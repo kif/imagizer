@@ -257,7 +257,6 @@ class interface:
 		self.image=photo(self.AllJpegs[self.CurIm])
 		X,Y=self.xml.get_widget("Principale").get_size()
 		if X<325 : X=798
-		print X
 		pixbuf=self.image.show(X-323,Y)
 		self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
 		del pixbuf
