@@ -1,0 +1,19 @@
+Source: imagizer
+Section: web 
+Priority: optional
+Maintainer: Mickael Profeta <profeta@debian.org>
+Build-Depends-Indep: debhelper (>= 4.0.0), python (>= 2.3)
+Standards-Version: 3.6.1
+
+Package: imagizer
+Architecture: all
+Depends: ${python:Depends}, python-imaging, python-glade2, exiftran
+Description: Utilities to sort and publish photos on the web 
+ Imagizer is composed of two executables, selector and generator:
+ .
+ Selector renames digital photos thanks to its date and camera model. It
+ can rotate images and add a title. The selected pictures will be copied
+ in a Selected/ directory with thumbnails and scaled images.
+ .
+ Generator, a fork of curator, will use the files prepared in the selected
+ directory to produce static web pages.

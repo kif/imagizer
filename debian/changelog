@@ -1,0 +1,12 @@
+imagizer (0.99+1.0beta3-2) unstable; urgency=low
+
+  * Build-Depends-Indep: python
+
+ --  Mickael Profeta <profeta@debian.org>  Mon,  8 Nov 2004 21:59:50 +0000
+
+imagizer (0.99+1.0beta3-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Mickael Profeta <profeta@debian.org>  Mon,  8 Nov 2004 14:26:16 +0100
+
