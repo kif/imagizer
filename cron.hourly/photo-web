@@ -1,0 +1,18 @@
+#!/bin/bash
+#written by Jerome Kieffer to move selected photos to the web page
+
+PhotoDir="/home/maison/Photos/Selected/"
+WebDir="/home/web"
+
+a=`ls $PhotoDir`
+
+# if there is nothing new, just exit !
+if [ -z "$a" ];
+then 
+	exit 0
+fi
+
+mv $PhotoDir/* $WebDir/.
+generator ${WebDir}
+chmod -R a+rX ${WebDir}
+
