@@ -793,7 +793,7 @@
 	  <child>
 	    <widget class="GtkHBox" id="hbox13">
 	      <property name="visible">True</property>
-	      <property name="homogeneous">False</property>
+	      <property name="homogeneous">True</property>
 	      <property name="spacing">0</property>
 
 	      <child>
@@ -820,6 +820,7 @@
 		  <child>
 		    <widget class="GtkButton" id="Poubelle">
 		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Déplace l'image dans la corbeille</property>
 		      <property name="can_focus">True</property>
 		      <property name="relief">GTK_RELIEF_NORMAL</property>
 		      <property name="focus_on_click">True</property>

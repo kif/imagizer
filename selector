@@ -754,16 +754,19 @@ def latin1_to_ascii (unicrap):
         0xd7:'*', 0xf7:'/'
         }
 
-    r = ''
+#    r = ''
+    r=[]
     for i in unicrap:
         if xlate.has_key(ord(i)):
-            r += xlate[ord(i)]
+#            r += xlate[ord(i)]
+	    r.append(xlate[ord(i)])
         elif ord(i) >= 0x80:
             pass
         else:
-            r += str(i)
-    return r
-
+#            r += str(i)
+	    r.append(str(i))
+#    return r
+    return "".join(r)
 
 class parser:
 	"""this class searches all the jpeg files""" 
