@@ -2237,7 +2237,7 @@ if image._pagefn:
 
     else:
         use_map = 0
-
+    use_map = 0
     xtra = 'class="image"'
     if use_map:
         xtra += '  usemap="#%s"' % 'navmap'
@@ -2422,12 +2422,6 @@ if dir._parent:
        dnext = sname[inext]
        print '|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename )
 -->
-<!-- 
-<a href="<!--tag:rel(rootdir._pagefn, cd)-->">Haut</a> 
-|
-<a href="<!--tag:rel(allindex_fn, cd)-->">Global</a> |
-<a href="<!--tag:rel(sortindex_fn, cd)-->">Sorted</a>
--->
 </div>
 
 
@@ -2457,6 +2451,24 @@ if len( dir._images ) > 0:
     print table( cd, dir._images, sous_titre )
 
 -->
+
+<div class="mininav">
+<!--tagcode:
+if dir._parent:
+    sname = list((dir._parent)._subdirs)
+    icur = sname.index(dir)
+    if icur > 0:
+       iprev = icur - 1
+       dprev = sname[iprev]
+       print '<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename )
+    print '<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd)
+    if icur < len(sname)-1:
+       inext = icur + 1
+       dnext = sname[inext]
+       print '|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename )
+-->
+</div>
+
 
 
 """ + html_postamble
