@@ -11,9 +11,15 @@
 #
 #todo liste des fonctions a implemanter ....
 # faire une doc décente.
+# 
 #Licence : GPL version 2
 #
-#bug : il semble que la taille de l'image augmente au fur et a mesure.
+# cette version comprend l'autowarning ainsi que toutes les fonctions de navigation.
+# reste a implemanter
+# - la version windows
+# - le fichier de preference
+# - la modification des preferences
+# - la creation de splash-sceens 
 
 
 import pygtk ; pygtk.require('2.0')
@@ -29,13 +35,13 @@ NbrPerPage=20
 PagePrefix="page"
 Trash="Trash"
 Selected="Selected"
+Selected_file=".selected-photos"
 Exts=[".jpg", ".jpeg"]
 scaled="scaled"
 thumb="thumb"
 
 
 autorotate=True
-StartWarning=False
 
 Interpolation=gtk.gdk.INTERP_TILES
 #gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
@@ -83,6 +89,7 @@ if len(sys.argv)>1:
 if not curdir : curdir=os.getcwd()
 Trashdir=os.path.join(curdir,Trash)
 SelectedDir=os.path.join(curdir,Selected)
+Selected_file=os.path.join(curdir,Selected_file)
 
 
 
@@ -197,12 +204,12 @@ class interface:
 	"""classe interface qui gère l'interface graphique"""
 	def __init__(self,AllJpegs=[],first=0):
 		self.AllJpegs=AllJpegs
-		self.SelectedFiles=LoadSelected()
-		for i in self.SelectedFiles:
+		self.Selected=LoadSelected()
+		for i in self.Selected:
 			if not(i in self.AllJpegs): 
-				self.SelectedFiles.remove(i)
+				self.Selected.remove(i)
 		self.CurIm=first
-		AllDays=[]
+#		AllDays=[]
 #		for i in self.AllJpegs:
 #definition ici des jours ....		
 		print "Initialisation de l'interface graphique ..."
@@ -235,6 +242,16 @@ class interface:
 		self.xml.signal_connect('on_premierJ_activate',self.firstJ)
 		self.xml.signal_connect('on_dernierJ_activate',self.lastJ)
 
+		self.xml.signal_connect('on_precedentS_activate',self.previousS)
+		self.xml.signal_connect('on_suivantS_activate',self.nextS)
+		self.xml.signal_connect('on_premierS_activate',self.firstS)
+		self.xml.signal_connect('on_dernierS_activate',self.lastS)
+
+		self.xml.signal_connect('on_precedentNS_activate',self.previousNS)
+		self.xml.signal_connect('on_suivantNS_activate',self.nextNS)
+		self.xml.signal_connect('on_premierNS_activate',self.firstNS)
+		self.xml.signal_connect('on_dernierNS_activate',self.lastNS)
+
 		
 		self.xml.signal_connect('on_enregistrerS_activate',self.SaveSelection)
 		self.xml.signal_connect('on_chargerS_activate',self.LoadSelection)
@@ -265,7 +282,7 @@ class interface:
 		for i in data:
 			self.xml.get_widget(i).set_text(data[i])
 		self.xml.get_widget("Principale").set_title("Selector : %s"%self.AllJpegs[self.CurIm])
-		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.SelectedFiles))
+		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		self.oldtitle=data["Titre"]		
 
 	def next(self,*args):
@@ -318,7 +335,7 @@ class interface:
 	def poubelle(self,*args):
 		"""Send the current file to the trash"""
 		self.settitle()
-		if self.AllJpegs[self.CurIm] in  self.SelectedFiles:self.SelectedFiles.remove(self.AllJpegs[self.CurIm])
+		if self.AllJpegs[self.CurIm] in  self.Selected:self.Selected.remove(self.AllJpegs[self.CurIm])
 		self.AllJpegs.remove(self.AllJpegs[self.CurIm])
 		self.image.Trash()
 		self.CurIm=self.CurIm%len(self.AllJpegs)
@@ -328,19 +345,19 @@ class interface:
 		"""Select or unselect the image"""
 		self.settitle()
 		etat=self.xml.get_widget("Selection").get_active()
-		if etat and (self.AllJpegs[self.CurIm] not in self.SelectedFiles): self.SelectedFiles.append(self.AllJpegs[self.CurIm])
-		if not etat and (self.AllJpegs[self.CurIm] in self.SelectedFiles): self.SelectedFiles.remove(self.AllJpegs[self.CurIm])
+		if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
+		if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
 		
 
 	def destroy(self,*args):
 		"""destroy clicked by user"""
 		self.settitle()
-		SaveSelected(self.SelectedFiles)
+		SaveSelected(self.Selected)
 		sys.exit(0)
 	def run(self,*args):
 		"""lauch the copy of all selected files"""
 		self.settitle()
-		ProcessSelected(self.SelectedFiles)
+		ProcessSelected(self.Selected)
 		print "Done"
 
 	def die(self,*args):
@@ -349,21 +366,23 @@ class interface:
 		dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_QUESTION,gtk.BUTTONS_OK_CANCEL,"Voulez vous vraiment quitter ce programme ?")
 		result=dialog.run()
 		dialog.destroy()
-		if result==gtk.RESPONSE_OK: gtk.main_quit() #sys.exit(0)
+		if result==gtk.RESPONSE_OK: 
+			SaveSelected(self.Selected)
+			gtk.main_quit() #sys.exit(0)
 
 	def SaveSelection(self,*args):
 		"""Saves all the selection of photos """
 		self.settitle()
-		SaveSelected(self.SelectedFiles)
+		SaveSelected(self.Selected)
 
 	def LoadSelection(self,*args):
 		"""Load a previously saved  selection of photos """
 		self.settitle()
-		self.SelectedFiles=LoadSelected()
-		for i in self.SelectedFiles:
+		self.Selected=LoadSelected()
+		for i in self.Selected:
 			if not(i in self.AllJpegs): 
-				self.SelectedFiles.remove(i)
-		self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.SelectedFiles)
+				self.Selected.remove(i)
+		self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.Selected)
 
 
 
@@ -371,23 +390,23 @@ class interface:
 	def SelectAll(self,*args):
 		"""Select all photos for processing"""
 		self.settitle()
-		self.SelectedFiles=self.AllJpegs
+		self.Selected=self.AllJpegs
 		self.xml.get_widget("Selection").set_active(True)
 
 	def SelectNone(self,*args):
 		"""Select NO photos and empty selection"""
 		self.settitle()
-		self.SelectedFiles=[]
+		self.Selected=[]
 		self.xml.get_widget("Selection").set_active(False)
 
 	def InvertSelection(self,*args):
 		"""Invert the selection of photos """
 		self.settitle()
 		temp=self.AllJpegs[:]
-		for i in self.SelectedFiles:
+		for i in self.Selected:
 			temp.remove(i)
-		self.SelectedFiles=temp
-		self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.SelectedFiles)
+		self.Selected=temp
+		self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.Selected)
 
 
 	def about(self,*args):
@@ -433,12 +452,88 @@ class interface:
 		self.CurIm=i
 		self.ShowImage()	
 
+	def firstS(self,*args):
+		"""switch to the first image selected"""
+		self.settitle()
+		if len(self.Selected)==0:return
+		self.CurIm=self.AllJpegs.index(self.Selected[0])
+		self.ShowImage()
+		
+	def lastS(self,*args):
+		"""switch to the last image selected"""
+		self.settitle()
+		if len(self.Selected)==0:return
+		self.CurIm=self.AllJpegs.index(self.Selected[-1])
+		self.ShowImage()
+		
+	def nextS(self,*args):
+		"""switch to the next image selected"""
+		self.settitle()	
+		if len(self.Selected)==0:return
+		for i in self.AllJpegs[self.CurIm+1:]:
+			if i in self.Selected:
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+
+	def previousS(self,*args):
+		"""switch to the previous image selected"""
+		self.settitle()	
+		if len(self.Selected)==0:return
+		temp=self.AllJpegs[:self.CurIm]
+		temp.reverse()
+		for i in temp:
+			if i in self.Selected:
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+				
+	def firstNS(self,*args):
+		"""switch to the first image NOT selected"""
+		self.settitle()
+		for i in self.AllJpegs:
+			if i not in self.Selected:
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+
+	def lastNS(self,*args):
+		"""switch to the last image NOT selected"""
+		self.settitle()
+		temp=self.AllJpegs[:]
+		temp.reverse()
+		for i in temp:
+			if i not in self.Selected:
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def nextNS(self,*args):
+		"""switch to the next image NOT selected"""
+		self.settitle()	
+		for i in self.AllJpegs[self.CurIm+1:]:
+			if i not in self.Selected:
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+
+	def previousNS(self,*args):
+		"""switch to the previous image NOT selected"""
+		self.settitle()	
+		temp=self.AllJpegs[:self.CurIm]
+		temp.reverse()
+		for i in temp:
+			if i not in self.Selected:
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+
+
 
 # # # # # # fin de la classe interface graphique # # # # # #
 def SaveSelected(List):
 	"""save the list of selected files"""
 	print "Sauvegarde de la sélection"
-	f=open(os.path.join(curdir,".selected-photos"),"w")
+	f=open(Selected_file,"w")
 	for ligne in List: f.write(ligne+"\n")
 	f.close()
 
@@ -448,7 +543,7 @@ def LoadSelected():
 	"""Load the list of selected files"""
 	print "Chargement de la sélection"
 	try:
-		lignes=open(os.path.join(curdir,".selected-photos"),"r").readlines()
+		lignes=open(Selected_file,"r").readlines()
 		select=[]
 		for ligne in lignes :
 			select.append(ligne.strip())
@@ -684,7 +779,8 @@ class parser:
 
 def WARNING():
 	"""print a warning before starting the program"""
-	dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_WARNING,gtk.BUTTONS_OK_CANCEL,"""Selector travaille sur toutes les photos d'un répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger\nÊtes vous sur de vouloir continuer ?""".decode("latin1"))
+	txt="Selector travaille sur toutes les photos du répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger !!!\nVous avez lancé selector sur un repertoire ne ressemblant pas à une archive selector : \n %s \n \nÊtes vous sur de vouloir continuer ?"%curdir
+	dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_WARNING,gtk.BUTTONS_OK_CANCEL,txt.decode("latin1"))
 	result=dialog.run()
 	dialog.destroy()
 	if result==gtk.RESPONSE_CANCEL: sys.exit(0)
@@ -692,7 +788,7 @@ def WARNING():
 		
 def main():
 	"""well this is tha main program"""
-	if StartWarning:WARNING()
+	if not os.path.isfile(Selected_file):WARNING()
 	AF,first=RangeTout(curdir)
 	interface(AF,first)
 	
