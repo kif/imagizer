@@ -5,12 +5,16 @@
 # Avec la participation de Isabelle Letard
 # version 0.3 : 28/10/2004
 # version 0.4 : 28/10/2004
+# version 1.1 : 11/01/2005
 # Liste des dépendances : python, PIL, Glade-2 exiftran
 # Exiftran existe en version windows maintenant !!!!
 #
 #todo liste des fonctions a implemanter ....
 # faire une doc décente.
 #Licence : GPL version 2
+#
+#bug : il semble que la taille de l'image augmente au fur et a mesure.
+
 
 import pygtk ; pygtk.require('2.0')
 import os,sys,string,Image,shutil,time,re,gtk,gtk.glade,gc
@@ -28,8 +32,10 @@ Selected="Selected"
 Exts=[".jpg", ".jpeg"]
 scaled="scaled"
 thumb="thumb"
+
+
 autorotate=True
-StartWarning=True
+StartWarning=False
 
 Interpolation=gtk.gdk.INTERP_TILES
 #gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
@@ -45,8 +51,8 @@ clef={
 'EXIF FocalLength': 'Focale',
 'EXIF FNumber': 'Ouverture',
 'EXIF ExposureTime' :'Vitesse',
-'EXIF ISOSpeedRatings': 'Iso'
-}
+'EXIF ISOSpeedRatings': 'Iso',
+'EXIF ExposureBiasValue': 'Bias'}
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
@@ -190,34 +196,48 @@ class photo:
 # # # # # # fin de la classe photo # # # # # # # # # # #
 class interface:
 	"""classe interface qui gère l'interface graphique"""
-	def __init__(self,AllJpegs=[]):
+	def __init__(self,AllJpegs=[],first=0):
 		self.AllJpegs=AllJpegs
 		self.SelectedFiles=LoadSelected()
-		OK=0
-		if self.SelectedFiles==False:	
-			self.SelectedFiles=self.AllJpegs[:]
-		else:
-			for i in self.SelectedFiles:
-				if not(i in self.AllJpegs): OK+=1
-		if OK>0:self.SelectedFiles=self.AllJpegs[:]
-		#Par défaut toutes les images sont sélectionnées
-		self.CurIm=0
+		for i in self.SelectedFiles:
+			if not(i in self.AllJpegs): 
+				self.SelectedFiles.remove(i)
+		self.CurIm=first
+		AllDays=[]
+#		for i in self.AllJpegs:
+#definition ici des jours ....		
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(interfaceglade)
 #		self.xml.get_widget("photo").set_size_request(ScreenSize,ScreenSize)
 		self.ShowImage()
-		self.xml.signal_connect('on_about_clicked',about)
-		self.xml.signal_connect('on_Quit_clicked',self.die)
-		self.xml.signal_connect('on_RUN_clicked',self.run)
 		self.xml.signal_connect('on_Principale_destroy',self.destroy)
 		self.xml.signal_connect('on_suivant_clicked',self.next)
 		self.xml.signal_connect('on_precedant_clicked',self.previous)
 		self.xml.signal_connect('on_droite_clicked',self.droite)
 		self.xml.signal_connect('on_gauche_clicked',self.gauche)
-		self.xml.signal_connect('on_poubelle_clicked',self.poubelle)
 		self.xml.signal_connect('on_Selection_toggled',self.select)
-		self.xml.signal_connect('on_premier_clicked',self.first)
-		self.xml.signal_connect('on_dernier_clicked',self.last)
+
+
+		self.xml.signal_connect('on_About_activate',self.about)
+		self.xml.signal_connect('on_quitter1_activate',self.die)
+		self.xml.signal_connect('on_executer1_activate',self.run)
+		self.xml.signal_connect('on_poubelle_activate',self.poubelle)
+
+		
+		self.xml.signal_connect('on_precedentI_activate',self.previous)
+		self.xml.signal_connect('on_suivantI_activate',self.next)
+		self.xml.signal_connect('on_premierI_activate',self.first)
+		self.xml.signal_connect('on_dernierI_activate',self.last)
+		self.xml.signal_connect('on_plus_10_activate',self.next10)
+		self.xml.signal_connect('on_moins_10_activate',self.previous10)
+		
+		self.xml.signal_connect('on_enregistrerS_activate',self.SaveSelection)
+		self.xml.signal_connect('on_chargerS_activate',self.LoadSelection)
+		self.xml.signal_connect('on_inverserS_activate',self.InvertSelection)
+		self.xml.signal_connect('on_aucun1_activate',self.SelectNone)
+		self.xml.signal_connect('on_TouS_activate',self.SelectAll)
+		
+
 		gtk.main()
 
 	def settitle(self):
@@ -232,7 +252,7 @@ class interface:
 		self.image=photo(self.AllJpegs[self.CurIm])
 		X,Y=self.xml.get_widget("Principale").get_size()
 		if X<305 : X=798
-		pixbuf=self.image.show(X-302,Y)
+		pixbuf=self.image.show(X-303,Y)
 		self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
 		del pixbuf
 		gc.collect()
@@ -248,11 +268,27 @@ class interface:
 		self.settitle()
 		self.CurIm=(self.CurIm+1)%len(self.AllJpegs)
 		self.ShowImage()
+		
+	def next10(self,*args):
+		"""Switch forward of 10 images """	
+		self.settitle()
+		self.CurIm=self.CurIm+10
+		if self.CurIm>len(self.AllJpegs):self.CurIm=len(self.AllJpegs)-1
+		self.ShowImage()	
+		
 	def previous(self,*args):
 		"""Switch to the previous image"""	
 		self.settitle()
 		self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
 		self.ShowImage()
+	
+	def previous10(self,*args):
+		"""Switch 10 images backward"""	
+		self.settitle()
+		self.CurIm=self.CurIm-10
+		if self.CurIm<0: self.CurIm=0
+		self.ShowImage()	
+		
 	def first(self,*args):
 		"""switch to the first image"""
 		self.settitle()
@@ -305,12 +341,48 @@ class interface:
 	def die(self,*args):
 		"""you wanna leave the program ??"""
 		self.settitle()
-		SaveSelected(self.SelectedFiles)
 		dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_QUESTION,gtk.BUTTONS_OK_CANCEL,"Voulez vous vraiment quitter ce programme ?")
 		result=dialog.run()
 		dialog.destroy()
 		if result==gtk.RESPONSE_OK: gtk.main_quit() #sys.exit(0)
 
+	def SaveSelection(self,*args):
+		"""Saves all the selection of photos """
+		SaveSelected(self.SelectedFiles)
+
+	def LoadSelection(self,*args):
+		"""Load a previously saved  selection of photos """
+		self.SelectedFiles=LoadSelected()
+		for i in self.SelectedFiles:
+			if not(i in self.AllJpegs): 
+				self.SelectedFiles.remove(i)
+		self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.SelectedFiles)
+
+
+
+	
+	def SelectAll(self,*args):
+		"""Select all photos for processing"""
+		self.SelectedFiles=self.AllJpegs
+		self.xml.get_widget("Selection").set_active(True)
+
+	def SelectNone(self,*args):
+		"""Select NO photos and empty selection"""
+		self.SelectedFiles=[]
+		self.xml.get_widget("Selection").set_active(False)
+
+	def InvertSelection(self,*args):
+		"""Invert the selection of photos """
+		temp=self.AllJpegs[:]
+		for i in self.SelectedFiles:
+			temp.remove(i)
+		self.SelectedFiles=temp
+		self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.SelectedFiles)
+
+
+	def about(self,*args):
+		print """display a copyright message"""	
+		MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.1 du 11/01/2005".decode("latin1"),Message=gtk.MESSAGE_INFO)
 		
 		
 # # # # # # fin de la classe interface graphique # # # # # #
@@ -333,7 +405,7 @@ def LoadSelected():
 			select.append(ligne.strip())
 		return select
 	except:
-		return False	
+		return []	
 
 def makedir(filen):
         """creates the tree structure for the file"""
@@ -350,9 +422,6 @@ def MessageError(text,Message=gtk.MESSAGE_ERROR):
         dialog.run()
         dialog.destroy()
 
-def about(*args):
-	"""display a copyright message"""	
-	MessageError("Selector est un petit programme qui \nvous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org> en python \nVersion 1.0".decode("latin1"),Message=gtk.MESSAGE_INFO)
 
 def FindFile(RootDir):
 	"""returns a list of the files with the given suffix in the given dir"""
@@ -438,6 +507,7 @@ def RangeTout(RootDir):
 	"""moves all the JPEG files to a directory named from their day and with the nameaccording to the time"""
 	AllJpegs=FindFile(curdir)
 	AllFilesToProcess=[]
+	AllreadyDone=[]
 	for i in AllJpegs:
 		if i.find(Trash)==0: continue
 		if i.find(Selected)==0: continue
@@ -445,8 +515,9 @@ def RangeTout(RootDir):
 			a=int(i[:4])
 			m=int(i[5:7])
 			j=int(i[8:10])
-			if (a>=0000) and (m<=12) and (j<=31) and (i[4] in ["-","_"]) and (i[7] in ["-","_"]): 
+			if (a>=0000) and (m<=12) and (j<=31) and (i[4] in ["-","_","."]) and (i[7] in ["-","_"]): 
 				AllFilesToProcess.append(i)
+				AllreadyDone.append(i)
 				continue
 		except : 
 			pass
@@ -480,7 +551,13 @@ def RangeTout(RootDir):
 		else :
 			print "Processing ..."+i
 	AllFilesToProcess.sort()
-	return AllFilesToProcess
+	NewFiles=AllFilesToProcess[:]
+	for i in AllreadyDone:
+		NewFiles.remove(i)
+	if len(NewFiles)>0:
+		return AllFilesToProcess,AllFilesToProcess.index(NewFiles[0])
+	else:
+		return AllFilesToProcess,0
 
 
 
@@ -567,9 +644,9 @@ def WARNING():
 def main():
 	"""well this is tha main program"""
 	if StartWarning:WARNING()
-	AllJpegs=RangeTout(curdir)
-	interface(AllJpegs)
-
+	AF,first=RangeTout(curdir)
+	interface(AF,first)
+	
 
 if __name__=='__main__':
 	main()
