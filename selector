@@ -256,8 +256,9 @@ class interface:
 		"""Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
 		self.image=photo(self.AllJpegs[self.CurIm])
 		X,Y=self.xml.get_widget("Principale").get_size()
-		if X<305 : X=798
-		pixbuf=self.image.show(X-303,Y)
+		if X<325 : X=798
+		print X
+		pixbuf=self.image.show(X-323,Y)
 		self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
 		del pixbuf
 		gc.collect()
