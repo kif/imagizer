@@ -71,7 +71,7 @@
 			  <property name="label" translatable="yes">Poubelle</property>
 			  <property name="use_underline">True</property>
 			  <signal name="activate" handler="on_poubelle_activate" last_modification_time="Thu, 06 Jan 2005 21:00:22 GMT"/>
-			  <accelerator key="Delete" modifiers="0" signal="activate"/>
+			  <accelerator key="Delete" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			  <child internal-child="image">
 			    <widget class="GtkImage" id="image258">
@@ -1413,6 +1413,7 @@
 		  <property name="focus_on_click">True</property>
 		  <signal name="clicked" handler="on_suivant_clicked" last_modification_time="Wed, 27 Oct 2004 14:03:04 GMT"/>
 		  <accelerator key="Page_Down" modifiers="0" signal="clicked"/>
+		  <accelerator key="Down" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
 
 		  <child>
 		    <widget class="GtkAlignment" id="alignment9">
@@ -1493,6 +1494,7 @@
 		  <property name="focus_on_click">True</property>
 		  <signal name="clicked" handler="on_precedant_clicked" last_modification_time="Wed, 27 Oct 2004 14:03:53 GMT"/>
 		  <accelerator key="Page_Up" modifiers="0" signal="clicked"/>
+		  <accelerator key="Up" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
 
 		  <child>
 		    <widget class="GtkAlignment" id="alignment10">
@@ -1756,6 +1758,8 @@
 	  <property name="yalign">0.5</property>
 	  <property name="xpad">0</property>
 	  <property name="ypad">0</property>
+	  <signal name="client_event" handler="on_photo_client_event" last_modification_time="Thu, 13 Jan 2005 21:04:33 GMT"/>
+	  <signal name="scroll_event" handler="on_photo_client_event" last_modification_time="Thu, 13 Jan 2005 21:12:46 GMT"/>
 	</widget>
 	<packing>
 	  <property name="padding">0</property>

@@ -150,7 +150,6 @@ class photo:
 		data["Taille"]="%s ko"%(os.path.getsize(self.fn)/1024)
 		
 		RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-#		print comment
 		if comment:
 			data["Titre"]=comment
 		else:
@@ -216,8 +215,8 @@ class interface:
 		self.xml.signal_connect('on_droite_clicked',self.droite)
 		self.xml.signal_connect('on_gauche_clicked',self.gauche)
 		self.xml.signal_connect('on_Selection_toggled',self.select)
-
-
+		self.xml.signal_connect('on_photo_client_event',self.next)
+		
 		self.xml.signal_connect('on_About_activate',self.about)
 		self.xml.signal_connect('on_quitter1_activate',self.die)
 		self.xml.signal_connect('on_executer1_activate',self.run)
@@ -230,6 +229,12 @@ class interface:
 		self.xml.signal_connect('on_dernierI_activate',self.last)
 		self.xml.signal_connect('on_plus_10_activate',self.next10)
 		self.xml.signal_connect('on_moins_10_activate',self.previous10)
+
+		self.xml.signal_connect('on_precedentJ_activate',self.previousJ)
+		self.xml.signal_connect('on_suivantJ_activate',self.nextJ)
+		self.xml.signal_connect('on_premierJ_activate',self.firstJ)
+		self.xml.signal_connect('on_dernierJ_activate',self.lastJ)
+
 		
 		self.xml.signal_connect('on_enregistrerS_activate',self.SaveSelection)
 		self.xml.signal_connect('on_chargerS_activate',self.LoadSelection)
@@ -348,10 +353,12 @@ class interface:
 
 	def SaveSelection(self,*args):
 		"""Saves all the selection of photos """
+		self.settitle()
 		SaveSelected(self.SelectedFiles)
 
 	def LoadSelection(self,*args):
 		"""Load a previously saved  selection of photos """
+		self.settitle()
 		self.SelectedFiles=LoadSelected()
 		for i in self.SelectedFiles:
 			if not(i in self.AllJpegs): 
@@ -363,16 +370,19 @@ class interface:
 	
 	def SelectAll(self,*args):
 		"""Select all photos for processing"""
+		self.settitle()
 		self.SelectedFiles=self.AllJpegs
 		self.xml.get_widget("Selection").set_active(True)
 
 	def SelectNone(self,*args):
 		"""Select NO photos and empty selection"""
+		self.settitle()
 		self.SelectedFiles=[]
 		self.xml.get_widget("Selection").set_active(False)
 
 	def InvertSelection(self,*args):
 		"""Invert the selection of photos """
+		self.settitle()
 		temp=self.AllJpegs[:]
 		for i in self.SelectedFiles:
 			temp.remove(i)
@@ -381,10 +391,49 @@ class interface:
 
 
 	def about(self,*args):
-		print """display a copyright message"""	
+		"""display a copyright message"""	
+		self.settitle()
 		MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.1 du 11/01/2005".decode("latin1"),Message=gtk.MESSAGE_INFO)
 		
-		
+	
+	def nextJ(self,*args):
+		"""Switch to the first image of the next day"""	
+		self.settitle()
+		jour=os.path.dirname(self.AllJpegs[self.CurIm])
+		for i in range(self.CurIm,len(self.AllJpegs)):
+			jc=os.path.dirname(self.AllJpegs[i])
+			if jc>jour: break
+		self.CurIm=i
+		self.ShowImage()	
+
+	def previousJ(self,*args):
+		"""Switch to the first image of the previous day"""	
+		self.settitle()
+		jour=os.path.dirname(self.AllJpegs[self.CurIm])
+		for i in range(self.CurIm-1,-1,-1):
+			jc=os.path.dirname(self.AllJpegs[i])
+			jd=os.path.dirname(self.AllJpegs[i-1])
+			if (jc<jour) and (jd<jc): break
+		self.CurIm=i
+		self.ShowImage()	
+
+	def firstJ(self,*args):
+		"""switch to the first image of the first day"""
+		self.settitle()
+		self.CurIm=0
+		self.ShowImage()
+	def lastJ(self,*args):
+		"""switch to the first image of the last day"""
+		self.settitle()
+		lastday=os.path.dirname(self.AllJpegs[-1])
+		for i in range(len(self.AllJpegs)-1,-1,-1):
+			jc=os.path.dirname(self.AllJpegs[i])
+			jd=os.path.dirname(self.AllJpegs[i-1])
+			if (jc==lastday) and (jd<jc): break
+		self.CurIm=i
+		self.ShowImage()	
+
+
 # # # # # # fin de la classe interface graphique # # # # # #
 def SaveSelected(List):
 	"""save the list of selected files"""
