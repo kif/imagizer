@@ -64,9 +64,11 @@ clef={
 if os.name == 'nt': #sys.platform == 'win32':
 	exiftran="exiftran.exe "
 	interfaceglade="interface.glade"
+	installdir="c:\\"
 elif os.name == 'posix':
 	exiftran="exiftran "
-	sys.path.append('/usr/share/imagizer')
+	installdir='/usr/share/imagizer'
+	sys.path.append(installdir)
 	interfaceglade="/usr/share/imagizer/interface.glade"
 else:
 	raise "Your platform does  not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
@@ -216,12 +218,9 @@ class interface:
 			if not(i in self.AllJpegs): 
 				self.Selected.remove(i)
 		self.CurIm=first
-#		AllDays=[]
-#		for i in self.AllJpegs:
-#definition ici des jours ....		
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(interfaceglade)
-#		self.xml.get_widget("photo").set_size_request(ScreenSize,ScreenSize)
+		self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(installdir+"/logo.png"))
 		self.ShowImage()
 		self.xml.signal_connect('on_Principale_destroy',self.destroy)
 		self.xml.signal_connect('on_suivant_clicked',self.next)
@@ -235,6 +234,7 @@ class interface:
 		self.xml.signal_connect('on_quitter1_activate',self.die)
 		self.xml.signal_connect('on_executer1_activate',self.run)
 		self.xml.signal_connect('on_poubelle_activate',self.poubelle)
+		self.xml.signal_connect('on_Poubelle_clicked',self.poubelle)
 
 		
 		self.xml.signal_connect('on_precedentI_activate',self.previous)
@@ -359,8 +359,9 @@ class interface:
 	def destroy(self,*args):
 		"""destroy clicked by user"""
 		self.settitle()
-		SaveSelected(self.Selected)
+#		SaveSelected(self.Selected)
 		sys.exit(0)
+
 	def run(self,*args):
 		"""lauch the copy of all selected files"""
 		self.settitle()
