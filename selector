@@ -358,6 +358,7 @@ class interface:
 		"""lauch the copy of all selected files"""
 		self.settitle()
 		ProcessSelected(self.Selected)
+		self.Selected=[]
 		print "Done"
 
 	def die(self,*args):
