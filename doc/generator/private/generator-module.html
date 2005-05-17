@@ -1,0 +1,978 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>generator</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css"></link>
+</head>
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th bgcolor="#70b0f0" class="navselect">&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <font size="-1"><b class="breadcrumbs">
+        Module&nbsp;generator
+      </b></font></br>
+    </td>
+    <td><table cellpadding="0" cellspacing="0">
+      <tr><td align="right"><font size="-2">[show&nbsp;private&nbsp;|&nbsp;<a href="../public/generator-module.html">hide&nbsp;private</a>]</font></td></tr>
+      <tr><td align="right"><font size="-2">[<a href="frames.html"target="_top">frames</a>&nbsp;|&nbsp;<a href="generator-module.html" target="_top">no&nbsp;frames</a>]</font></td></tr>
+    </table></td>
+</tr></table>
+
+<!-- =========== START OF MODULE DESCRIPTION =========== -->
+<h2 class="module">Module generator</h2>
+
+<pre class="literalblock">
+Generate HTML image gallery pages.
+
+Curator is a powerful script that allows one to generate Web page image
+galleries with the intent of displaying photographic images on the Web, or for a
+CD-ROM presentation and archiving. It generates static Web pages only - no
+special configuration or running scripts are required on the server. The script
+supports many file formats, hierarchical directories, thumbnail generation and
+update, per-image description file with any attributes, and 'tracks' of images
+spanning multiple directories. The templates consist of HTML with embedded
+Python. Running this script only requires a recent Python interpreter (version 2
+or more) and the ImageMagick tools.
+
+All links it generates are relative links, so that the pages can be moved or
+copied to different media. Each image page and directory can be associated any
+set of attributes which become available from the template (this way you can
+implement descriptions, conversion code, camera settings, and more).
+
+You can find the latest version at http://curator.sourceforge.net
+
+
+Input
+------------------------------
+
+The image files need to be organized in a directory structure.
+
+For each image, the following is required:
+
+ - &lt;image&gt;.&lt;ext&gt;: the main image file to be displayed in the html page, where
+   &lt;ext&gt; is an image extension (e.g. jpg, gif, etc.)
+
+The following is optional, and will be used if present:
+
+ - &lt;image&gt;.desc: a per-image description file containing user-provided
+   attributes about the photograph.  The format is, e.g.:
+
+      &lt;attribute-name&gt;: &lt;text&gt;
+      &lt;text&gt;
+      &lt;text&gt;
+
+      &lt;attribute-name&gt;: &lt;text&gt;
+      ...
+
+   Each attribute text is ended with a blank line.  You can inclue all the
+   attribute fields you want, it is up to the template file to access them or
+   not. There are, however, some special predefined attributes:
+
+    - title: A descriptive title for the image (a short one liner).
+
+    - tracks: &lt;trackname1&gt; &lt;trackname2&gt; ...
+      specifies the tracks that the image is part of
+
+    - ignore: yes
+      specifies that the image should be ignored
+
+ - &lt;image&gt;--&lt;string&gt;.&lt;ext&gt;: alternative representations of the image. Could be
+   the original scan plate, or alternative resolutions, or anything else related
+   to this image.  The image html page can add links to these alternative
+   representations. We assume that we only need to generate an HTML page for the
+   main resolution (i.e. smaller resolutions won't have associated web pages)
+
+To configure the generated HTML files, use --save-templates and modify the code
+that will appear in the output directory.
+
+The following files can be put in the root:
+
+ - template-image.html: template for image HTML file
+ - template-allindex.html: template for global index HTML file
+ - template-dirindex.html: template for directory index HTML file
+ - template-trackindex.html: template for track index HTML file
+ - template-sortindex.html: template for sorted index HTML file
+
+The template is a normal HTML file, the way you like it, except that it contains
+certain special tags that get evaluated by the script in a special environment
+nwhich contains useful variables and functions.  You can use the following two
+tags:
+
+&lt;!--tagcode:
+print 'some python code',
+for i in images:
+    print 'bla'
+--&gt;
+
+&lt;!--tag:title--&gt;
+
+The second tag is implemented as 'print &lt;tag contents&gt;,'. You can put
+definitions, function calls, whatever you like.  Variable bindings and
+definitions will remain between tags.
+
+The templates are looked up in the following order:
+ - user-specified path (-templates option)
+ - the root of the hierarchy
+ - the dir specified in the env var CURATOR_TEMPLATE
+
+If not found, simple fallback templates are used. Remember that under unix,
+processing python code with carriage returns will fail the python interpreter
+with a Syntax Error.
+
+For a complete description of the environment, look at the code.
+
+
+Output
+------------------------------
+
+Note by default nothing that already exists is overwritten. Use the --no* or
+--force* options to disable or force thumbnails, indexes and image pages.
+Directories which do not contain images (and whose subdirectories do not contain
+images) will be ignored.
+
+For each image:
+
+ - &lt;image&gt;--thumb.&lt;ext&gt;: associated image thumbnail.
+
+ - &lt;image&gt;.html
+   (for each image, an associated web page which features it)
+
+Thus you will end up with the following files for each image:
+
+ - &lt;image&gt;.&lt;ext&gt;
+ - &lt;image&gt;.desc
+ - &lt;image&gt;--&lt;string&gt;.&lt;ext&gt;
+ - &lt;image&gt;--&lt;string&gt;.&lt;ext&gt;
+ - ...
+ - &lt;image&gt;--thumb.&lt;ext&gt;
+ - &lt;image&gt;.html
+
+In each subdirectory of the root:
+
+ - dirindex.html: an HTML index of the directory, with thumbnails and
+   titles.
+
+In the root:
+
+ - trackindex-&lt;track&gt;.html: for each track, an HTML index of the track, with
+   thumbnails and titles.
+
+ - allindex.cidx: a text index of all the pictures, with image filenames and
+   titles, each on a single line.
+
+ - allindex.html: an HTML index of all the pictures, with thumbnails and titles,
+   and list of tracks.
+
+ - sortindex.html: an HTML index of all the pictures, with some form of sorting
+   This output can be used as a global index for sorting images by
+   name/date/whatever.  The images in the author's photo gallery are named
+   by date so sorting by name is sorting by date, which the default template
+   implements.
+
+
+Usage:
+------------------------------
+  curator &lt;options&gt; [&lt;root&gt;]
+
+If &lt;root&gt; is not specified, we assume cwd is the root.
+</pre>
+<hr/>
+
+<!-- =========== START OF CLASSES =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Classes</th></tr>
+<tr><td width="15%">
+  <b><a href="generator.AttrFile-class.html"><code>AttrFile</code></a></b></td>
+  <td>Attributes file representation and trivial parser.</td></tr>
+<tr><td width="15%">
+  <b><a href="generator.Dir-class.html"><code>Dir</code></a></b></td>
+  <td>Directory class.</td></tr>
+<tr><td width="15%">
+  <b><a href="generator.Entry-class.html"><code>Entry</code></a></b></td>
+  <td>&nbsp;</td></tr>
+<tr><td width="15%">
+  <b><a href="generator.FCache-class.html"><code>FCache</code></a></b></td>
+  <td>&nbsp;</td></tr>
+<tr><td width="15%">
+  <b><a href="generator.Image-class.html"><code>Image</code></a></b></td>
+  <td>Image specific processing and storage.</td></tr>
+<tr><td width="15%">
+  <b><a href="generator.StringStream-class.html"><code>StringStream</code></a></b></td>
+  <td>Simple string stream with a write() method, for replacing stdout when 
+running in script environment.</td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Function Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#checkThumbSize" class="summary-sig-name"><code>checkThumbSize</code></a>(<span class=summary-sig-arg>isz</span>,
+          <span class=summary-sig-arg>tsz</span>,
+          <span class=summary-sig-arg>desired</span>)</span></code>
+<br />
+Returns true if the sizepair fits the size.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#clean" class="summary-sig-name"><code>clean</code></a>(<span class=summary-sig-arg>allimages</span>,
+          <span class=summary-sig-arg>alldirs</span>)</span></code>
+<br />
+Removes the files generated by curator in the current directory and 
+below.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#compileCode" class="summary-sig-name"><code>compileCode</code></a>(<span class=summary-sig-arg>pretext</span>,
+          <span class=summary-sig-arg>codetext</span>,
+          <span class=summary-sig-arg>filename</span>)</span></code>
+<br />
+Compile a chunk of code.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#compileTemplate" class="summary-sig-name"><code>compileTemplate</code></a>(<span class=summary-sig-arg>ttext</span>,
+          <span class=summary-sig-arg>filename</span>)</span></code>
+<br />
+Compiles template text.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#computeTrackmap" class="summary-sig-name"><code>computeTrackmap</code></a>(<span class=summary-sig-arg>imagelist</span>)</span></code>
+<br />
+Computes a map of files in each track.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="cycnext"></a><span class="summary-sig"><span class="summary-sig-name">cycnext</span>(<span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>imglist</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="cycprev"></a><span class="summary-sig"><span class="summary-sig-name">cycprev</span>(<span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>imglist</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="desc_index"></a><span class="summary-sig"><span class="summary-sig-name">desc_index</span>(<span class=summary-sig-arg>dir</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#Dir_cmpdates" class="summary-sig-name"><code>Dir_cmpdates</code></a>(<span class=summary-sig-arg>dir1</span>,
+          <span class=summary-sig-arg>dir2</span>)</span></code>
+<br />
+Compare two subdirectories by date.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#dirnav" class="summary-sig-name"><code>dirnav</code></a>(<span class=summary-sig-arg>cd</span>,
+          <span class=summary-sig-arg>dir</span>,
+          <span class=summary-sig-arg>rootname</span>,
+          <span class=summary-sig-arg>dirsep</span>)</span></code>
+<br />
+(rootname: string, dirsep: string, dir: Dir, ignoreCurrent: bool)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#execTemplate" class="summary-sig-name"><code>execTemplate</code></a>(<span class=summary-sig-arg>outfile</span>,
+          <span class=summary-sig-arg>olist</span>,
+          <span class=summary-sig-arg>envir</span>)</span></code>
+<br />
+Executes template text.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#generatePage" class="summary-sig-name"><code>generatePage</code></a>(<span class=summary-sig-arg>fn</span>,
+          <span class=summary-sig-arg>ttype</span>,
+          <span class=summary-sig-arg>envir</span>)</span></code>
+<br />
+Generates an index page, replacing the tags as needed.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#generateSummary" class="summary-sig-name"><code>generateSummary</code></a>(<span class=summary-sig-arg>fn</span>,
+          <span class=summary-sig-arg>allimages</span>)</span></code>
+<br />
+Generates the text index that could be used by other processing 
+tools.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#getMagickProg" class="summary-sig-name"><code>getMagickProg</code></a>(<span class=summary-sig-arg>progname</span>)</span></code>
+<br />
+Returns the program name to execute for an ImageMagick command.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="imagePile"></a><span class="summary-sig"><span class="summary-sig-name">imagePile</span>(<span class=summary-sig-arg>dstdir</span>,
+          <span class=summary-sig-arg>images</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#imageSize" class="summary-sig-name"><code>imageSize</code></a>(<span class=summary-sig-arg>path</span>)</span></code>
+<br />
+Returns the ( width, height ) image size pair.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#imageSizeNoCache" class="summary-sig-name"><code>imageSizeNoCache</code></a>(<span class=summary-sig-arg>filename</span>)</span></code>
+<br />
+Non-caching finding out the size of an image file.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="imageSrc"></a><span class="summary-sig"><span class="summary-sig-name">imageSrc</span>(<span class=summary-sig-arg>cd</span>,
+          <span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>xtra</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#imgwhat" class="summary-sig-name"><code>imgwhat</code></a>(<span class=summary-sig-arg>fn</span>,
+          <span class=summary-sig-arg>fast</span>)</span></code>
+<br />
+Faster, sloppier, imgwhat, that doesn't require opening the file if we 
+specified that it should be fast.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="main"></a><span class="summary-sig"><span class="summary-sig-name">main</span>()</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="next"></a><span class="summary-sig"><span class="summary-sig-name">next</span>(<span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>imglist</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="prev"></a><span class="summary-sig"><span class="summary-sig-name">prev</span>(<span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>imglist</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#readTemplate" class="summary-sig-name"><code>readTemplate</code></a>(<span class=summary-sig-arg>tfn</span>)</span></code>
+<br />
+Reads a template file.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#readTemplates" class="summary-sig-name"><code>readTemplates</code></a>()</span></code>
+<br />
+Reads the template files.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#rel" class="summary-sig-name"><code>rel</code></a>(<span class=summary-sig-arg>dest</span>,
+          <span class=summary-sig-arg>curdir</span>)</span></code>
+<br />
+Returns dest filename relative to curdir.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="scaledImage"></a><span class="summary-sig"><span class="summary-sig-name">scaledImage</span>(<span class=summary-sig-arg>cd</span>,
+          <span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>xtra</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="sous_titre"></a><span class="summary-sig"><span class="summary-sig-name">sous_titre</span>(<span class=summary-sig-arg>i</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#splitFn" class="summary-sig-name"><code>splitFn</code></a>(<span class=summary-sig-arg>fn</span>)</span></code>
+<br />
+Returns a tuplet ( dir, base, repn, ext ).</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#splitpath" class="summary-sig-name"><code>splitpath</code></a>(<span class=summary-sig-arg>path</span>)</span></code>
+<br />
+Splits a path into a list of components.</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#table" class="summary-sig-name"><code>table</code></a>(<span class=summary-sig-arg>dstdir</span>,
+          <span class=summary-sig-arg>images</span>,
+          <span class=summary-sig-arg>textfun</span>,
+          <span class=summary-sig-arg>cols</span>)</span></code>
+<br />
+(images: seq of Image, textfun: function, cols: int)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#test_jpeg_exif" class="summary-sig-name"><code>test_jpeg_exif</code></a>(<span class=summary-sig-arg>h</span>,
+          <span class=summary-sig-arg>f</span>)</span></code>
+<br />
+imghdr test for JPEG data in EXIF format</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><span class="summary-sig"><a href="generator-module.html#textnav" class="summary-sig-name"><code>textnav</code></a>(<span class=summary-sig-arg>dstdir</span>,
+          <span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>imglist</span>,
+          <span class=summary-sig-arg>midtext</span>,
+          <span class=summary-sig-arg>middest</span>,
+          <span class=summary-sig-arg>pcycling</span>)</span></code>
+<br />
+(imglist: seq of Image, midtext: string, middest: string, pcycling: 
+bool)</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="thumbImage"></a><span class="summary-sig"><span class="summary-sig-name">thumbImage</span>(<span class=summary-sig-arg>cd</span>,
+          <span class=summary-sig-arg>image</span>,
+          <span class=summary-sig-arg>xtra</span>)</span></code>
+</td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1">&nbsp;</font></td>
+  <td><code><a name="twoColumns"></a><span class="summary-sig"><span class="summary-sig-name">twoColumns</span>(<span class=summary-sig-arg>dstdir</span>,
+          <span class=summary-sig-arg>images</span>)</span></code>
+</td></tr>
+</table><br />
+
+
+<!-- =========== START OF VARIABLE SUMMARY =========== -->
+<table class="summary" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <th colspan="2">Variable Summary</th></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="generator-module.html#__author__"><code>__author__</code></a></b> = <span title="'Martin Blais &lt;blais@furius.ca&gt;'"><code><span class="variable-quote">'</span>Martin&nbsp;Blais&nbsp;&lt;blais&#64;furius.ca&gt;<span class="variable-quote">'</span>            </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="generator-module.html#__version__"><code>__version__</code></a></b> = <span title="'$Revision$'"><code><span class="variable-quote">'</span>$Revision$<span class="variable-quote">'</span>                         </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="generator-module.html#__version_pr__"><code>__version_pr__</code></a></b> = <span title="'2.0'"><code><span class="variable-quote">'</span>2.0<span class="variable-quote">'</span>                                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="generator-module.html#dirnavsep"><code>dirnavsep</code></a></b> = <span title="' / '"><code><span class="variable-quote">'</span>&nbsp;/&nbsp;<span class="variable-quote">'</span>                                        </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="generator-module.html#fallbackTemplates"><code>fallbackTemplates</code></a></b> = <span title="{'template-dirindex': '&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;\n&lt;html&gt;\n&lt;head&gt;\n   &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;\n   &lt;link rel=stylesheet type=&quot;text/css&quot; href=&quot;&lt;!--tag:rel(css_fn, cd)--&gt;&quot;&gt;\n   &lt;title&gt;Directory Index: &lt;!--tag:dir._path--&gt;&lt;/title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n\n\n&lt;!--tagcode:\ndesc_page = desc_index(dir)\n--&gt;\n\n&lt;table class=&quot;toptable dirtop&quot;&gt;&lt;tr&gt;&lt;td&gt;\n&lt;p class=&quot;toptitle&quot;&gt;&lt;!--tag:dirnav(cd, dir)--&gt;&lt;/p&gt;\n&lt;p&gt;&lt;center&gt;&lt;h3&gt;\n&lt;!--tagcode:\nif desc_page:\n  if desc_page.get_def(\'title\'):\n    print desc_page.get_def(\'title\')..."><code>{'template-dirindex':&nbsp;'&lt;!DOCTYPE&nbsp;HTM<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>list</code></font></td>
+<td><b><a href="generator-module.html#fast_imgexts"><code>fast_imgexts</code></a></b> = <span title="['jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', 'tiff', 'tif', 'rast', 'xbm', 'bmp']"><code>['jpeg',&nbsp;'jpg',&nbsp;'gif',&nbsp;'png',&nbsp;'rgb',&nbsp;'pbm<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>NoneType</code></font></td>
+<td><b><a href="generator-module.html#fcachesizes"><code>fcachesizes</code></a></b> = <span title="None">None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="generator-module.html#html_postamble"><code>html_postamble</code></a></b> = <span title="&quot;\n&lt;!--tagcode:\nif 'footer' in globals():\n    print footer\n--&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n&quot;"><code><span class="variable-quote">"</span>\n&lt;!--tagcode:\nif&nbsp;'footer'&nbsp;in&nbsp;globals<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>str</code></font></td>
+<td><b><a href="generator-module.html#html_preamble"><code>html_preamble</code></a></b> = <span title="'&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;\n&lt;html&gt;\n&lt;head&gt;\n   &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;\n   &lt;link rel=stylesheet type=&quot;text/css&quot; href=&quot;&lt;!--tag:rel(css_fn, cd)--&gt;&quot;&gt;\n   &lt;title&gt;%s&lt;/title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n'"><code><span class="variable-quote">'</span>&lt;!DOCTYPE&nbsp;HTML&nbsp;PUBLIC&nbsp;&quot;-//W3C//DTD&nbsp;HTML<span class="variable-ellipsis">...</span></code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="generator-module.html#imageSizeCache"><code>imageSizeCache</code></a></b> = <span title="{}"><code>{}                                      </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>dict</code></font></td>
+<td><b><a href="generator-module.html#magick_path_cache"><code>magick_path_cache</code></a></b> = <span title="{}"><code>{}                                   </code>
+</span></td></tr>
+<tr><td align="right" valign="top" width="15%"><font size="-1"><code>SRE_Pattern</code></font></td>
+<td><b><a href="generator-module.html#szre"><code>szre</code></a></b> = <span title="&lt;_sre.SRE_Pattern object at 0xb7bfe020&gt;"><code><span class="re"><span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span>x<span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span></span>                                       </code>
+</span></td></tr>
+</table><br />
+
+
+<!-- =========== START OF FUNCTION DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Function Details</th></tr>
+</table>
+
+<a name="checkThumbSize"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">checkThumbSize</span>(<span class=sig-arg>isz</span>,
+          <span class=sig-arg>tsz</span>,
+          <span class=sig-arg>desired</span>)</span>
+  </h3>
+  Returns true if the sizepair fits the size.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="clean"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">clean</span>(<span class=sig-arg>allimages</span>,
+          <span class=sig-arg>alldirs</span>)</span>
+  </h3>
+  Removes the files generated by curator in the current directory and 
+  below.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="compileCode"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">compileCode</span>(<span class=sig-arg>pretext</span>,
+          <span class=sig-arg>codetext</span>,
+          <span class=sig-arg>filename</span>)</span>
+  </h3>
+  Compile a chunk of code.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="compileTemplate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">compileTemplate</span>(<span class=sig-arg>ttext</span>,
+          <span class=sig-arg>filename</span>)</span>
+  </h3>
+  Compiles template text.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="computeTrackmap"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">computeTrackmap</span>(<span class=sig-arg>imagelist</span>)</span>
+  </h3>
+  Computes a map of files in each track. The key is the track 
+  name.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="Dir_cmpdates"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">Dir_cmpdates</span>(<span class=sig-arg>dir1</span>,
+          <span class=sig-arg>dir2</span>)</span>
+  </h3>
+  Compare two subdirectories by date.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="dirnav"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">dirnav</span>(<span class=sig-arg>cd</span>,
+          <span class=sig-arg>dir</span>,
+          <span class=sig-arg>rootname</span>=<span class=sig-default>'(root)'</span>,
+          <span class=sig-arg>dirsep</span>=<span class=sig-default>'&nbsp;/&nbsp;'</span>)</span>
+  </h3>
+  <p>(rootname: string, dirsep: string, dir: Dir, ignoreCurrent: 
+  bool)</p>
+  Utility that generates an anchored HTML representation for a 
+  directory within the image hierarchy. You can click on the directory 
+  names.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="execTemplate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">execTemplate</span>(<span class=sig-arg>outfile</span>,
+          <span class=sig-arg>olist</span>,
+          <span class=sig-arg>envir</span>)</span>
+  </h3>
+  Executes template text. Output is written to outfile.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="generatePage"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">generatePage</span>(<span class=sig-arg>fn</span>,
+          <span class=sig-arg>ttype</span>,
+          <span class=sig-arg>envir</span>)</span>
+  </h3>
+  Generates an index page, replacing the tags as needed.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="generateSummary"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">generateSummary</span>(<span class=sig-arg>fn</span>,
+          <span class=sig-arg>allimages</span>)</span>
+  </h3>
+  Generates the text index that could be used by other processing 
+  tools.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="getMagickProg"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">getMagickProg</span>(<span class=sig-arg>progname</span>)</span>
+  </h3>
+  Returns the program name to execute for an ImageMagick command.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="imageSize"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">imageSize</span>(<span class=sig-arg>path</span>)</span>
+  </h3>
+  Returns the ( width, height ) image size pair. Filename must be 
+  absolute. This method uses a cache to avoid having to reopen an image 
+  file multiple times.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="imageSizeNoCache"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">imageSizeNoCache</span>(<span class=sig-arg>filename</span>)</span>
+  </h3>
+  Non-caching finding out the size of an image file.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="imgwhat"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">imgwhat</span>(<span class=sig-arg>fn</span>,
+          <span class=sig-arg>fast</span>=<span class=sig-default>None</span>)</span>
+  </h3>
+  Faster, sloppier, imgwhat, that doesn't require opening the file if 
+  we specified that it should be fast.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="readTemplate"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">readTemplate</span>(<span class=sig-arg>tfn</span>)</span>
+  </h3>
+  Reads a template file. This method expects an simple filename.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="readTemplates"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">readTemplates</span>()</span>
+  </h3>
+  Reads the template files.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="rel"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">rel</span>(<span class=sig-arg>dest</span>,
+          <span class=sig-arg>curdir</span>)</span>
+  </h3>
+  Returns dest filename relative to curdir.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="splitFn"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">splitFn</span>(<span class=sig-arg>fn</span>)</span>
+  </h3>
+  Returns a tuplet ( dir, base, repn, ext ). Repn is '' if not 
+  present.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="splitpath"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">splitpath</span>(<span class=sig-arg>path</span>)</span>
+  </h3>
+  Splits a path into a list of components. This function works around 
+  a quirk in string.split().
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="table"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">table</span>(<span class=sig-arg>dstdir</span>,
+          <span class=sig-arg>images</span>,
+          <span class=sig-arg>textfun</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>cols</span>=<span class=sig-default>4</span>)</span>
+  </h3>
+  <p>(images: seq of Image, textfun: function, cols: int)</p>
+  Utility function that generates a table with thumbnails for the 
+  given images. Specify textfun a callback if you want to include some 
+  text under each image. cols is the number of columns. Of course, you're 
+  free to define your own table making function within the template 
+  itself if you don't like this one.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="test_jpeg_exif"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">test_jpeg_exif</span>(<span class=sig-arg>h</span>,
+          <span class=sig-arg>f</span>)</span>
+  </h3>
+  imghdr test for JPEG data in EXIF format
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+
+<a name="textnav"></a>
+<table width="100%" class="func-details" bgcolor="#e0e0e0"><tr><td>
+  <h3><span class="sig"><span class="sig-name">textnav</span>(<span class=sig-arg>dstdir</span>,
+          <span class=sig-arg>image</span>,
+          <span class=sig-arg>imglist</span>,
+          <span class=sig-arg>midtext</span>=<span class=sig-default>''</span>,
+          <span class=sig-arg>middest</span>=<span class=sig-default>None</span>,
+          <span class=sig-arg>pcycling</span>=<span class=sig-default>0</span>)</span>
+  </h3>
+  <p>(imglist: seq of Image, midtext: string, middest: string, pcycling: 
+  bool)</p>
+  Returns an HTML snippet for a text track navigation widget. Set 
+  pcycling to 1 if you want it cycling.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+<br />
+
+
+<!-- =========== START OF VARIABLE DETAILS =========== -->
+<table class="details" border="1" cellpadding="3" cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="details">
+  <th colspan="2">Variable Details</th></tr>
+</table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="__author__"></a>
+<h3>__author__</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'Martin Blais &lt;blais@furius.ca&gt;'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>Martin Blais &lt;blais&#64;furius.ca&gt;<span class="variable-quote">'</span>                                       </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="__version__"></a>
+<h3>__version__</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'$Revision$'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>$Revision$<span class="variable-quote">'</span>                                                     </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="__version_pr__"></a>
+<h3>__version_pr__</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'2.0'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span>2.0<span class="variable-quote">'</span>                                                                  </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="dirnavsep"></a>
+<h3>dirnavsep</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="' / '">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'</span> / <span class="variable-quote">'</span>                                                                  </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="fallbackTemplates"></a>
+<h3>fallbackTemplates</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+<span title="{'template-dirindex': '&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;\n&lt;html&gt;\n&lt;head&gt;\n   &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;\n   &lt;link rel=stylesheet type=&quot;text/css&quot; href=&quot;&lt;!--tag:rel(css_fn, cd)--&gt;&quot;&gt;\n   &lt;title&gt;Directory Index: &lt;!--tag:dir._path--&gt;&lt;/title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n\n\n&lt;!--tagcode:\ndesc_page = desc_index(dir)\n--&gt;\n\n&lt;table class=&quot;toptable dirtop&quot;&gt;&lt;tr&gt;&lt;td&gt;\n&lt;p class=&quot;toptitle&quot;&gt;&lt;!--tag:dirnav(cd, dir)--&gt;&lt;/p&gt;\n&lt;p&gt;&lt;center&gt;&lt;h3&gt;\n&lt;!--tagcode:\nif desc_page:\n  if desc_page.get_def(\'title\'):\n    print desc_page.get_def(\'title\')...">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+{'template-allindex': '&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Tra<span class="variable-linewrap">\</span>
+nsitional//EN&quot;&gt;\n&lt;html&gt;\n&lt;head&gt;\n   &lt;meta http-equiv=&quot;Content-Type&quot; co<span class="variable-linewrap">\</span>
+ntent=&quot;text/html; charset=iso-8859-1&quot;&gt;\n   &lt;link rel=stylesheet type=&quot;<span class="variable-linewrap">\</span>
+text/css&quot; href=&quot;&lt;!--tag:rel(css_fn, cd)--&gt;&quot;&gt;\n   &lt;title&gt;Global Index&lt;/<span class="variable-linewrap">\</span>
+title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n\n\n&lt;table class=&quot;toptable globaltop&quot;&gt;&lt;tr&gt;&lt;td<span class="variable-linewrap">\</span>
+&gt;\n&lt;p class=&quot;toptitle&quot;&gt;Global Index&lt;/p&gt;\n&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;\n\n&lt;div cl<span class="variable-linewrap">\</span>
+ass=&quot;mininav&quot;&gt;\n&lt;a href=&quot;&lt;!--tag:rel(rootdir._pagefn, cd)--&gt;&quot;&gt;Root&lt;/a&gt;<span class="variable-linewrap">\</span>
+ |\n&lt;a href=&quot;&lt;!--tag:rel(allindex_fn, cd)--&gt;&quot;&gt;Global&lt;/a&gt; |\n&lt;a href=&quot;&lt;<span class="variable-linewrap">\</span>
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="fast_imgexts"></a>
+<h3>fast_imgexts</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>list</code>
+
+      </dd>
+<span title="['jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', 'tiff', 'tif', 'rast', 'xbm', 'bmp']">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+['jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', 'tiff']      </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="fcachesizes"></a>
+<h3>fcachesizes</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>NoneType</code>
+
+      </dd>
+<span title="None">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="html_postamble"></a>
+<h3>html_postamble</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="&quot;\n&lt;!--tagcode:\nif 'footer' in globals():\n    print footer\n--&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n&quot;">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">"""</span>
+&lt;!--tagcode:
+if 'footer' in globals():
+    print footer
+--&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+<span class="variable-quote">"""</span>                                                                    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="html_preamble"></a>
+<h3>html_preamble</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>str</code>
+
+      </dd>
+<span title="'&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;\n&lt;html&gt;\n&lt;head&gt;\n   &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-8859-1&quot;&gt;\n   &lt;link rel=stylesheet type=&quot;text/css&quot; href=&quot;&lt;!--tag:rel(css_fn, cd)--&gt;&quot;&gt;\n   &lt;title&gt;%s&lt;/title&gt;\n&lt;/head&gt;\n&lt;body&gt;\n'">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="variable-quote">'''</span>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;
+&lt;html&gt;
+&lt;head&gt;
+   &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=iso-885<span class="variable-linewrap">\</span>
+9-1&quot;&gt;
+   &lt;link rel=stylesheet type=&quot;text/css&quot; href=&quot;&lt;!--tag:rel(css_fn, cd)-<span class="variable-linewrap">\</span>
+-&gt;&quot;&gt;
+   &lt;title&gt;%s&lt;/title&gt;
+<span class="variable-ellipsis">...</span>                                                                    </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="imageSizeCache"></a>
+<h3>imageSizeCache</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+<span title="{}">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+{}                                                                     </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="magick_path_cache"></a>
+<h3>magick_path_cache</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>dict</code>
+
+      </dd>
+<span title="{}">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+{}                                                                     </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<table width="100%" class="var-details" bgcolor="#e0e0e0"><tr><td>
+<a name="szre"></a>
+<h3>szre</h3>
+<dl>
+  <dt></dt>
+  <dd>
+    <dl>
+      <dt><b>Type:</b></dt>
+      <dd>
+          <code>SRE_Pattern</code>
+
+      </dd>
+<span title="&lt;_sre.SRE_Pattern object at 0xb7bfe020&gt;">      <dt><b>Value:</b></dt>
+      <dd><table><tr><td>
+<pre class="variable">
+<span class="re"><span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span>x<span class="re-group">(</span><span class="re-char">\d</span><span class="re-op">+</span><span class="re-group">)</span></span>                                                            </pre>
+        </td></tr></table></dd>
+</span>    </dl>
+  </dd>
+</dl></td></tr></table>
+<br />
+
+
+<!-- =========== START OF NAVBAR =========== -->
+<table class="navbar" border="0" width="100%" cellpadding="0" bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="center">
+    <th bgcolor="#70b0f0" class="navselect">&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar" href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+    <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="left"><font size="-2">Generated by Epydoc 2.1 on Tue May 17 21:40:08 2005</font></td>
+    <td align="right"><a href="http://epydoc.sourceforge.net"
+                      ><font size="-2">http://epydoc.sf.net</font></a></td>
+  </tr>
+</table>
+</body>
+</html>
