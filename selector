@@ -98,7 +98,7 @@ Selected_file=os.path.join(curdir,Selected_file)
 
 
 class photo:
-	"""classe photo qui contient toutes les operations qui sont réalisables sur les photographies"""
+	"""class photo qui th all the operations available on photos"""
 	def __init__(self,filename):
 		self.filename=filename
 		self.fn=os.path.join(curdir,self.filename)
@@ -145,11 +145,11 @@ class photo:
 	def Rotate(self,angle=0):
 		"""does a looseless rotation of the given jpeg file"""
 		if angle==90:
-			os.popen(exiftran+" -ip -9 %s"%self.fn,"r")	
+			os.system(exiftran+" -ip -9 %s"%self.fn)	
 		elif angle==270:
-			os.popen(exiftran+" -ip -2 %s"%self.fn,"r")
+			os.system(exiftran+" -ip -2 %s"%self.fn)
 		elif angle==180:
-			os.popen(exiftran+" -ip -1 %s"%self.fn,"r")	
+			os.system(exiftran+" -ip -1 %s"%self.fn)	
 		else:
 			print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 
@@ -202,15 +202,15 @@ class photo:
 				
 	def name(self,titre):
 		"""write the title of the photo inside the description field, in the JPEG header"""	
-		os.popen(exiftran+' -ipc "%s"  %s'%(titre,self.fn),"r")
+		os.system(exiftran+' -ipc "%s"  %s'%(titre,self.fn),)
 		
 	def autorotate(self):
 		"""does autorotate the image according to the EXIF tag"""
-		os.popen(exiftran+" -aip %s"%self.fn,"r")
+		os.system(exiftran+" -aip %s"%self.fn)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 class interface:
-	"""classe interface qui gère l'interface graphique"""
+	"""class interface that manages the GUI using Glade-2"""
 	def __init__(self,AllJpegs=[],first=0):
 		self.AllJpegs=AllJpegs
 		self.Selected=LoadSelected()
@@ -365,10 +365,11 @@ class interface:
 	def run(self,*args):
 		"""lauch the copy of all selected files"""
 		self.settitle()
-		a=time.time()
+#		a=time.time()
 		ProcessSelected(self.Selected)
-		print "process-time = %s"%(time.time()-a)
+#		print "process-time = %s"%(time.time()-a)
 		self.Selected=[]
+		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		print "Done"
 
 	def die(self,*args):
@@ -580,7 +581,7 @@ def MessageError(text,Message=gtk.MESSAGE_ERROR):
 
 def FindFile(RootDir):
 	"""returns a list of the files with the given suffix in the given dir"""
-	#files=os.popen('find "%s"  -iname "*.%s"'%(RootDir,suffix),"r").readlines()
+	#files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
 	files=[]
 	for i in Exts:
 		files+=parser().FindExts(RootDir,i)

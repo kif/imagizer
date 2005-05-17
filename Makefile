@@ -10,9 +10,11 @@ install:
 	install -m 644 interface.glade $(DESTDIR)/usr/share/imagizer
 	install -m 644 EXIF.py $(DESTDIR)/usr/share/imagizer
 	install -m 644 README.txt $(DESTDIR)/usr/share/doc/imagizer
+	cp -R doc/* $(DESTDIR)/usr/share/doc/imagizer
+	chmod -R a+rX $(DESTDIR)/usr/share/doc/imagizer
 
 uninstall:
-	rm -rf /usr/share/imagizer
-	rm -rf /usr/share/doc/imagizer
-	rm -f /usr/bin/generator
-	rm -f /usr/bin/selector
+	rm -rf $(DESTDIR)/usr/share/imagizer
+	rm -rf $(DESTDIR)/usr/share/doc/imagizer
+	rm -f $(DESTDIR)/usr/bin/generator
+	rm -f $(DESTDIR)/usr/bin/selector
