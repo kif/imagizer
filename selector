@@ -41,8 +41,10 @@ scaled="scaled"
 thumb="thumb"
 
 
-autorotate=True
+autorotate=False
+DefaultMode="666"
 
+	
 Interpolation=gtk.gdk.INTERP_TILES
 #gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
 #gtk.gdk.INTERP_TILES	This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
@@ -94,6 +96,12 @@ SelectedDir=os.path.join(curdir,Selected)
 Selected_file=os.path.join(curdir,Selected_file)
 
 
+DefaultFileMode=0
+for i in list(DefaultMode):
+	DefaultFileMode*=8
+	DefaultFileMode+=int(i)
+
+DefaultDirMode=DefaultFileMode+73
 
 
 
@@ -545,9 +553,11 @@ class interface:
 def SaveSelected(List):
 	"""save the list of selected files"""
 	print "Sauvegarde de la sélection"
+	os.remove(Selected_file)
 	f=open(Selected_file,"w")
 	for ligne in List: f.write(ligne+"\n")
 	f.close()
+	os.chmod(Selected_file,DefaultFileMode)
 
 
 		
@@ -664,6 +674,7 @@ def RangeTout(RootDir):
 	AllJpegs=FindFile(curdir)
 	AllFilesToProcess=[]
 	AllreadyDone=[]
+	NewFiles=[]
 	for i in AllJpegs:
 		if i.find(Trash)==0: continue
 		if i.find(Selected)==0: continue
@@ -672,12 +683,16 @@ def RangeTout(RootDir):
 			m=int(i[5:7])
 			j=int(i[8:10])
 			if (a>=0000) and (m<=12) and (j<=31) and (i[4] in ["-","_","."]) and (i[7] in ["-","_"]): 
-				AllFilesToProcess.append(i)
 				AllreadyDone.append(i)
-				continue
+			else:
+				AllFilesToProcess.append(i)
 		except : 
-			pass
+			AllFilesToProcess.append(i)
+	AllFilesToProcess.sort()
+	NumFiles=len(AllFilesToProcess)		
+	for h in range(NumFiles):
 		#a ce moment il ne reste plus que les fichiers a traiter
+		i=AllFilesToProcess[h]
 		data=photo(i).exif() 
 		try:
 			datei,heurei=data["Heure"].split()
@@ -689,7 +704,9 @@ def RangeTout(RootDir):
 			#print i,os.path.getctime(os.path.join(curdir,i)) 
 			date=time.strftime("%Y-%m-%d",time.gmtime(os.path.getctime(os.path.join(curdir,i))))
 			heure=latin1_to_ascii("%s-%s.jpg"%(time.strftime("%Hh%Mm%S",time.gmtime(os.path.getctime(os.path.join(curdir,i)))),re.sub("/","-",re.sub(" ","_",os.path.splitext(i)[0]))))
-		if not (os.path.isdir(os.path.join(curdir,date))) : os.mkdir(os.path.join(curdir,date))
+		if not (os.path.isdir(os.path.join(curdir,date))) : 
+			os.mkdir(os.path.join(curdir,date))
+			os.chmod(os.path.join(curdir,date),DefaultDirMode)
 		imagefile=os.path.join(curdir,date,heure)
 		ToProcess=os.path.join(date,heure)
 		if os.path.isfile(imagefile):
@@ -699,21 +716,26 @@ def RangeTout(RootDir):
 				if j.find(heure[:-4])==0:s+=1
 			ToProcess=os.path.join(date,heure[:-4]+"-%s.jpg"%s)
 			imagefile=os.path.join(curdir,ToProcess)
-		AllFilesToProcess.append(ToProcess)
 		shutil.move(os.path.join(curdir,i),imagefile)
-		os.chmod(imagefile,420)
+		os.chmod(imagefile,DefaultFileMode)
 		if autorotate :
 			photo(imagefile).autorotate()
 		else :
-			print "Processing ..."+i
-	AllFilesToProcess.sort()
-	NewFiles=AllFilesToProcess[:]
-	for i in AllreadyDone:
-		NewFiles.remove(i)
+			print "%.1f %% processing  ... "%(100.0*h/NumFiles,i)
+#			print "Processing ..."+i
+		AllreadyDone.append(ToProcess)
+		NewFiles.append(ToProcess)
+	AllreadyDone.sort()
+#	NewFiles=AllFilesToProcess[:]
+##########################
+#a reverifier ....
+#########################3	
+#	for i in AllreadyDone:
+#		NewFiles.remove(i)
 	if len(NewFiles)>0:
-		return AllFilesToProcess,AllFilesToProcess.index(NewFiles[0])
+		return AllreadyDone,AllreadyDone.index(NewFiles[0])
 	else:
-		return AllFilesToProcess,0
+		return AllreadyDone,0
 
 
 
