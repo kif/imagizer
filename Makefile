@@ -1,20 +1,21 @@
 
-DESTDIR=
+DESTDIR=/usr
 
 install:
-	install -d $(DESTDIR)/usr/share/imagizer
-	install -d $(DESTDIR)/usr/share/doc/imagizer
-	install -m 755 generator $(DESTDIR)/usr/bin
-	install -m 755 selector $(DESTDIR)/usr/bin
-	install -m 644 *.png $(DESTDIR)/usr/share/imagizer
-	install -m 644 interface.glade $(DESTDIR)/usr/share/imagizer
-	install -m 644 EXIF.py $(DESTDIR)/usr/share/imagizer
-	install -m 644 README.txt $(DESTDIR)/usr/share/doc/imagizer
-	cp -R doc/* $(DESTDIR)/usr/share/doc/imagizer
-	chmod -R a+rX $(DESTDIR)/usr/share/doc/imagizer
+	install -d $(DESTDIR)/share/imagizer
+	install -d $(DESTDIR)/share/doc/imagizer
+	install -m 755 generator $(DESTDIR)/bin
+	install -m 755 selector $(DESTDIR)/bin
+	install -m 644 *.png $(DESTDIR)/share/imagizer
+	install -m 644 interface.glade $(DESTDIR)/share/imagizer
+	install -m 644 EXIF.py $(DESTDIR)/share/imagizer
+	install -m 644 README.txt $(DESTDIR)/share/doc/imagizer
+	install -m 644 favicon.ico $(DESTDIR)/share/imagizer
+	cp -R doc/* $(DESTDIR)/share/doc/imagizer
+	chmod -R a+rX $(DESTDIR)/share/doc/imagizer
 
 uninstall:
-	rm -rf $(DESTDIR)/usr/share/imagizer
-	rm -rf $(DESTDIR)/usr/share/doc/imagizer
-	rm -f $(DESTDIR)/usr/bin/generator
-	rm -f $(DESTDIR)/usr/bin/selector
+	rm -rf $(DESTDIR)/share/imagizer
+	rm -rf $(DESTDIR)/share/doc/imagizer
+	rm -f $(DESTDIR)/bin/generator
+	rm -f $(DESTDIR)/bin/selector
