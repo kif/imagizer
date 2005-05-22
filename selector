@@ -41,8 +41,8 @@ scaled="scaled"
 thumb="thumb"
 
 
-autorotate=False
-DefaultMode="666"
+autorotate=True
+DefaultMode="664"
 
 	
 Interpolation=gtk.gdk.INTERP_TILES
@@ -214,7 +214,7 @@ class photo:
 		
 	def autorotate(self):
 		"""does autorotate the image according to the EXIF tag"""
-		os.system(exiftran+" -aip %s"%self.fn)
+		os.system(exiftran+" -aip %s 2>/dev/null"%self.fn)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 class interface:
@@ -720,8 +720,8 @@ def RangeTout(RootDir):
 		os.chmod(imagefile,DefaultFileMode)
 		if autorotate :
 			photo(imagefile).autorotate()
-		else :
-			print "%.1f %% processing  ... "%(100.0*h/NumFiles,i)
+#		else :
+		print "%.1f %% processing  ... %s"%(100.0*h/NumFiles,i)
 #			print "Processing ..."+i
 		AllreadyDone.append(ToProcess)
 		NewFiles.append(ToProcess)
@@ -825,7 +825,10 @@ def WARNING():
 		
 def main():
 	"""well this is tha main program"""
-	if not os.path.isfile(Selected_file):WARNING()
+	if not os.path.isfile(Selected_file):
+		WARNING()
+		f=open(Selected_file,"w")
+		f.close()
 	AF,first=RangeTout(curdir)
 	interface(AF,first)
 	
