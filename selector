@@ -670,6 +670,7 @@ def ScaleImage(filename):
 
 def RangeTout(RootDir):
 	"""moves all the JPEG files to a directory named from their day and with the nameaccording to the time"""
+	sc=SplashScreen()
 	AllJpegs=FindFile(curdir)
 	AllFilesToProcess=[]
 	AllreadyDone=[]
@@ -692,6 +693,9 @@ def RangeTout(RootDir):
 	for h in range(NumFiles):
 		#a ce moment il ne reste plus que les fichiers a traiter
 		i=AllFilesToProcess[h]
+		sc.setbar(float(h)/NumFiles,i)
+		print "%.1f %% processing  ... %s"%(100.0*h/NumFiles,i)
+
 		data=photo(i).exif() 
 		try:
 			datei,heurei=data["Heure"].split()
@@ -719,18 +723,10 @@ def RangeTout(RootDir):
 		os.chmod(imagefile,DefaultFileMode)
 		if autorotate :
 			photo(imagefile).autorotate()
-#		else :
-		print "%.1f %% processing  ... %s"%(100.0*h/NumFiles,i)
-#			print "Processing ..."+i
 		AllreadyDone.append(ToProcess)
 		NewFiles.append(ToProcess)
 	AllreadyDone.sort()
-#	NewFiles=AllFilesToProcess[:]
-##########################
-#a reverifier ....
-#########################3	
-#	for i in AllreadyDone:
-#		NewFiles.remove(i)
+	sc.finish()
 	if len(NewFiles)>0:
 		return AllreadyDone,AllreadyDone.index(NewFiles[0])
 	else:
@@ -827,16 +823,24 @@ class SplashScreen:
 		self.xml=gtk.glade.XML(interfaceSplash)
 		self.xml.get_widget("image").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"Splash.png")))
 		self.pb=self.xml.get_widget("progress")
-	def setbar(self,val,name=""):
-		"""set the progress bar to the given value"""
-		self.pb.set_value(val)
+		self.xml.get_widget("splash").show()
+		while gtk.events_pending():gtk.main_iteration()
+	def setbar(self,val,name):
+		"""set the progress-bar to the given value with the given name
+		@param val: value(<1) of the progress bar
+		@type val: float
+		@param name: name of the current element
+		@type name: string 
+		@return: None"""
+		self.pb.set_fraction(val)
 		self.pb.set_text(name)
-		
+		while gtk.events_pending():gtk.main_iteration()
 	def finish(self):
-		"""destroys the interface"""			
-		self.xml.destroy()		
-		del self.xml
-		gc.collect()
+		"""destroys the interface of the splash screen"""			
+		self.xml.get_widget("splash").destroy()
+		while gtk.events_pending():gtk.main_iteration()		
+		#del self.xml
+		#gc.collect()
 
 def main():
 	"""well this is tha main program"""
