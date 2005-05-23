@@ -6,8 +6,8 @@
 # version 0.3 : 28/10/2004
 # version 0.4 : 28/10/2004
 # version 1.1 : 11/01/2005
-# Liste des dépendances : python, PIL, Glade-2 exiftran
-# Exiftran existe en version windows maintenant !!!!
+# Liste des dépendances : python, PIL, Glade-2
+# Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
 #
 #todo liste des fonctions a implemanter ....
 # faire une doc décente.
@@ -39,8 +39,6 @@ Selected_file=".selected-photos"
 Exts=[".jpg", ".jpeg"]
 scaled="scaled"
 thumb="thumb"
-
-
 autorotate=True
 DefaultMode="664"
 
@@ -66,12 +64,13 @@ clef={
 if os.name == 'nt': #sys.platform == 'win32':
 	exiftran="exiftran.exe "
 	interfaceglade="interface.glade"
-	installdir="c:\\"
+	installdir="c:\\Imagizer"
 elif os.name == 'posix':
-	exiftran="exiftran "
 	installdir='/usr/share/imagizer'
+	exiftran=os.path.join(installdir,"exiftran ")
 	sys.path.append(installdir)
-	interfaceglade="/usr/share/imagizer/interface.glade"
+	interfaceglade=os.path.join(installdir,"interface.glade")
+	interfaceSplash=os.path.join(installdir,"splash.glade")
 else:
 	raise "Your platform does  not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
@@ -95,18 +94,18 @@ Trashdir=os.path.join(curdir,Trash)
 SelectedDir=os.path.join(curdir,Selected)
 Selected_file=os.path.join(curdir,Selected_file)
 
-
+#default mode  is in octal ... here we convert octal -> decimal
 DefaultFileMode=0
 for i in list(DefaultMode):
 	DefaultFileMode*=8
 	DefaultFileMode+=int(i)
 
-DefaultDirMode=DefaultFileMode+73
+DefaultDirMode=DefaultFileMode+73 #+111 en octal ...
 
 
 
 class photo:
-	"""class photo qui th all the operations available on photos"""
+	"""class photo that does all the operations available on photos"""
 	def __init__(self,filename):
 		self.filename=filename
 		self.fn=os.path.join(curdir,self.filename)
@@ -214,7 +213,7 @@ class photo:
 		
 	def autorotate(self):
 		"""does autorotate the image according to the EXIF tag"""
-		os.system(exiftran+" -aip %s 2>/dev/null"%self.fn)
+		os.system(exiftran+" -aip %s"%self.fn)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 class interface:
@@ -822,7 +821,23 @@ def WARNING():
 	dialog.destroy()
 	if result==gtk.RESPONSE_CANCEL: sys.exit(0)
 
+class SplashScreen:
+	"""lauches a splash sceen during the processing"""
+	def __init__(self):
+		self.xml=gtk.glade.XML(interfaceSplash)
+		self.xml.get_widget("image").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"Splash.png")))
+		self.pb=self.xml.get_widget("progress")
+	def setbar(self,val,name=""):
+		"""set the progress bar to the given value"""
+		self.pb.set_value(val)
+		self.pb.set_text(name)
 		
+	def finish(self):
+		"""destroys the interface"""			
+		self.xml.destroy()		
+		del self.xml
+		gc.collect()
+
 def main():
 	"""well this is tha main program"""
 	if not os.path.isfile(Selected_file):
