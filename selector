@@ -607,6 +607,9 @@ def FindFile(RootDir):
 
 def ProcessSelected(List):
 	"""copy all the selected files to "selected" subdirectory, 20 per page"""
+	avcmt=SplashScreen()
+	avcmt.xml.get_widget("splash").set_title("Un moment...")
+	avcmt.setbar(0,"copie des fichiers existants")
 	if not os.path.isdir(SelectedDir): os.mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
 	for day in os.listdir(SelectedDir):
@@ -623,6 +626,8 @@ def ProcessSelected(List):
 							
 #######then copy the selected files to their folders###########################		
 	for File in List:
+		#avcmt.setbar(float(List.index(File))/len(List),"1 -> %s"%File)
+		#print float(List.index(File))/len(List)
 		dest=os.path.join(SelectedDir,File)
 		src=os.path.join(curdir,File)
 		destdir=os.path.dirname(dest)
@@ -636,6 +641,7 @@ def ProcessSelected(List):
 	dirs=os.listdir(SelectedDir)
 	dirs.sort()
 	for day in dirs:
+		#avcmt.setbar(float(dirs.index(day))/len(dirs),day)
 		pathday=os.path.join(SelectedDir,day)
 		files=[]
 		for  i in os.listdir(pathday):
@@ -650,11 +656,15 @@ def ProcessSelected(List):
 			for j in range(len(files)):
 				i=1+(j)/NbrPerPage
 				filename=os.path.join(pathday,PagePrefix+str(i),files[j])
+				avcmt.setbar(float(j)/len(files),PagePrefix+str(i)+"/"+files[j])
 				shutil.move(os.path.join(pathday,files[j]),filename)
 				ScaleImage(filename)
 		else:
 			for j in files:
+				avcmt.setbar(float(files.index(j))/len(files),j)
 				ScaleImage(os.path.join(pathday,j))
+	
+	avcmt.finish()
 
 def ScaleImage(filename):
 	"""common processing for one image : create a subfolder "scaled" and "thumb" : """
@@ -839,8 +849,8 @@ class SplashScreen:
 		"""destroys the interface of the splash screen"""			
 		self.xml.get_widget("splash").destroy()
 		while gtk.events_pending():gtk.main_iteration()		
-		#del self.xml
-		#gc.collect()
+		del self.xml
+		gc.collect()
 
 def main():
 	"""well this is tha main program"""
