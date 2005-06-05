@@ -730,7 +730,7 @@ def RangeTout(RootDir):
 			ToProcess=os.path.join(date,heure[:-4]+"-%s.jpg"%s)
 			imagefile=os.path.join(curdir,ToProcess)
 		shutil.move(os.path.join(curdir,i),imagefile)
-		os.chmod(imagefile,DefaultFileMode)
+		#os.chmod(imagefile,DefaultFileMode)
 		if autorotate :
 			photo(imagefile).autorotate()
 		AllreadyDone.append(ToProcess)
