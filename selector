@@ -62,18 +62,19 @@ clef={
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-	exiftran="exiftran.exe "
-	interfaceglade="interface.glade"
 	installdir="c:\\Imagizer"
+	exiftran=os.path.join(installdir,"exiftran.exe ")
+	
 elif os.name == 'posix':
 	installdir='/usr/share/imagizer'
 	exiftran=os.path.join(installdir,"exiftran ")
-	sys.path.append(installdir)
-	interfaceglade=os.path.join(installdir,"interface.glade")
-	interfaceSplash=os.path.join(installdir,"splash.glade")
 else:
 	raise "Your platform does  not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
+
+sys.path.append(installdir)	
+interfaceglade=os.path.join(installdir,"interface.glade")
+interfaceSplash=os.path.join(installdir,"splash.glade")
 
 import EXIF
 
@@ -151,6 +152,8 @@ class photo:
 	
 	def Rotate(self,angle=0):
 		"""does a looseless rotation of the given jpeg file"""
+                if os.name == 'nt' and self.f!=None: del self.f
+             
 		if angle==90:
 			os.system(exiftran+" -ip -9 %s"%self.fn)	
 		elif angle==270:
@@ -159,6 +162,7 @@ class photo:
 			os.system(exiftran+" -ip -1 %s"%self.fn)	
 		else:
 			print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
+	
 
 	def Trash(self):
 		"""Send the file to the trash folder"""	
@@ -209,10 +213,12 @@ class photo:
 				
 	def name(self,titre):
 		"""write the title of the photo inside the description field, in the JPEG header"""	
+                if os.name == 'nt' and self.f!=None: del self.f
 		os.system(exiftran+' -ipc "%s"  %s'%(titre,self.fn),)
 		
 	def autorotate(self):
 		"""does autorotate the image according to the EXIF tag"""
+		if os.name == 'nt' and self.f!=None: del self.f
 		os.system(exiftran+" -aip %s"%self.fn)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
@@ -227,7 +233,7 @@ class interface:
 		self.CurIm=first
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(interfaceglade)
-		self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(installdir+"/logo.png"))
+		self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"logo.png")))
 		self.ShowImage()
 		self.xml.signal_connect('on_Principale_destroy',self.destroy)
 		self.xml.signal_connect('on_suivant_clicked',self.next)
@@ -431,7 +437,7 @@ class interface:
 	def about(self,*args):
 		"""display a copyright message"""	
 		self.settitle()
-		MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.1 du 11/01/2005".decode("latin1"),Message=gtk.MESSAGE_INFO)
+		MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.1a du 14/06/2005".decode("latin1"),Message=gtk.MESSAGE_INFO)
 		
 	
 	def nextJ(self,*args):
