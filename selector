@@ -35,7 +35,7 @@ NbrPerPage=20
 PagePrefix="page"
 Trash="Trash"
 Selected="Selected"
-Selected_file=".selected-photos"
+Selected_save=".selected-photos"
 Exts=[".jpg", ".jpeg"]
 scaled="scaled"
 thumb="thumb"
@@ -62,7 +62,7 @@ clef={
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir="c:\\Imagizer"
+	installdir="c:\\Program Files\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	
 elif os.name == 'posix':
@@ -75,25 +75,19 @@ else:
 sys.path.append(installdir)	
 interfaceglade=os.path.join(installdir,"interface.glade")
 interfaceSplash=os.path.join(installdir,"splash.glade")
-
+interfaceWarning=os.path.join(installdir,"warning.glade")
+interfacefiler=os.path.join(installdir,"filer.glade")
 import EXIF
 
-curdir=False
-if len(sys.argv)>1: 
-	for arg in sys.argv[1:]:
-		if arg[0]=="-":
-			if arg[1].lower()=="h":
-				print "Selectorclasse des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n"
-				sys.exit(0)
-			if arg.lower()=="-noautorotate":autorotate=False
-			if arg.lower()=="-nowarning":StartWarning=False			
-		else:
-			curdir=os.path.abspath(arg)
 
-if not curdir : curdir=os.getcwd()
-Trashdir=os.path.join(curdir,Trash)
-SelectedDir=os.path.join(curdir,Selected)
-Selected_file=os.path.join(curdir,Selected_file)
+
+
+
+
+
+
+
+
 
 #default mode  is in octal ... here we convert octal -> decimal
 DefaultFileMode=0
@@ -155,11 +149,11 @@ class photo:
                 if os.name == 'nt' and self.f!=None: del self.f
              
 		if angle==90:
-			os.system(exiftran+" -ip -9 %s"%self.fn)	
+			os.system(exiftran+' -ip -9 "%s"'%self.fn)	
 		elif angle==270:
-			os.system(exiftran+" -ip -2 %s"%self.fn)
+			os.system(exiftran+' -ip -2 "%s"'%self.fn)
 		elif angle==180:
-			os.system(exiftran+" -ip -1 %s"%self.fn)	
+			os.system(exiftran+' -ip -1 "%s"'%self.fn)	
 		else:
 			print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 	
@@ -214,12 +208,12 @@ class photo:
 	def name(self,titre):
 		"""write the title of the photo inside the description field, in the JPEG header"""	
                 if os.name == 'nt' and self.f!=None: del self.f
-		os.system(exiftran+' -ipc "%s"  %s'%(titre,self.fn),)
+		os.system(exiftran+' -ipc "%s"  "%s"'%(titre,self.fn))
 		
 	def autorotate(self):
 		"""does autorotate the image according to the EXIF tag"""
 		if os.name == 'nt' and self.f!=None: del self.f
-		os.system(exiftran+" -aip %s"%self.fn)
+		os.system(exiftran+' -aip "%s"'%self.fn)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 class interface:
@@ -687,7 +681,7 @@ def ScaleImage(filename):
 def RangeTout(RootDir):
 	"""moves all the JPEG files to a directory named from their day and with the nameaccording to the time"""
 	sc=SplashScreen()
-	AllJpegs=FindFile(curdir)
+	AllJpegs=FindFile(RootDir)
 	AllFilesToProcess=[]
 	AllreadyDone=[]
 	NewFiles=[]
@@ -720,22 +714,21 @@ def RangeTout(RootDir):
 			model=data["Modele"].split(",")[-1]
 			heure=latin1_to_ascii("%s-%s.jpg"%(re.sub(":","m",heurej,1),re.sub("/","",re.sub(" ","_",model))))
 		except:
-			#print i,os.path.getctime(os.path.join(curdir,i)) 
-			date=time.strftime("%Y-%m-%d",time.gmtime(os.path.getctime(os.path.join(curdir,i))))
-			heure=latin1_to_ascii("%s-%s.jpg"%(time.strftime("%Hh%Mm%S",time.gmtime(os.path.getctime(os.path.join(curdir,i)))),re.sub("/","-",re.sub(" ","_",os.path.splitext(i)[0]))))
-		if not (os.path.isdir(os.path.join(curdir,date))) : 
-			os.mkdir(os.path.join(curdir,date))
-			os.chmod(os.path.join(curdir,date),DefaultDirMode)
-		imagefile=os.path.join(curdir,date,heure)
+			date=time.strftime("%Y-%m-%d",time.gmtime(os.path.getctime(os.path.join(RootDir,i))))
+			heure=latin1_to_ascii("%s-%s.jpg"%(time.strftime("%Hh%Mm%S",time.gmtime(os.path.getctime(os.path.join(RootDir,i)))),re.sub("/","-",re.sub(" ","_",os.path.splitext(i)[0]))))
+		if not (os.path.isdir(os.path.join(RootDir,date))) : 
+			os.mkdir(os.path.join(RootDir,date))
+			os.chmod(os.path.join(RootDir,date),DefaultDirMode)
+		imagefile=os.path.join(RootDir,date,heure)
 		ToProcess=os.path.join(date,heure)
 		if os.path.isfile(imagefile):
 			print "Problème ... %s existe déja "%i
 			s=0
-			for j in os.listdir(os.path.join(curdir,date)):
+			for j in os.listdir(os.path.join(RootDir,date)):
 				if j.find(heure[:-4])==0:s+=1
 			ToProcess=os.path.join(date,heure[:-4]+"-%s.jpg"%s)
-			imagefile=os.path.join(curdir,ToProcess)
-		shutil.move(os.path.join(curdir,i),imagefile)
+			imagefile=os.path.join(RootDir,ToProcess)
+		shutil.move(os.path.join(RootDir,i),imagefile)
 		#os.chmod(imagefile,DefaultFileMode)
 		if autorotate :
 			photo(imagefile).autorotate()
@@ -825,13 +818,10 @@ class parser:
 		#print self.imagelist
 		return self.imagelist
 
-def WARNING():
-	"""print a warning before starting the program"""
-	txt="Selector travaille sur toutes les photos du répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger !!!\nVous avez lancé selector sur un repertoire ne ressemblant pas à une archive selector : \n %s \n \nÊtes vous sur de vouloir continuer ?"%curdir
-	dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_WARNING,gtk.BUTTONS_OK_CANCEL,txt.decode("latin1"))
-	result=dialog.run()
-	dialog.destroy()
-	if result==gtk.RESPONSE_CANCEL: sys.exit(0)
+
+
+
+
 
 class SplashScreen:
 	"""lauches a splash sceen during the processing"""
@@ -858,16 +848,71 @@ class SplashScreen:
 		del self.xml
 		gc.collect()
 
-def main():
-	"""well this is tha main program"""
-	if not os.path.isfile(Selected_file):
-		WARNING()
-		f=open(Selected_file,"w")
-		f.close()
-	AF,first=RangeTout(curdir)
-	interface(AF,first)
-	
+
+
+#def WARNING():
+#	"""print a warning before starting the program"""	
+#	txt="Selector travaille sur toutes les photos du répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger !!!\nVous avez lancé selector sur un repertoire ne ressemblant pas à une archive selector : \n %s \n \nÊtes vous sur de vouloir continuer ?"%curdir
+#	dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_WARNING,gtk.BUTTONS_OK_CANCEL,txt.decode("latin1"))
+#	result=dialog.run()
+#	dialog.destroy()
+#	if result==gtk.RESPONSE_CANCEL: sys.exit(0)
+
+
+class WarningSc:
+	"""print a warning before starting the program and allows to chang the working directory"""
+	def __init__(self,directory):
+		self.directory=directory
+		self.quit=True
+		self.xml=gtk.glade.XML(interfaceWarning)
+		self.xml.signal_connect('on_dialog_warning_destroy',self.destroy)
+#		self.xml.signal_connect('on_Select_clicked',self.filer)
+		self.xml.signal_connect('on_cancel_clicked',self.destroy)
+		self.xml.signal_connect('on_ok_clicked',self.continu)
+		self.xml.signal_connect('on_dirname_editing_done',self.continu)
+		self.xml.get_widget("dirname").set_text(directory)		
+		gtk.main()
+	def continu(self,*args):
+		"""just distroy the window and goes on ...."""
+		self.directory=self.xml.get_widget("dirname").get_text().strip()
+		gtk.main_quit()
+		self.quit=False
+		self.xml.get_widget("dialog-warning").destroy()
+		while gtk.events_pending():gtk.main_iteration()
+	def destroy(self,*args):
+		"""destroy clicked by user -> quit the program"""
+		if self.quit:
+			sys.exit(0)
 
 if __name__=='__main__':
-	main()
+	global curdir,Selected_file,Trashdir,SelectedDir
+	curdir=False
+	if len(sys.argv)>1: 
+		for arg in sys.argv[1:]:
+			if arg[0]=="-":
+				if arg[1].lower()=="h":
+					print "Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n"
+					sys.exit(0)
+				if arg.lower()=="-noautorotate":autorotate=False
+				if arg.lower()=="-nowarning":StartWarning=False			
+			else:
+				curdir=os.path.abspath(arg)
+	if curdir==False : curdir=os.getcwd()
+	
+	Selected_file=os.path.join(curdir,Selected_save)
+	if not os.path.isfile(Selected_file):
+		W=WarningSc(curdir)
+		curdir=W.directory
+		del W
+		Selected_file=os.path.join(curdir,Selected_save)
+	Trashdir=os.path.join(curdir,Trash)
+	SelectedDir=os.path.join(curdir,Selected)
+	
+	if not os.path.isfile(Selected_file):
+		f=open(Selected_file,"w")
+		f.close()
+
+
+	AF,first=RangeTout(curdir)
+	interface(AF,first)
 
