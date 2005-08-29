@@ -64,10 +64,11 @@ clef={
 if os.name == 'nt': #sys.platform == 'win32':
 	installdir="c:\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
-	
+	gimpexe="gimp-remote "
 elif os.name == 'posix':
 	installdir='/usr/share/imagizer'
 	exiftran=os.path.join(installdir,"exiftran ")
+	gimpexe="gimp-remote "
 else:
 	raise "Your platform does  not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
@@ -243,7 +244,7 @@ class interface:
 		self.xml.signal_connect('on_executer1_activate',self.run)
 		self.xml.signal_connect('on_poubelle_activate',self.poubelle)
 		self.xml.signal_connect('on_Poubelle_clicked',self.poubelle)
-
+		self.xml.signal_connect('on_Gimp_clicked',self.gimp)
 		
 		self.xml.signal_connect('on_precedentI_activate',self.previous)
 		self.xml.signal_connect('on_suivantI_activate',self.next)
@@ -355,6 +356,11 @@ class interface:
 		self.image.Trash()
 		self.CurIm=self.CurIm%len(self.AllJpegs)
 		self.ShowImage()
+
+	def gimp(self,*args):
+		"""Edit the current file with the Gimp"""
+		self.settitle()
+		os.system(gimpexe+os.path.join(curdir,self.AllJpegs[self.CurIm]))
 
 	def select(self,*args):
 		"""Select or unselect the image"""
