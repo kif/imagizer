@@ -62,7 +62,7 @@ clef={
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir="c:\\Program Files\\Imagizer"
+	installdir="c:\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	
 elif os.name == 'posix':
@@ -142,6 +142,7 @@ class photo:
 				self.LoadPIL()
 				self.f.thumbnail((size,size),Quality)
 				self.f.save(thumbname)
+			os.chmod(thumbname,DefaultFileMode)
 
 	
 	def Rotate(self,angle=0):
@@ -576,10 +577,10 @@ def makedir(filen):
         """creates the tree structure for the file"""
         dire=os.path.dirname(filen)
         if os.path.isdir(dire):
-                os.mkdir(filen)
+                mkdir(filen)
         else:
                 makedir(dire)
-                os.mkdir(filen)
+                mkdir(filen)
 				
 def MessageError(text,Message=gtk.MESSAGE_ERROR):
         dialog = gtk.MessageDialog(None, 0, Message,gtk.BUTTONS_OK,text)
@@ -610,7 +611,7 @@ def ProcessSelected(List):
 	avcmt=SplashScreen()
 	avcmt.xml.get_widget("splash").set_title("Un moment...")
 	avcmt.setbar(0,"copie des fichiers existants")
-	if not os.path.isdir(SelectedDir): os.mkdir(SelectedDir)
+	if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
 	for day in os.listdir(SelectedDir):
 		for File in os.listdir(os.path.join(SelectedDir,day)):
@@ -635,6 +636,7 @@ def ProcessSelected(List):
 		if not os.path.exists(dest):
 			print "copie de %s "%(File)
 			shutil.copy(src,dest)
+			os.chmod(dest,DefaultFileMode)
 		else :
 			print "%s existe déja"%(dest)
 ########finaly recreate the structure with pages########################
@@ -651,8 +653,7 @@ def ProcessSelected(List):
 			pages=1+(len(files)-1)/NbrPerPage
 			for i in range(1, pages+1):
 				folder=os.path.join(pathday,PagePrefix+str(i))
-				if not os.path.isdir(folder):
-					os.mkdir(folder)
+				if not os.path.isdir(folder): mkdir(folder)
 			for j in range(len(files)):
 				i=1+(j)/NbrPerPage
 				filename=os.path.join(pathday,PagePrefix+str(i),files[j])
@@ -672,12 +673,12 @@ def ScaleImage(filename):
 	rootdir=os.path.dirname(filename)
 	scaledir=os.path.join(rootdir,scaled)
 	thumbdir=os.path.join(rootdir,thumb)
-	if not os.path.isdir(scaledir) : os.mkdir(scaledir)
-	if not os.path.isdir(thumbdir) : os.mkdir(thumbdir)
+	if not os.path.isdir(scaledir) : mkdir(scaledir)
+	if not os.path.isdir(thumbdir) : mkdir(thumbdir)
 	I=photo(filename)
-	I.SaveThumb(os.path.join(scaledir,os.path.basename(filename))[:-4]+"--%s.jpg"%scaled,ScaledSize,Quality=2,AllowExif=False)
-	I.SaveThumb(os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%thumb,ThumbSize,Quality=1,AllowExif=True)
-
+	I.SaveThumb(os.path.join(scaledir,os.path.basename(filename))[:-4]+"--%s.jpg"%scaled,ScaledSize,Quality=2,AllowExif=False)	
+	I.SaveThumb(os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%thumb,ThumbSize,Quality=1,AllowExif=False)
+	
 def RangeTout(RootDir):
 	"""moves all the JPEG files to a directory named from their day and with the nameaccording to the time"""
 	sc=SplashScreen()
@@ -716,9 +717,7 @@ def RangeTout(RootDir):
 		except:
 			date=time.strftime("%Y-%m-%d",time.gmtime(os.path.getctime(os.path.join(RootDir,i))))
 			heure=latin1_to_ascii("%s-%s.jpg"%(time.strftime("%Hh%Mm%S",time.gmtime(os.path.getctime(os.path.join(RootDir,i)))),re.sub("/","-",re.sub(" ","_",os.path.splitext(i)[0]))))
-		if not (os.path.isdir(os.path.join(RootDir,date))) : 
-			os.mkdir(os.path.join(RootDir,date))
-			os.chmod(os.path.join(RootDir,date),DefaultDirMode)
+		if not (os.path.isdir(os.path.join(RootDir,date))) : mkdir(os.path.join(RootDir,date))
 		imagefile=os.path.join(RootDir,date,heure)
 		ToProcess=os.path.join(date,heure)
 		if os.path.isfile(imagefile):
@@ -883,6 +882,12 @@ class WarningSc:
 		"""destroy clicked by user -> quit the program"""
 		if self.quit:
 			sys.exit(0)
+
+
+def mkdir(filename,mode=DefaultDirMode):
+	os.mkdir(filename)
+	os.chmod(filename,mode)
+
 
 if __name__=='__main__':
 	global curdir,Selected_file,Trashdir,SelectedDir
