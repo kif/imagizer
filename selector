@@ -39,7 +39,7 @@ Selected_save=".selected-photos"
 Exts=[".jpg", ".jpeg"]
 scaled="scaled"
 thumb="thumb"
-autorotate=True
+autorotate=False
 DefaultMode="664"
 
 	
@@ -96,7 +96,7 @@ for i in list(DefaultMode):
 	DefaultFileMode*=8
 	DefaultFileMode+=int(i)
 
-DefaultDirMode=DefaultFileMode+73 #+111 en octal ...
+DefaultDirMode=DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
 
 
 
