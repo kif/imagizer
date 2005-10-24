@@ -1040,7 +1040,7 @@ class Image:
 	    try:
 	        self._comment =  comment.encode("latin-1")
 	    except:
-                self._comment =  self._filename
+                self._comment =  splitext(self._filename)[0]
 
         if data:
             self._exif = data

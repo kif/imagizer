@@ -454,6 +454,7 @@ class interface:
 	def previousJ(self,*args):
 		"""Switch to the first image of the previous day"""	
 		self.settitle()
+		if self.CurIm==0: return
 		jour=os.path.dirname(self.AllJpegs[self.CurIm])
 		for i in range(self.CurIm-1,-1,-1):
 			jc=os.path.dirname(self.AllJpegs[i])
