@@ -1037,7 +1037,10 @@ class Image:
      #   print comment
 
         if comment:
-            self._comment =  comment.encode("latin-1")
+	    try:
+	        self._comment =  comment.encode("latin-1")
+	    except:
+                self._comment =  self._filename
 
         if data:
             self._exif = data
