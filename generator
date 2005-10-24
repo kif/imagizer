@@ -1037,9 +1037,10 @@ class Image:
      #   print comment
 
         if comment:
-	    try:
-	        self._comment =  comment.encode("latin-1")
-	    except:
+            try:
+                self._comment =  comment.encode("latin-1")
+            except:
+                sys.stderr.write("The title of %s is not encodable in latin-1\n"%exiffn)
                 self._comment =  splitext(self._filename)[0]
 
         if data:
