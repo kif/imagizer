@@ -74,10 +74,7 @@ else:
 	sys.exit(1)
 
 sys.path.append(installdir)	
-interfaceglade=os.path.join(installdir,"interface.glade")
-interfaceSplash=os.path.join(installdir,"splash.glade")
-interfaceWarning=os.path.join(installdir,"warning.glade")
-interfacefiler=os.path.join(installdir,"filer.glade")
+unifiedglade=os.path.join(installdir,"selector.glade")
 import EXIF
 
 
@@ -228,7 +225,7 @@ class interface:
 				self.Selected.remove(i)
 		self.CurIm=first
 		print "Initialisation de l'interface graphique ..."
-		self.xml=gtk.glade.XML(interfaceglade)
+		self.xml=gtk.glade.XML(unifiedglade,root="Principale")
 		self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"logo.png")))
 		self.ShowImage()
 		self.xml.signal_connect('on_Principale_destroy',self.destroy)
@@ -832,7 +829,7 @@ class parser:
 class SplashScreen:
 	"""lauches a splash sceen during the processing"""
 	def __init__(self):
-		self.xml=gtk.glade.XML(interfaceSplash)
+		self.xml=gtk.glade.XML(unifiedglade,root="splash")
 		self.xml.get_widget("image").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"Splash.png")))
 		self.pb=self.xml.get_widget("progress")
 		self.xml.get_widget("splash").show()
@@ -870,7 +867,7 @@ class WarningSc:
 	def __init__(self,directory):
 		self.directory=directory
 		self.quit=True
-		self.xml=gtk.glade.XML(interfaceWarning)
+		self.xml=gtk.glade.XML(unifiedglade,root="dialog-warning")
 		self.xml.signal_connect('on_dialog_warning_destroy',self.destroy)
 #		self.xml.signal_connect('on_Select_clicked',self.filer)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)

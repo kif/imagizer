@@ -7,7 +7,7 @@ install:
 	install -m 755 generator $(DESTDIR)/bin
 	install -m 755 selector $(DESTDIR)/bin
 	install -m 644 *.png $(DESTDIR)/share/imagizer
-	install -m 644 *.glade $(DESTDIR)/share/imagizer
+	install -m 644 selector.glade $(DESTDIR)/share/imagizer
 	install -m 644 EXIF.py $(DESTDIR)/share/imagizer
 	install -m 644 README.txt $(DESTDIR)/share/doc/imagizer
 	install -m 644 favicon.ico $(DESTDIR)/share/imagizer
