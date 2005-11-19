@@ -994,11 +994,11 @@ def process_file(file, debug=0):
             if hdata == '\xFF\xFE': #jpeg comment
                 data = file.read(2)
                 length = ord(data[0])*256+ord(data[1])
-				try:
+                try:
                     comment = file.read(length-2).decode("UTF8")
                 except:
 				    comment = file.read(length-2).decode("latin-1")
-				if comment[-1] == "\x00":
+                if comment[-1] == "\x00":
                     comment = comment[:-1]
                 is_comment = 1
             elif hdata == '\xFF\xE1': # exif header
