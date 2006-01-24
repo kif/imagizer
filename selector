@@ -42,6 +42,10 @@ thumb="thumb"
 autorotate=False
 DefaultMode="664"
 
+JPEGprogression=1
+JPEGquality=75
+JPEGoptimize=1
+
 	
 Interpolation=gtk.gdk.INTERP_TILES
 #gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
@@ -139,7 +143,7 @@ class photo:
 			else:
 				self.LoadPIL()
 				self.f.thumbnail((size,size),Quality)
-				self.f.save(thumbname)
+				self.f.save(thumbname,progressive=JPEGprogression,quality=JPEGquality,optimize=JPEGoptimize)
 			os.chmod(thumbname,DefaultFileMode)
 
 	
@@ -681,7 +685,7 @@ def ScaleImage(filename):
 	if not os.path.isdir(thumbdir) : mkdir(thumbdir)
 	I=photo(filename)
 	I.SaveThumb(os.path.join(scaledir,os.path.basename(filename))[:-4]+"--%s.jpg"%scaled,ScaledSize,Quality=2,AllowExif=False)	
-	I.SaveThumb(os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%thumb,ThumbSize,Quality=1,AllowExif=False)
+	I.SaveThumb(os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%thumb,ThumbSize,Quality=1,AllowExif=True)
 	
 def RangeTout(RootDir):
 	"""moves all the JPEG files to a directory named from their day and with the nameaccording to the time"""
