@@ -23,8 +23,7 @@
 
 
 import pygtk ; pygtk.require('2.0')
-import os,sys,string,Image,shutil,time,re,gtk,gtk.glade,gc
-
+import os,sys,string,Image,shutil,time,re,gtk,gtk.glade,gc,ImageFile
 
 
 
@@ -45,6 +44,8 @@ DefaultMode="664"
 JPEGprogression=1
 JPEGquality=75 #Not in use at the moment.... need some more debug
 JPEGoptimize=1
+#this is work around for the optimize-bug in PIL, max size=1M fro thumb & scaled
+ImageFile.MAXBLOCK = 1000000 # default is 64k
 
 	
 Interpolation=gtk.gdk.INTERP_TILES
