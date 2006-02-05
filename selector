@@ -43,7 +43,7 @@ autorotate=False
 DefaultMode="664"
 
 JPEGprogression=1
-JPEGquality=75
+JPEGquality=75 #Not in use at the moment.... need some more debug
 JPEGoptimize=1
 
 	
@@ -143,7 +143,9 @@ class photo:
 			else:
 				self.LoadPIL()
 				self.f.thumbnail((size,size),Quality)
-				self.f.save(thumbname,progressive=JPEGprogression,quality=JPEGquality,optimize=JPEGoptimize)
+				self.f.save(thumbname,progressive=JPEGprogression,optimize=JPEGoptimize)
+#Should check why optin quality makes the process crash ....			
+#				self.f.save(thumbname)
 			os.chmod(thumbname,DefaultFileMode)
 
 	
