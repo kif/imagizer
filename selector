@@ -6,6 +6,7 @@
 # version 0.3 : 28/10/2004
 # version 0.4 : 28/10/2004
 # version 1.1 : 11/01/2005
+# version 1.2 : 13/02/2006 : includes a configuration file
 # Liste des dépendances : python, PIL, Glade-2
 # Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
 #
@@ -22,33 +23,60 @@
 # - la creation de splash-sceens 
 
 
-import pygtk ; pygtk.require('2.0')
-import os,sys,string,Image,shutil,time,re,gtk,gtk.glade,gc,ImageFile
+import os,sys,string,shutil,time,re,gc
+
+try:
+	import Image,ImageFile
+except:
+	raise "Selector needs PIL: Python Imagin Library\n PIL is available from http://www.pythonware.com/products/pil/"
+
+try:
+	import pygtk ; pygtk.require('2.0')
+	import gtk,gtk.glade
+except:
+	raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
 
 
+#Default options : will be overwritten by configuration file
+Thumbnails={
+	"Size":160,
+	"Suffix": "thumb",
+	"Interpolation":1,
+	"Progressive":False,
+	"Optimize":False,
+	"ExifExtraction":True
+}
+ScaledImages={
+	"Size":800,
+	"Suffix": "scaled",
+	"Interpolation":2,
+	"Progressive":False,
+	"Optimize":False,
+	"ExifExtraction":False
+}
 
-ThumbSize=160
 ScreenSize=600
-ScaledSize=800
 NbrPerPage=20
 PagePrefix="page"
 Trash="Trash"
 Selected="Selected"
 Selected_save=".selected-photos"
-Exts=[".jpg", ".jpeg"]
-scaled="scaled"
-thumb="thumb"
-autorotate=False
+Exts=[".jpg", ".jpeg",".jpe",".jfif"]
+AutoRotate=False
 DefaultMode="664"
+DefaultRepository=os.getcwd()
+Interpolation=1
 
-JPEGprogression=1
-JPEGquality=75 #Not in use at the moment.... need some more debug
-JPEGoptimize=1
-#this is work around for the optimize-bug in PIL, max size=1M fro thumb & scaled
-ImageFile.MAXBLOCK = 1000000 # default is 64k
+DefaultFileMode=int(DefaultMode,8)
+DefaultDirMode=DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
 
-	
-Interpolation=gtk.gdk.INTERP_TILES
+#this is work around for the optimize-bug in PIL, The initial buffer size is 64k
+kpix= 3*ScaledImages["Size"]**2/4000
+if kpix>64:
+	ImageFile.MAXBLOCK = 1000*kpix 
+
+
+gtkInterpolation=[gtk.gdk.INTERP_NEAREST,gtk.gdk.INTERP_TILES,gtk.gdk.INTERP_BILINEAR,gtk.gdk.INTERP_HYPER]	
 #gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
 #gtk.gdk.INTERP_TILES	This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
 #gtk.gdk.INTERP_BILINEAR	Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
@@ -81,25 +109,6 @@ else:
 sys.path.append(installdir)	
 unifiedglade=os.path.join(installdir,"selector.glade")
 import EXIF
-
-
-
-
-
-
-
-
-
-
-
-#default mode  is in octal ... here we convert octal -> decimal
-DefaultFileMode=0
-for i in list(DefaultMode):
-	DefaultFileMode*=8
-	DefaultFileMode+=int(i)
-
-DefaultDirMode=DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
-
 
 
 class photo:
@@ -206,7 +215,7 @@ class photo:
 		if R<1:
 			nx=int(R*self.x)
 			ny=int(R*self.y)
-			scaled_buf=pixbuf.scale_simple(nx,ny,Interpolation)
+			scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[Interpolation])
 		else :
 			scaled_buf=pixbuf
 		return scaled_buf
@@ -740,7 +749,7 @@ def RangeTout(RootDir):
 			imagefile=os.path.join(RootDir,ToProcess)
 		shutil.move(os.path.join(RootDir,i),imagefile)
 		#os.chmod(imagefile,DefaultFileMode)
-		if autorotate :
+		if AutoRotate :
 			photo(imagefile).autorotate()
 		AllreadyDone.append(ToProcess)
 		NewFiles.append(ToProcess)
@@ -791,18 +800,14 @@ def latin1_to_ascii (unicrap):
         0xd7:'*', 0xf7:'/'
         }
 
-#    r = ''
     r=[]
     for i in unicrap:
         if xlate.has_key(ord(i)):
-#            r += xlate[ord(i)]
 	    r.append(xlate[ord(i)])
         elif ord(i) >= 0x80:
             pass
         else:
-#            r += str(i)
 	    r.append(str(i))
-#    return r
     return "".join(r)
 
 class parser:
@@ -860,13 +865,6 @@ class SplashScreen:
 
 
 
-#def WARNING():
-#	"""print a warning before starting the program"""	
-#	txt="Selector travaille sur toutes les photos du répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger !!!\nVous avez lancé selector sur un repertoire ne ressemblant pas à une archive selector : \n %s \n \nÊtes vous sur de vouloir continuer ?"%curdir
-#	dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_WARNING,gtk.BUTTONS_OK_CANCEL,txt.decode("latin1"))
-#	result=dialog.run()
-#	dialog.destroy()
-#	if result==gtk.RESPONSE_CANCEL: sys.exit(0)
 
 
 class WarningSc:
@@ -900,9 +898,115 @@ def mkdir(filename,mode=DefaultDirMode):
 	os.chmod(filename,mode)
 
 
+
+def PrintConfig():
+	print "#"*80
+	print "Size on the images on the Screen:%s"%ScreenSize
+	print "Downsampling quality [0..3]:\t %s"%Interpolation
+	print "Page prefix:\t\t\t %s"%PagePrefix
+	print "Number of images per page:\t %s"%NbrPerPage
+	print "Trash directory:\t\t %s"%TrashDirectory
+	print "Selected directory:\t\t %s"%SelectedDirectory
+	print "Selected images file:\t\t %s"%Selected_save
+	print "Use Exif for Auto-Rotate:\t %s"%AutoRotate
+	print "Default mode for files (octal):\t %o"%DefaultFileMode
+	print "JPEG extensions:\t\t %s"%Extensions
+	print "Default photo repository:\t %s"%DefaultRepository
+	print "**** Scaled images configuration ****"
+	print "Size:\t\t\t\t %s"%ScaledImages["Size"]
+	print "Suffix:\t\t\t\t %s"%ScaledImages["Suffix"]
+	print "Interpolation Quality:\t\t %s"%ScaledImages["Interpolation"]
+	print "Progressive JPEG:\t\t %s"%ScaledImages["Progressive"]
+	print "Optimized JPEG:\t\t\t %s"%ScaledImages["Optimize"]
+	print "Allow Exif extraction:\t\t %s"%ScaledImages["ExifExtraction"]
+	print "**** Thumbnail images configuration ****"
+	print "Size:\t\t\t\t %s"%Thumbnails["Size"]
+	print "Suffix:\t\t\t\t %s"%Thumbnails["Suffix"]
+	print "Interpolation Quality:\t\t %s"%Thumbnails["Interpolation"]
+	print "Progressive JPEG:\t\t %s"%Thumbnails["Progressive"]
+	print "Optimized JPEG:\t\t\t %s"%Thumbnails["Optimize"]
+	print "Allow Exif extraction:\t\t %s"%Thumbnails["ExifExtraction"]
+
+def SaveConfig(filename):
+	"""saves the default options, those are global variables"""
+	txt="[Selector]\n"
+	txt+="#Size on the images on the Screen, by default\nScreenSize: %s \n\n"%ScreenSize
+	txt+="#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]\nInterpolation: %s \n\n"%Interpolation
+	txt+="#Page prefix (used when there are too many images per day to fit on one web page)\nPagePrefix= %s \n\n"%PagePrefix
+	txt+="#Maximum number of images per web page\nNbrPerPage= %s\n\n"%NbrPerPage
+	txt+="#Trash sub-directory\nTrashDirectory: %s \n\n"%TrashDirectory
+	txt+="#Selected/processed images sub-directory\nSelectedDirectory: %s \n\n"%SelectedDirectory
+	txt+="#File containing the list of selected but unprocessed images\nSelected_save: %s \n\n"%Selected_save
+	txt+="#Use Exif data for auto-rotation of the images (canon cameras mainly)\nAutoRotate: %s\n\n"%AutoRotate
+	txt+="#Default mode for files (in octal)\nDefaultFileMode: %o\n\n"%DefaultFileMode
+	txt+="#Default JPEG extensions\nExtensions: "
+	for i in Extensions: txt+=i+" "
+	txt+="\n\n"
+	txt+="#Default photo repository\nDefaultRepository: %s \n\n"%DefaultRepository
+	for i in ["ScaledImages","Thumbnails"]:
+		txt+="[%s]\n"%i
+		j=eval(i)
+		txt+="#%s size\nSize: %s \n\n"%(i,j["Size"])
+		txt+="#%s suffix\nSuffix: %s \n\n"%(i,j["Suffix"])
+		txt+="#%s downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias] )\nInterpolation: %s \n\n"%(i,j["Interpolation"])
+		txt+="#%s progressive JPEG files\nProgressive: %s \n\n"%(i,j["Progressive"])
+		txt+="#%s optimized JPEG (2 pass encoding)\nOptimize: %s \n\n"%(i,j["Optimize"])
+		txt+="#%s image can be obtained by Exif extraction ?\nExifExtraction: %s \n\n"%(i,j["ExifExtraction"])
+	w=open(filename,"w")
+	w.write(txt)
+	w.close()
+	
+def LoadConfig(filename):
+	"""retrieves the the default options, those are global variables"""
+	global ScreenSize,Interpolation,PagePrefix,NbrPerPage,TrashDirectory,SelectedDirectory,Selected_save,AutoRotate,DefaultFileMode,DefaultDirMode,Extensions,DefaultRepository,Thumbnails,SelectedImages
+	import ConfigParser
+	config = ConfigParser.ConfigParser()
+	config.read(["/etc/imagizer.conf",filename])
+	for i in config.items("Selector"):
+		j=i[0]
+		if j=="ScreenSize".lower():ScreenSize=int(i[1])
+		elif j=="Interpolation".lower():Interpolation=int(i[1])
+		elif j=="PagePrefix".lower():PagePrefix=i[1]
+		elif j=="NbrPerPage".lower():NbrPerPage=int(i[1])
+		elif j=="TrashDirectory".lower():TrashDirectory=i[1]
+		elif j=="SelectedDirectory".lower():SelectedDirectory=i[1]
+		elif j=="Selected_save".lower():Selected_save=i[1]
+		elif j=="AutoRotate".lower():AutoRotate=config.getboolean("Selector","AutoRotate")
+		elif j=="DefaultFileMode".lower():
+			DefaultFileMode=int(i[1],8)
+			DefaultDirMode=DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
+		elif j=="Extensions".lower(): Extensions=i[1].split()
+		elif j=="DefaultRepository".lower():DefaultRepository=i[1]
+		else: print "unknown key "+j
+	for k in ["ScaledImages","Thumbnails"]:
+		try:
+			dico=eval(k)
+		except:
+			dico={}
+		for i in config.items(k):
+			j=i[0]
+			if j=="Size".lower():dico["Size"]=int(i[1])
+			elif j=="Suffix".lower():dico["Suffix"]=i[1]
+			elif j=="Interpolation".lower():dico["Interpolation"]=int(i[1])
+			elif j=="Progressive".lower():dico["Progressive"]=config.getboolean(k,"Progressive")
+			elif j=="Optimize".lower():dico["Optimize"]=config.getboolean(k,"Optimize")
+			elif j=="ExifExtraction".lower():dico["ExifExtraction"]=config.getboolean(k,"ExifExtraction")
+		exec(k+"=dico")
+	#this is work around for the optimize-bug in PIL, The initial buffer size is 64k
+	kpix= 3*ScaledImages["Size"]**2/4000
+	if kpix>64:
+		ImageFile.MAXBLOCK = 1000*kpix 
+
+
+
+
+
+
 if __name__=='__main__':
 	global curdir,Selected_file,Trashdir,SelectedDir
-	curdir=False
+	LoadConfig(os.path.join(os.getenv("HOME"),".imagizer"))
+	PrintConfig()	
+	curdir=DefaultRepository
 	if len(sys.argv)>1: 
 		for arg in sys.argv[1:]:
 			if arg[0]=="-":
@@ -913,7 +1017,6 @@ if __name__=='__main__':
 				if arg.lower()=="-nowarning":StartWarning=False			
 			else:
 				curdir=os.path.abspath(arg)
-	if curdir==False : curdir=os.getcwd()
 	
 	Selected_file=os.path.join(curdir,Selected_save)
 	if not os.path.isfile(Selected_file):

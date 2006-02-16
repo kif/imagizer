@@ -11,6 +11,7 @@ install:
 	install -m 644 EXIF.py $(DESTDIR)/share/imagizer
 	install -m 644 README.txt $(DESTDIR)/share/doc/imagizer
 	install -m 644 favicon.ico $(DESTDIR)/share/imagizer
+	install -m 644 imagizer.conf /etc
 	install -m 755 bin/exiftran $(DESTDIR)/share/imagizer
 	cp -R doc/* $(DESTDIR)/share/doc/imagizer
 	chmod -R a+rX $(DESTDIR)/share/doc/imagizer
