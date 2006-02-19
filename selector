@@ -36,7 +36,6 @@ try:
 except:
 	raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
 
-
 #Default options : will be overwritten by configuration file
 Thumbnails={
 	"Size":160,
@@ -100,10 +99,14 @@ if os.name == 'nt': #sys.platform == 'win32':
 	installdir="c:\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
+	ConfFile=os.path.join(installdir,".imagizer")
+	GlobalConfFile
 elif os.name == 'posix':
 	installdir='/usr/share/imagizer'
 	exiftran=os.path.join(installdir,"exiftran ")
 	gimpexe="gimp-remote "
+	ConfFile=os.path.join(os.getenv("HOME"),".imagizer")
+	GlobalConfFile="c:\\imagizer.conf"
 else:
 	raise "Your platform does  not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
@@ -242,8 +245,47 @@ class interface:
 		self.CurIm=first
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(unifiedglade,root="Principale")
+		self.xml.get_widget("Principale").resize(ScreenSize+323,ScreenSize)
 		self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"logo.png")))
+		if AutoRotate:
+			i=1
+		else:
+			i=0
+		self.xml.get_widget("Autorotate").set_active(i)
+		if ScreenSize==300:
+			self.xml.get_widget("t300").set_active(1)
+		elif ScreenSize==600:
+			self.xml.get_widget("t600").set_active(1)
+		elif ScreenSize==900:
+			self.xml.get_widget("t900").set_active(1)
+		else:
+			self.xml.get_widget("tauto").set_active(1)
+		
+		if NbrPerPage == 9:
+			self.xml.get_widget("9PerPage").set_active(1)
+		elif NbrPerPage == 12:
+			self.xml.get_widget("12PerPage").set_active(1)
+		elif NbrPerPage == 16:
+			self.xml.get_widget("16PerPage").set_active(1)
+		elif NbrPerPage == 20:
+			self.xml.get_widget("20PerPage").set_active(1)
+		elif NbrPerPage == 25:
+			self.xml.get_widget("25PerPage").set_active(1)
+		elif NbrPerPage == 30:
+			self.xml.get_widget("30PerPage").set_active(1)
+			
+		if Interpolation == 0:
+			self.xml.get_widget("VLowQ").set_active(1)
+		elif Interpolation == 1:
+			self.xml.get_widget("LowQ").set_active(1)
+		elif Interpolation == 2:
+			self.xml.get_widget("HiQ").set_active(1)
+		elif Interpolation == 3:
+			self.xml.get_widget("VHiQ").set_active(1)
+		
+		self.flush_event_queue()
 		self.ShowImage()
+		
 		self.xml.signal_connect('on_Principale_destroy',self.destroy)
 		self.xml.signal_connect('on_suivant_clicked',self.next)
 		self.xml.signal_connect('on_precedant_clicked',self.previous)
@@ -281,6 +323,23 @@ class interface:
 		self.xml.signal_connect('on_premierNS_activate',self.firstNS)
 		self.xml.signal_connect('on_dernierNS_activate',self.lastNS)
 
+		self.xml.signal_connect('on_enregistrerP_activate',self.SavePref)
+		self.xml.signal_connect('on_Autorotate_activate',self.DefAutoRotate)
+		self.xml.signal_connect('on_tauto_activate',self.SizeCurrent)
+		self.xml.signal_connect('on_t300_activate',self.Size300)
+		self.xml.signal_connect('on_t600_activate',self.Size600)
+		self.xml.signal_connect('on_t900_activate',self.Size900)
+		self.xml.signal_connect('on_VLowQ_activate',self.SetInterpol0)
+		self.xml.signal_connect('on_LowQ_activate',self.SetInterpol1)
+		self.xml.signal_connect('on_HiQ_activate',self.SetInterpol2)
+		self.xml.signal_connect('on_VHiQ_activate',self.SetInterpol3)
+		self.xml.signal_connect('on_9PerPage_activate',self.Set9PerPage)
+		self.xml.signal_connect('on_12PerPage_activate',self.Set12PerPage)
+		self.xml.signal_connect('on_16PerPage_activate',self.Set16PerPage)
+		self.xml.signal_connect('on_20PerPage_activate',self.Set20PerPage)
+		self.xml.signal_connect('on_25PerPage_activate',self.Set25PerPage)
+		self.xml.signal_connect('on_30PerPage_activate',self.Set30PerPage)
+		
 		
 		self.xml.signal_connect('on_enregistrerS_activate',self.SaveSelection)
 		self.xml.signal_connect('on_chargerS_activate',self.LoadSelection)
@@ -290,6 +349,12 @@ class interface:
 		
 
 		gtk.main()
+
+	def flush_event_queue(self):
+		"""Updates the GTK GUI before comming back to the gtk.main()"""
+    	while gtk.events_pending():
+        	gtk.main_iteration()
+
 
 	def settitle(self):
 		"""Set the new title of the image"""
@@ -567,7 +632,85 @@ class interface:
 				self.ShowImage()
 				return
 
+	def SavePref(self,*args):
+		"""Preferences,save clicked. now we save the preferences in the file"""
+		SaveConfig(ConfFile)
 
+	def DefAutoRotate(self,*args):
+		"""Set the autorotate flag"""
+		global AutoRotate
+		AutoRotate=self.xml.get_widget("Autorotate").get_active()
+	
+	
+	def SizeCurrent(self,*args):
+		"""reads the current size of the image and defines it as default for next-time"""	
+		X,Y=self.xml.get_widget("Principale").get_size()
+		global ScreenSize
+		ScreenSize=max(X-323,Y)
+	def Size300(self,*args):
+		"""reads the current size of the image and defines it as default for next-time"""	
+		X,Y=self.xml.get_widget("Principale").get_size()
+		global ScreenSize
+		ScreenSize=300
+		self.xml.get_widget("Principale").resize(ScreenSize+323,ScreenSize)
+	def Size600(self,*args):
+		"""reads the current size of the image and defines it as default for next-time"""	
+		X,Y=self.xml.get_widget("Principale").get_size()
+		global ScreenSize
+		ScreenSize=600
+		self.xml.get_widget("Principale").resize(ScreenSize+323,ScreenSize)
+	def Size900(self,*args):
+		"""reads the current size of the image and defines it as default for next-time"""	
+		X,Y=self.xml.get_widget("Principale").get_size()
+		global ScreenSize
+		ScreenSize=900
+		self.xml.get_widget("Principale").resize(ScreenSize+323,ScreenSize)
+		
+	def	SetInterpol0(self,*args):
+		"""set interpolation level to nearest"""
+		global Interpolation
+		Interpolation=0
+	def	SetInterpol1(self,*args):
+		"""set interpolation level to tiles"""
+		global Interpolation
+		Interpolation=1
+	def	SetInterpol2(self,*args):
+		"""set interpolation level to bilinear"""
+		global Interpolation
+		Interpolation=2
+	def	SetInterpol3(self,*args):
+		"""set interpolation level to hyperbolic"""
+		global Interpolation
+		Interpolation=3
+
+	def Set30PerPage(self,*args):
+		"""set 30 images per web-page"""
+		global NbrPerPage
+		NbrPerPage=30
+	def Set25PerPage(self,*args):
+		"""set 25 images per web-page"""
+		global NbrPerPage
+		NbrPerPage=25
+	def Set20PerPage(self,*args):
+		"""set 20 images per web-page"""
+		global NbrPerPage
+		NbrPerPage=20
+	def Set16PerPage(self,*args):
+		"""set 16 images per web-page"""
+		global NbrPerPage
+		NbrPerPage=16
+	def Set12PerPage(self,*args):
+		"""set 12 images per web-page"""
+		global NbrPerPage
+		NbrPerPage=12
+	def Set9PerPage(self,*args):
+		"""set  9 images per web-page"""
+		global NbrPerPage
+		NbrPerPage= 9
+		
+		
+		
+		
 
 # # # # # # fin de la classe interface graphique # # # # # #
 def SaveSelected(List):
@@ -938,10 +1081,10 @@ def PrintConfig():
 def SaveConfig(filename):
 	"""saves the default options, those are global variables"""
 	txt="[Selector]\n"
-	txt+="#Size on the images on the Screen, by default\nScreenSize: %s \n\n"%ScreenSize
+	txt+="#Size of the image on the Screen, by default\nScreenSize: %s \n\n"%ScreenSize
 	txt+="#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]\nInterpolation: %s \n\n"%Interpolation
-	txt+="#Page prefix (used when there are too many images per day to fit on one web page)\nPagePrefix= %s \n\n"%PagePrefix
-	txt+="#Maximum number of images per web page\nNbrPerPage= %s\n\n"%NbrPerPage
+	txt+="#Page prefix (used when there are too many images per day to fit on one web page)\nPagePrefix: %s \n\n"%PagePrefix
+	txt+="#Maximum number of images per web page\nNbrPerPage: %s\n\n"%NbrPerPage
 	txt+="#Trash sub-directory\nTrashDirectory: %s \n\n"%TrashDirectory
 	txt+="#Selected/processed images sub-directory\nSelectedDirectory: %s \n\n"%SelectedDirectory
 	txt+="#File containing the list of selected but unprocessed images\nSelected_save: %s \n\n"%Selected_save
@@ -970,7 +1113,7 @@ def LoadConfig(filename):
 	global ScreenSize,Interpolation,PagePrefix,NbrPerPage,TrashDirectory,SelectedDirectory,Selected_save,AutoRotate,DefaultFileMode,DefaultDirMode,Extensions,DefaultRepository,Thumbnails,SelectedImages
 	import ConfigParser
 	config = ConfigParser.ConfigParser()
-	config.read(["/etc/imagizer.conf",filename])
+	config.read([GlobalConfFile,filename])
 	for i in config.items("Selector"):
 		j=i[0]
 		if j=="ScreenSize".lower():ScreenSize=int(i[1])
@@ -1014,7 +1157,7 @@ def LoadConfig(filename):
 
 if __name__=='__main__':
 	global curdir,Selected_file,Trashdir,SelectedDir
-	LoadConfig(os.path.join(os.getenv("HOME"),".imagizer"))
+	LoadConfig(ConfFile)
 	PrintConfig()	
 	curdir=DefaultRepository
 	if len(sys.argv)>1: 

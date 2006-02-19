@@ -9,6 +9,7 @@
   <property name="local_only">True</property>
   <property name="select_multiple">False</property>
   <property name="show_hidden">False</property>
+  <property name="do_overwrite_confirmation">False</property>
   <property name="title" translatable="yes">dépot Imagizer</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
@@ -21,6 +22,7 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
+  <property name="urgency_hint">False</property>
 
   <child internal-child="vbox">
     <widget class="GtkVBox" id="dialog-vbox1">
@@ -85,6 +87,7 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
   <property name="gravity">GDK_GRAVITY_CENTER</property>
   <property name="focus_on_map">True</property>
+  <property name="urgency_hint">False</property>
   <signal name="destroy" handler="on_Principale_destroy" last_modification_time="Thu, 28 Oct 2004 07:21:12 GMT"/>
 
   <child>
@@ -102,6 +105,8 @@
 	  <child>
 	    <widget class="GtkMenuBar" id="menubar1">
 	      <property name="visible">True</property>
+	      <property name="pack_direction">GTK_PACK_DIRECTION_LTR</property>
+	      <property name="child_pack_direction">GTK_PACK_DIRECTION_LTR</property>
 
 	      <child>
 		<widget class="GtkMenuItem" id="menuitem1">
@@ -120,7 +125,7 @@
 			  <signal name="activate" handler="on_About_activate" last_modification_time="Thu, 06 Jan 2005 21:32:05 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image257">
+			    <widget class="GtkImage" id="image317">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-dialog-info</property>
 			      <property name="icon_size">1</property>
@@ -143,7 +148,7 @@
 			  <accelerator key="Delete" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image258">
+			    <widget class="GtkImage" id="image318">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-delete</property>
 			      <property name="icon_size">1</property>
@@ -171,7 +176,7 @@
 			  <signal name="activate" handler="on_executer1_activate" last_modification_time="Tue, 11 Jan 2005 20:30:12 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image259">
+			    <widget class="GtkImage" id="image319">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-execute</property>
 			      <property name="icon_size">1</property>
@@ -232,18 +237,8 @@
 			  <property name="visible">True</property>
 			  <property name="label" translatable="yes">Rotation automatique</property>
 			  <property name="use_underline">True</property>
-			  <property name="active">True</property>
+			  <property name="active">False</property>
 			  <signal name="activate" handler="on_Autorotate_activate" last_modification_time="Tue, 11 Jan 2005 18:42:41 GMT"/>
-			</widget>
-		      </child>
-
-		      <child>
-			<widget class="GtkCheckMenuItem" id="Warning">
-			  <property name="visible">True</property>
-			  <property name="label" translatable="yes">Avertissement</property>
-			  <property name="use_underline">True</property>
-			  <property name="active">True</property>
-			  <signal name="activate" handler="on_Warning_activate" last_modification_time="Tue, 11 Jan 2005 18:42:41 GMT"/>
 			</widget>
 		      </child>
 
@@ -260,7 +255,7 @@
 			  <property name="use_underline">True</property>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image260">
+			    <widget class="GtkImage" id="image320">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-zoom-100</property>
 			      <property name="icon_size">1</property>
@@ -309,7 +304,7 @@
 			      <child>
 				<widget class="GtkRadioMenuItem" id="tauto">
 				  <property name="visible">True</property>
-				  <property name="label" translatable="yes">Taille auto</property>
+				  <property name="label" translatable="yes">Taille actuelle</property>
 				  <property name="use_underline">True</property>
 				  <property name="active">True</property>
 				  <property name="group">t300</property>
@@ -353,7 +348,7 @@
 				  <property name="tooltip" translatable="yes">Interpollation type Postscript</property>
 				  <property name="label" translatable="yes">Rapide</property>
 				  <property name="use_underline">True</property>
-				  <property name="active">False</property>
+				  <property name="active">True</property>
 				  <property name="group">VLowQ</property>
 				  <signal name="activate" handler="on_LowQ_activate" last_modification_time="Thu, 06 Jan 2005 20:52:25 GMT"/>
 				</widget>
@@ -377,9 +372,93 @@
 				  <property name="tooltip" translatable="yes">Interpollation Hyperbolique </property>
 				  <property name="label" translatable="yes">Très Bon</property>
 				  <property name="use_underline">True</property>
-				  <property name="active">True</property>
+				  <property name="active">False</property>
 				  <property name="group">VLowQ</property>
 				  <signal name="activate" handler="on_VHiQ_activate" last_modification_time="Thu, 06 Jan 2005 20:52:25 GMT"/>
+				</widget>
+			      </child>
+			    </widget>
+			  </child>
+			</widget>
+		      </child>
+
+		      <child>
+			<widget class="GtkSeparatorMenuItem" id="séparateur10">
+			  <property name="visible">True</property>
+			</widget>
+		      </child>
+
+		      <child>
+			<widget class="GtkMenuItem" id="images_per_web-page1">
+			  <property name="visible">True</property>
+			  <property name="label" translatable="yes">Images per web-page</property>
+			  <property name="use_underline">True</property>
+
+			  <child>
+			    <widget class="GtkMenu" id="images_per_web-page1_menu">
+
+			      <child>
+				<widget class="GtkRadioMenuItem" id="9PerPage">
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">9</property>
+				  <property name="use_underline">True</property>
+				  <property name="active">False</property>
+				  <signal name="activate" handler="on_9PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkRadioMenuItem" id="12PerPage">
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">12</property>
+				  <property name="use_underline">True</property>
+				  <property name="active">False</property>
+				  <property name="group">9PerPage</property>
+				  <signal name="activate" handler="on_12PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkRadioMenuItem" id="16PerPage">
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">16</property>
+				  <property name="use_underline">True</property>
+				  <property name="active">False</property>
+				  <property name="group">9PerPage</property>
+				  <signal name="activate" handler="on_16PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkRadioMenuItem" id="20PerPage">
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">20</property>
+				  <property name="use_underline">True</property>
+				  <property name="active">True</property>
+				  <property name="group">9PerPage</property>
+				  <signal name="activate" handler="on_20PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkRadioMenuItem" id="25PerPage">
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">25</property>
+				  <property name="use_underline">True</property>
+				  <property name="active">False</property>
+				  <property name="group">9PerPage</property>
+				  <signal name="activate" handler="on_25PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkRadioMenuItem" id="30PerPage">
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">30</property>
+				  <property name="use_underline">True</property>
+				  <property name="active">False</property>
+				  <property name="group">9PerPage</property>
+				  <signal name="activate" handler="on_30PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
 				</widget>
 			      </child>
 			    </widget>
@@ -410,7 +489,7 @@
 			  <signal name="activate" handler="on_chargerS_activate" last_modification_time="Tue, 11 Jan 2005 21:05:29 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image261">
+			    <widget class="GtkImage" id="image321">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-open</property>
 			      <property name="icon_size">1</property>
@@ -446,7 +525,7 @@
 			  <signal name="activate" handler="on_inverserS_activate" last_modification_time="Thu, 06 Jan 2005 21:20:53 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image262">
+			    <widget class="GtkImage" id="image322">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-refresh</property>
 			      <property name="icon_size">1</property>
@@ -518,7 +597,7 @@
 				  <signal name="activate" handler="on_moins_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image263">
+				    <widget class="GtkImage" id="image323">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-undo</property>
 				      <property name="icon_size">1</property>
@@ -557,7 +636,7 @@
 				  <signal name="activate" handler="on_plus_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image264">
+				    <widget class="GtkImage" id="image324">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-redo</property>
 				      <property name="icon_size">1</property>
@@ -2137,6 +2216,7 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
   <property name="gravity">GDK_GRAVITY_CENTER</property>
   <property name="focus_on_map">True</property>
+  <property name="urgency_hint">False</property>
 
   <child>
     <widget class="GtkVBox" id="vbox1">
@@ -2191,6 +2271,7 @@
   <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
+  <property name="urgency_hint">False</property>
   <property name="has_separator">True</property>
   <signal name="destroy" handler="on_dialog_warning_destroy" last_modification_time="Fri, 17 Jun 2005 20:21:26 GMT"/>
   <signal name="response" handler="on_dialog_warning_response" last_modification_time="Tue, 21 Jun 2005 20:13:37 GMT"/>
