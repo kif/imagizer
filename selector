@@ -44,7 +44,8 @@ Thumbnails={
 	"Interpolation":1,
 	"Progressive":False,
 	"Optimize":False,
-	"ExifExtraction":True
+	"ExifExtraction":True,
+	"Quality": 75
 }
 ScaledImages={
 	"Size":800,
@@ -52,7 +53,8 @@ ScaledImages={
 	"Interpolation":2,
 	"Progressive":False,
 	"Optimize":False,
-	"ExifExtraction":False
+	"ExifExtraction":False,
+	"Quality": 75
 }
 
 ScreenSize=600
@@ -133,7 +135,7 @@ class photo:
 		self.x,self.y=self.f.size
 		return self.x,self.y	
 
-	def SaveThumb(self,thumbname,size=160,Quality=1,AllowExif=True):
+	def SaveThumb(self,Thumbname,Size=160,Interpolation=1,Quality=75,Progressive=False,Optimize=False,ExifExtraction=False):
 		"""save a thumbnail of the given name, with the given size and the interpollation mathode (quality) 
 		resampling filters :
 		NONE = 0
@@ -142,21 +144,19 @@ class photo:
 		LINEAR = BILINEAR = 2
 		CUBIC = BICUBIC = 3
 		"""
-		if  os.path.isfile(thumbname):
-			print "sorry, file %s exists"%thumbname
+		if  os.path.isfile(Thumbname):
+			print "sorry, file %s exists"%Thumbname
 		else:
 			RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-			if RawExif.has_key("JPEGThumbnail") and AllowExif:
-				w=open(thumbname,"wb")
+			if RawExif.has_key("JPEGThumbnail") and ExifExtraction:
+				w=open(Thumbname,"wb")
 				w.write(RawExif["JPEGThumbnail"])
 				w.close()			
 			else:
 				self.LoadPIL()
-				self.f.thumbnail((size,size),Quality)
-				self.f.save(thumbname,progressive=JPEGprogression,optimize=JPEGoptimize)
-#Should check why optin quality makes the process crash ....			
-#				self.f.save(thumbname)
-			os.chmod(thumbname,DefaultFileMode)
+				self.f.thumbnail((Size,Size),Interpolation)
+				self.f.save(Thumbname,quality=Quality,progressive=Progressive,optimize=Optimize)
+			os.chmod(Thumbname,DefaultFileMode)
 
 	
 	def Rotate(self,angle=0):
@@ -691,13 +691,19 @@ def ScaleImage(filename):
 	"""common processing for one image : create a subfolder "scaled" and "thumb" : """
 	print "Génération des vignettes pour %s "%filename
 	rootdir=os.path.dirname(filename)
-	scaledir=os.path.join(rootdir,scaled)
-	thumbdir=os.path.join(rootdir,thumb)
+	scaledir=os.path.join(rootdir,ScaledImages["Suffix"])
+	thumbdir=os.path.join(rootdir,Thumbnails["Suffix"])
 	if not os.path.isdir(scaledir) : mkdir(scaledir)
 	if not os.path.isdir(thumbdir) : mkdir(thumbdir)
 	I=photo(filename)
-	I.SaveThumb(os.path.join(scaledir,os.path.basename(filename))[:-4]+"--%s.jpg"%scaled,ScaledSize,Quality=2,AllowExif=False)	
-	I.SaveThumb(os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%thumb,ThumbSize,Quality=1,AllowExif=True)
+	Param=ScaledImages.copy()
+	Param.pop("Suffix")
+	Param["Thumbname"]=os.path.join(scaledir,os.path.basename(filename))[:-4]+"--%s.jpg"%ScaledImages["Suffix"]
+	I.SaveThumb(**Param)
+	Param=Thumbnails.copy()
+	Param.pop("Suffix")
+	Param["Thumbname"]=os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%Thumbnails["Suffix"]
+	I.SaveThumb(**Param)
 	
 def RangeTout(RootDir):
 	"""moves all the JPEG files to a directory named from their day and with the nameaccording to the time"""
@@ -918,6 +924,7 @@ def PrintConfig():
 	print "Interpolation Quality:\t\t %s"%ScaledImages["Interpolation"]
 	print "Progressive JPEG:\t\t %s"%ScaledImages["Progressive"]
 	print "Optimized JPEG:\t\t\t %s"%ScaledImages["Optimize"]
+	print "JPEG Quality:\t\t\t %s %%"%ScaledImages["Quality"]
 	print "Allow Exif extraction:\t\t %s"%ScaledImages["ExifExtraction"]
 	print "**** Thumbnail images configuration ****"
 	print "Size:\t\t\t\t %s"%Thumbnails["Size"]
@@ -925,6 +932,7 @@ def PrintConfig():
 	print "Interpolation Quality:\t\t %s"%Thumbnails["Interpolation"]
 	print "Progressive JPEG:\t\t %s"%Thumbnails["Progressive"]
 	print "Optimized JPEG:\t\t\t %s"%Thumbnails["Optimize"]
+	print "JPEG Quality:\t\t\t %s %%"%Thumbnails["Quality"]
 	print "Allow Exif extraction:\t\t %s"%Thumbnails["ExifExtraction"]
 
 def SaveConfig(filename):
@@ -951,6 +959,7 @@ def SaveConfig(filename):
 		txt+="#%s downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias] )\nInterpolation: %s \n\n"%(i,j["Interpolation"])
 		txt+="#%s progressive JPEG files\nProgressive: %s \n\n"%(i,j["Progressive"])
 		txt+="#%s optimized JPEG (2 pass encoding)\nOptimize: %s \n\n"%(i,j["Optimize"])
+		txt+="#%s quality (in percent)\nQuality: %s \n\n"%(i,j["Quality"])
 		txt+="#%s image can be obtained by Exif extraction ?\nExifExtraction: %s \n\n"%(i,j["ExifExtraction"])
 	w=open(filename,"w")
 	w.write(txt)
@@ -991,6 +1000,7 @@ def LoadConfig(filename):
 			elif j=="Progressive".lower():dico["Progressive"]=config.getboolean(k,"Progressive")
 			elif j=="Optimize".lower():dico["Optimize"]=config.getboolean(k,"Optimize")
 			elif j=="ExifExtraction".lower():dico["ExifExtraction"]=config.getboolean(k,"ExifExtraction")
+			elif j=="Quality".lower():dico["Quality"]=int(i[1])
 		exec(k+"=dico")
 	#this is work around for the optimize-bug in PIL, The initial buffer size is 64k
 	kpix= 3*ScaledImages["Size"]**2/4000
