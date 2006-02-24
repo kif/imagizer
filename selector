@@ -59,10 +59,10 @@ ScaledImages={
 ScreenSize=600
 NbrPerPage=20
 PagePrefix="page"
-Trash="Trash"
-Selected="Selected"
+TrashDirectory="Trash"
+SelectedDirectory="Selected"
 Selected_save=".selected-photos"
-Exts=[".jpg", ".jpeg",".jpe",".jfif"]
+Extensions=[".jpg", ".jpeg",".jpe",".jfif"]
 AutoRotate=False
 DefaultMode="664"
 DefaultRepository=os.getcwd()
@@ -100,13 +100,13 @@ if os.name == 'nt': #sys.platform == 'win32':
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
 	ConfFile=os.path.join(installdir,".imagizer")
-	GlobalConfFile
+	GlobalConfFile="c:\\imagizer.conf"
 elif os.name == 'posix':
 	installdir='/usr/share/imagizer'
 	exiftran=os.path.join(installdir,"exiftran ")
 	gimpexe="gimp-remote "
 	ConfFile=os.path.join(os.getenv("HOME"),".imagizer")
-	GlobalConfFile="c:\\imagizer.conf"
+	GlobalConfFile="/etc/imagizer.conf"
 else:
 	raise "Your platform does  not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
@@ -1113,7 +1113,14 @@ def LoadConfig(filename):
 	global ScreenSize,Interpolation,PagePrefix,NbrPerPage,TrashDirectory,SelectedDirectory,Selected_save,AutoRotate,DefaultFileMode,DefaultDirMode,Extensions,DefaultRepository,Thumbnails,SelectedImages
 	import ConfigParser
 	config = ConfigParser.ConfigParser()
-	config.read([GlobalConfFile,filename])
+	files=[]
+	if os.path.isfile(GlobalConfFile):files.append(GlobalConfFile)
+	if os.path.isfile(filename):files.append(filename)
+	if len(files)==0:
+		print "No configuration file found. Falling back on defaults"
+		return
+	else:
+		config.read(files)
 	for i in config.items("Selector"):
 		j=i[0]
 		if j=="ScreenSize".lower():ScreenSize=int(i[1])
