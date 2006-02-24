@@ -756,7 +756,7 @@ def FindFile(RootDir):
 	"""returns a list of the files with the given suffix in the given dir"""
 	#files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
 	files=[]
-	for i in Exts:
+	for i in Extensions:
 		files+=parser().FindExts(RootDir,i)
 	good=[]
 	l=len(RootDir)+1
@@ -856,8 +856,8 @@ def RangeTout(RootDir):
 	AllreadyDone=[]
 	NewFiles=[]
 	for i in AllJpegs:
-		if i.find(Trash)==0: continue
-		if i.find(Selected)==0: continue
+		if i.find(TrashDirectory)==0: continue
+		if i.find(SelectedDirectory)==0: continue
 		try:
 			a=int(i[:4])
 			m=int(i[5:7])
@@ -1184,8 +1184,8 @@ if __name__=='__main__':
 		curdir=W.directory
 		del W
 		Selected_file=os.path.join(curdir,Selected_save)
-	Trashdir=os.path.join(curdir,Trash)
-	SelectedDir=os.path.join(curdir,Selected)
+	Trashdir=os.path.join(curdir,TrashDirectory)
+	SelectedDir=os.path.join(curdir,SelectedDirectory)
 	
 	if not os.path.isfile(Selected_file):
 		f=open(Selected_file,"w")
