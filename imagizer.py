@@ -430,6 +430,7 @@ class Config:
 			elif j=="Extensions".lower(): self.Extensions=i[1].split()
 			elif j=="DefaultRepository".lower():self.DefaultRepository=i[1]
 			else: print "unknown key "+j
+
 		for k in ["ScaledImages","Thumbnails"]:
 			try:
 				dico=eval(k)
@@ -568,10 +569,11 @@ class photo:
 			os.system('JPEGMEM=%i %s -ip -1 "%s"'%(self.x*self.y/100,exiftran,self.fn))	
 		else:
 			print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
-	
 
 	def Trash(self):
-		"""Send the file to the trash folder"""	
+		"""Send the file to the trash folder"""
+		config=Config()	
+		Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
 		td=os.path.dirname(os.path.join(Trashdir,self.filename))
 		tf=os.path.join(Trashdir,self.filename)
 		if not os.path.isdir(td): makedir(td)
@@ -638,6 +640,31 @@ class photo:
 		if os.name == 'nt' and self.f!=None: del self.f
 		self.taille()
 		os.system('JPEGMEM=%i %s -aip "%s"'%(self.x*self.y/100,exiftran,self.fn))
+
+	def ContrastMask(self,outfile):
+		"""Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...
+		Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, en particulier A. Fayolles et F. Mantegazza
+		avril 2006
+		necessite numarray et PIL."""
+		import ImageChops
+		try:
+			import numarray
+		except:
+			raise "This filter needs the numarray library available on http://www.stsci.edu/resources/software_hardware/numarray"
+		config=Config()	
+		self.LoadPIL()
+		x,y=self.f.size
+		img_array = numarray.fromstring(self.f.tostring(),type="UInt8").astype("UInt16") 
+		img_array.shape = (x, y, 3) 
+		red, green, blue = img_array[:,:,0], img_array[:,:,1],img_array[:,:,2]
+		desat_array = (numarray.minimum(numarray.minimum(red, green), blue) + numarray.maximum( numarray.maximum(red, green), blue))/2
+		inv_desat=255-desat_array
+		k=Image.fromstring("L",(x,y),inv_desat.astype("UInt8").tostring()).convert("RGB")
+		S=ImageChops.screen(self.f,k)
+		M=ImageChops.multiply(self.f,k)
+		F=ImageChops.add(ImageChops.multiply(self.f,S),ImageChops.multiply(ImageChops.invert(self.f),M))
+		F.save(os.path.join(config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
+
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 

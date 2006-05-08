@@ -61,6 +61,8 @@ class interface:
 			if not(i in self.AllJpegs): 
 				self.Selected.remove(i)
 		self.CurIm=first
+
+
 		
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(unifiedglade,root="Principale")
@@ -119,6 +121,7 @@ class interface:
 		self.xml.signal_connect('on_poubelle_activate',self.poubelle)
 		self.xml.signal_connect('on_Poubelle_clicked',self.poubelle)
 		self.xml.signal_connect('on_Gimp_clicked',self.gimp)
+		self.xml.signal_connect('on_Filter_clicked',self.filter)
 		
 		self.xml.signal_connect('on_precedentI_activate',self.previous)
 		self.xml.signal_connect('on_suivantI_activate',self.next)
@@ -258,7 +261,31 @@ class interface:
 	def gimp(self,*args):
 		"""Edit the current file with the Gimp"""
 		self.settitle()
-		os.system(gimpexe+os.path.join(curdir,self.AllJpegs[self.CurIm]))
+		filename=self.AllJpegs[self.CurIm]
+		base,ext=os.path.splitext(filename)
+		newname=base+"-Gimp"+ext
+		if not newname in self.AllJpegs:
+			self.AllJpegs.append(newname)
+			self.AllJpegs.sort()
+		self.CurIm=self.AllJpegs.index(newname)
+		shutil.copy(os.path.join(config.DefaultRepository,filename),os.path.join(config.DefaultRepository,newname))
+		os.system(gimpexe+os.path.join(config.DefaultRepository,newname))
+		self.ShowImage()
+
+	def filter(self,*args):
+		"""Filter the current image with a contrast mask"""
+		self.settitle()
+		filename=self.AllJpegs[self.CurIm]
+		base,ext=os.path.splitext(filename)
+		newname=base+"-Filtered"+ext
+		if not newname in self.AllJpegs:
+			self.AllJpegs.append(newname)
+			self.AllJpegs.sort()
+		self.CurIm=self.AllJpegs.index(newname)
+		photo(filename).ContrastMask(newname)
+		self.ShowImage()
+
+
 
 	def select(self,*args):
 		"""Select or unselect the image"""
@@ -336,7 +363,7 @@ class interface:
 	def about(self,*args):
 		"""display a copyright message"""	
 		self.settitle()
-		MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.1a du 14/06/2005".decode("latin1"),Message=gtk.MESSAGE_INFO)
+		MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.2 du 08/05/2006".decode("latin1"),Message=gtk.MESSAGE_INFO)
 		
 	
 	def nextJ(self,*args):
@@ -597,11 +624,9 @@ if __name__=='__main__':
 	Selected_file=os.path.join(config.DefaultRepository,config.Selected_save)
 	if not os.path.isfile(Selected_file):
 		W=WarningSc(config.DefaultRepository)
-		curdir=W.directory
+		config.DefaultRepository=W.directory
 		del W
 		Selected_file=os.path.join(config.DefaultRepository,config.Selected_save)
-	Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
-	SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
 	
 	if not os.path.isfile(Selected_file):
 		f=open(Selected_file,"w")
