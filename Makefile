@@ -6,7 +6,7 @@ install:
 	install -d $(DESTDIR)/share/doc/imagizer
 	install -m 755 generator $(DESTDIR)/bin
 	install -m 755 selector $(DESTDIR)/bin
-	install -m 644 *.png $(DESTDIR)/share/imagizer
+	install -m 644 pixmaps/*.png $(DESTDIR)/share/imagizer
 	install -m 644 selector.glade $(DESTDIR)/share/imagizer
 	install -m 644 EXIF.py $(DESTDIR)/share/imagizer
 	install -m 644 imagizer.py $(DESTDIR)/share/imagizer
