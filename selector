@@ -61,13 +61,17 @@ class interface:
 			if not(i in self.AllJpegs): 
 				self.Selected.remove(i)
 		self.CurIm=first
-
+		self.Xmin=350
 
 		
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(unifiedglade,root="Principale")
-		self.xml.get_widget("Principale").resize(config.ScreenSize+323,config.ScreenSize)
+#		self.xml.get_widget("Principale").resize(config.ScreenSize+self.Xmin,config.ScreenSize)
+		self.xml.get_widget("Principale").set_size_request(config.ScreenSize+self.Xmin,config.ScreenSize)
+		self.xml.get_widget("Principale").resize(config.ScreenSize+self.Xmin,config.ScreenSize)
+
 		self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"logo.png")))
+		self.flush_event_queue()
 		if config.AutoRotate:
 			i=1
 		else:
@@ -189,8 +193,10 @@ class interface:
 		"""Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
 		self.image=photo(self.AllJpegs[self.CurIm])
 		X,Y=self.xml.get_widget("Principale").get_size()
-		if X<325 : X=798
-		pixbuf=self.image.show(X-323,Y)
+#		print "Taille fenetre %sx%s"%(X,Y)
+		if X<=self.Xmin : X=self.Xmin+config.ScreenSize
+		pixbuf=self.image.show(X-self.Xmin,Y)
+		
 		self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
 		del pixbuf
 		gc.collect()
@@ -200,7 +206,6 @@ class interface:
 		self.xml.get_widget("Principale").set_title("Selector : %s"%self.AllJpegs[self.CurIm])
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		self.oldtitle=data["Titre"]             
-
 
 	def next(self,*args):
 		"""Switch to the next image"""	
@@ -268,8 +273,10 @@ class interface:
 			self.AllJpegs.append(newname)
 			self.AllJpegs.sort()
 		self.CurIm=self.AllJpegs.index(newname)
-		shutil.copy(os.path.join(config.DefaultRepository,filename),os.path.join(config.DefaultRepository,newname))
-		os.system(gimpexe+os.path.join(config.DefaultRepository,newname))
+		newnamefull=os.path.join(config.DefaultRepository,newname)
+		shutil.copy(os.path.join(config.DefaultRepository,filename),newnamefull)
+		os.chmod(newnamefull,config.DefaultFileMode)
+		os.system(gimpexe+newnamefull)
 		self.ShowImage()
 
 	def filter(self,*args):

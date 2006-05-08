@@ -524,14 +524,13 @@ class photo:
 	
 	def larg(self):
 		"""width-height of a jpeg file"""
-		x,y=self.taille()
-		return x-y
+		self.taille()
+		return self.x-self.y
 
 	def taille(self):
 		"""width and height of a jpeg file"""
 		self.LoadPIL()
 		self.x,self.y=self.f.size
-		return self.x,self.y	
 
 	def SaveThumb(self,Thumbname,Size=160,Interpolation=1,Quality=75,Progressive=False,Optimize=False,ExifExtraction=False):
 		"""save a thumbnail of the given name, with the given size and the interpollation mathode (quality) 
@@ -572,8 +571,7 @@ class photo:
 
 	def Trash(self):
 		"""Send the file to the trash folder"""
-		config=Config()	
-		Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
+		Trashdir=os.path.join(self.config.DefaultRepository,self.config.TrashDirectory)
 		td=os.path.dirname(os.path.join(Trashdir,self.filename))
 		tf=os.path.join(Trashdir,self.filename)
 		if not os.path.isdir(td): makedir(td)
@@ -600,8 +598,8 @@ class photo:
 			data["Titre"]=comment
 		else:
 			data["Titre"]=""
-		x,y=self.taille()
-		data["Resolution"]="%s x %s "%(x,y)
+		self.taille()
+		data["Resolution"]="%s x %s "%(self.x,self.y)
 		for i in clef:
 			try:
 				data[clef[i]]=str(RawExif[i].printable).strip()
@@ -611,20 +609,14 @@ class photo:
 		
 	def show(self,Xsize=600,Ysize=600):
 		"""return a pixbuf to shows the image in a Gtk window"""
-		self.x,self.y=self.taille()			
+		self.taille()			
 		pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
-		if self.x>Xsize:
-			RX=1.0*Xsize/self.x
-		else :
-			RX=1
-		if self.y>Ysize:
-			RY=1.0*Ysize/self.y
-		else :
-			RY=1	
-		R=min(RY,RX)
+#		print "Taille voulue %sx%s"%(Xsize,Ysize)
+		R=min(float(Xsize)/self.x,float(Ysize)/self.y)
 		if R<1:
 			nx=int(R*self.x)
 			ny=int(R*self.y)
+#			print  "Taille Obtenue  %sx%s"%(nx,ny)
 			scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[self.config.Interpolation])
 		else :
 			scaled_buf=pixbuf
@@ -651,9 +643,9 @@ class photo:
 			import numarray
 		except:
 			raise "This filter needs the numarray library available on http://www.stsci.edu/resources/software_hardware/numarray"
-		config=Config()	
 		self.LoadPIL()
 		x,y=self.f.size
+		ImageFile.MAXBLOCK=x*y
 		img_array = numarray.fromstring(self.f.tostring(),type="UInt8").astype("UInt16") 
 		img_array.shape = (x, y, 3) 
 		red, green, blue = img_array[:,:,0], img_array[:,:,1],img_array[:,:,2]
@@ -663,8 +655,8 @@ class photo:
 		S=ImageChops.screen(self.f,k)
 		M=ImageChops.multiply(self.f,k)
 		F=ImageChops.add(ImageChops.multiply(self.f,S),ImageChops.multiply(ImageChops.invert(self.f),M))
-		F.save(os.path.join(config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
-
+		F.save(os.path.join(self.config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
+		os.chmod(os.path.join(self.config.DefaultRepository,outfile),self.config.DefaultFileMode)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 
