@@ -90,16 +90,17 @@ class ModelProcessSelected:
 #reste a implementer.
 #		avcmt.setbar(0,"copie des fichiers existants")
 		config=Config()
+		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
 		self.refreshSignal.emit(-1,"copie des fichiers existants")
-		if not os.path.isdir(config.SelectedDirectory): 	mkdir(config.SelectedDirectory)
+		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
-		for day in os.listdir(config.SelectedDirectory):
-			for File in os.listdir(os.path.join(config.SelectedDirectory,day)):
+		for day in os.listdir(SelectedDir):
+			for File in os.listdir(os.path.join(SelectedDir,day)):
 				if File.find(config.PagePrefix)==0:
-					if os.path.isdir(os.path.join(config.SelectedDirectory,day,File)):
-						for ImageFile in os.listdir(os.path.join(config.SelectedDirectory,day,File)):
-							src=os.path.join(config.SelectedDirectory,day,File,ImageFile)
-							dst=os.path.join(config.SelectedDirectory,day,ImageFile)
+					if os.path.isdir(os.path.join(SelectedDir,day,File)):
+						for ImageFile in os.listdir(os.path.join(SelectedDir,day,File)):
+							src=os.path.join(SelectedDir,day,File,ImageFile)
+							dst=os.path.join(SelectedDir,day,ImageFile)
 							if os.path.isfile(src) and not os.path.exists(dst):
 								shutil.move(src,dst)
 							if (os.path.isdir(src)) and (os.path.split(src)[1] in [scaled,thumb]):
@@ -107,9 +108,7 @@ class ModelProcessSelected:
 							
 #######then copy the selected files to their folders###########################		
 		for File in List:
-			#avcmt.setbar(float(List.index(File))/len(List),"1 -> %s"%File)
-			#print float(List.index(File))/len(List)
-			dest=os.path.join(config.SelectedDirectory,File)
+			dest=os.path.join(SelectedDir,File)
 			src=os.path.join(config.DefaultRepository,File)
 			destdir=os.path.dirname(dest)
 			if not os.path.isdir(destdir): makedir(destdir)
@@ -120,12 +119,11 @@ class ModelProcessSelected:
 			else :
 				print "%s existe déja"%(dest)
 ########finaly recreate the structure with pages########################
-		dirs=os.listdir(config.SelectedDirectory)
+		dirs=os.listdir(SelectedDir)
 		dirs.sort()
 		GlobalCount=0
 		for day in dirs:
-			#avcmt.setbar(float(dirs.index(day))/len(dirs),day)
-			pathday=os.path.join(config.SelectedDirectory,day)
+			pathday=os.path.join(SelectedDir,day)
 			files=[]
 			for  i in os.listdir(pathday):
 				if i[-4:]==".jpg":files.append(i)
@@ -140,7 +138,6 @@ class ModelProcessSelected:
 					filename=os.path.join(pathday,PagePrefix+str(i),files[j])
 					self.refreshSignal.emit(GlobalCount,files[j])
 					GlobalCount+=1
-#					avcmt.setbar(float(j)/len(files),PagePrefix+str(i)+"/"+files[j])
 					shutil.move(os.path.join(pathday,files[j]),filename)
 					ScaleImage(filename)
 			else:
@@ -323,7 +320,10 @@ class ViewX:
 		@param name: name of the current element
 		@type name: string 
 		@return: None"""
-		self.pb.set_fraction(float(h+1)/self.__nbVal)
+		if h<self.__nbVal:
+			self.pb.set_fraction(float(h+1)/self.__nbVal)
+		else:
+			self.pb.set_fraction(1.0)
 		self.pb.set_text(filename)
 		while gtk.events_pending():gtk.main_iteration()
 	def finish(self):
@@ -697,7 +697,7 @@ def FindFile(RootDir):
 #######################################################################################
 def ScaleImage(filename):
 	"""common processing for one image : create a subfolder "scaled" and "thumb" : """
-	print "Génération des vignettes pour %s "%filename
+#	print "Génération des vignettes pour %s "%filename
 	config=Config()
 	rootdir=os.path.dirname(filename)
 	scaledir=os.path.join(rootdir,config.ScaledImages["Suffix"])

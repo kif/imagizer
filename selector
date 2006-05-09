@@ -66,7 +66,6 @@ class interface:
 		
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(unifiedglade,root="Principale")
-#		self.xml.get_widget("Principale").resize(config.ScreenSize+self.Xmin,config.ScreenSize)
 		self.xml.get_widget("Principale").set_size_request(config.ScreenSize+self.Xmin,config.ScreenSize)
 		self.xml.get_widget("Principale").resize(config.ScreenSize+self.Xmin,config.ScreenSize)
 
@@ -85,7 +84,7 @@ class interface:
 			self.xml.get_widget("t900").set_active(1)
 		else:
 			self.xml.get_widget("tauto").set_active(1)
-		
+			
 		if config.NbrPerPage == 9:
 			self.xml.get_widget("9PerPage").set_active(1)
 		elif config.NbrPerPage == 12:
@@ -498,7 +497,7 @@ class interface:
 	def SizeCurrent(self,*args):
 		"""reads the current size of the image and defines it as default for next-time"""	
 		X,Y=self.xml.get_widget("Principale").get_size()
-		config.ScreenSize=max(X-323,Y)
+		config.ScreenSize=max(X-self.Xmin,Y)
 	def Size300(self,*args):
 		"""reads the current size of the image and defines it as default for next-time"""	
 		X,Y=self.xml.get_widget("Principale").get_size()
