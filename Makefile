@@ -7,12 +7,12 @@ install:
 	install -m 755 generator $(DESTDIR)/bin
 	install -m 755 selector $(DESTDIR)/bin
 	install -m 644 pixmaps/*.png $(DESTDIR)/share/imagizer
+	install -m 644 pixmaps/*.ico $(DESTDIR)/share/imagizer
 	install -m 644 selector.glade $(DESTDIR)/share/imagizer
 	install -m 644 EXIF.py $(DESTDIR)/share/imagizer
 	install -m 644 imagizer.py $(DESTDIR)/share/imagizer
 	install -m 644 signals.py $(DESTDIR)/share/imagizer
 	install -m 644 README.txt $(DESTDIR)/share/doc/imagizer
-	install -m 644 favicon.ico $(DESTDIR)/share/imagizer
 	install -m 644 imagizer.conf /etc
 	install -m 755 bin/exiftran $(DESTDIR)/share/imagizer
 	cp -R doc/* $(DESTDIR)/share/doc/imagizer
