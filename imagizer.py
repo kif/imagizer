@@ -135,7 +135,7 @@ class ModelProcessSelected:
 					if not os.path.isdir(folder): mkdir(folder)
 				for j in range(len(files)):
 					i=1+(j)/config.NbrPerPage
-					filename=os.path.join(pathday,PagePrefix+str(i),files[j])
+					filename=os.path.join(pathday,config.PagePrefix+str(i),files[j])
 					self.refreshSignal.emit(GlobalCount,files[j])
 					GlobalCount+=1
 					shutil.move(os.path.join(pathday,files[j]),filename)
