@@ -86,7 +86,7 @@ class ModelProcessSelected:
 	def start(self,List):
 		""" Lance les calculs
 		"""
-		self.startSignal.emit(self.__label, len(List))
+		self.startSignal.emit(self.__label, max(1,len(List)))
 #reste a implementer.
 #		avcmt.setbar(0,"copie des fichiers existants")
 		config=Config()
@@ -103,7 +103,7 @@ class ModelProcessSelected:
 							dst=os.path.join(SelectedDir,day,ImageFile)
 							if os.path.isfile(src) and not os.path.exists(dst):
 								shutil.move(src,dst)
-							if (os.path.isdir(src)) and (os.path.split(src)[1] in [scaled,thumb]):
+							if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]):
 								shutil.rmtree(src)
 							
 #######then copy the selected files to their folders###########################		
