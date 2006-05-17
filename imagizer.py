@@ -82,7 +82,7 @@ class ModelProcessSelected:
 		self.startSignal = Signal()
 		self.refreshSignal = Signal()
 		self.finishSignal = Signal()
-		
+		self.NbrJobsSignal = Signal()
 	def start(self,List):
 		""" Lance les calculs
 		"""
@@ -94,6 +94,7 @@ class ModelProcessSelected:
 		self.refreshSignal.emit(-1,"copie des fichiers existants")
 		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
+		AlsoProcess=0
 		for day in os.listdir(SelectedDir):
 			for File in os.listdir(os.path.join(SelectedDir,day)):
 				if File.find(config.PagePrefix)==0:
@@ -103,9 +104,13 @@ class ModelProcessSelected:
 							dst=os.path.join(SelectedDir,day,ImageFile)
 							if os.path.isfile(src) and not os.path.exists(dst):
 								shutil.move(src,dst)
+								AlsoProcess+=1
 							if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]):
 								shutil.rmtree(src)
-							
+				else:
+					if os.path.splitext(File)[1] in config.Extensions:
+						AlsoProcess+=1
+						
 #######then copy the selected files to their folders###########################		
 		for File in List:
 			dest=os.path.join(SelectedDir,File)
@@ -116,8 +121,11 @@ class ModelProcessSelected:
 				print "copie de %s "%(File)
 				shutil.copy(src,dest)
 				os.chmod(dest,config.DefaultFileMode)
+				AlsoProcess+=1
 			else :
 				print "%s existe déja"%(dest)
+		if AlsoProcess>0:self.NbrJobsSignal.emit(AlsoProcess)					
+
 ########finaly recreate the structure with pages########################
 		dirs=os.listdir(SelectedDir)
 		dirs.sort()
@@ -160,7 +168,8 @@ class ModelRangeTout:
 		self.startSignal = Signal()
 		self.refreshSignal = Signal()
 		self.finishSignal = Signal()
-	
+		self.NbrJobsSignal = Signal()
+
 
 	def start(self,RootDir):
 		""" Lance les calculs
@@ -237,6 +246,7 @@ class Controler:
 		model.startSignal.connect(self.__startCallback)
 		model.refreshSignal.connect(self.__refreshCallback)
 		model.finishSignal.connect(self.__stopCallback)
+		model.NbrJobsSignal.connect(self.__NBJCallback)
 	def __startCallback(self, label, nbVal):
 		""" Callback pour le signal de début de progressbar."""
 		self.__view.creatProgressBar(label, nbVal)
@@ -246,6 +256,9 @@ class Controler:
 	def __stopCallback(self):
 		""" Callback pour le signal de fin de splashscreen."""
 		self.__view.finish()	
+	def __NBJCallback(self,NbrJobs):
+		""" Callback pour redefinir le nombre de job totaux."""
+		self.__view.ProgressBarMax(NbrJobs)
 
 
 
@@ -258,6 +271,7 @@ class ControlerX:
 		model.startSignal.connect(self.__startCallback)
 		model.refreshSignal.connect(self.__refreshCallback)
 		model.finishSignal.connect(self.__stopCallback)
+		model.NbrJobsSignal.connect(self.__NBJCallback)
 	def __startCallback(self, label, nbVal):
 		""" Callback pour le signal de début de progressbar."""
 		self.__viewx.creatProgressBar(label, nbVal)
@@ -267,6 +281,9 @@ class ControlerX:
 	def __stopCallback(self):
 		""" ferme la fenetre. Callback pour le signal de fin de splashscreen."""
 		self.__viewx.finish()
+	def __NBJCallback(self,NbrJobs):
+		""" Callback pour redefinir le nombre de job totaux."""
+		self.__viewx.ProgressBarMax(NbrJobs)
 
 
 
@@ -281,6 +298,11 @@ class View:
 		""" Création de la progressbar.		"""
 		self.__nbVal = nbVal
 		print label
+
+	def ProgressBarMax(self,nbVal):
+		"""re-definit le nombre maximum de la progress-bar"""
+		self.__nbVal = nbVal
+#		print "Modification du maximum : %i"%self.__nbVal	
 		
 	def updateProgressBar(self,h,filename):
 		""" Mise à jour de la progressbar
@@ -310,6 +332,10 @@ class ViewX:
 		self.xml.get_widget("splash").show()
 		while gtk.events_pending():gtk.main_iteration()
 		self.__nbVal = nbVal
+	def ProgressBarMax(self,nbVal):
+		"""re-definit le nombre maximum de la progress-bar"""
+		self.__nbVal = nbVal
+		 	
 	def updateProgressBar(self,h,filename):
 		""" Mise à jour de la progressbar
 		Dans le cas d'un toolkit, c'est ici qu'il faudra appeler le traitement
