@@ -551,7 +551,9 @@ class interface:
 	def renommer(self,*args):
 		"""lauch a new window and ask for anew name for the current directory"""
 		self.settitle()
-		self.AllJpegs=RenameDay(self.AllJpegs[self.CurIm],self.AllJpegs).AllPhotos
+		renamdayinstance=RenameDay(self.AllJpegs[self.CurIm],self.AllJpegs,self.Selected)
+		self.AllJpegs=renamdayinstance.AllPhotos
+		self.Selected=renamdayinstance.selected		
 #		self.ShowImage()
 		
 		
@@ -591,7 +593,7 @@ def MessageError(text,Message=gtk.MESSAGE_ERROR):
 
 class RenameDay:
 	"""prompt a windows and asks for a name for the day"""
-	def __init__(self,filename,AllPhotos):
+	def __init__(self,filename,AllPhotos,selected):
 		self.dayname=os.path.dirname(filename)
 		try:
 			self.timetuple=time.strptime(self.dayname[:10],"%Y-%m-%d")
@@ -603,6 +605,7 @@ class RenameDay:
 		else:
 			self.name=""
 		self.AllPhotos=AllPhotos
+		self.selected=selected
 		self.xml=gtk.glade.XML(unifiedglade,root="Renommer")
 		self.xml.signal_connect('on_Renommer_destroy',self.destroy)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
@@ -613,13 +616,13 @@ class RenameDay:
 	def continu(self,*args):
 		"""just distroy the window and goes on ...."""
 		self.newname=re.sub(" ","_",latin1_to_ascii(self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")))
-		print self.newname
+#		print self.newname
 		config=Config()
 		if self.newname=="":
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)
 		else:
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+self.newname
-		print self.newdayname
+#		print self.newdayname
 		if self.newname!=self.name:
 			if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
 				mkdir(os.path.join(config.DefaultRepository,self.newdayname))
@@ -636,6 +639,8 @@ class RenameDay:
 					print "%s -> %s" %(photofile,newphotofile)
 					self.AllPhotos[idx]=newphotofile
 					os.rename(os.path.join(config.DefaultRepository,photofile),os.path.join(config.DefaultRepository,newphotofile))
+					if photofile in self.selected:
+						self.selected[self.selected.index(photofile)]=newphotofile
 				idx+=1
 			if len(os.listdir(os.path.join(config.DefaultRepository,self.dayname)))==0:
 				os.rmdir(os.path.join(config.DefaultRepository,self.dayname))		
