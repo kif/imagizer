@@ -87,8 +87,6 @@ class ModelProcessSelected:
 		""" Lance les calculs
 		"""
 		self.startSignal.emit(self.__label, max(1,len(List)))
-#reste a implementer.
-#		avcmt.setbar(0,"copie des fichiers existants")
 		config=Config()
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
 		self.refreshSignal.emit(-1,"copie des fichiers existants")
@@ -154,6 +152,56 @@ class ModelProcessSelected:
 					GlobalCount+=1
 					ScaleImage(os.path.join(pathday,j))
 		self.finishSignal.emit()
+
+
+class ModelCopySelected:
+	"""Implemantation MVC de la procedure CopySelected"""
+	def __init__(self):
+		"""
+		"""
+		self.__label = "Un moment..."
+		self.startSignal = Signal()
+		self.refreshSignal = Signal()
+		self.finishSignal = Signal()
+		self.NbrJobsSignal = Signal()
+	def start(self,List):
+		""" Lance les calculs
+		"""
+		self.startSignal.emit(self.__label, max(1,len(List)))
+		config=Config()
+		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
+		self.refreshSignal.emit(-1,"copie des fichiers existants")
+		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
+#####first of all : copy the subfolders into the day folder to help mixing the files
+		for day in os.listdir(SelectedDir):
+			for File in os.listdir(os.path.join(SelectedDir,day)):
+				if File.find(config.PagePrefix)==0:
+					if os.path.isdir(os.path.join(SelectedDir,day,File)):
+						for ImageFile in os.listdir(os.path.join(SelectedDir,day,File)):
+							src=os.path.join(SelectedDir,day,File,ImageFile)
+							dst=os.path.join(SelectedDir,day,ImageFile)
+							if os.path.isfile(src) and not os.path.exists(dst):
+								shutil.move(src,dst)
+							if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]):
+								shutil.rmtree(src)
+						
+#######then copy the selected files to their folders###########################		
+		GlobalCount=0
+		for File in List:
+			dest=os.path.join(SelectedDir,File)
+			src=os.path.join(config.DefaultRepository,File)
+			destdir=os.path.dirname(dest)
+			self.refreshSignal.emit(GlobalCount,File)
+			GlobalCount+=1
+			if not os.path.isdir(destdir): makedir(destdir)
+			if not os.path.exists(dest):
+				shutil.copy(src,dest)
+				os.chmod(dest,config.DefaultFileMode)
+			else :
+				print "%s existe déja"%(dest)
+		self.finishSignal.emit()
+
+
 
 
 class ModelRangeTout:
@@ -384,6 +432,18 @@ def ProcessSelected(SelectedFiles):
 	ctrlx = ControlerX(model, viewx)
 	model.start(SelectedFiles)
 
+def CopySelected(SelectedFiles):
+	"""This procedure makes a copy of all selected photos and scales them
+	copy all the selected files to "selected" subdirectory
+	"""
+	print "Copy %s"%SelectedFiles
+	model = ModelCopySelected()
+	view = View()
+	ctrl = Controler(model, view)
+	viewx = ViewX()
+	ctrlx = ControlerX(model, viewx)
+	model.start(SelectedFiles)
+
 
 
 ################################################################################################
@@ -406,6 +466,8 @@ class Config:
 		self.Interpolation=1
 		self.DefaultFileMode=int(self.DefaultMode,8)
 		self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
+		self.Filigrane=False
+		self.MediaSize=680
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -450,11 +512,13 @@ class Config:
 			elif j=="SelectedDirectory".lower():self.SelectedDirectory=i[1]
 			elif j=="Selected_save".lower():self.Selected_save=i[1]
 			elif j=="AutoRotate".lower():self.AutoRotate=config.getboolean("Selector","AutoRotate")
+			elif j=="Filigrane".lower():self.Filigrane=config.getboolean("Selector","Filigrane")
 			elif j=="DefaultFileMode".lower():
 				self.DefaultFileMode=int(i[1],8)
 				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
 			elif j=="Extensions".lower(): self.Extensions=i[1].split()
 			elif j=="DefaultRepository".lower():self.DefaultRepository=i[1]
+			elif j=="MediaSize".lower():self.MediaSize=float(i[1])
 			else: print "unknown key "+j
 
 		for k in ["ScaledImages","Thumbnails"]:
@@ -486,6 +550,8 @@ class Config:
 		print "Default mode for files (octal):\t %o"%self.DefaultFileMode
 		print "JPEG extensions:\t\t %s"%self.Extensions
 		print "Default photo repository:\t %s"%self.DefaultRepository
+		print "Add signature for exported images:\t%s"%self.Filigrane
+		print "Backup media size (CD,DVD) in Mb :\t%s"%self.MediaSize
 		print "**** Scaled images configuration ****"
 		print "Size:\t\t\t\t %s"%self.ScaledImages["Size"]
 		print "Suffix:\t\t\t\t %s"%self.ScaledImages["Suffix"]
@@ -519,12 +585,14 @@ class Config:
 		for i in self.Extensions: txt+=i+" "
 		txt+="\n\n"
 		txt+="#Default photo repository\nDefaultRepository: %s \n\n"%self.DefaultRepository
+		txt+="#Size of the backup media (in MegaByte)\nMediaSize:	%s \n\n"%self.MediaSize
+		txt+="#Add signature to web published images\nFiligrane: %s \n\n"%self.Filigrane
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)
 			txt+="#%s size\nSize: %s \n\n"%(i,j["Size"])
 			txt+="#%s suffix\nSuffix: %s \n\n"%(i,j["Suffix"])
-			txt+="#%s downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias] )\nInterpolation: %s \n\n"%(i,j["Interpolation"])
+			txt+="#%s downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias]\nInterpolation: %s \n\n"%(i,j["Interpolation"])
 			txt+="#%s progressive JPEG files\nProgressive: %s \n\n"%(i,j["Progressive"])
 			txt+="#%s optimized JPEG (2 pass encoding)\nOptimize: %s \n\n"%(i,j["Optimize"])
 			txt+="#%s quality (in percent)\nQuality: %s \n\n"%(i,j["Quality"])
@@ -577,8 +645,9 @@ class photo:
 				w.close()			
 			else:
 				self.LoadPIL()
-				self.f.thumbnail((Size,Size),Interpolation)
-				self.f.save(Thumbname,quality=Quality,progressive=Progressive,optimize=Optimize)
+				self.g=self.f.copy()
+				self.g.thumbnail((Size,Size),Interpolation)
+				self.g.save(Thumbname,quality=Quality,progressive=Progressive,optimize=Optimize)
 			os.chmod(Thumbname,self.config.DefaultFileMode)
 
 	
@@ -685,6 +754,64 @@ class photo:
 		os.chmod(os.path.join(self.config.DefaultRepository,outfile),self.config.DefaultFileMode)
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
+class signature:
+	def __init__(self,filename):
+		"""this filter allows add a signature to an image"""
+		import Image,ImageStat,ImageChops,ImageFile
+		self.sig=Image.open(filename)
+		self.sig.convert("RGB")
+		(self.xs,self.ys)=self.sig.size
+		self.bigsig=self.sig
+		#The signature file is entented to be white on a black background, this inverts the color if necessary
+		if ImageStat.Stat(self.sig)._getmean()>127:
+			self.sig=ImageChops.invert(self.sig)
+
+		self.orientation=-1 #this is an impossible value
+		(self.x,self.y)=(self.xs,self.ys)
+		
+	def mask(self,orientation=5):
+		"""
+		x and y are the size of the initial image
+		the orientation correspond to the position on a clock :
+		0 for the center
+		1 or 2 upper right
+		3 centered in heith right side ...."""
+		if orientation==self.orientation and (self.x,self.y)==self.bigsig.size:
+			#no need to change the mask
+			return 
+		self.orientation=orientation
+		self.bigsig=Image.new("RGB", (self.x,self.y), (0,0,0)) 
+		if self.x<self.xs or self.y<self.ys : 
+			#the signature is larger than the image
+			return 
+		if self.orientation == 0:
+			self.bigsig.paste(self.sig,(self.x/2-self.xs/2,self.y/2-self.ys/2,self.x/2-self.xs/2+self.xs,self.y/2-self.ys/2+self.ys))
+		elif self.orientation in [1,2]:
+			self.bigsig.paste(self.sig,(self.x-self.xs,0,self.x,self.ys))
+		elif self.orientation == 3:
+			self.bigsig.paste(self.sig,(self.x-self.xs,self.y/2-self.ys/2,self.x,self.y/2-self.ys/2+self.ys))
+		elif self.orientation in [ 5,4]: 
+			self.bigsig.paste(self.sig,(self.x-self.xs,self.y-self.ys,self.x,self.y))
+		elif self.orientation == 6:
+			self.bigsig.paste(self.sig,(self.x/2-self.xs/2,self.y-self.ys,self.x/2-self.xs/2+self.xs,self.y))
+		elif self.orientation in [7,8]: 
+			self.bigsig.paste(self.sig,(0,self.y-self.ys,self.xs,self.y))
+		elif self.orientation == 9:
+			self.bigsig.paste(self.sig,(0,self.y/2-self.ys/2,self.xs,self.y/2-self.ys/2+self.ys))
+		elif self.orientation in [10,11]:
+			self.bigsig.paste(self.sig,(0,0,self.xs,self.ys))
+		elif self.orientation == 12:
+			self.bigsig.paste(self.sig,(self.x/2-self.xs/2,0,self.x/2-self.xs/2+self.xs,self.ys))
+		return
+	
+	def substract(self,inimage,orientation=0):
+		"""apply a substraction mask on the image"""
+		self.img=inimage	 
+		self.x,self.y=self.img.size
+		ImageFile.MAXBLOCK=self.x*self.y
+		self.mask(orientation)
+		k=ImageChops.difference(self.img, self.bigsig)
+		return k
 
 
 

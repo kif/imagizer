@@ -14,9 +14,10 @@
 #
 #todo liste des fonctions a implemanter ....
 # - faire une doc décente.
-# - s'assurer que le programme demarre sur la toute premiere photo
-# - design pattern MVC pour le prolog
-# - utilisation de signgleton pour la config.
+# - selectonner 1CD en avant ou en arriere
+# - copier images seulement
+# - filigraner les photos pour l'export web
+# - deplacement par photo titrées et/ou pas
 # - la version windows et la version mac
 
 #  
@@ -76,6 +77,12 @@ class interface:
 		else:
 			i=0
 		self.xml.get_widget("Autorotate").set_active(i)
+		if config.Filigrane:
+			i=1
+		else:
+			i=0
+		self.xml.get_widget("Filigrane").set_active(i)
+		
 		if config.ScreenSize==300:
 			self.xml.get_widget("t300").set_active(1)
 		elif config.ScreenSize==600:
@@ -122,6 +129,7 @@ class interface:
 		self.xml.signal_connect('on_quitter1_activate',self.die)
 		self.xml.signal_connect('on_nommer1_activate',self.renommer)
 		self.xml.signal_connect('on_executer1_activate',self.run)
+		self.xml.signal_connect('on_copie1_activate',self.copy)
 		self.xml.signal_connect('on_poubelle_activate',self.poubelle)
 		self.xml.signal_connect('on_Poubelle_clicked',self.poubelle)
 		self.xml.signal_connect('on_Gimp_clicked',self.gimp)
@@ -151,6 +159,8 @@ class interface:
 
 		self.xml.signal_connect('on_enregistrerP_activate',self.SavePref)
 		self.xml.signal_connect('on_Autorotate_activate',self.DefAutoRotate)
+		self.xml.signal_connect('on_Filigrane_activate',self.DefFiligrane)
+		self.xml.signal_connect('on_taille_media_activate',self.DefMediaSize)
 		self.xml.signal_connect('on_tauto_activate',self.SizeCurrent)
 		self.xml.signal_connect('on_t300_activate',self.Size300)
 		self.xml.signal_connect('on_t600_activate',self.Size600)
@@ -306,18 +316,25 @@ class interface:
 	def destroy(self,*args):
 		"""destroy clicked by user"""
 		self.settitle()
-#		SaveSelected(self.Selected)
 		sys.exit(0)
 
 	def run(self,*args):
-		"""lauch the copy of all selected files"""
+		"""lauch the copy of all selected files then scale them to generate web pages"""
 		self.settitle()
-#		a=time.time()
 		ProcessSelected(self.Selected)
-#		print "process-time = %s"%(time.time()-a)
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		print "Done"
+
+	def copy(self,*args):
+		"""lauch the copy of all selected files"""
+		self.settitle()
+		CopySelected(self.Selected)
+		self.Selected=[]
+		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+		print "Done"
+
+
 
 	def die(self,*args):
 		"""you wanna leave the program ??"""
@@ -494,7 +511,10 @@ class interface:
 	def DefAutoRotate(self,*args):
 		"""Set the autorotate flag"""
 		config.AutoRotate=self.xml.get_widget("Autorotate").get_active()
-	
+
+	def DefFiligrane(self,*args):
+		"""Set the Signature/Filigrane flag"""
+		config.Filigrane=self.xml.get_widget("Filigrane").get_active()
 	
 	def SizeCurrent(self,*args):
 		"""reads the current size of the image and defines it as default for next-time"""	
@@ -554,8 +574,11 @@ class interface:
 		renamdayinstance=RenameDay(self.AllJpegs[self.CurIm],self.AllJpegs,self.Selected)
 		self.AllJpegs=renamdayinstance.AllPhotos
 		self.Selected=renamdayinstance.selected		
-#		self.ShowImage()
 		
+	def DefMediaSize(self,*args):
+		"""lauch a new window and ask for the size of the backup media"""
+		self.settitle()
+		AskMediaSizeInstance=AskMediaSize()
 		
 		
 
@@ -653,6 +676,40 @@ class RenameDay:
 		except:
 			pass
 		while gtk.events_pending():gtk.main_iteration()	
+
+
+class AskMediaSize:
+	"""prompt a windows and asks for the size of the backup media"""
+	def __init__(self):
+		self.config=Config()
+		self.xml=gtk.glade.XML(unifiedglade,root="TailleCD")
+		self.xml.signal_connect('on_TailleCD_destroy',self.destroy)
+		self.xml.signal_connect('on_cancel_clicked',self.destroy)
+		self.xml.signal_connect('on_ok_clicked',self.continu)
+		self.xml.get_widget("TailleMo").set_text(str(self.config.MediaSize))		
+
+	def continu(self,*args):
+		"""just distroy the window and goes on ...."""
+		txt=self.xml.get_widget("TailleMo").get_text().strip().decode("UTF-8").encode("Latin-1")
+		try:
+			self.config.MediaSize=abs(float(txt))
+		except:
+			print "%s does not seem to be the size of a media"%txt
+		self.xml.get_widget("TailleCD").destroy()
+
+	def destroy(self,*args):
+		"""destroy clicked by user -> quit the program"""
+		try:
+			self.xml.get_widget("TailleCD").destroy()
+		except:
+			pass
+		while gtk.events_pending():gtk.main_iteration()	
+
+
+
+
+
+
 
 class WarningSc:
 	"""print a warning before starting the program and allows to chang the working directory"""
