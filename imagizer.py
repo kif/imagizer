@@ -9,7 +9,7 @@
 import os,sys,string,shutil,time,re,gc
 
 try:
-	import Image,ImageFile
+	import Image,ImageStat,ImageChops,ImageFile
 except:
 	raise "Selector needs PIL: Python Imagin Library\n PIL is available from http://www.pythonware.com/products/pil/"
 
@@ -88,6 +88,11 @@ class ModelProcessSelected:
 		"""
 		self.startSignal.emit(self.__label, max(1,len(List)))
 		config=Config()
+		if config.Filigrane:
+			filigrane=signature(config.FiligraneSource)
+		else:
+			filigrane=None
+
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
 		self.refreshSignal.emit(-1,"copie des fichiers existants")
 		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
@@ -128,6 +133,7 @@ class ModelProcessSelected:
 		dirs=os.listdir(SelectedDir)
 		dirs.sort()
 		GlobalCount=0
+		
 		for day in dirs:
 			pathday=os.path.join(SelectedDir,day)
 			files=[]
@@ -145,12 +151,12 @@ class ModelProcessSelected:
 					self.refreshSignal.emit(GlobalCount,files[j])
 					GlobalCount+=1
 					shutil.move(os.path.join(pathday,files[j]),filename)
-					ScaleImage(filename)
+					ScaleImage(filename,filigrane)
 			else:
 				for j in files:
 					self.refreshSignal.emit(GlobalCount,j)
 					GlobalCount+=1
-					ScaleImage(os.path.join(pathday,j))
+					ScaleImage(os.path.join(pathday,j),filigrane)
 		self.finishSignal.emit()
 
 
@@ -169,6 +175,11 @@ class ModelCopySelected:
 		"""
 		self.startSignal.emit(self.__label, max(1,len(List)))
 		config=Config()
+		if config.Filigrane:
+			filigrane=signature(config.FiligraneSource)
+		else:
+			filigrane=None
+
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
 		self.refreshSignal.emit(-1,"copie des fichiers existants")
 		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
@@ -195,7 +206,11 @@ class ModelCopySelected:
 			GlobalCount+=1
 			if not os.path.isdir(destdir): makedir(destdir)
 			if not os.path.exists(dest):
-				shutil.copy(src,dest)
+				if filigrane: 
+					Img=Image.open(src)
+					filigrane.substract(Img).save(dest,quality=config.FiligraneQuality,optimize=config.FiligraneOptimize,progressive=config.FiligraneOptimize)
+				else:
+					shutil.copy(src,dest)
 				os.chmod(dest,config.DefaultFileMode)
 			else :
 				print "%s existe déja"%(dest)
@@ -467,6 +482,11 @@ class Config:
 		self.DefaultFileMode=int(self.DefaultMode,8)
 		self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
 		self.Filigrane=False
+		self.FiligraneSource=os.path.join(installdir,"signature.png")
+		self.FiligranePosition=5
+		self.FiligraneQuality=75
+		self.FiligraneOptimize=False		
+		self.FiligraneProgressive=False		
 		self.MediaSize=680
 		self.Thumbnails={
 			"Size":160,
@@ -513,6 +533,11 @@ class Config:
 			elif j=="Selected_save".lower():self.Selected_save=i[1]
 			elif j=="AutoRotate".lower():self.AutoRotate=config.getboolean("Selector","AutoRotate")
 			elif j=="Filigrane".lower():self.Filigrane=config.getboolean("Selector","Filigrane")
+			elif j=="FiligraneSource".lower():self.FiligraneSource=i[1]
+			elif j=="FiligranePosition".lower():self.FiligranePosition=int(i[1])
+			elif j=="FiligraneQuality".lower():self.FiligraneQuality=int(i[1])
+			elif j=="FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
+			elif j=="FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
 			elif j=="DefaultFileMode".lower():
 				self.DefaultFileMode=int(i[1],8)
 				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
@@ -540,34 +565,16 @@ class Config:
 	def PrintConfig(self):
 		print "#"*80
 		print "Size on the images on the Screen:%s"%self.ScreenSize
-		print "Downsampling quality [0..3]:\t %s"%self.Interpolation
 		print "Page prefix:\t\t\t %s"%self.PagePrefix
 		print "Number of images per page:\t %s"%self.NbrPerPage
-		print "Trash directory:\t\t %s"%self.TrashDirectory
-		print "Selected directory:\t\t %s"%self.SelectedDirectory
-		print "Selected images file:\t\t %s"%self.Selected_save
 		print "Use Exif for Auto-Rotate:\t %s"%self.AutoRotate
 		print "Default mode for files (octal):\t %o"%self.DefaultFileMode
 		print "JPEG extensions:\t\t %s"%self.Extensions
 		print "Default photo repository:\t %s"%self.DefaultRepository
 		print "Add signature for exported images:\t%s"%self.Filigrane
 		print "Backup media size (CD,DVD) in Mb :\t%s"%self.MediaSize
-		print "**** Scaled images configuration ****"
-		print "Size:\t\t\t\t %s"%self.ScaledImages["Size"]
-		print "Suffix:\t\t\t\t %s"%self.ScaledImages["Suffix"]
-		print "Interpolation Quality:\t\t %s"%self.ScaledImages["Interpolation"]
-		print "Progressive JPEG:\t\t %s"%self.ScaledImages["Progressive"]
-		print "Optimized JPEG:\t\t\t %s"%self.ScaledImages["Optimize"]
-		print "JPEG Quality:\t\t\t %s %%"%self.ScaledImages["Quality"]
-		print "Allow Exif extraction:\t\t %s"%self.ScaledImages["ExifExtraction"]
-		print "**** Thumbnail images configuration ****"
-		print "Size:\t\t\t\t %s"%self.Thumbnails["Size"]
-		print "Suffix:\t\t\t\t %s"%self.Thumbnails["Suffix"]
-		print "Interpolation Quality:\t\t %s"%self.Thumbnails["Interpolation"]
-		print "Progressive JPEG:\t\t %s"%self.Thumbnails["Progressive"]
-		print "Optimized JPEG:\t\t\t %s"%self.Thumbnails["Optimize"]
-		print "JPEG Quality:\t\t\t %s %%"%self.Thumbnails["Quality"]
-		print "Allow Exif extraction:\t\t %s"%self.Thumbnails["ExifExtraction"]
+		print "Scaled imagesSize:\t\t\t\t %s"%self.ScaledImages["Size"]
+		print "Thumbnail Size:\t\t\t\t %s"%self.Thumbnails["Size"]
 
 	def SaveConfig(self,filename):
 		"""saves the default options"""
@@ -587,6 +594,12 @@ class Config:
 		txt+="#Default photo repository\nDefaultRepository: %s \n\n"%self.DefaultRepository
 		txt+="#Size of the backup media (in MegaByte)\nMediaSize:	%s \n\n"%self.MediaSize
 		txt+="#Add signature to web published images\nFiligrane: %s \n\n"%self.Filigrane
+		txt+="#File containing the image of the signature for the filigrane\nFiligraneSource: %s\n\n"%self.FiligraneSource
+		txt+="#Position of the filigrane : 0=center 12=top center 1=upper-right 3=center-right...\nFiligranePosition: %s\n\n"%self.FiligranePosition
+		txt+="#Quality of the saved image in filigrane mode (JPEG quality)\nFiligraneQuality: %s\n\n"%self.FiligraneQuality
+		txt+="#Optimize the filigraned image (2 pass JPEG encoding)\nFiligraneOptimize: %s\n\n"%self.FiligraneOptimize
+		txt+="#Progressive JPEG for saving filigraned images\nFiligraneProgressive: %s\n\n"%self.FiligraneProgressive
+
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)
@@ -733,7 +746,6 @@ class photo:
 		Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, en particulier A. Fayolles et F. Mantegazza
 		avril 2006
 		necessite numarray et PIL."""
-		import ImageChops
 		try:
 			import numarray
 		except:
@@ -757,7 +769,6 @@ class photo:
 class signature:
 	def __init__(self,filename):
 		"""this filter allows add a signature to an image"""
-		import Image,ImageStat,ImageChops,ImageFile
 		self.sig=Image.open(filename)
 		self.sig.convert("RGB")
 		(self.xs,self.ys)=self.sig.size
@@ -804,7 +815,7 @@ class signature:
 			self.bigsig.paste(self.sig,(self.x/2-self.xs/2,0,self.x/2-self.xs/2+self.xs,self.ys))
 		return
 	
-	def substract(self,inimage,orientation=0):
+	def substract(self,inimage,orientation=5):
 		"""apply a substraction mask on the image"""
 		self.img=inimage	 
 		self.x,self.y=self.img.size
@@ -848,7 +859,7 @@ def FindFile(RootDir):
 
 
 #######################################################################################
-def ScaleImage(filename):
+def ScaleImage(filename,filigrane=None):
 	"""common processing for one image : create a subfolder "scaled" and "thumb" : """
 #	print "Génération des vignettes pour %s "%filename
 	config=Config()
@@ -866,6 +877,9 @@ def ScaleImage(filename):
 	Param.pop("Suffix")
 	Param["Thumbname"]=os.path.join(thumbdir,os.path.basename(filename))[:-4]+"--%s.jpg"%config.Thumbnails["Suffix"]
 	Img.SaveThumb(**Param)
+	if filigrane: 
+		filigrane.substract(Img.f).save(filename,quality=config.FiligraneQuality,optimize=config.FiligraneOptimize,progressive=config.FiligraneOptimize)
+		os.chmod(filename,config.DefaultFileMode)
 
 
 
