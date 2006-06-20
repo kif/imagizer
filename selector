@@ -16,6 +16,8 @@
 # - faire une doc décente.
 # - selectonner 1CD en avant ou en arriere
 # - deplacement par photo titrées et/ou pas
+# - autorotate basé sur EXIF.py plutot que sur exiftran
+# - se passer de exiftran
 # - la version windows et la version mac
 
 #  
