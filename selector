@@ -17,6 +17,7 @@
 # - selectonner 1CD en avant ou en arriere
 # - deplacement par photo titrées et/ou pas
 # - autorotate basé sur EXIF.py plutot que sur exiftran
+# - config pour le champ CommentFile
 # - se passer de exiftran
 # - la version windows et la version mac
 
@@ -84,35 +85,35 @@ class interface:
 		self.xml.get_widget("Filigrane").set_active(i)
 		
 		if config.ScreenSize==300:
-			self.xml.get_widget("t300").set_active(1)
+			self.xml.get_widget("t300").set_active(True)
 		elif config.ScreenSize==600:
-			self.xml.get_widget("t600").set_active(1)
+			self.xml.get_widget("t600").set_active(True)
 		elif config.ScreenSize==900:
-			self.xml.get_widget("t900").set_active(1)
+			self.xml.get_widget("t900").set_active(True)
 		else:
-			self.xml.get_widget("tauto").set_active(1)
+			self.xml.get_widget("tauto").set_active(True)
 			
 		if config.NbrPerPage == 9:
-			self.xml.get_widget("9PerPage").set_active(1)
+			self.xml.get_widget("9PerPage").set_active(True)
 		elif config.NbrPerPage == 12:
-			self.xml.get_widget("12PerPage").set_active(1)
+			self.xml.get_widget("12PerPage").set_active(True)
 		elif config.NbrPerPage == 16:
-			self.xml.get_widget("16PerPage").set_active(1)
+			self.xml.get_widget("16PerPage").set_active(True)
 		elif config.NbrPerPage == 20:
-			self.xml.get_widget("20PerPage").set_active(1)
+			self.xml.get_widget("20PerPage").set_active(True)
 		elif config.NbrPerPage == 25:
-			self.xml.get_widget("25PerPage").set_active(1)
+			self.xml.get_widget("25PerPage").set_active(True)
 		elif config.NbrPerPage == 30:
-			self.xml.get_widget("30PerPage").set_active(1)
+			self.xml.get_widget("30PerPage").set_active(True)
 			
 		if config.Interpolation == 0:
-			self.xml.get_widget("VLowQ").set_active(1)
+			self.xml.get_widget("VLowQ").set_active(True)
 		elif config.Interpolation == 1:
-			self.xml.get_widget("LowQ").set_active(1)
+			self.xml.get_widget("LowQ").set_active(True)
 		elif config.Interpolation == 2:
-			self.xml.get_widget("HiQ").set_active(1)
+			self.xml.get_widget("HiQ").set_active(True)
 		elif config.Interpolation == 3:
-			self.xml.get_widget("VHiQ").set_active(1)
+			self.xml.get_widget("VHiQ").set_active(True)
 		
 		self.flush_event_queue()
 		self.ShowImage()
@@ -618,6 +619,7 @@ class RenameDay:
 	"""prompt a windows and asks for a name for the day"""
 	def __init__(self,filename,AllPhotos,selected):
 		self.dayname=os.path.dirname(filename)
+#		config=Config()
 		try:
 			self.timetuple=time.strptime(self.dayname[:10],"%Y-%m-%d")
 		except:
@@ -634,21 +636,37 @@ class RenameDay:
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
 		self.xml.get_widget("Date").set_text(time.strftime("%A, %d %B %Y",self.timetuple))
-		self.xml.get_widget("Commentaire").set_text(self.name)		
+		self.xml.get_widget("Commentaire").set_text(self.name)
+		self.comment=""
+		self.commentfile=os.path.join(config.DefaultRepository,self.dayname,config.CommentFile)
+		self.DescObj=self.xml.get_widget("Description").get_buffer()
+		if os.path.isfile(self.commentfile):
+			for ligne in open(self.commentfile).readlines():	
+				self.comment+=ligne
+			self.DescObj.set_text(self.comment)
+			
 
 	def continu(self,*args):
 		"""just distroy the window and goes on ...."""
 		self.newname=re.sub(" ","_",latin1_to_ascii(self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")))
-#		print self.newname
-		config=Config()
 		if self.newname=="":
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)
 		else:
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+self.newname
-#		print self.newdayname
+		self.newcommentfile=os.path.join(config.DefaultRepository,self.newdayname,config.CommentFile)
+		if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
+			mkdir(os.path.join(config.DefaultRepository,self.newdayname))
+
+		
+		if self.DescObj.get_modified():
+			self.comment=self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter())
+			f=open(self.newcommentfile,"w")
+			f.write(self.comment)
+			f.close()
+				
+
+
 		if self.newname!=self.name:
-			if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
-				mkdir(os.path.join(config.DefaultRepository,self.newdayname))
 			idx=0
 			for photofile in self.AllPhotos[:]:
 				if os.path.dirname(photofile)==self.dayname:
@@ -665,6 +683,11 @@ class RenameDay:
 					if photofile in self.selected:
 						self.selected[self.selected.index(photofile)]=newphotofile
 				idx+=1
+#move or remove the comment file if necessary
+			if os.path.isfile(self.commentfile) and not  os.path.isfile(self.newcommentfile):
+				os.rename(self.commentfile,self.newcommentfile)
+			elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
+				 os.remove(self.commentfile)
 			if len(os.listdir(os.path.join(config.DefaultRepository,self.dayname)))==0:
 				os.rmdir(os.path.join(config.DefaultRepository,self.dayname))		
 		self.xml.get_widget("Renommer").destroy()

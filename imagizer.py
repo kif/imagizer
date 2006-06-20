@@ -6,6 +6,8 @@
 # Licence GPL v2
 # Bibliotheque contenant tout le prolog de selector basée sur le design Pattern MVC.
 
+
+
 import os,sys,string,shutil,time,re,gc
 
 try:
@@ -478,6 +480,7 @@ class Config:
 		self.AutoRotate=False
 		self.DefaultMode="664"
 		self.DefaultRepository=os.getcwd()
+		self.CommentFile="Comment.txt"
 		self.Interpolation=1
 		self.DefaultFileMode=int(self.DefaultMode,8)
 		self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
