@@ -1,29 +1,51 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: Latin1 -*-
-# Programmé par Jérome Kieffer : kieffer@terre-adelie.org
-# Conception : Jérôme KIEFFER et  Mickael Profeta
-# Avec la participation de Isabelle Letard
+#******************************************************************************\
+#* $Source$
+#* $Id$
+#*
+#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Conception : Jérôme KIEFFER, Mickael Profeta &Isabelle Letard
+#* Licence GPL v2
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+
 # version 0.3 : 28/10/2004
-# version 0.4 : 28/10/2004
 # version 1.1 : 11/01/2005
 # version 1.2 : 13/02/2006 : includes a configuration file
 # version 1.3 : correction d'un bug quant à l'allocation de mémoire dans libjpeg
 # version 1.4 : 04/2006 : passage du pre-processing dans un bibliotheque externe utilisant le design pattern 
+#
+#
 # Liste des dépendances : python, PIL, Glade-2
 # Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
 #
 #todo liste des fonctions a implemanter ....
-# - faire une doc décente.
-# - selectonner 1CD en avant ou en arriere
-# - deplacement par photo titrées et/ou pas
 # - autorotate basé sur EXIF.py plutot que sur exiftran
-# - config pour le champ CommentFile
+# - config pour le champ graver / executer generator
 # - se passer de exiftran
 # - la version windows et la version mac
+# - inclure les options du fichier de config dans generator
+# - faire une doc décente.
 
-#  
-#Licence : GPL version 2
-#
+
+"""
+Selector is the graphical (GUI) interface part of the Imagizer project.
+"""
 
 
 import os,sys,string,shutil,time,re,gc
@@ -136,28 +158,6 @@ class interface:
 		self.xml.signal_connect('on_Gimp_clicked',self.gimp)
 		self.xml.signal_connect('on_Filter_clicked',self.filter)
 		
-		self.xml.signal_connect('on_precedentI_activate',self.previous)
-		self.xml.signal_connect('on_suivantI_activate',self.next)
-		self.xml.signal_connect('on_premierI_activate',self.first)
-		self.xml.signal_connect('on_dernierI_activate',self.last)
-		self.xml.signal_connect('on_plus_10_activate',self.next10)
-		self.xml.signal_connect('on_moins_10_activate',self.previous10)
-
-		self.xml.signal_connect('on_precedentJ_activate',self.previousJ)
-		self.xml.signal_connect('on_suivantJ_activate',self.nextJ)
-		self.xml.signal_connect('on_premierJ_activate',self.firstJ)
-		self.xml.signal_connect('on_dernierJ_activate',self.lastJ)
-
-		self.xml.signal_connect('on_precedentS_activate',self.previousS)
-		self.xml.signal_connect('on_suivantS_activate',self.nextS)
-		self.xml.signal_connect('on_premierS_activate',self.firstS)
-		self.xml.signal_connect('on_dernierS_activate',self.lastS)
-
-		self.xml.signal_connect('on_precedentNS_activate',self.previousNS)
-		self.xml.signal_connect('on_suivantNS_activate',self.nextNS)
-		self.xml.signal_connect('on_premierNS_activate',self.firstNS)
-		self.xml.signal_connect('on_dernierNS_activate',self.lastNS)
-
 		self.xml.signal_connect('on_enregistrerP_activate',self.SavePref)
 		self.xml.signal_connect('on_Autorotate_activate',self.DefAutoRotate)
 		self.xml.signal_connect('on_Filigrane_activate',self.DefFiligrane)
@@ -183,8 +183,40 @@ class interface:
 		self.xml.signal_connect('on_inverserS_activate',self.InvertSelection)
 		self.xml.signal_connect('on_aucun1_activate',self.SelectNone)
 		self.xml.signal_connect('on_TouS_activate',self.SelectAll)
+		self.xml.signal_connect('on_taille_selection_activate',self.CalculateSize)
+		self.xml.signal_connect('on_media_apres_activate',self.SelectNewerMedia)
+		self.xml.signal_connect('on_media_avant_activate',self.SelectOlderMedia)
 		
+		self.xml.signal_connect('on_precedentI_activate',self.previous)
+		self.xml.signal_connect('on_suivantI_activate',self.next)
+		self.xml.signal_connect('on_premierI_activate',self.first)
+		self.xml.signal_connect('on_dernierI_activate',self.last)
+		self.xml.signal_connect('on_plus_10_activate',self.next10)
+		self.xml.signal_connect('on_moins_10_activate',self.previous10)
 
+		self.xml.signal_connect('on_precedentJ_activate',self.previousJ)
+		self.xml.signal_connect('on_suivantJ_activate',self.nextJ)
+		self.xml.signal_connect('on_premierJ_activate',self.firstJ)
+		self.xml.signal_connect('on_dernierJ_activate',self.lastJ)
+
+		self.xml.signal_connect('on_precedentS_activate',self.previousS)
+		self.xml.signal_connect('on_suivantS_activate',self.nextS)
+		self.xml.signal_connect('on_premierS_activate',self.firstS)
+		self.xml.signal_connect('on_dernierS_activate',self.lastS)
+
+		self.xml.signal_connect('on_precedentNS_activate',self.previousNS)
+		self.xml.signal_connect('on_suivantNS_activate',self.nextNS)
+		self.xml.signal_connect('on_premierNS_activate',self.firstNS)
+		self.xml.signal_connect('on_dernierNS_activate',self.lastNS)
+
+		self.xml.signal_connect('on_premierT_activate',self.firstT)
+		self.xml.signal_connect('on_precedentT_activate',self.previousT)
+		self.xml.signal_connect('on_suivantT_activate',self.nextT)
+		self.xml.signal_connect('on_dernierT_activate',self.lastT)
+		self.xml.signal_connect('on_premierNT_activate',self.firstNT)
+		self.xml.signal_connect('on_precedentNT_activate',self.previousNT)
+		self.xml.signal_connect('on_suivantNT_activate',self.nextNT)
+		self.xml.signal_connect('on_dernierNT_activate',self.lastNT)
 		gtk.main()
 
 	def flush_event_queue(self):
@@ -436,14 +468,12 @@ class interface:
 		if len(self.Selected)==0:return
 		self.CurIm=self.AllJpegs.index(self.Selected[0])
 		self.ShowImage()
-		
 	def lastS(self,*args):
 		"""switch to the last image selected"""
 		self.settitle()
 		if len(self.Selected)==0:return
 		self.CurIm=self.AllJpegs.index(self.Selected[-1])
 		self.ShowImage()
-		
 	def nextS(self,*args):
 		"""switch to the next image selected"""
 		self.settitle()	
@@ -453,7 +483,6 @@ class interface:
 				self.CurIm=self.AllJpegs.index(i)
 				self.ShowImage()
 				return
-
 	def previousS(self,*args):
 		"""switch to the previous image selected"""
 		self.settitle()	
@@ -465,7 +494,6 @@ class interface:
 				self.CurIm=self.AllJpegs.index(i)
 				self.ShowImage()
 				return
-				
 	def firstNS(self,*args):
 		"""switch to the first image NOT selected"""
 		self.settitle()
@@ -474,7 +502,6 @@ class interface:
 				self.CurIm=self.AllJpegs.index(i)
 				self.ShowImage()
 				return
-
 	def lastNS(self,*args):
 		"""switch to the last image NOT selected"""
 		self.settitle()
@@ -493,7 +520,6 @@ class interface:
 				self.CurIm=self.AllJpegs.index(i)
 				self.ShowImage()
 				return
-
 	def previousNS(self,*args):
 		"""switch to the previous image NOT selected"""
 		self.settitle()	
@@ -504,6 +530,81 @@ class interface:
 				self.CurIm=self.AllJpegs.index(i)
 				self.ShowImage()
 				return
+
+	def firstT(self,*args):
+		"""switch to the first titeled image"""
+		self.settitle()	
+		for i in self.AllJpegs:
+			if photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def	previousT(self,*args):
+		"""switch to the previous titeled image"""
+		self.settitle()	
+		temp=self.AllJpegs[:self.CurIm]
+		temp.reverse()
+		for i in temp:
+			if photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def nextT(self,*args):
+		"""switch to the next titeled image"""
+		self.settitle()	
+		for i in self.AllJpegs[self.CurIm+1:]:
+			if photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def lastT(self,*args):
+		"""switch to the last titeled image"""
+		self.settitle()	
+		temp=self.AllJpegs[:]
+		temp.reverse()
+		for i in temp:
+			if photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def firstNT(self,*args):
+		"""switch to the first non-titeled image"""
+		self.settitle()	
+		for i in self.AllJpegs:
+			if not photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def	previousNT(self,*args):
+		"""switch to the previous non-titeled image"""
+		self.settitle()	
+		temp=self.AllJpegs[:self.CurIm]
+		temp.reverse()
+		for i in temp:
+			if not photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def nextNT(self,*args):
+		"""switch to the next non-titeled image"""
+		self.settitle()	
+		for i in self.AllJpegs[self.CurIm+1:]:
+			if not photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+	def lastNT(self,*args):
+		"""switch to the last non-titeled image"""
+		self.settitle()	
+		temp=self.AllJpegs[:]
+		temp.reverse()
+		for i in temp:
+			if not photo(i).has_title():
+				self.CurIm=self.AllJpegs.index(i)
+				self.ShowImage()
+				return
+
+
 
 	def SavePref(self,*args):
 		"""Preferences,save clicked. now we save the preferences in the file"""
@@ -580,10 +681,89 @@ class interface:
 		"""lauch a new window and ask for the size of the backup media"""
 		self.settitle()
 		AskMediaSizeInstance=AskMediaSize()
+
+	def SelectNewerMedia(self,*args):
+		"""Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
+		Finally the last selected image is shown and the total size is printed"""
+		self.settitle()
+		size=SelectedSize(self.Selected)
+		initsize=size
+		maxsize=config.MediaSize*1024*1024
+		init=len(self.Selected)
+		for i in self.AllJpegs[self.CurIm:]:
+			if i in self.Selected:
+				continue
+			size+=os.path.getsize(os.path.join(config.DefaultRepository,i))
+			if size>=maxsize:
+				size-=os.path.getsize(os.path.join(config.DefaultRepository,i))
+				break
+			else:
+				self.Selected.append(i)
+		self.Selected.sort()
+		if len(self.Selected)==0:return
+		self.CurIm=self.AllJpegs.index(self.Selected[-1])
+		self.ShowImage()
+		t=SmartSize(size)+(len(self.Selected),)+SmartSize(initsize)+(init,)
+		txt="%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées "%t
+		dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,txt.decode("latin-1"))
+		result=dialog.run()
+		dialog.destroy()
+
+				
+				
 		
-		
+	def SelectOlderMedia(self,*args):
+		"""Calculate the size of the selected images then add older images to complete the media (CD or DVD). 
+		Finally the first selected image is shown and the total size is printed"""
+		self.settitle()
+		size=SelectedSize(self.Selected)
+		initsize=size
+		maxsize=config.MediaSize*1024*1024
+		init=len(self.Selected)
+		tmplist=self.AllJpegs[:self.CurIm]
+		tmplist.reverse()
+		for i in tmplist:
+			if i in self.Selected:
+				continue
+			size+=os.path.getsize(os.path.join(config.DefaultRepository,i))
+			if size>=maxsize:
+				size-=os.path.getsize(os.path.join(config.DefaultRepository,i))
+				break
+			else:
+				self.Selected.append(i)
+		self.Selected.sort()
+		if len(self.Selected)==0:return
+		self.CurIm=self.AllJpegs.index(self.Selected[0])
+		self.ShowImage()
+		t=SmartSize(size)+(len(self.Selected),)+SmartSize(initsize)+(init,)
+		txt="%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées "%t
+		dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,txt.decode("latin-1"))
+		result=dialog.run()
+		dialog.destroy()
+
+	
+	def CalculateSize(self,*args):
+		"""Calculate the size of the selection and print it"""
+		self.settitle()
+		size=SelectedSize(self.Selected)
+		t=SmartSize(size)+(len(self.Selected),)
+		txt="%.2f %s de données dans %i images sélectionnées"%t
+		dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,txt.decode("latin-1"))
+		result=dialog.run()
+		dialog.destroy()
+
+							
 
 # # # # # # fin de la classe interface graphique # # # # # #
+
+	
+def SelectedSize(List):
+	"""Return the size of the selection in byte (octets)"""
+	size=0
+	for File in List:
+		size+=os.path.getsize(os.path.join(config.DefaultRepository,File))
+	return size
+
 def SaveSelected(List):
 	"""save the list of selected files"""
 	print "Sauvegarde de la sélection"
@@ -741,7 +921,7 @@ class WarningSc:
 		self.quit=True
 		self.xml=gtk.glade.XML(unifiedglade,root="dialog-warning")
 		self.xml.signal_connect('on_dialog_warning_destroy',self.destroy)
-#		self.xml.signal_connect('on_Select_clicked',self.filer)
+		self.xml.signal_connect('on_Select_clicked',self.filer)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
 		self.xml.signal_connect('on_dirname_editing_done',self.continu)
@@ -758,8 +938,21 @@ class WarningSc:
 		"""destroy clicked by user -> quit the program"""
 		if self.quit:
 			sys.exit(0)
-
-
+	def filer(self,*args):	
+		"""Lauch the filer GUI to choose the root directory"""
+		self.xml2=gtk.glade.XML(unifiedglade,root="filer")
+		self.xml2.get_widget("filer").set_current_folder(self.directory)
+		self.xml2.signal_connect('on_Open_clicked',self.filerselect)
+		self.xml2.signal_connect('on_Cancel_clicked',self.filerdestroy)
+	def filerselect(self,*args):	
+		"""Close the filer GUI and update the data"""
+		self.directory=self.xml2.get_widget("filer").get_current_folder()
+		self.xml.get_widget("dirname").set_text(self.directory)		
+		self.xml2.get_widget("filer").destroy()
+	def filerdestroy(self,*args):	
+		"""Close the filer GUI"""
+		self.xml2.get_widget("filer").destroy()
+	
 
 
 if __name__=='__main__':

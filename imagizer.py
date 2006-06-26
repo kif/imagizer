@@ -1,10 +1,34 @@
-#!/usr/bin/python
+#!/usr/bin/env python 
 # -*- coding: Latin1 -*-
-# Programmé par Jérome Kieffer : kieffer@terre-adelie.org
-# Conception : Jérôme KIEFFER et  Mickael Profeta
-# Avec la participation de Isabelle Letard
-# Licence GPL v2
-# Bibliotheque contenant tout le prolog de selector basée sur le design Pattern MVC.
+#******************************************************************************\
+#* $Source$
+#* $Id$
+#*
+#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+#* Licence GPL v2
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+
+"""
+General library used by selector and (in a near futur) generator.
+It handles images, progress bars and configuration file.
+"""
+
 
 
 
@@ -15,11 +39,12 @@ try:
 except:
 	raise "Selector needs PIL: Python Imagin Library\n PIL is available from http://www.pythonware.com/products/pil/"
 
-try:
-	import pygtk ; pygtk.require('2.0')
-	import gtk,gtk.glade
-except:
-	raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
+if sys.argv[0]!="generator":
+	try:
+		import pygtk ; pygtk.require('2.0')
+		import gtk,gtk.glade
+	except:
+		raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
 
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
@@ -140,8 +165,9 @@ class ModelProcessSelected:
 			pathday=os.path.join(SelectedDir,day)
 			files=[]
 			for  i in os.listdir(pathday):
-				if i[-4:]==".jpg":files.append(i)
+				if os.path.splitext(i)[1] in config.Extensions:files.append(i)
 			files.sort()
+
 			if  len(files)>config.NbrPerPage:
 				pages=1+(len(files)-1)/config.NbrPerPage
 				for i in range(1, pages+1):
@@ -159,6 +185,19 @@ class ModelProcessSelected:
 					self.refreshSignal.emit(GlobalCount,j)
 					GlobalCount+=1
 					ScaleImage(os.path.join(pathday,j),filigrane)
+######copy the comments of the directory to the Selected directory 
+		AlreadyDone=[]
+		for File in List:
+			directory=os.path.split(File)[0]
+			if directory in AlreadyDone:
+				continue
+			else:
+				AlreadyDone.append(directory)
+				dst=os.path.join(SelectedDir,directory,config.CommentFile)
+				src=os.path.join(config.DefaultRepository,directory,config.CommentFile)
+				if os.path.isfile(src):
+					shutil.copy(src,dst)
+
 		self.finishSignal.emit()
 
 
@@ -216,6 +255,18 @@ class ModelCopySelected:
 				os.chmod(dest,config.DefaultFileMode)
 			else :
 				print "%s existe déja"%(dest)
+######copy the comments of the directory to the Selected directory 
+		AlreadyDone=[]
+		for File in List:
+			directory=os.path.split(File)[0]
+			if directory in AlreadyDone:
+				continue
+			else:
+				AlreadyDone.append(directory)
+				dst=os.path.join(SelectedDir,directory,config.CommentFile)
+				src=os.path.join(config.DefaultRepository,directory,config.CommentFile)
+				if os.path.isfile(src):
+					shutil.copy(src,dst)
 		self.finishSignal.emit()
 
 
@@ -541,6 +592,7 @@ class Config:
 			elif j=="FiligraneQuality".lower():self.FiligraneQuality=int(i[1])
 			elif j=="FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
 			elif j=="FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
+			elif j=="CommentFile".lower():self.CommentFile=i[1]
 			elif j=="DefaultFileMode".lower():
 				self.DefaultFileMode=int(i[1],8)
 				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
@@ -602,7 +654,7 @@ class Config:
 		txt+="#Quality of the saved image in filigrane mode (JPEG quality)\nFiligraneQuality: %s\n\n"%self.FiligraneQuality
 		txt+="#Optimize the filigraned image (2 pass JPEG encoding)\nFiligraneOptimize: %s\n\n"%self.FiligraneOptimize
 		txt+="#Progressive JPEG for saving filigraned images\nFiligraneProgressive: %s\n\n"%self.FiligraneProgressive
-
+		txt+="#File containing the description of the day in each directory\nCommentFile: %s\n\n"%self.CommentFile
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)
@@ -702,7 +754,7 @@ class photo:
 			'EXIF ExposureBiasValue': 'Bias'}
 
 		data={}
-		data["Taille"]="%s ko"%(os.path.getsize(self.fn)/1024)
+		data["Taille"]="%.2f %s"%SmartSize(os.path.getsize(self.fn))
 		
 		RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
 		if comment:
@@ -717,6 +769,15 @@ class photo:
 			except:
 				data[clef[i]]=""
 		return data
+
+	def has_title(self):
+		"""return true if the image is entitled"""
+		RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
+		if comment:
+			return True	 
+		else:
+			return False
+	
 		
 	def show(self,Xsize=600,Ysize=600):
 		"""return a pixbuf to shows the image in a Gtk window"""
@@ -767,6 +828,7 @@ class photo:
 		F=ImageChops.add(ImageChops.multiply(self.f,S),ImageChops.multiply(ImageChops.invert(self.f),M))
 		F.save(os.path.join(self.config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
 		os.chmod(os.path.join(self.config.DefaultRepository,outfile),self.config.DefaultFileMode)
+
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
 class signature:
@@ -829,7 +891,7 @@ class signature:
 
 
 
-
+############################################################################################################
 
 def makedir(filen):
 		"""creates the tree structure for the file"""
@@ -858,6 +920,7 @@ def FindFile(RootDir):
 	good=[]
 	l=len(RootDir)+1
 	for i in files: good.append(i.strip()[l:])
+	good.sort()
 	return good
 
 
@@ -935,6 +998,26 @@ def latin1_to_ascii (unicrap):
 		else:
 			r.append(str(i))
 	return "".join(r)
+
+def SmartSize(size):
+	"""print the size of files in a pretty way"""
+	unit="o"
+	fsize=float(size)
+	if len(str(size))>3:
+		size/=1024
+		fsize/=1024.0
+		unit="ko"
+		if len(str(size))>3:
+			size=size/1024
+			fsize/=1024.0
+			unit="Mo"
+			if len(str(size))>3:
+				size=size/1024
+				fsize/=1024.0
+				unit="Go"
+	return fsize,unit
+
+
 	
 #############################################################################
 class parser:

@@ -12,7 +12,7 @@
   <property name="do_overwrite_confirmation">False</property>
   <property name="title" translatable="yes">dépot Imagizer</property>
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
-  <property name="window_position">GTK_WIN_POS_NONE</property>
+  <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
   <property name="modal">False</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
@@ -23,6 +23,8 @@
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
+  <signal name="destroy" handler="on_filer_destroy" last_modification_time="Sun, 25 Jun 2006 13:07:17 GMT"/>
+  <signal name="selection_changed" handler="on_filer_selection_changed" last_modification_time="Sun, 25 Jun 2006 13:09:25 GMT"/>
 
   <child internal-child="vbox">
     <widget class="GtkVBox" id="dialog-vbox1">
@@ -36,7 +38,7 @@
 	  <property name="layout_style">GTK_BUTTONBOX_END</property>
 
 	  <child>
-	    <widget class="GtkButton" id="button1">
+	    <widget class="GtkButton" id="Cancel">
 	      <property name="visible">True</property>
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
@@ -45,11 +47,12 @@
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
 	      <property name="response_id">-6</property>
+	      <signal name="clicked" handler="on_Cancel_clicked" last_modification_time="Sun, 25 Jun 2006 13:10:29 GMT"/>
 	    </widget>
 	  </child>
 
 	  <child>
-	    <widget class="GtkButton" id="button2">
+	    <widget class="GtkButton" id="Open">
 	      <property name="visible">True</property>
 	      <property name="can_default">True</property>
 	      <property name="has_default">True</property>
@@ -59,6 +62,7 @@
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
 	      <property name="response_id">-5</property>
+	      <signal name="clicked" handler="on_Open_clicked" last_modification_time="Sun, 25 Jun 2006 13:10:10 GMT"/>
 	    </widget>
 	  </child>
 	</widget>
@@ -125,7 +129,7 @@
 			  <signal name="activate" handler="on_About_activate" last_modification_time="Thu, 06 Jan 2005 21:32:05 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image516">
+			    <widget class="GtkImage" id="image580">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-dialog-info</property>
 			      <property name="icon_size">1</property>
@@ -148,7 +152,7 @@
 			  <accelerator key="Delete" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image517">
+			    <widget class="GtkImage" id="image581">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-delete</property>
 			      <property name="icon_size">1</property>
@@ -175,7 +179,7 @@
 			  <property name="use_underline">True</property>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image518">
+			    <widget class="GtkImage" id="image582">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-execute</property>
 			      <property name="icon_size">1</property>
@@ -241,7 +245,7 @@
 			  <signal name="activate" handler="on_nommer1_activate" last_modification_time="Thu, 25 May 2006 15:28:39 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image519">
+			    <widget class="GtkImage" id="image583">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-directory</property>
 			      <property name="icon_size">1</property>
@@ -334,7 +338,7 @@
 			  <property name="use_underline">True</property>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image520">
+			    <widget class="GtkImage" id="image584">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-zoom-100</property>
 			      <property name="icon_size">1</property>
@@ -385,7 +389,7 @@
 				  <property name="visible">True</property>
 				  <property name="label" translatable="yes">Taille actuelle</property>
 				  <property name="use_underline">True</property>
-				  <property name="active">False</property>
+				  <property name="active">True</property>
 				  <property name="group">t300</property>
 				  <signal name="activate" handler="on_tauto_activate" last_modification_time="Thu, 06 Jan 2005 20:53:30 GMT"/>
 				</widget>
@@ -451,7 +455,7 @@
 				  <property name="tooltip" translatable="yes">Interpollation Hyperbolique </property>
 				  <property name="label" translatable="yes">Très Bon</property>
 				  <property name="use_underline">True</property>
-				  <property name="active">False</property>
+				  <property name="active">True</property>
 				  <property name="group">VLowQ</property>
 				  <signal name="activate" handler="on_VHiQ_activate" last_modification_time="Thu, 06 Jan 2005 20:52:25 GMT"/>
 				</widget>
@@ -535,7 +539,7 @@
 				  <property name="visible">True</property>
 				  <property name="label" translatable="yes">30</property>
 				  <property name="use_underline">True</property>
-				  <property name="active">False</property>
+				  <property name="active">True</property>
 				  <property name="group">9PerPage</property>
 				  <signal name="activate" handler="on_30PerPage_activate" last_modification_time="Sun, 19 Feb 2006 16:39:11 GMT"/>
 				</widget>
@@ -568,7 +572,7 @@
 			  <signal name="activate" handler="on_chargerS_activate" last_modification_time="Tue, 11 Jan 2005 21:05:29 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image521">
+			    <widget class="GtkImage" id="image585">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-open</property>
 			      <property name="icon_size">1</property>
@@ -604,7 +608,7 @@
 			  <signal name="activate" handler="on_inverserS_activate" last_modification_time="Thu, 06 Jan 2005 21:20:53 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image522">
+			    <widget class="GtkImage" id="image586">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-refresh</property>
 			      <property name="icon_size">1</property>
@@ -642,10 +646,20 @@
 		      </child>
 
 		      <child>
+			<widget class="GtkMenuItem" id="taille_selection">
+			  <property name="visible">True</property>
+			  <property name="tooltip" translatable="yes">Calcule la taille de la section</property>
+			  <property name="label" translatable="yes">Taille</property>
+			  <property name="use_underline">True</property>
+			  <signal name="activate" handler="on_taille_selection_activate" last_modification_time="Sat, 24 Jun 2006 15:07:27 GMT"/>
+			</widget>
+		      </child>
+
+		      <child>
 			<widget class="GtkMenuItem" id="media_avant">
 			  <property name="visible">True</property>
 			  <property name="tooltip" translatable="yes">Sélection pour  remplir CD/DVD  avec des images plus anciennes que la courante.</property>
-			  <property name="label" translatable="yes">Media avant</property>
+			  <property name="label" translatable="yes">CD/DVD + ancien</property>
 			  <property name="use_underline">True</property>
 			  <signal name="activate" handler="on_media_avant_activate" last_modification_time="Tue, 13 Jun 2006 20:58:49 GMT"/>
 			</widget>
@@ -655,7 +669,7 @@
 			<widget class="GtkMenuItem" id="media_apres">
 			  <property name="visible">True</property>
 			  <property name="tooltip" translatable="yes">Sélection pour  remplir CD/DVD  avec des images plus récentes que la courante.</property>
-			  <property name="label" translatable="yes">Media après</property>
+			  <property name="label" translatable="yes">CD/DVD + récent</property>
 			  <property name="use_underline">True</property>
 			  <signal name="activate" handler="on_media_apres_activate" last_modification_time="Tue, 13 Jun 2006 20:58:49 GMT"/>
 			</widget>
@@ -702,7 +716,7 @@
 				  <signal name="activate" handler="on_moins_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image523">
+				    <widget class="GtkImage" id="image587">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-undo</property>
 				      <property name="icon_size">1</property>
@@ -741,7 +755,7 @@
 				  <signal name="activate" handler="on_plus_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image524">
+				    <widget class="GtkImage" id="image588">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-redo</property>
 				      <property name="icon_size">1</property>
