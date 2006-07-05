@@ -209,8 +209,22 @@ from urllib import quote as urlquote
 
 import imghdr
 import stat
-sys.path.append('/usr/share/imagizer')
+
+#here we detect the OS runnng the program so that we can call exftran in the right way
+if os.name == 'nt': #sys.platform == 'win32':
+	installdir="c:\\Imagizer"
+	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")]
+elif os.name == 'posix':
+	installdir='/usr/share/imagizer'
+	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
+else:
+	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
+	sys.exit(1)
+sys.path.append(installdir)	
 import EXIF
+from imagizer import *
+config=Config()
+config.load(ConfFile)
 
 from traceback import print_exception
 
@@ -888,8 +902,9 @@ class Image:
                     print >> sys.stderr, \
                           "Error: in attributes file %s" % a._path
 
-        self.readExif()
-
+#        self.readExif()
+        self._exif,self._comment=exif(join(opts.root,self._filename))
+#        print self._exif,self._comment
         # no title, so use something unique to the image, it's path
         if not self._title:
             self._title = join(self._dir._path, self._base)
@@ -1026,25 +1041,25 @@ class Image:
             self._title = title
             
     # -------------------------------------------------------------------------
-    def readExif( self ):
-
-        """ Read Exif tags and jpeg comment """
-
-        exiffn = join(opts.root,self._filename)
-        exif_file = open(exiffn, 'rb')
-        data,comment = EXIF.process_file(exif_file)
-
-     #   print comment
-
-        if comment:
-            try:
-                self._comment =  comment.encode("latin-1")
-            except:
-                sys.stderr.write("The title of %s is not encodable in latin-1\n"%exiffn)
-                self._comment =  splitext(self._filename)[0]
-
-        if data:
-            self._exif = data
+#    def readExif( self ):
+#
+#        """ Read Exif tags and jpeg comment """
+#
+#        exiffn = join(opts.root,self._filename)
+#        exif_file = open(exiffn, 'rb')
+#        data,comment = EXIF.process_file(exif_file)
+#
+#     #   print comment
+#
+#        if comment:
+#            try:
+#                self._comment =  comment.encode("latin-1")
+#            except:
+#                sys.stderr.write("The title of %s is not encodable in latin-1\n"%exiffn)
+#                self._comment =  splitext(self._filename)[0]
+#
+#        if data:
+#            self._exif = data
     #---------------------------------------------------------------------------
     #
     def generateThumbnail( img ):
@@ -2083,6 +2098,28 @@ def sous_titre(i):
     s_titre += '<br>\n'+description
   return s_titre
 
+def exif(filename):
+	"""return exif data + title from the photo"""
+	clef=['Image Make','Image Model','Image DateTime','EXIF Flash',
+	'EXIF FocalLength','EXIF FNumber','EXIF ExposureTime',
+	'EXIF ISOSpeedRatings']
+	data={}
+	RawExif,comment=EXIF.process_file(open(filename,'rb'),0)
+	if comment:
+		try:
+			comment =  comment.encode("latin-1")
+		except:
+			sys.stderr.write("The title of %s is not encodable in latin-1\n"%exiffn)
+			self._comment =  splitext(self._filename)[0]
+	else:
+		comment=""
+
+	for i in clef:
+		try:
+			data[i]=str(RawExif[i].printable).strip()
+		except:
+			data[i]=""
+	return data,comment
 
 
 #===============================================================================
@@ -2311,7 +2348,7 @@ if image._exif:
     for s in exif_tag:
         if exif_key[s] in image._exif:
             print '<tr><td class="settings">%s:</td> \
-            <td class="settings"> %s </td></tr>' % (s,image._exif[exif_key[s]].printable)
+            <td class="settings"> %s </td></tr>' % (s,image._exif[exif_key[s]])
 -->
 
 </table>

@@ -732,11 +732,11 @@ class EXIF_header:
         else:
             val=s2n_motorola(slice)
         # Sign extension ?
-        if signed:
+#        if signed:
             #msb=1 << (8*length-1)
             #if val & msb:
             #    val=val-(msb << 1)
-            pass
+#            pass
         return val
 
     # convert offset to string
