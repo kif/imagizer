@@ -1,4 +1,4 @@
-
+#Use this Makefile only on a UNIX computer.
 DESTDIR=/usr
 
 install:
@@ -10,6 +10,7 @@ install:
 	install -m 644 pixmaps/*.ico $(DESTDIR)/share/imagizer
 	install -m 644 selector.glade $(DESTDIR)/share/imagizer
 	install -m 644 EXIF.py $(DESTDIR)/share/imagizer
+	install -m 644 config.py $(DESTDIR)/share/imagizer
 	install -m 644 imagizer.py $(DESTDIR)/share/imagizer
 	install -m 644 signals.py $(DESTDIR)/share/imagizer
 	install -m 644 README.txt $(DESTDIR)/share/doc/imagizer

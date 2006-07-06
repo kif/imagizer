@@ -38,18 +38,13 @@ try:
 	import Image,ImageStat,ImageChops,ImageFile
 except:
 	raise "Selector needs PIL: Python Imagin Library\n PIL is available from http://www.pythonware.com/products/pil/"
-
-rungenerator=False
-for i in sys.argv:
-	if i.lower().find("generator")!=-1:rungenerator=True
-if not rungenerator:
-	try:
-		import pygtk ; pygtk.require('2.0')
-		import gtk,gtk.glade
-	except:
+try:
+	import pygtk ; pygtk.require('2.0')
+	import gtk,gtk.glade
+except:
 		raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
-	#Variables globales qui sont des CONSTANTES !
-	gtkInterpolation=[gtk.gdk.INTERP_NEAREST,gtk.gdk.INTERP_TILES,gtk.gdk.INTERP_BILINEAR,gtk.gdk.INTERP_HYPER]	
+#Variables globales qui sont des CONSTANTES !
+gtkInterpolation=[gtk.gdk.INTERP_NEAREST,gtk.gdk.INTERP_TILES,gtk.gdk.INTERP_BILINEAR,gtk.gdk.INTERP_HYPER]	
 #gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
 #gtk.gdk.INTERP_TILES	This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
 #gtk.gdk.INTERP_BILINEAR	Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
@@ -74,6 +69,10 @@ else:
 sys.path.append(installdir)	
 unifiedglade=os.path.join(installdir,"selector.glade")
 from signals import Signal
+from config import Config
+config=Config()
+config.load(ConfFile)
+
 import EXIF
 
 
@@ -116,7 +115,7 @@ class ModelProcessSelected:
 		""" Lance les calculs
 		"""
 		self.startSignal.emit(self.__label, max(1,len(List)))
-		config=Config()
+#		config=Config()
 		if config.Filigrane:
 			filigrane=signature(config.FiligraneSource)
 		else:
@@ -217,7 +216,7 @@ class ModelCopySelected:
 		""" Lance les calculs
 		"""
 		self.startSignal.emit(self.__label, max(1,len(List)))
-		config=Config()
+#		config=Config()
 		if config.Filigrane:
 			filigrane=signature(config.FiligraneSource)
 		else:
@@ -292,7 +291,7 @@ class ModelRangeTout:
 	def start(self,RootDir):
 		""" Lance les calculs
 		"""
-		config=Config()
+#		config=Config()
 		AllJpegs=FindFile(RootDir)
 		AllFilesToProcess=[]
 		AllreadyDone=[]
@@ -516,160 +515,6 @@ def CopySelected(SelectedFiles):
 
 
 
-################################################################################################
-class Config:
-	"""this class is a Borg : always returns the same values regardless to the instance of the object"""
-	__shared_state = {}
-	def __init__(self):
-		self.__dict__ = self.__shared_state
-	def default(self):
-		self.ScreenSize=600
-		self.NbrPerPage=20
-		self.PagePrefix="page"
-		self.TrashDirectory="Trash"
-		self.SelectedDirectory="Selected"
-		self.Selected_save=".selected-photos"
-		self.Extensions=[".jpg", ".jpeg",".jpe",".jfif"]
-		self.AutoRotate=False
-		self.DefaultMode="664"
-		self.DefaultRepository=os.getcwd()
-		self.CommentFile="Comment.txt"
-		self.Interpolation=1
-		self.DefaultFileMode=int(self.DefaultMode,8)
-		self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
-		self.Filigrane=False
-		self.FiligraneSource=os.path.join(installdir,"signature.png")
-		self.FiligranePosition=5
-		self.FiligraneQuality=75
-		self.FiligraneOptimize=False		
-		self.FiligraneProgressive=False		
-		self.MediaSize=680
-		self.Thumbnails={
-			"Size":160,
-			"Suffix": "thumb",
-			"Interpolation":1,
-			"Progressive":False,
-			"Optimize":False,
-			"ExifExtraction":True,
-			"Quality": 75
-			}
-		self.ScaledImages={
-			"Size":800,
-			"Suffix": "scaled",
-			"Interpolation":2,
-			"Progressive":False,
-			"Optimize":False,
-			"ExifExtraction":False,
-			"Quality": 75
-			}
-			
-	def load(self,filenames):
-		"""retrieves the the default options, if the filenames does not exist, uses the default instead
-		type filenames: list of filename
-		"""
-		import ConfigParser
-		config = ConfigParser.ConfigParser()
-		self.default()
-		files=[]
-		for i in filenames:
-			if os.path.isfile(i):files.append(i)
-		if len(files)==0:
-			print "No configuration file found. Falling back on defaults"
-			return
-
-		config.read(files)
-		for i in config.items("Selector"):
-			j=i[0]
-			if j=="ScreenSize".lower():self.ScreenSize=int(i[1])
-			elif j=="Interpolation".lower():self.Interpolation=int(i[1])
-			elif j=="PagePrefix".lower():self.PagePrefix=i[1]
-			elif j=="NbrPerPage".lower():self.NbrPerPage=int(i[1])
-			elif j=="TrashDirectory".lower():self.TrashDirectory=i[1]
-			elif j=="SelectedDirectory".lower():self.SelectedDirectory=i[1]
-			elif j=="Selected_save".lower():self.Selected_save=i[1]
-			elif j=="AutoRotate".lower():self.AutoRotate=config.getboolean("Selector","AutoRotate")
-			elif j=="Filigrane".lower():self.Filigrane=config.getboolean("Selector","Filigrane")
-			elif j=="FiligraneSource".lower():self.FiligraneSource=i[1]
-			elif j=="FiligranePosition".lower():self.FiligranePosition=int(i[1])
-			elif j=="FiligraneQuality".lower():self.FiligraneQuality=int(i[1])
-			elif j=="FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
-			elif j=="FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
-			elif j=="CommentFile".lower():self.CommentFile=i[1]
-			elif j=="DefaultFileMode".lower():
-				self.DefaultFileMode=int(i[1],8)
-				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
-			elif j=="Extensions".lower(): self.Extensions=i[1].split()
-			elif j=="DefaultRepository".lower():self.DefaultRepository=i[1]
-			elif j=="MediaSize".lower():self.MediaSize=float(i[1])
-			else: print "unknown key "+j
-
-		for k in ["ScaledImages","Thumbnails"]:
-			try:
-				dico=eval(k)
-			except:
-				dico={}
-			for i in config.items(k):
-				j=i[0]
-				if j=="Size".lower():dico["Size"]=int(i[1])
-				elif j=="Suffix".lower():dico["Suffix"]=i[1]
-				elif j=="Interpolation".lower():dico["Interpolation"]=int(i[1])
-				elif j=="Progressive".lower():dico["Progressive"]=config.getboolean(k,"Progressive")
-				elif j=="Optimize".lower():dico["Optimize"]=config.getboolean(k,"Optimize")
-				elif j=="ExifExtraction".lower():dico["ExifExtraction"]=config.getboolean(k,"ExifExtraction")
-				elif j=="Quality".lower():dico["Quality"]=int(i[1])
-			exec("self.%s=dico"%k)
-	
-	def PrintConfig(self):
-		print "#"*80
-		print "Size on the images on the Screen:%s"%self.ScreenSize
-		print "Page prefix:\t\t\t %s"%self.PagePrefix
-		print "Number of images per page:\t %s"%self.NbrPerPage
-		print "Use Exif for Auto-Rotate:\t %s"%self.AutoRotate
-		print "Default mode for files (octal):\t %o"%self.DefaultFileMode
-		print "JPEG extensions:\t\t %s"%self.Extensions
-		print "Default photo repository:\t %s"%self.DefaultRepository
-		print "Add signature for exported images:\t%s"%self.Filigrane
-		print "Backup media size (CD,DVD) in Mb :\t%s"%self.MediaSize
-		print "Scaled imagesSize:\t\t\t\t %s"%self.ScaledImages["Size"]
-		print "Thumbnail Size:\t\t\t\t %s"%self.Thumbnails["Size"]
-
-	def SaveConfig(self,filename):
-		"""saves the default options"""
-		txt="[Selector]\n"
-		txt+="#Size of the image on the Screen, by default\nScreenSize: %s \n\n"%self.ScreenSize
-		txt+="#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]\nInterpolation: %s \n\n"%self.Interpolation
-		txt+="#Page prefix (used when there are too many images per day to fit on one web page)\nPagePrefix: %s \n\n"%self.PagePrefix
-		txt+="#Maximum number of images per web page\nNbrPerPage: %s\n\n"%self.NbrPerPage
-		txt+="#Trash sub-directory\nTrashDirectory: %s \n\n"%self.TrashDirectory
-		txt+="#Selected/processed images sub-directory\nSelectedDirectory: %s \n\n"%self.SelectedDirectory
-		txt+="#File containing the list of selected but unprocessed images\nSelected_save: %s \n\n"%self.Selected_save
-		txt+="#Use Exif data for auto-rotation of the images (canon cameras mainly)\nAutoRotate: %s\n\n"%self.AutoRotate
-		txt+="#Default mode for files (in octal)\nDefaultFileMode: %o\n\n"%self.DefaultFileMode
-		txt+="#Default JPEG extensions\nExtensions: "
-		for i in self.Extensions: txt+=i+" "
-		txt+="\n\n"
-		txt+="#Default photo repository\nDefaultRepository: %s \n\n"%self.DefaultRepository
-		txt+="#Size of the backup media (in MegaByte)\nMediaSize:	%s \n\n"%self.MediaSize
-		txt+="#Add signature to web published images\nFiligrane: %s \n\n"%self.Filigrane
-		txt+="#File containing the image of the signature for the filigrane\nFiligraneSource: %s\n\n"%self.FiligraneSource
-		txt+="#Position of the filigrane : 0=center 12=top center 1=upper-right 3=center-right...\nFiligranePosition: %s\n\n"%self.FiligranePosition
-		txt+="#Quality of the saved image in filigrane mode (JPEG quality)\nFiligraneQuality: %s\n\n"%self.FiligraneQuality
-		txt+="#Optimize the filigraned image (2 pass JPEG encoding)\nFiligraneOptimize: %s\n\n"%self.FiligraneOptimize
-		txt+="#Progressive JPEG for saving filigraned images\nFiligraneProgressive: %s\n\n"%self.FiligraneProgressive
-		txt+="#File containing the description of the day in each directory\nCommentFile: %s\n\n"%self.CommentFile
-		for i in ["ScaledImages","Thumbnails"]:
-			txt+="[%s]\n"%i
-			j=eval("self.%s"%i)
-			txt+="#%s size\nSize: %s \n\n"%(i,j["Size"])
-			txt+="#%s suffix\nSuffix: %s \n\n"%(i,j["Suffix"])
-			txt+="#%s downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias]\nInterpolation: %s \n\n"%(i,j["Interpolation"])
-			txt+="#%s progressive JPEG files\nProgressive: %s \n\n"%(i,j["Progressive"])
-			txt+="#%s optimized JPEG (2 pass encoding)\nOptimize: %s \n\n"%(i,j["Optimize"])
-			txt+="#%s quality (in percent)\nQuality: %s \n\n"%(i,j["Quality"])
-			txt+="#%s image can be obtained by Exif extraction ?\nExifExtraction: %s \n\n"%(i,j["ExifExtraction"])
-		w=open(filename,"w")
-		w.write(txt)
-		w.close()
 
 
 # # # # # # Début de la classe photo # # # # # # # # # # #
@@ -677,9 +522,8 @@ class Config:
 class photo:
 	"""class photo that does all the operations available on photos"""
 	def __init__(self,filename):
-		self.config=Config()
 		self.filename=filename
-		self.fn=os.path.join(self.config.DefaultRepository,self.filename)
+		self.fn=os.path.join(config.DefaultRepository,self.filename)
 		if not os.path.isfile(self.fn): print "Erreur, le fichier %s n'existe pas"%self.fn 
 
 	def LoadPIL(self):
@@ -718,7 +562,7 @@ class photo:
 				self.g=self.f.copy()
 				self.g.thumbnail((Size,Size),Interpolation)
 				self.g.save(Thumbname,quality=Quality,progressive=Progressive,optimize=Optimize)
-			os.chmod(Thumbname,self.config.DefaultFileMode)
+			os.chmod(Thumbname,config.DefaultFileMode)
 
 	
 	def Rotate(self,angle=0):
@@ -736,7 +580,7 @@ class photo:
 
 	def Trash(self):
 		"""Send the file to the trash folder"""
-		Trashdir=os.path.join(self.config.DefaultRepository,self.config.TrashDirectory)
+		Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
 		td=os.path.dirname(os.path.join(Trashdir,self.filename))
 		tf=os.path.join(Trashdir,self.filename)
 		if not os.path.isdir(td): makedir(td)
@@ -791,7 +635,7 @@ class photo:
 			nx=int(R*self.x)
 			ny=int(R*self.y)
 #			print  "Taille Obtenue  %sx%s"%(nx,ny)
-			scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[self.config.Interpolation])
+			scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[config.Interpolation])
 		else :
 			scaled_buf=pixbuf
 		return scaled_buf
@@ -828,8 +672,8 @@ class photo:
 		S=ImageChops.screen(self.f,k)
 		M=ImageChops.multiply(self.f,k)
 		F=ImageChops.add(ImageChops.multiply(self.f,S),ImageChops.multiply(ImageChops.invert(self.f),M))
-		F.save(os.path.join(self.config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
-		os.chmod(os.path.join(self.config.DefaultRepository,outfile),self.config.DefaultFileMode)
+		F.save(os.path.join(config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
+		os.chmod(os.path.join(config.DefaultRepository,outfile),config.DefaultFileMode)
 
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
@@ -906,7 +750,7 @@ def makedir(filen):
 
 def mkdir(filename):
 	"""create an empty directory with the given rights"""
-	config=Config()
+#	config=Config()
 	os.mkdir(filename)
 	os.chmod(filename,config.DefaultDirMode)
 
@@ -916,7 +760,7 @@ def FindFile(RootDir):
 	files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
 	"""
 	files=[]
-	config=Config()
+#	config=Config()
 	for i in config.Extensions:
 		files+=parser().FindExts(RootDir,i)
 	good=[]
@@ -929,8 +773,7 @@ def FindFile(RootDir):
 #######################################################################################
 def ScaleImage(filename,filigrane=None):
 	"""common processing for one image : create a subfolder "scaled" and "thumb" : """
-#	print "Génération des vignettes pour %s "%filename
-	config=Config()
+#	config=Config()
 	rootdir=os.path.dirname(filename)
 	scaledir=os.path.join(rootdir,config.ScaledImages["Suffix"])
 	thumbdir=os.path.join(rootdir,config.Thumbnails["Suffix"])
@@ -1051,8 +894,6 @@ class parser:
 if __name__ == "__main__":
 	####################################################################################	
 	#Definition de la classe des variables de configuration globales : Borg"""
-	config=Config()
-	config.load(ConfFile)
 	config.DefaultRepository=os.path.abspath(sys.argv[1])
 	print config.DefaultRepository
 	RangeTout(sys.argv[1])

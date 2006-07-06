@@ -212,17 +212,16 @@ import stat
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir="c:\\Imagizer"
-	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")]
+	installdir='"c:\\Program Files\\Imagizer"'
 elif os.name == 'posix':
 	installdir='/usr/share/imagizer'
-	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
 sys.path.append(installdir)	
 import EXIF
 from imagizer import *
+from config import Config
 config=Config()
 config.load(ConfFile)
 
@@ -3065,10 +3064,25 @@ def main():
             generatePage( dir._pagefn, 'dirindex', envir )
 
             lnfn = join(opts.root, dir._path, index_fn)
+            if islink(lnfn): os.remove(lnfn)
             if not ( opts.no_links or opts.out_onedir ) and \
                    not exists(lnfn) and not islink(lnfn):
-                if hasattr(os, 'symlink'):
-                    os.symlink(rel(dir._pagefn, dir._path), lnfn)
+                f=open(lnfn,"w")
+                f.write('''
+<HTML>
+<HEAD>
+	<link rel=stylesheet type="text/css" href="style.css">
+	<TITLE>Redirection</TITLE>
+	<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html">
+</HEAD>
+<BODY>
+	<H1>You should be reloacted to the correct URL in a second :</H1>
+	<p> <a href="html/dirindex.html">html/dirindex.html</a></p>
+</BODY>
+</HTML>''')
+                f.close()
+#				if hasattr(os, 'symlink'):
+#                    os.symlink(rel(dir._pagefn, dir._path), lnfn)
     rootdir.visit(walkDirsForIndex)
 
     #
@@ -3089,10 +3103,10 @@ def main():
     if opts.quiet: print "==> global index generation"
 
     envir['dir'] = rootdir
-    if opts.quiet: print "generating allindex", allindex_fn
-    generatePage( allindex_fn, 'allindex', envir )
-    if opts.quiet: print "generating sortindex", sortindex_fn
-    generatePage( sortindex_fn, 'sortindex', envir )
+#    if opts.quiet: print "generating allindex", allindex_fn
+#    generatePage( allindex_fn, 'allindex', envir )
+#    if opts.quiet: print "generating sortindex", sortindex_fn
+#    generatePage( sortindex_fn, 'sortindex', envir )
     if opts.quiet: print "generating summary", allcidx_fn
     generateSummary( allcidx_fn, allimages )
     if opts.quiet: print "generating css file", css_fn
