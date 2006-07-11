@@ -209,21 +209,21 @@ from urllib import quote as urlquote
 
 import imghdr
 import stat
-
+import distutils.sysconfig
 #here we detect the OS runnng the program so that we can call exftran in the right way
+installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir='"c:\\Program Files\\Imagizer"'
+#	installdir='"c:\\Program Files\\Imagizer"'
 	ConfFile=[os.path.join(installdir,"imagizer.conf"),os.path.join(installdir,".imagizer")]
-
 elif os.name == 'posix':
-	installdir='/usr/share/imagizer'
+#	installdir='/usr/share/imagizer'
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
-sys.path.append(installdir)	
-import EXIF
-from config import Config
+#sys.path.append(installdir)	
+import imagizer.EXIF as EXIF
+from imagizer.config import Config
 config=Config()
 config.load(ConfFile)
 
@@ -2775,7 +2775,10 @@ def main():
     opts, args = parser.parse_args()
 
     if len(args) == 0:
-        opts.root = os.getcwd()
+        if isdir(config.WebRepository):
+            opts.root = config.WebRepository
+        else:	
+            opts.root = os.getcwd()
     elif len(args) == 1:
         opts.root = args[0]
     elif len(args) > 1:

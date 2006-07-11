@@ -41,6 +41,7 @@
 # - la version windows et la version mac
 # - inclure les options du fichier de config dans generator
 # - faire une doc décente.
+# - remplacer le makefile par un script python qui serait multi plateforme
 
 
 """
@@ -48,16 +49,17 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os,sys,string,shutil,time,re,gc
+import os,sys,string,shutil,time,re,gc,distutils.sysconfig
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
+installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir="c:\\Imagizer"
+#	installdir="c:\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
 	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")]
 elif os.name == 'posix':
-	installdir='/usr/share/imagizer'
+#	installdir='/usr/share/imagizer'
 	exiftran=os.path.join(installdir,"exiftran ")
 	gimpexe="gimp-remote "
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
@@ -66,9 +68,9 @@ else:
 	sys.exit(1)
 
 
-sys.path.append(installdir)	
-import EXIF
-from imagizer import *
+#sys.path.append(installdir)	
+import imagizer.EXIF as EXIF
+from imagizer.imagizer import *
 config=Config()
 config.load(ConfFile)
 kpix= 3*config.ScaledImages["Size"]**2/4000
@@ -152,6 +154,9 @@ class interface:
 		self.xml.signal_connect('on_quitter1_activate',self.die)
 		self.xml.signal_connect('on_nommer1_activate',self.renommer)
 		self.xml.signal_connect('on_executer1_activate',self.run)
+		self.xml.signal_connect('on_copie_et_grave1_activate',self.Burn)
+		self.xml.signal_connect('on_vers_page_web2_activate',self.ToWeb)
+		self.xml.signal_connect('on_vide_selection1_activate',self.EmptySelected)
 		self.xml.signal_connect('on_copie1_activate',self.copy)
 		self.xml.signal_connect('on_poubelle_activate',self.poubelle)
 		self.xml.signal_connect('on_Poubelle_clicked',self.poubelle)
@@ -358,6 +363,29 @@ class interface:
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		print "Done"
+	def ToWeb(self,*args):
+		"""lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
+		self.settitle()
+		ProcessSelected(self.Selected)
+		self.Selected=[]
+		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
+		print config.WebServer
+		print re.sub("\$WebRepository",config.WebRepository,re.sub("\$Selected",SelectedDir,config.WebServer))
+		out=os.system(re.sub("\$WebRepository",config.WebRepository,re.sub("\$Selected",SelectedDir,config.WebServer)))
+		if out != 0 : print "Error n° : %i"%out
+		print "Done"
+
+	def EmptySelected(self,*args):
+		"""remove all the files in the "Selected" folder"""
+		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
+		for dirs in os.listdir(SelectedDir):
+			curfile=os.path.join(SelectedDir,dirs)
+			if os.path.isdir(curfile):
+				recursive_delete(curfile)
+			else:
+				os.remove(curfile)
+		print "Done"
 
 	def copy(self,*args):
 		"""lauch the copy of all selected files"""
@@ -365,6 +393,19 @@ class interface:
 		CopySelected(self.Selected)
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+		print "Done"
+
+	def Burn(self,*args):
+		"""lauch the copy of all selected files then burn a CD according to the configuration file"""
+		self.settitle()
+		CopySelected(self.Selected)
+		self.Selected=[]
+		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
+		print config.Burn
+		print re.sub("\$Selected",SelectedDir,config.Burn)
+		out=os.system(re.sub("\$Selected",SelectedDir,config.Burn))
+		if out != 0 : print "Error n° : %i"%out
 		print "Done"
 
 

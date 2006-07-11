@@ -32,7 +32,7 @@ It handles images, progress bars and configuration file.
 
 
 
-import os,sys,string,shutil,time,re,gc
+import os,sys,string,shutil,time,re,gc,distutils.sysconfig
 
 try:
 	import Image,ImageStat,ImageChops,ImageFile
@@ -52,13 +52,14 @@ gtkInterpolation=[gtk.gdk.INTERP_NEAREST,gtk.gdk.INTERP_TILES,gtk.gdk.INTERP_BIL
 
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
+installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir="c:\\Imagizer"
+#	installdir="c:\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
-	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")]
+	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")] #TODO!!!!
 elif os.name == 'posix':
-	installdir='/usr/share/imagizer'
+#	installdir='/usr/share/imagizer'
 	exiftran=os.path.join(installdir,"exiftran ")
 	gimpexe="gimp-remote "
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
@@ -66,7 +67,7 @@ else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
 
-sys.path.append(installdir)	
+#sys.path.append(installdir)	
 unifiedglade=os.path.join(installdir,"selector.glade")
 from signals import Signal
 from config import Config
@@ -887,6 +888,19 @@ class parser:
 		self.OneDir(self.root)
 		return self.imagelist
 
+
+def recursive_delete(dirname):
+	files = os.listdir(dirname)
+	for filename in files:
+		path = os.path.join (dirname, filename)
+		if os.path.isdir(path):
+			recursive_delete(path)
+		else:
+			print 'Removing file: "%s"' % path
+			retval = os.remove(path)
+			
+	print 'Removing directory:', dirname
+	os.rmdir(dirname)
 
 
 

@@ -14,6 +14,12 @@ leur date, propose de les nommer ou de les selectionner.
 fabrique les pages HTML et s'occupe de la connectivité entre les pages. C'est 
 une variante du programme curator écrit par Martin Blais avec des templates 
 optimisés. http://curator.sourceforge.net/ 
+
+Installation :
+==============
+
+python setup.py install
+
  
 
 Première étape : selector

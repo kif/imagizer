@@ -29,16 +29,17 @@ Config is a class containing all the configuration of the imagizer suite.
 Technically it is a Borg (design Pattern) so every instance of Config has exactly the same contents.
 """
 
-import os,sys
+import os,sys,distutils.sysconfig
 
+installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-	installdir='"c:\\Program Files\\Imagizer"'
+#	installdir='"c:\\Program Files\\Imagizer"'
 #	exiftran=os.path.join(installdir,"exiftran.exe ")
 #	gimpexe="gimp-remote "
 	ConfFile=[os.path.join(installdir,"imagizer.conf"),os.path.join(installdir,".imagizer")]
 elif os.name == 'posix':
-	installdir='/usr/share/imagizer'
+#	installdir='/usr/share/imagizer'
 #	exiftran=os.path.join(installdir,"exiftran ")
 #	gimpexe="gimp-remote "
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
@@ -46,7 +47,7 @@ else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
 
-sys.path.append(installdir)	
+#sys.path.append(installdir)	
 
 
 
@@ -78,6 +79,9 @@ class Config:
 		self.FiligraneOptimize=False		
 		self.FiligraneProgressive=False		
 		self.MediaSize=680
+		self.Burn="grave-rep $Selected"
+		self.WebServer="cp -r $Selected /var/www/ ; generator" 
+		self.WebRepository="/var/www/imagizer"
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -135,7 +139,11 @@ class Config:
 			elif j=="Extensions".lower(): self.Extensions=i[1].split()
 			elif j=="DefaultRepository".lower():self.DefaultRepository=i[1]
 			elif j=="MediaSize".lower():self.MediaSize=float(i[1])
+			elif j=="Burn".lower(): self.Burn=i[1]
+			elif j=="WebServer".lower():self.WebServer=i[1]
+			elif j=="WebRepository".lower():self.WebRepository=i[1]
 			else: print "unknown key "+j
+		
 
 		for k in ["ScaledImages","Thumbnails"]:
 			try:
@@ -191,6 +199,10 @@ class Config:
 		txt+="#Optimize the filigraned image (2 pass JPEG encoding)\nFiligraneOptimize: %s\n\n"%self.FiligraneOptimize
 		txt+="#Progressive JPEG for saving filigraned images\nFiligraneProgressive: %s\n\n"%self.FiligraneProgressive
 		txt+="#File containing the description of the day in each directory\nCommentFile: %s\n\n"%self.CommentFile
+		txt+="#System command to use to burn a CD or a DVD\n# $Selected will be replaced by the directory where the files are\nBurn: %s\n\n"%self.Burn
+		txt+="#System command to copy the selection to the server\n# $Selected will be replaced by the directory where the files are\n# $WebRepository will be replaced by the directory of the root of generator\nWebServer: %s\n\n"%self.WebServer
+		txt+="#The location of the root of generator\nWebRepository: %s\n\n"%self.WebRepository
+
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)
