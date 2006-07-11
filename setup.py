@@ -57,7 +57,7 @@ setup(name= 'Imagizer',
 		(installdir, ["selector.glade",execexiftran]+
 		glob.glob(os.path.join("pixmaps","*.png"))+
 		glob.glob(os.path.join("pixmaps","*.ico"))),
-		(ConfFile[0],['imagizer.conf'])
+		(os.path.split(ConfFile[0])[0],['imagizer.conf'])
 	],
 	packages= ['imagizer'],
 	package_dir= {'imagizer': ''},
