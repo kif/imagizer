@@ -2110,8 +2110,8 @@ def exif(filename):
 		try:
 			comment =  comment.encode("latin-1")
 		except:
-			sys.stderr.write("The title of %s is not encodable in latin-1\n"%exiffn)
-			self._comment =  splitext(self._filename)[0]
+			sys.stderr.write("The title of %s is not encodable in latin-1\n"%filename)
+			comment = ""#  os.path.splitext( os.path.basename(filename) )[0]
 	else:
 		comment=""
 
