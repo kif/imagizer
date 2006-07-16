@@ -54,13 +54,12 @@ gtkInterpolation=[gtk.gdk.INTERP_NEAREST,gtk.gdk.INTERP_TILES,gtk.gdk.INTERP_BIL
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-#	installdir="c:\\Imagizer"
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
-	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")] #TODO!!!!
+	ConfFile=[os.path.join(os.getenv("ALLUSERPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
 elif os.name == 'posix':
-#	installdir='/usr/share/imagizer'
-	exiftran=os.path.join(installdir,"exiftran ")
+	MaxJPEGMem=100000 # OK up to 10 Mpix
+	exiftran="JPEGMEM=%i %s "%(MaxJPEGMem,os.path.join(installdir,"exiftran "))
 	gimpexe="gimp-remote "
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 else:
@@ -571,11 +570,11 @@ class photo:
 		if os.name == 'nt' and self.f!=None: del self.f
 #		self.taille()
 		if angle==90:
-			os.system('JPEGMEM=%i %s -ip -9 "%s"'%(self.x*self.y/100,exiftran,self.fn))	
+			os.system('%s -ip -9 "%s"'%(exiftran,self.fn))	
 		elif angle==270:
-			os.system('JPEGMEM=%i %s -ip -2 "%s"'%(self.x*self.y/100,exiftran,self.fn))
+			os.system('%s -ip -2 "%s"'%(exiftran,self.fn))
 		elif angle==180:
-			os.system('JPEGMEM=%i %s -ip -1 "%s"'%(self.x*self.y/100,exiftran,self.fn))	
+			os.system('%s -ip -1 "%s"'%(exiftran,self.fn))	
 		else:
 			print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 

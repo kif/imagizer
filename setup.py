@@ -35,14 +35,17 @@ import os,sys,glob,distutils.sysconfig
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
 	execexiftran=os.path.join(os.getcwd(),"bin","exiftran.exe")
-	ConfFile=[os.path.join(installdir,"imagizer.conf"),os.path.join(installdir,".imagizer")]
+	ConfFile=[os.path.join(os.getenv("ALLUSERPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
+	scripts= ['selector.py',"generator.py"]
+
 elif os.name == 'posix':
 	execexiftran=os.path.join(os.getcwd(),"bin","exiftran")
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
+	scripts= ['selector',"generator"]
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
-
+88
 
 setup(name= 'Imagizer',
 	version= '1.0',
@@ -51,8 +54,7 @@ setup(name= 'Imagizer',
 	url= 'http://wiki.terre-adelie.org/Imagizer',
 	description= "Imagizer is a manager for a repository of photos",
 	license= 'GNU GPL v2',
-	scripts= ['selector',"generator"],
-#	py_modules= ['config','signals','imagizer'],
+	scripts= scripts,
 	data_files= [
 		(installdir, ["selector.glade",execexiftran]+
 		glob.glob(os.path.join("pixmaps","*.png"))+

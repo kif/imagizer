@@ -54,13 +54,9 @@ import os,sys,string,shutil,time,re,gc,distutils.sysconfig
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-#	installdir="c:\\Imagizer"
-	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
-	ConfFile=["c:\\imagizer.conf",os.path.join(installdir,".imagizer")]
+	ConfFile=[os.path.join(os.getenv("ALLUSERPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
 elif os.name == 'posix':
-#	installdir='/usr/share/imagizer'
-	exiftran=os.path.join(installdir,"exiftran ")
 	gimpexe="gimp-remote "
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 else:
@@ -68,7 +64,6 @@ else:
 	sys.exit(1)
 
 
-#sys.path.append(installdir)	
 import imagizer.EXIF as EXIF
 from imagizer.imagizer import *
 config=Config()
