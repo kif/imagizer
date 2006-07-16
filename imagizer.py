@@ -56,7 +56,7 @@ installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
 	exiftran=os.path.join(installdir,"exiftran.exe ")
 	gimpexe="gimp-remote "
-	ConfFile=[os.path.join(os.getenv("ALLUSERPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
+	ConfFile=[os.path.join(os.getenv("ALLUSERSPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
 elif os.name == 'posix':
 	MaxJPEGMem=100000 # OK up to 10 Mpix
 	exiftran="JPEGMEM=%i %s "%(MaxJPEGMem,os.path.join(installdir,"exiftran "))

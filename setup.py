@@ -35,7 +35,9 @@ import os,sys,glob,distutils.sysconfig
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
 	execexiftran=os.path.join(os.getcwd(),"bin","exiftran.exe")
-	ConfFile=[os.path.join(os.getenv("ALLUSERPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
+	ConfFile=[os.path.join(os.getenv("ALLUSERSPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
+	os.rename('selector','selector.py')
+	os.rename('generator','generator.py')
 	scripts= ['selector.py',"generator.py"]
 
 elif os.name == 'posix':
