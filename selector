@@ -344,7 +344,7 @@ class interface:
 		etat=self.xml.get_widget("Selection").get_active()
 		if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
 		if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
-		
+		self.Selected.sort()
 
 	def destroy(self,*args):
 		"""destroy clicked by user"""
@@ -365,7 +365,7 @@ class interface:
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
-		print config.WebServer
+#		print config.WebServer
 		print re.sub("\$WebRepository",config.WebRepository,re.sub("\$Selected",SelectedDir,config.WebServer))
 		out=os.system(re.sub("\$WebRepository",config.WebRepository,re.sub("\$Selected",SelectedDir,config.WebServer)))
 		if out != 0 : print "Error n° : %i"%out
@@ -397,8 +397,8 @@ class interface:
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
-		print config.Burn
-		print re.sub("\$Selected",SelectedDir,config.Burn)
+#		print config.Burn
+#		print re.sub("\$Selected",SelectedDir,config.Burn)
 		out=os.system(re.sub("\$Selected",SelectedDir,config.Burn))
 		if out != 0 : print "Error n° : %i"%out
 		print "Done"
