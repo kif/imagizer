@@ -129,7 +129,7 @@
 			  <signal name="activate" handler="on_About_activate" last_modification_time="Thu, 06 Jan 2005 21:32:05 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image615">
+			    <widget class="GtkImage" id="image633">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-dialog-info</property>
 			      <property name="icon_size">1</property>
@@ -152,7 +152,7 @@
 			  <accelerator key="Delete" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image616">
+			    <widget class="GtkImage" id="image634">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-delete</property>
 			      <property name="icon_size">1</property>
@@ -172,6 +172,28 @@
 		      </child>
 
 		      <child>
+			<widget class="GtkImageMenuItem" id="nommer1">
+			  <property name="visible">True</property>
+			  <property name="tooltip" translatable="yes">Propose de renommer le répertoire courant</property>
+			  <property name="label" translatable="yes">Nommer journée</property>
+			  <property name="use_underline">True</property>
+			  <signal name="activate" handler="on_nommer1_activate" last_modification_time="Thu, 25 May 2006 15:28:39 GMT"/>
+
+			  <child internal-child="image">
+			    <widget class="GtkImage" id="image635">
+			      <property name="visible">True</property>
+			      <property name="stock">gtk-directory</property>
+			      <property name="icon_size">1</property>
+			      <property name="xalign">0.5</property>
+			      <property name="yalign">0.5</property>
+			      <property name="xpad">0</property>
+			      <property name="ypad">0</property>
+			    </widget>
+			  </child>
+			</widget>
+		      </child>
+
+		      <child>
 			<widget class="GtkImageMenuItem" id="executer1">
 			  <property name="visible">True</property>
 			  <property name="tooltip" translatable="yes">Lance le redimentionnement des images selectionnées</property>
@@ -179,7 +201,7 @@
 			  <property name="use_underline">True</property>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image617">
+			    <widget class="GtkImage" id="image636">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-execute</property>
 			      <property name="icon_size">1</property>
@@ -246,7 +268,7 @@
 				  <signal name="activate" handler="on_vide_selection1_activate" last_modification_time="Thu, 06 Jul 2006 12:16:50 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image618">
+				    <widget class="GtkImage" id="image637">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-delete</property>
 				      <property name="icon_size">1</property>
@@ -258,28 +280,6 @@
 				  </child>
 				</widget>
 			      </child>
-			    </widget>
-			  </child>
-			</widget>
-		      </child>
-
-		      <child>
-			<widget class="GtkImageMenuItem" id="nommer1">
-			  <property name="visible">True</property>
-			  <property name="tooltip" translatable="yes">Propose de renommer le répertoire courant</property>
-			  <property name="label" translatable="yes">Nommer journée</property>
-			  <property name="use_underline">True</property>
-			  <signal name="activate" handler="on_nommer1_activate" last_modification_time="Thu, 25 May 2006 15:28:39 GMT"/>
-
-			  <child internal-child="image">
-			    <widget class="GtkImage" id="image619">
-			      <property name="visible">True</property>
-			      <property name="stock">gtk-directory</property>
-			      <property name="icon_size">1</property>
-			      <property name="xalign">0.5</property>
-			      <property name="yalign">0.5</property>
-			      <property name="xpad">0</property>
-			      <property name="ypad">0</property>
 			    </widget>
 			  </child>
 			</widget>
@@ -365,7 +365,7 @@
 			  <property name="use_underline">True</property>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image620">
+			    <widget class="GtkImage" id="image638">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-zoom-100</property>
 			      <property name="icon_size">1</property>
@@ -599,7 +599,7 @@
 			  <signal name="activate" handler="on_chargerS_activate" last_modification_time="Tue, 11 Jan 2005 21:05:29 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image621">
+			    <widget class="GtkImage" id="image639">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-open</property>
 			      <property name="icon_size">1</property>
@@ -635,7 +635,7 @@
 			  <signal name="activate" handler="on_inverserS_activate" last_modification_time="Thu, 06 Jan 2005 21:20:53 GMT"/>
 
 			  <child internal-child="image">
-			    <widget class="GtkImage" id="image622">
+			    <widget class="GtkImage" id="image640">
 			      <property name="visible">True</property>
 			      <property name="stock">gtk-refresh</property>
 			      <property name="icon_size">1</property>
@@ -743,7 +743,7 @@
 				  <signal name="activate" handler="on_moins_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image623">
+				    <widget class="GtkImage" id="image641">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-undo</property>
 				      <property name="icon_size">1</property>
@@ -782,7 +782,7 @@
 				  <signal name="activate" handler="on_plus_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				  <child internal-child="image">
-				    <widget class="GtkImage" id="image624">
+				    <widget class="GtkImage" id="image642">
 				      <property name="visible">True</property>
 				      <property name="stock">gtk-redo</property>
 				      <property name="icon_size">1</property>

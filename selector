@@ -42,6 +42,10 @@
 # - inclure les options du fichier de config dans generator
 # - faire une doc décente.
 # - remplacer le makefile par un script python qui serait multi plateforme
+# - proposer d'exporter toutes les photos dans un seul répertoire (pas de jour)
+# - lors du nommage du fichier de conf : noter le nom (latin-1), le nom ascii, le commentaire, 
+#     la photo courante et quelques option sur la catégorie de la sortie, stoqué en XML ou autre
+#
 
 
 """
@@ -66,6 +70,8 @@ else:
 
 import imagizer.EXIF as EXIF
 from imagizer.imagizer import *
+from imagizer.parser import AttrFile
+
 config=Config()
 config.load(ConfFile)
 kpix= 3*config.ScaledImages["Size"]**2/4000
@@ -831,7 +837,7 @@ def MessageError(text,Message=gtk.MESSAGE_ERROR):
         dialog.destroy()
 
 
-class RenameDay:
+class RenameDay: #recuperer toutes les ammorces de modification dans backup sur lofoten
 	"""prompt a windows and asks for a name for the day"""
 	def __init__(self,filename,AllPhotos,selected):
 		self.dayname=os.path.dirname(filename)

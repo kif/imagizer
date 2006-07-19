@@ -291,7 +291,7 @@ class ModelRangeTout:
 	def start(self,RootDir):
 		""" Lance les calculs
 		"""
-#		config=Config()
+		config.DefaultRepository=RootDir
 		AllJpegs=FindFile(RootDir)
 		AllFilesToProcess=[]
 		AllreadyDone=[]

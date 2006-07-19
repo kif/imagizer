@@ -47,7 +47,6 @@ elif os.name == 'posix':
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
-88
 
 setup(name= 'Imagizer',
 	version= '1.0',
