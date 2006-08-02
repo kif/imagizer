@@ -336,7 +336,7 @@ class ModelRangeTout:
 				ToProcess=os.path.join(date,heure[:-4]+"-%s.jpg"%s)
 				imagefile=os.path.join(RootDir,ToProcess)
 			shutil.move(os.path.join(RootDir,i),imagefile)
-			if config.AutoRotate :
+			if config.AutoRotate and data["Orientation"]!="1":
 				photo(imagefile).autorotate()
 			AllreadyDone.append(ToProcess)
 			NewFiles.append(ToProcess)
@@ -524,6 +524,9 @@ class photo:
 	def __init__(self,filename):
 		self.filename=filename
 		self.fn=os.path.join(config.DefaultRepository,self.filename)
+		self.data=None
+		self.x=None
+		self.y=None
 		if not os.path.isfile(self.fn): print "Erreur, le fichier %s n'existe pas"%self.fn 
 
 	def LoadPIL(self):
@@ -537,8 +540,9 @@ class photo:
 
 	def taille(self):
 		"""width and height of a jpeg file"""
-		self.LoadPIL()
-		self.x,self.y=self.f.size
+		if self.x==None and self.y==None:
+			self.LoadPIL()
+			self.x,self.y=self.f.size
 
 	def SaveThumb(self,Thumbname,Size=160,Interpolation=1,Quality=75,Progressive=False,Optimize=False,ExifExtraction=False):
 		"""save a thumbnail of the given name, with the given size and the interpollation mathode (quality) 
@@ -597,24 +601,26 @@ class photo:
 			'EXIF FNumber': 'Ouverture',
 			'EXIF ExposureTime' :'Vitesse',
 			'EXIF ISOSpeedRatings': 'Iso',
-			'EXIF ExposureBiasValue': 'Bias'}
+			'EXIF ExposureBiasValue': 'Bias',
+			'Image Orientation':'Orientation'}
 
-		data={}
-		data["Taille"]="%.2f %s"%SmartSize(os.path.getsize(self.fn))
-		
-		RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-		if comment:
-			data["Titre"]=comment
-		else:
-			data["Titre"]=""
-		self.taille()
-		data["Resolution"]="%s x %s "%(self.x,self.y)
-		for i in clef:
-			try:
-				data[clef[i]]=str(RawExif[i].printable).strip()
-			except:
-				data[clef[i]]=""
-		return data
+		if self.data==None:
+			self.data={}
+			self.data["Taille"]="%.2f %s"%SmartSize(os.path.getsize(self.fn))
+			RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
+			if comment:
+				self.data["Titre"]=comment
+			else:
+				self.data["Titre"]=""
+			self.taille()
+			self.data["Resolution"]="%s x %s "%(self.x,self.y)
+			self.data["Orientation"]="1"
+			for i in clef:
+				try:
+					self.data[clef[i]]=str(RawExif[i].printable).strip()
+				except:
+					self.data[clef[i]]=""
+		return self.data
 
 	def has_title(self):
 		"""return true if the image is entitled"""
@@ -648,8 +654,7 @@ class photo:
 	def autorotate(self):
 		"""does autorotate the image according to the EXIF tag"""
 		if os.name == 'nt' and self.f!=None: del self.f
-		self.taille()
-		os.system('JPEGMEM=%i %s -aip "%s"'%(self.x*self.y/100,exiftran,self.fn))
+		os.system('%s -aip "%s"'%(exiftran,self.fn))
 
 	def ContrastMask(self,outfile):
 		"""Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...

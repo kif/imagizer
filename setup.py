@@ -29,7 +29,8 @@ The setup.py script allows to install Imagizer regardless to the
 """
 
 from distutils.core import setup
-import os,sys,glob,distutils.sysconfig
+from math import log
+import os,sys,glob,distutils.sysconfig,shutil
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
@@ -41,9 +42,10 @@ if os.name == 'nt': #sys.platform == 'win32':
 	scripts= ['selector.py',"generator.py"]
 
 elif os.name == 'posix':
-	execexiftran=os.path.join(os.getcwd(),"bin","exiftran")
+	shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 	scripts= ['selector',"generator"]
+	execexiftran=os.path.join(os.getcwd(),"bin","exiftran")
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
