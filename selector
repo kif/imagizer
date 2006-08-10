@@ -842,51 +842,62 @@ class RenameDay: #recuperer toutes les ammorces de modification dans backup sur 
 	"""prompt a windows and asks for a name for the day"""
 	def __init__(self,filename,AllPhotos,selected):
 		self.dayname=os.path.dirname(filename)
-#		config=Config()
+		self.commentfile=os.path.join(config.DefaultRepository,self.dayname,config.CommentFile)
+		self.comment= AttrFile(self.commentfile)
+		if os.path.isfile(self.commentfile):
+			try:
+				self.comment.read()
+			except:
+				pass
+
 		try:
 			self.timetuple=time.strptime(self.dayname[:10],"%Y-%m-%d")
 		except:
 			print "something is wrong with this name : "+self.dayname
 			return
-		if len(self.dayname)>10:
+		self.comment["date"]=time.strftime("%A, %d %B %Y",self.timetuple).capitalize()
+		
+		if self.comment.has_key("title"):
+			self.name= self.comment["title"]
+		elif len(self.dayname)>10:
 			self.name=self.dayname[11:]
+			self.comment["title"]=self.name
 		else:
 			self.name=""
+			self.comment["title"]=self.name
+		self.comment["image"]=os.path.split(filename)[1]
+		if not self.comment.has_key("comment"):
+			self.comment["comment"]=""
 		self.AllPhotos=AllPhotos
 		self.selected=selected
 		self.xml=gtk.glade.XML(unifiedglade,root="Renommer")
 		self.xml.signal_connect('on_Renommer_destroy',self.destroy)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.get_widget("Date").set_text(time.strftime("%A, %d %B %Y",self.timetuple).capitalize())
-		self.xml.get_widget("Commentaire").set_text(self.name)
-		self.comment=""
-		self.commentfile=os.path.join(config.DefaultRepository,self.dayname,config.CommentFile)
+		self.xml.get_widget("Date").set_text(self.comment["date"].decode("Latin-1").encode("UTF-8"))
+		self.xml.get_widget("Commentaire").set_text(self.comment["title"].decode("Latin-1").encode("UTF-8"))
 		self.DescObj=self.xml.get_widget("Description").get_buffer()
-		if os.path.isfile(self.commentfile):
-			for ligne in open(self.commentfile).readlines():	
-				self.comment+=ligne
-			self.DescObj.set_text(self.comment)
-			
+#		print 	self.comment["comment"]
+		comment=re.sub("<BR>","\n",self.comment["comment"].decode("Latin-1").encode("UTF-8")).strip()
+		self.DescObj.set_text(comment)
+#		print 	comment
 
 	def continu(self,*args):
 		"""just distroy the window and goes on ...."""
-		self.newname=re.sub(" ","_",latin1_to_ascii(self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")))
+
+		self.newname=self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")
+		self.comment["title"]=self.newname
+#		self.newname=re.sub(" ","_",latin1_to_ascii(self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")))
 		if self.newname=="":
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)
 		else:
-			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+self.newname
+			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+re.sub(" ","_",latin1_to_ascii(self.newname))
 		self.newcommentfile=os.path.join(config.DefaultRepository,self.newdayname,config.CommentFile)
 		if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
 			mkdir(os.path.join(config.DefaultRepository,self.newdayname))
-
-		
 		if self.DescObj.get_modified():
-			self.comment=self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter())
-			f=open(self.newcommentfile,"w")
-			f.write(self.comment)
-			f.close()
-				
+			self.comment["comment"]=re.sub("\n","<BR>",self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter()).strip()).decode("UTF-8").encode("Latin-1")
+		self.comment.write()		
 
 
 		if self.newname!=self.name:
@@ -907,10 +918,10 @@ class RenameDay: #recuperer toutes les ammorces de modification dans backup sur 
 						self.selected[self.selected.index(photofile)]=newphotofile
 				idx+=1
 #move or remove the comment file if necessary
-			if os.path.isfile(self.commentfile) and not  os.path.isfile(self.newcommentfile):
+			if os.path.isfile(self.commentfile):# and not  os.path.isfile(self.newcommentfile):
 				os.rename(self.commentfile,self.newcommentfile)
-			elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
-				 os.remove(self.commentfile)
+#			elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
+#				 os.remove(self.commentfile)
 			if len(os.listdir(os.path.join(config.DefaultRepository,self.dayname)))==0:
 				os.rmdir(os.path.join(config.DefaultRepository,self.dayname))		
 		self.xml.get_widget("Renommer").destroy()
