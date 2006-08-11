@@ -23,7 +23,7 @@
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
 
-import re
+import re,os
 
 class AttrFile:
 
