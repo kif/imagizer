@@ -88,6 +88,7 @@ class AttrFile:
 				f.write( self._attrmap[k] )
 				f.write( "\n\n" )
 			f.close()
+			os.chmod(self._path,config.DefaultFileMode)
 		except IOError, e:
 			print >> sys.stderr, "Error: cannot open attributes file", \
 				  self._path

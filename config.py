@@ -77,10 +77,11 @@ class Config:
 		self.FiligranePosition=5
 		self.FiligraneQuality=75
 		self.FiligraneOptimize=False		
-		self.FiligraneProgressive=False		
+		self.FiligraneProgressive=False	
+		self.WebDirIndexStyle="list"	
 		self.MediaSize=680
 		self.Burn="grave-rep $Selected"
-		self.WebServer="cp -r $Selected /var/www/ ; generator" 
+		self.WebServer="cp -r $Selected $WebRepository ; generator" 
 		self.WebRepository="/var/www/imagizer"
 		self.Thumbnails={
 			"Size":160,
@@ -133,6 +134,8 @@ class Config:
 			elif j=="FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
 			elif j=="FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
 			elif j=="CommentFile".lower():self.CommentFile=i[1]
+			elif j=="WebDirIndexStyle".lower():self.WebDirIndexStyle=i[1]
+
 			elif j=="DefaultFileMode".lower():
 				self.DefaultFileMode=int(i[1],8)
 				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
@@ -199,6 +202,7 @@ class Config:
 		txt+="#Optimize the filigraned image (2 pass JPEG encoding)\nFiligraneOptimize: %s\n\n"%self.FiligraneOptimize
 		txt+="#Progressive JPEG for saving filigraned images\nFiligraneProgressive: %s\n\n"%self.FiligraneProgressive
 		txt+="#File containing the description of the day in each directory\nCommentFile: %s\n\n"%self.CommentFile
+		txt+="#Style of the dirindex web pages, either <<list>> or <<table>>, the latest includes thumbnail photos\nWebDirIndexStyle: %s\n\n"%self.WebDirIndexStyle
 		txt+="#System command to use to burn a CD or a DVD\n# $Selected will be replaced by the directory where the files are\nBurn: %s\n\n"%self.Burn
 		txt+="#System command to copy the selection to the server\n# $Selected will be replaced by the directory where the files are\n# $WebRepository will be replaced by the directory of the root of generator\nWebServer: %s\n\n"%self.WebServer
 		txt+="#The location of the root of generator\nWebRepository: %s\n\n"%self.WebRepository
