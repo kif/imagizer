@@ -24,6 +24,8 @@
 """CLASS AttrFile Attributes file representation and trivial parser."""
 
 import re,os
+import config 
+config=config.Config()
 
 class AttrFile:
 
