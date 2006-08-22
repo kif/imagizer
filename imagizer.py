@@ -115,7 +115,7 @@ class ModelProcessSelected:
 		""" Lance les calculs
 		"""
 
-		def SplitIntoPages(pathday):
+		def SplitIntoPages(pathday,GlobalCount):
 			"""Split a directory (pathday) into pages of 20 images""" 
 			files=[]
 			for  i in os.listdir(pathday):
@@ -138,7 +138,7 @@ class ModelProcessSelected:
 					self.refreshSignal.emit(GlobalCount,j)
 					GlobalCount+=1
 					ScaleImage(os.path.join(pathday,j),filigrane)
-
+			return GlobalCount
 
 		self.startSignal.emit(self.__label, max(1,len(List)))
 		if config.Filigrane:
@@ -161,7 +161,7 @@ class ModelProcessSelected:
 				except:
 					continue
 				daydir=os.path.join(SelectedDir,time.strftime("%Y-%m-%d",timetuple))
-				if not os.isdir(daydir):
+				if not os.path.isdir(daydir):
 					os.mkdir(daydir)
 				shutil.move(os.path.join(SelectedDir,day),os.path.join(daydir,time.strftime("%Hh%Mm%S",timetuple)+suffix))	
 #end SingleDir normalization
@@ -211,24 +211,31 @@ class ModelProcessSelected:
 ########finaly recreate the structure with pages or make a single page ########################
 		dirs=os.listdir(SelectedDir)
 		dirs.sort()
+		print "config.ExportSingleDir = "+str(config.ExportSingleDir)
 		if config.ExportSingleDir: #SingleDir
 			#first move all files to the root
 			for day in dirs:
 				daydir=os.path.join(SelectedDir,day)
-				for filename in daydir:
+				for filename in os.listdir(daydir):
 					try:
-						timetuple=time.strptime(day+"_"+filename[10:],"%Y-%m-%d_%Hh%Mm%S")
-						suffix=filename[10:]
+#						print day,filename,day[:10]+"_"+filename[:8]
+						timetuple=time.strptime(day[:10]+"_"+filename[:8],"%Y-%m-%d_%Hh%Mm%S")
+#						print timetuple
+#						suffix1=day[10:]
+						suffix=filename[8:]
+#						print suffix1,suffix2
+#						print suffix
 					except:
 						continue	
 					src=os.path.join(daydir,filename)
-					dst=os.path.join(SelectedDir,time.strftime(timetuple,"%Y-%m-%d_%Hh%Mm%S")+suffix)
-					if not os.path.isfile(dst):shutil.move(src,dst)
-			SplitIntoPages(SelectedDir)						
+					dst=os.path.join(SelectedDir,time.strftime("%Y-%m-%d_%Hh%Mm%S",timetuple)+suffix)
+					shutil.move(src,dst)
+				recursive_delete(daydir)	
+			SplitIntoPages(SelectedDir,0)						
 		else: #Multidir
 			GlobalCount=0
 			for day in dirs:
-				SplitIntoPages(os.path.join(SelectedDir,day))
+				GlobalCount=SplitIntoPages(os.path.join(SelectedDir,day),GlobalCount)
 				
 		self.finishSignal.emit()
 		
