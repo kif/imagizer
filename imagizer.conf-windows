@@ -39,7 +39,7 @@ MediaSize:	680.0
 Filigrane: False
 
 #File containing the image of the signature for the filigrane
-FiligraneSource: /usr/share/imagizer/signature.png
+FiligraneSource: ~/imagizer/imagizer/pixmaps/signature.png
 
 #Position of the filigrane : 0=center 12=top center 1=upper-right 3=center-right...
 FiligranePosition: 5
@@ -58,12 +58,12 @@ CommentFile: index.desc
 
 #System command to use to burn a CD or a DVD;  
 #Selected will be replaced by the directory where the files are
-Burn: grave-rep $Selected
+Burn: grave-rep $Selected/.
 
 #System command to copy the selection to the server;  
 #$Selected will be replaced by the directory where the files are
 #$WebRepository will be replaced by the directory of the root of generator
-WebServer: cp -r $Selected $WebRepository ; generator $WebRepository
+WebServer: cp -r $Selected/* $WebRepository ; generator
 
 #The location of the root of generator 
 WebRepository: /var/www/imagizer
@@ -89,6 +89,12 @@ Quality: 75
 
 #ScaledImages image can be obtained by Exif extraction ?
 ExifExtraction: False 
+
+#The localization code, fr_FR(unix) or FR(win32)  is suggested
+Locale: FR 
+
+#Default encoding for text files, latin-1 is suggested UTF-8 should be possible
+Coding: latin-1
 
 [Thumbnails]
 #Thumbnails size

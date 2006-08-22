@@ -37,8 +37,9 @@ installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
 	execexiftran=os.path.join(os.getcwd(),"bin","exiftran.exe")
 	ConfFile=[os.path.join(os.getenv("ALLUSERSPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
-	os.rename('selector','selector.py')
-	os.rename('generator','generator.py')
+	shutil.copy('selector','selector.py')
+	shutil.copy('generator','generator.py')
+	shutil.copy('imagizer.conf-windows','imagizer.conf')
 	scripts= ['selector.py',"generator.py"]
 
 elif os.name == 'posix':
@@ -46,6 +47,8 @@ elif os.name == 'posix':
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 	scripts= ['selector',"generator"]
 	execexiftran=os.path.join(os.getcwd(),"bin","exiftran")
+	shutil.copy('imagizer.conf-unix','imagizer.conf')
+
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
@@ -67,3 +70,4 @@ setup(name= 'Imagizer',
 	packages= ['imagizer'],
 	package_dir= {'imagizer': ''},
 	)
+os.remove("imagizer.conf") 

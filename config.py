@@ -81,8 +81,10 @@ class Config:
 		self.WebDirIndexStyle="list"	
 		self.MediaSize=680
 		self.Burn="grave-rep $Selected"
-		self.WebServer="cp -r $Selected $WebRepository ; generator" 
+		self.WebServer="cp -r $Selected/* $WebRepository && generator" 
 		self.WebRepository="/var/www/imagizer"
+		self.Locale="fr_FR"
+		self.Coding="latin-1"
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -145,6 +147,9 @@ class Config:
 			elif j=="Burn".lower(): self.Burn=i[1]
 			elif j=="WebServer".lower():self.WebServer=i[1]
 			elif j=="WebRepository".lower():self.WebRepository=i[1]
+			elif j=="Locale".lower():self.Locale=i[1]
+			elif j=="Coding".lower():self.Coding=i[1]
+
 			else: print "unknown key "+j
 		
 
@@ -206,6 +211,8 @@ class Config:
 		txt+="#System command to use to burn a CD or a DVD\n# $Selected will be replaced by the directory where the files are\nBurn: %s\n\n"%self.Burn
 		txt+="#System command to copy the selection to the server\n# $Selected will be replaced by the directory where the files are\n# $WebRepository will be replaced by the directory of the root of generator\nWebServer: %s\n\n"%self.WebServer
 		txt+="#The location of the root of generator\nWebRepository: %s\n\n"%self.WebRepository
+		txt+="#The localization code, fr_FR is suggested\nLocale: %s\n\n"%self.Locale
+		txt+="#Default encoding for text files, latin-1 is suggested\nCoding: %s\n\n"%self.Coding
 
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i

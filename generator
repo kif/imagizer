@@ -203,7 +203,7 @@ import os, os.path, dircache
 from os.path import join, dirname, basename, normpath, splitext
 from os.path import isfile, islink, isdir, exists
 
-import re, string,time,random
+import re, string,time,random,locale
 import StringIO
 from pprint import pprint, pformat
 from urllib import quote as urlquote
@@ -230,7 +230,7 @@ from imagizer.parser import AttrFile
 
 config=Config()
 config.load(ConfFile)
-
+locale.setlocale(locale.LC_TIME,config.Locale)
 from traceback import print_exception
 
 #===============================================================================
@@ -757,9 +757,7 @@ class Image:
 					print >> sys.stderr, \
 						  "Error: in attributes file %s" % a._path
 
-#		self.readExif()
 		self._exif,self._comment=exif(join(opts.root,self._filename))
-#		print self._exif,self._comment
 		# no title, so use something unique to the image, it's path
 		if not self._title:
 			self._title = join(self._dir._path, self._base)
@@ -2322,7 +2320,8 @@ if len( dir._subdirs ) > 0:
 			if d._attrfile.has_key("image"):
 				temp=os.path.splitext(d._attrfile["image"])[0]+opts.separator+config.Thumbnails["Suffix"]+config.Extensions[0]
 				temp1,temp2=os.path.split(temp)
-				filename=os.path.join(d._curdir,temp1,config.Thumbnails["Suffix"],temp2)
+				filename=os.path.join(os.path.split(d._curdir)[1],temp1,config.Thumbnails["Suffix"],temp2)
+#				sys.stderr.write("cd= %s\\tcurdir=%s \\t rel=%s\\n"%(cd,d._curdir,rel(filename,cd)))
 				print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" ></a></center></td>'%(rel(d._pagefn,cd),rel(filename,cd),os.path.split(filename)[1])
 			else:
 				print "<td> </td>"
