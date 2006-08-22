@@ -139,7 +139,18 @@ class ModelProcessSelected:
 					GlobalCount+=1
 					ScaleImage(os.path.join(pathday,j),filigrane)
 			return GlobalCount
+		def ArrangeOneFile(dirname,filename):
+				try:
+					timetuple=time.strptime(filename[:19],"%Y-%m-%d_%Hh%Mm%S")
+					suffix=filename[19:]
+				except:
+					return
+				daydir=os.path.join(SelectedDir,time.strftime("%Y-%m-%d",timetuple))
+				if not os.path.isdir(daydir):
+					os.mkdir(daydir)
+				shutil.move(os.path.join(dirname,filename),os.path.join(daydir,time.strftime("%Hh%Mm%S",timetuple)+suffix))	
 
+		
 		self.startSignal.emit(self.__label, max(1,len(List)))
 		if config.Filigrane:
 			filigrane=signature(config.FiligraneSource)
@@ -155,31 +166,35 @@ class ModelProcessSelected:
 #if SingleDir : revert to a foldered structure
 			DayOrFile=os.path.join(SelectedDir,day)
 			if os.path.isfile(DayOrFile):
-				try:
-					timetuple=time.strptime(day[:19],"%Y-%m-%d_%Hh%Mm%S")
-					suffix=day[19:]
-				except:
-					continue
-				daydir=os.path.join(SelectedDir,time.strftime("%Y-%m-%d",timetuple))
-				if not os.path.isdir(daydir):
-					os.mkdir(daydir)
-				shutil.move(os.path.join(SelectedDir,day),os.path.join(daydir,time.strftime("%Hh%Mm%S",timetuple)+suffix))	
+				ArrangeOneFile(SelectedDir,day)
+				AlsoProcess+=1
 #end SingleDir normalization
 			elif os.path.isdir(DayOrFile):
-				for File in os.listdir(DayOrFile):
-					if File.find(config.PagePrefix)==0:
-						if os.path.isdir(os.path.join(SelectedDir,day,File)):
-							for ImageFile in os.listdir(os.path.join(SelectedDir,day,File)):
-								src=os.path.join(SelectedDir,day,File,ImageFile)
-								dst=os.path.join(SelectedDir,day,ImageFile)
-								if os.path.isfile(src) and not os.path.exists(dst):
-									shutil.move(src,dst)
-									AlsoProcess+=1
-								if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]):
-									shutil.rmtree(src)
-					else:
-						if os.path.splitext(File)[1] in config.Extensions:
+				if day in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
+					recursive_delete(DayOrFile)
+				elif day.find(config.PagePrefix)==0: #subpages in SIngleDir mode that need to be flatten
+					for File in os.listdir(DayOrFile):
+						if 	os.path.isfile(os.path.join(DayOrFile,File)):
+							ArrangeOneFile(DayOrFile,File)
 							AlsoProcess+=1
+#						elif os.path.isdir(os.path.join(DayOrFile,File)) and File in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
+#							recursive_delete(os.path.join(DayOrFile,File))
+					recursive_delete(DayOrFile)
+				else:
+					for File in os.listdir(DayOrFile):
+						if File.find(config.PagePrefix)==0:
+							if os.path.isdir(os.path.join(SelectedDir,day,File)):
+								for ImageFile in os.listdir(os.path.join(SelectedDir,day,File)):
+									src=os.path.join(SelectedDir,day,File,ImageFile)
+									dst=os.path.join(SelectedDir,day,ImageFile)
+									if os.path.isfile(src) and not os.path.exists(dst):
+										shutil.move(src,dst)
+										AlsoProcess+=1
+									if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]):
+										shutil.rmtree(src)
+						else:
+							if os.path.splitext(File)[1] in config.Extensions:
+								AlsoProcess+=1
 						
 #######then copy the selected files to their folders###########################		
 		for File in List:
@@ -211,7 +226,7 @@ class ModelProcessSelected:
 ########finaly recreate the structure with pages or make a single page ########################
 		dirs=os.listdir(SelectedDir)
 		dirs.sort()
-		print "config.ExportSingleDir = "+str(config.ExportSingleDir)
+#		print "config.ExportSingleDir = "+str(config.ExportSingleDir)
 		if config.ExportSingleDir: #SingleDir
 			#first move all files to the root
 			for day in dirs:
