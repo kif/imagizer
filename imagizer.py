@@ -115,7 +115,7 @@ class ModelProcessSelected:
 		""" Lance les calculs
 		"""
 
-		def SplitIntoPages(pathday)
+		def SplitIntoPages(pathday):
 			"""Split a directory (pathday) into pages of 20 images""" 
 			files=[]
 			for  i in os.listdir(pathday):
@@ -215,7 +215,7 @@ class ModelProcessSelected:
 			#first move all files to the root
 			for day in dirs:
 				daydir=os.path.join(SelectedDir,day)
-				for filename in daydir
+				for filename in daydir:
 					try:
 						timetuple=time.strptime(day+"_"+filename[10:],"%Y-%m-%d_%Hh%Mm%S")
 						suffix=filename[10:]
