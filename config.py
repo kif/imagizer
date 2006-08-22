@@ -34,22 +34,12 @@ import os,sys,distutils.sysconfig
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-#	installdir='"c:\\Program Files\\Imagizer"'
-#	exiftran=os.path.join(installdir,"exiftran.exe ")
-#	gimpexe="gimp-remote "
 	ConfFile=[os.path.join(installdir,"imagizer.conf"),os.path.join(installdir,".imagizer")]
 elif os.name == 'posix':
-#	installdir='/usr/share/imagizer'
-#	exiftran=os.path.join(installdir,"exiftran ")
-#	gimpexe="gimp-remote "
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
-
-#sys.path.append(installdir)	
-
-
 
 ################################################################################################
 class Config:
@@ -85,6 +75,7 @@ class Config:
 		self.WebRepository="/var/www/imagizer"
 		self.Locale="fr_FR"
 		self.Coding="latin-1"
+		self.ExportSingleDir=False
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -149,7 +140,7 @@ class Config:
 			elif j=="WebRepository".lower():self.WebRepository=i[1]
 			elif j=="Locale".lower():self.Locale=i[1]
 			elif j=="Coding".lower():self.Coding=i[1]
-
+			elif j=="ExportSingleDir".lower():self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
 			else: print "unknown key "+j
 		
 
@@ -213,7 +204,7 @@ class Config:
 		txt+="#The location of the root of generator\nWebRepository: %s\n\n"%self.WebRepository
 		txt+="#The localization code, fr_FR is suggested\nLocale: %s\n\n"%self.Locale
 		txt+="#Default encoding for text files, latin-1 is suggested\nCoding: %s\n\n"%self.Coding
-
+		txt+="#All selected photos should be exported in a single directory\nExportSingleDir: %s\n\n"%self.ExportSingleDir
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)

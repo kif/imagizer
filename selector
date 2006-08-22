@@ -5,7 +5,7 @@
 #* $Id$
 #*
 #* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta &Isabelle Letard
+#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
 #* This program is free software; you can redistribute it and/or modify
@@ -35,17 +35,10 @@
 # Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
 #
 #todo liste des fonctions a implemanter ....
-# - autorotate basé sur EXIF.py plutot que sur exiftran
-# - config pour le champ graver / executer generator
 # - se passer de exiftran
 # - la version windows et la version mac
-# - inclure les options du fichier de config dans generator
 # - faire une doc décente.
-# - remplacer le makefile par un script python qui serait multi plateforme
 # - proposer d'exporter toutes les photos dans un seul répertoire (pas de jour)
-# - lors du nommage du fichier de conf : noter le nom (latin-1), le nom ascii, le commentaire, 
-#     la photo courante et quelques option sur la catégorie de la sortie, stoqué en XML ou autre
-#
 
 
 """
@@ -53,7 +46,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os,sys,string,shutil,time,re,gc,distutils.sysconfig
+import os,sys,string,shutil,time,re,gc,distutils.sysconfig,locale
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
@@ -77,6 +70,14 @@ config.load(ConfFile)
 kpix= 3*config.ScaledImages["Size"]**2/4000
 if kpix>64:
 	ImageFile.MAXBLOCK = 1000*kpix 
+
+if os.getenv("LANGUAGE"):
+	try:
+		locale.setlocale(locale.LC_ALL,os.getenv("LANGUAGE"))
+	except:
+		locale.setlocale(locale.LC_ALL,config.Locale)
+else:
+	locale.setlocale(locale.LC_ALL,config.Locale)
 
 
 class interface:
@@ -838,7 +839,7 @@ def MessageError(text,Message=gtk.MESSAGE_ERROR):
         dialog.destroy()
 
 
-class RenameDay: #recuperer toutes les ammorces de modification dans backup sur lofoten
+class RenameDay: 
 	"""prompt a windows and asks for a name for the day"""
 	def __init__(self,filename,AllPhotos,selected):
 		self.dayname=os.path.dirname(filename)
