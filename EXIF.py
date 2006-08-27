@@ -90,7 +90,7 @@ def usercomment_fct(v):
     for i in v:
         if type(i) == type ('a'):
             u_comment += i
-        elif i >= 32:
+        elif i >= 32 and i <=255 :
             u_comment+=chr(int(i))
         else:
             break
@@ -715,29 +715,28 @@ class IFD_Tag:
                                         self.field_offset)
 
 # class that handles an EXIF header
+import struct
 class EXIF_header:
     def __init__(self, file, endian, offset, debug=0):
         self.file=file
         self.endian=endian
+	if self.endian == 'M':
+	   self.endian_format='>'
+	else :
+	   self.endian_format='<'
         self.offset=offset
         self.debug=debug
         self.tags={}
-        
+	self.format=[('','B','H','','I','','','','L'),
+		('','b','h','','i','','','','l')]
+
     # convert slice to integer, based on sign and endian flags
     def s2n(self, offset, length, signed=0):
         self.file.seek(self.offset+offset)
         slice=self.file.read(length)
-        if self.endian == 'I':
-            val=s2n_intel(slice)
-        else:
-            val=s2n_motorola(slice)
-        # Sign extension ?
-#        if signed:
-            #msb=1 << (8*length-1)
-            #if val & msb:
-            #    val=val-(msb << 1)
-#            pass
-        return val
+	fmt=self.endian_format+self.format[signed][length]
+	val=struct.unpack(fmt,slice)
+        return val[0]
 
     # convert offset to string
     def n2s(self, offset, length):
