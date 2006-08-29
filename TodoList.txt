@@ -1,4 +1,0 @@
-Todo List ....
--modifier exiftran pour qu'il ne fasse pas le "fchown" lorsque l'on lui passe les options  "-ip"
--Ajouter la "favicon.ico" dans le repertoire de base de imagizer (et ajouter l'option dans les entetes du fichier html ...)
--corriger certains bugs dans exif.py
