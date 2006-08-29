@@ -63,7 +63,7 @@ Burn: grave-rep $Selected/.
 #System command to copy the selection to the server;  
 #$Selected will be replaced by the directory where the files are
 #$WebRepository will be replaced by the directory of the root of generator
-WebServer: cp -r $Selected/* $WebRepository ; generator
+WebServer: xcopy /s $Selected $WebRepository
 
 #The location of the root of generator 
 WebRepository: /var/www/imagizer
