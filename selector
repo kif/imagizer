@@ -64,6 +64,7 @@ else:
 import imagizer.EXIF as EXIF
 from imagizer.imagizer import *
 from imagizer.parser import AttrFile
+from imagizer.dirchooser import WarningSc
 
 config=Config()
 config.load(ConfFile)
@@ -969,45 +970,6 @@ class AskMediaSize:
 
 
 
-class WarningSc:
-	"""print a warning before starting the program and allows to chang the working directory"""
-	def __init__(self,directory):
-		self.directory=directory
-		self.quit=True
-		self.xml=gtk.glade.XML(unifiedglade,root="dialog-warning")
-		self.xml.signal_connect('on_dialog_warning_destroy',self.destroy)
-		self.xml.signal_connect('on_Select_clicked',self.filer)
-		self.xml.signal_connect('on_cancel_clicked',self.destroy)
-		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.signal_connect('on_dirname_editing_done',self.continu)
-		self.xml.get_widget("dirname").set_text(directory)		
-		gtk.main()
-	def continu(self,*args):
-		"""just distroy the window and goes on ...."""
-		self.directory=self.xml.get_widget("dirname").get_text().strip()
-		gtk.main_quit()
-		self.quit=False
-		self.xml.get_widget("dialog-warning").destroy()
-		while gtk.events_pending():gtk.main_iteration()
-	def destroy(self,*args):
-		"""destroy clicked by user -> quit the program"""
-		if self.quit:
-			sys.exit(0)
-	def filer(self,*args):	
-		"""Lauch the filer GUI to choose the root directory"""
-		self.xml2=gtk.glade.XML(unifiedglade,root="filer")
-		self.xml2.get_widget("filer").set_current_folder(self.directory)
-		self.xml2.signal_connect('on_Open_clicked',self.filerselect)
-		self.xml2.signal_connect('on_Cancel_clicked',self.filerdestroy)
-	def filerselect(self,*args):	
-		"""Close the filer GUI and update the data"""
-		self.directory=self.xml2.get_widget("filer").get_current_folder()
-		self.xml.get_widget("dirname").set_text(self.directory)		
-		self.xml2.get_widget("filer").destroy()
-	def filerdestroy(self,*args):	
-		"""Close the filer GUI"""
-		self.xml2.get_widget("filer").destroy()
-	
 
 
 if __name__=='__main__':

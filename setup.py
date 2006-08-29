@@ -25,7 +25,7 @@
 #*****************************************************************************/
 
 """
-The setup.py script allows to install Imagizer regardless to the 
+The setup.py script allows to install Imagizer regardless to the operating system
 """
 
 from distutils.core import setup
@@ -53,6 +53,17 @@ else:
 	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
 	sys.exit(1)
 
+configured=False
+for i in ConfFile:
+	if os.path.isfile(i):configured=True 
+
+
+### trick to make an auto-install under windows :
+if len(sys.argv)==1:
+	sys.argv.append("install")
+
+
+
 setup(name= 'Imagizer',
 	version= '1.0',
 	author= 'Jerome Kieffer',
@@ -71,3 +82,26 @@ setup(name= 'Imagizer',
 	package_dir= {'imagizer': ''},
 	)
 os.remove("imagizer.conf") 
+
+if not configured:
+	import config
+	config=config.Config()
+	config.load(ConfFile)
+	try:
+		import pygtk ; pygtk.require('2.0')
+		import gtk,gtk.glade
+		textinterface=False
+	except:
+		textinterface=True
+	if textinterface:
+		while True:
+			print "Enter le chemin du repertoire racine du serveur WEB :"
+			config.WebRepository=raw_input("[%s] :"%config.WebRepository)
+			if os.path.isdir(config.WebRepository):break
+	else:
+		from dirchooser import WarningSc
+		W=WarningSc(config.WebRepository,window="WWW-root")
+		config.WebRepository=W.directory
+		del W
+
+	config.SaveConfig(ConfFile[0])	

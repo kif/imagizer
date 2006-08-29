@@ -34,7 +34,7 @@ import os,sys,distutils.sysconfig
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-	ConfFile=[os.path.join(installdir,"imagizer.conf"),os.path.join(installdir,".imagizer")]
+	ConfFile=[os.path.join(os.getenv("ALLUSERSPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
 elif os.name == 'posix':
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 else:
@@ -202,8 +202,8 @@ class Config:
 		txt+="#System command to use to burn a CD or a DVD\n# $Selected will be replaced by the directory where the files are\nBurn: %s\n\n"%self.Burn
 		txt+="#System command to copy the selection to the server\n# $Selected will be replaced by the directory where the files are\n# $WebRepository will be replaced by the directory of the root of generator\nWebServer: %s\n\n"%self.WebServer
 		txt+="#The location of the root of generator\nWebRepository: %s\n\n"%self.WebRepository
-		txt+="#The localization code, fr_FR is suggested\nLocale: %s\n\n"%self.Locale
-		txt+="#Default encoding for text files, latin-1 is suggested\nCoding: %s\n\n"%self.Coding
+		txt+="#The localization code, fr_FR is suggested for unix or FR for win32\nLocale: %s\n\n"%self.Locale
+		txt+="#Default encoding for text files, latin-1 is suggested,UTF-8 should be possible\nCoding: %s\n\n"%self.Coding
 		txt+="#All selected photos should be exported in a single directory\nExportSingleDir: %s\n\n"%self.ExportSingleDir
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i

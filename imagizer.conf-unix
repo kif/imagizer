@@ -68,6 +68,12 @@ WebServer: cp -r $Selected/* $WebRepository ; generator
 #The location of the root of generator 
 WebRepository: /var/www/imagizer
 
+#The localization code, fr_FR(unix) or FR(win32)  is suggested
+Locale: fr_FR 
+
+#Default encoding for text files, latin-1 is suggested UTF-8 should be possible
+Coding: latin-1
+
 [ScaledImages]
 #ScaledImages size
 Size: 800 
@@ -89,12 +95,6 @@ Quality: 75
 
 #ScaledImages image can be obtained by Exif extraction ?
 ExifExtraction: False 
-
-#The localization code, fr_FR(unix) or FR(win32)  is suggested
-Locale: fr_FR 
-
-#Default encoding for text files, latin-1 is suggested UTF-8 should be possible
-Coding: latin-1
 
 [Thumbnails]
 #Thumbnails size
