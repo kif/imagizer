@@ -74,7 +74,7 @@ class Config:
 		self.WebServer="cp -r $Selected/* $WebRepository && generator" 
 		self.WebRepository="/var/www/imagizer"
 		self.Locale="fr_FR"
-		self.Coding="latin-1"
+		self.Coding="Latin-1"
 		self.ExportSingleDir=False
 		self.Thumbnails={
 			"Size":160,

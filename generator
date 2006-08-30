@@ -207,7 +207,7 @@ from os.path import isfile, islink, isdir, exists
 import re, string,time,random,locale
 import StringIO
 from pprint import pprint, pformat
-from urllib import quote as urlquote
+import urllib  
 
 import imghdr
 import stat
@@ -252,6 +252,14 @@ from traceback import print_exception
 #===============================================================================
 # PUBLIC DECLARATIONS
 #===============================================================================
+
+def urlquote(text):
+	"""same as urllib.quote but windows compliant"""
+	if os.path.sep=="\\":
+		return urllib.quote(text.replace("\\","/"))
+	else:
+		return urllib.quote(text)
+
 
 class Entry:
 	def __init__( self, fn, mtime, size, info ):

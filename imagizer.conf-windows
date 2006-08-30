@@ -72,7 +72,7 @@ WebRepository: /var/www/imagizer
 Locale: FR 
 
 #Default encoding for text files, latin-1 is suggested UTF-8 should be possible
-Coding: latin-1
+Coding: Latin-1
 
 [ScaledImages]
 #ScaledImages size

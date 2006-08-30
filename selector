@@ -46,7 +46,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os,sys,string,shutil,time,re,gc,distutils.sysconfig,locale
+import os,sys,string,shutil,time,gc,distutils.sysconfig,locale #re
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
@@ -374,9 +374,7 @@ class interface:
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
-#		print config.WebServer
-		print re.sub("\$WebRepository",config.WebRepository,re.sub("\$Selected",SelectedDir,config.WebServer))
-		out=os.system(re.sub("\$WebRepository",config.WebRepository,re.sub("\$Selected",SelectedDir,config.WebServer)))
+		out=os.system(config.WebServer.replace("$WebRepository",config.WebRepository).replace("$Selected",SelectedDir))
 		if out != 0 : print "Error n° : %i"%out
 		print "Done"
 
@@ -406,9 +404,7 @@ class interface:
 		self.Selected=[]
 		self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
 		SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
-#		print config.Burn
-#		print re.sub("\$Selected",SelectedDir,config.Burn)
-		out=os.system(re.sub("\$Selected",SelectedDir,config.Burn))
+		out=os.system(config.Burn.replace("$Selected",SelectedDir))
 		if out != 0 : print "Error n° : %i"%out
 		print "Done"
 
@@ -876,29 +872,28 @@ class RenameDay:
 		self.xml.signal_connect('on_Renommer_destroy',self.destroy)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.get_widget("Date").set_text(self.comment["date"].decode("Latin-1").encode("UTF-8"))
-		self.xml.get_widget("Commentaire").set_text(self.comment["title"].decode("Latin-1").encode("UTF-8"))
+		self.xml.get_widget("Date").set_text(self.comment["date"].decode(self.Coding).encode("UTF-8"))
+		self.xml.get_widget("Commentaire").set_text(self.comment["title"].decode(self.Coding).encode("UTF-8"))
 		self.DescObj=self.xml.get_widget("Description").get_buffer()
 #		print 	self.comment["comment"]
-		comment=re.sub("<BR>","\n",self.comment["comment"].decode("Latin-1").encode("UTF-8")).strip()
+		comment=self.comment["comment"].decode(self.Coding).encode("UTF-8").strip().replace("<BR>","\n",)
 		self.DescObj.set_text(comment)
 #		print 	comment
 
 	def continu(self,*args):
 		"""just distroy the window and goes on ...."""
 
-		self.newname=self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")
+		self.newname=self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode(config.Coding)
 		self.comment["title"]=self.newname
-#		self.newname=re.sub(" ","_",latin1_to_ascii(self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode("Latin-1")))
 		if self.newname=="":
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)
 		else:
-			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+re.sub(" ","_",latin1_to_ascii(self.newname))
+			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+latin1_to_ascii(self.newname).replace(" ","_",)
 		self.newcommentfile=os.path.join(config.DefaultRepository,self.newdayname,config.CommentFile)
 		if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
 			mkdir(os.path.join(config.DefaultRepository,self.newdayname))
 		if self.DescObj.get_modified():
-			self.comment["comment"]=re.sub("\n","<BR>",self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter()).strip()).decode("UTF-8").encode("Latin-1")
+			self.comment["comment"]=self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter()).strip().decode("UTF-8").encode(config.Coding).replace("\n","<BR>")
 		self.comment.write()		
 
 
@@ -949,7 +944,7 @@ class AskMediaSize:
 
 	def continu(self,*args):
 		"""just distroy the window and goes on ...."""
-		txt=self.xml.get_widget("TailleMo").get_text().strip().decode("UTF-8").encode("Latin-1")
+		txt=self.xml.get_widget("TailleMo").get_text().strip().decode("UTF-8").encode(config.Coding)
 		try:
 			self.config.MediaSize=abs(float(txt))
 		except:
