@@ -335,11 +335,21 @@ def splitpath( path ):
 	This function works around a quirk in string.split()."""
 
 	# FIXME perhaps call os.path.split repetitively would be better.
-	s = string.split( path, '/' ) # we work with fwd slash only inside.
+	#s = string.split( path, '/' ) # we work with fwd slash only inside.
+
+#We have decided to use all kind of separator
+	s=[]
+	while True:
+		first,second=os.path.split( path )
+		s.append(second)
+		if first=="":
+			break
+		else:
+			path=first
+	s.reverse()
 	if len( s ) == 1 and s[0] == "":
 		s = []
 	return s
-
 #-------------------------------------------------------------------------------
 #
 def rel( dest, curdir ):
