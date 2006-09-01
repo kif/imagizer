@@ -872,11 +872,11 @@ class RenameDay:
 		self.xml.signal_connect('on_Renommer_destroy',self.destroy)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.get_widget("Date").set_text(self.comment["date"].decode(self.Coding).encode("UTF-8"))
-		self.xml.get_widget("Commentaire").set_text(self.comment["title"].decode(self.Coding).encode("UTF-8"))
+		self.xml.get_widget("Date").set_text(self.comment["date"].decode(config.Coding).encode("UTF-8"))
+		self.xml.get_widget("Commentaire").set_text(self.comment["title"].decode(config.Coding).encode("UTF-8"))
 		self.DescObj=self.xml.get_widget("Description").get_buffer()
 #		print 	self.comment["comment"]
-		comment=self.comment["comment"].decode(self.Coding).encode("UTF-8").strip().replace("<BR>","\n",)
+		comment=self.comment["comment"].decode(config.Coding).encode("UTF-8").strip().replace("<BR>","\n",)
 		self.DescObj.set_text(comment)
 #		print 	comment
 
