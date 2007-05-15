@@ -146,11 +146,13 @@ class interface:
 		self.ShowImage()
 		
 		self.xml.signal_connect('on_Principale_destroy',self.destroy)
+		self.xml.signal_connect('on_arreter1_activate',self.destroy)
 		self.xml.signal_connect('on_suivant_clicked',self.next)
 		self.xml.signal_connect('on_precedant_clicked',self.previous)
 		self.xml.signal_connect('on_droite_clicked',self.droite)
 		self.xml.signal_connect('on_gauche_clicked',self.gauche)
 		self.xml.signal_connect('on_Selection_toggled',self.select)
+		self.xml.signal_connect('on_selectionner_activate',self.select_Shortcut)
 		self.xml.signal_connect('on_photo_client_event',self.next)
 		
 		self.xml.signal_connect('on_About_activate',self.about)
@@ -225,6 +227,8 @@ class interface:
 		self.xml.signal_connect('on_precedentNT_activate',self.previousNT)
 		self.xml.signal_connect('on_suivantNT_activate',self.nextNT)
 		self.xml.signal_connect('on_dernierNT_activate',self.lastNT)
+#TODO
+#		self.xml.signal_connect('on_fullscreen_activate',self.FullScreen)
 		gtk.main()
 
 	def flush_event_queue(self):
@@ -345,7 +349,14 @@ class interface:
 		photo(filename).ContrastMask(newname)
 		self.ShowImage()
 
-
+	def select_Shortcut(self,*args):
+		"""Select or unselect the image"""
+		self.settitle()
+		etat=not(self.xml.get_widget("Selection").get_active())
+		if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
+		if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
+		self.Selected.sort()
+		self.xml.get_widget("Selection").set_active(etat)
 
 	def select(self,*args):
 		"""Select or unselect the image"""
