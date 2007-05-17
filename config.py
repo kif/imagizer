@@ -76,6 +76,7 @@ class Config:
 		self.Locale="fr_FR"
 		self.Coding="Latin-1"
 		self.ExportSingleDir=False
+		self.GraphicMode="Normal"
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",

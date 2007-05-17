@@ -79,16 +79,128 @@ if os.getenv("LANGUAGE"):
 		locale.setlocale(locale.LC_ALL,config.Locale)
 else:
 	locale.setlocale(locale.LC_ALL,config.Locale)
+################################
+##### FullScreen Interface #####
+################################
 
+class FullScreenInterface:
+	def __init__(self,AllJpegs=[],first=0,selected=[]):
+		self.AllJpegs=AllJpegs
+		self.Selected=[]
+		self.CurIm=first
+		for i in selected:
+			if i in self.AllJpegs: 
+				self.Selected.append(i)
+		print "Initialisation de l'interface graphique ..."
+		self.xml=gtk.glade.XML(unifiedglade,root="FullScreen")
+		self.xml.get_widget("FullScreen").maximize()
+		self.flush_event_queue()
+		self.ShowImage()
+		self.xml.get_widget("FullScreen").connect("key_press_event",self.keypressed)
 
+		gtk.main()
+
+	def flush_event_queue(self):
+		"""Updates the GTK GUI before comming back to the gtk.main()"""
+    	while gtk.events_pending():
+        	gtk.main_iteration()
+
+	def ShowImage(self):
+		"""Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+		self.image=photo(self.AllJpegs[self.CurIm])
+		X,Y=self.xml.get_widget("FullScreen").get_size()
+		print "Taille fenetre %sx%s"%(X,Y)
+		pixbuf=self.image.show(X,Y)
+		self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
+		del pixbuf
+		gc.collect()
+		self.xml.get_widget("FullScreen").set_title("Selector : %s"%self.AllJpegs[self.CurIm])
+
+	def keypressed(self,widget,event,*args):
+		"""keylogger"""
+		key = gtk.gdk.keyval_name (event.keyval)
+		print "Keyval = %s\t Key = %s"%(event.keyval,key)
+		if key=="Page_Up":
+			self.previousJ()
+		elif key=="Page_Down":
+			self.nextJ()
+		elif key=="q":
+			self.destroy()
+		elif key=="Right":
+			self.droite()
+		elif key=="Left":
+			self.gauche()
+		elif key=="f":
+			self.NormalScreen()	
+		elif key=="Down":
+			self.next()
+		elif key=="Up":
+			self.previous()	
+		elif key=="s":
+			self.select_Shortcut()	
+
+	def droite(self,*args):
+		"""rotate the current image clockwise"""
+		self.image.Rotate(90)
+		self.ShowImage()	
+	def gauche(self,*args):
+		"""rotate the current image clockwise"""
+		self.image.Rotate(270)
+		self.ShowImage()
+	def destroy(self,*args):
+		"""destroy clicked by user"""
+		gtk.main_quit()
+		config.GraphicMode="Quit"
+	def NormalScreen(self,*args):
+		"""Switch to Normal mode"""
+		self.xml.get_widget("FullScreen").destroy()
+		config.GraphicMode="Normal"
+		gtk.main_quit()
+	def next(self,*args):
+		"""Switch to the next image"""	
+		self.CurIm=(self.CurIm+1)%len(self.AllJpegs)
+		self.ShowImage()
+	def previous(self,*args):
+		"""Switch to the previous image"""	
+		self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
+		self.ShowImage()			
+	def nextJ(self,*args):
+		"""Switch to the first image of the next day"""	
+		jour=os.path.dirname(self.AllJpegs[self.CurIm])
+		for i in range(self.CurIm,len(self.AllJpegs)):
+			jc=os.path.dirname(self.AllJpegs[i])
+			if jc>jour: break
+		self.CurIm=i
+		self.ShowImage()	
+	def previousJ(self,*args):
+		"""Switch to the first image of the previous day"""	
+		if self.CurIm==0: return
+		jour=os.path.dirname(self.AllJpegs[self.CurIm])
+		for i in range(self.CurIm-1,-1,-1):
+			jc=os.path.dirname(self.AllJpegs[i])
+			jd=os.path.dirname(self.AllJpegs[i-1])
+			if (jc<jour) and (jd<jc): break
+		self.CurIm=i
+		self.ShowImage()	
+	def select_Shortcut(self,*args):
+		"""Select or unselect the image"""
+		if self.AllJpegs[self.CurIm] not in self.Selected: 
+			self.Selected.append(self.AllJpegs[self.CurIm])
+		else:
+			self.Selected.remove(self.AllJpegs[self.CurIm])
+		self.Selected.sort()
+		
+############################
+##### Normal Interface #####
+############################
 class interface:
 	"""class interface that manages the GUI using Glade-2"""
-	def __init__(self,AllJpegs=[],first=0):
+	def __init__(self,AllJpegs=[],first=0,selected=[]):
 		self.AllJpegs=AllJpegs
-		self.Selected=LoadSelected()
-		for i in self.Selected:
-			if not(i in self.AllJpegs): 
-				self.Selected.remove(i)
+		self.Selected=[]
+		for i in selected:
+			if i in self.AllJpegs: 
+				self.Selected.append(i)
 		self.CurIm=first
 		self.Xmin=350
 
@@ -227,9 +339,10 @@ class interface:
 		self.xml.signal_connect('on_precedentNT_activate',self.previousNT)
 		self.xml.signal_connect('on_suivantNT_activate',self.nextNT)
 		self.xml.signal_connect('on_dernierNT_activate',self.lastNT)
-#TODO
-#		self.xml.signal_connect('on_fullscreen_activate',self.FullScreen)
+
+		self.xml.signal_connect('on_fullscreen_activate',self.FullScreen)
 		gtk.main()
+
 
 	def flush_event_queue(self):
 		"""Updates the GTK GUI before comming back to the gtk.main()"""
@@ -369,8 +482,16 @@ class interface:
 	def destroy(self,*args):
 		"""destroy clicked by user"""
 		self.settitle()
-		sys.exit(0)
-
+		gtk.main_quit()
+		config.GraphicMode="Quit"
+		
+	def FullScreen(self,*args):
+		"""Switch to fullscreen mode"""
+		self.settitle()
+		self.xml.get_widget("Principale").destroy()
+		config.GraphicMode="FullScreen"
+		gtk.main_quit()
+	
 	def run(self,*args):
 		"""lauch the copy of all selected files then scale them to generate web pages"""
 		self.settitle()
@@ -429,7 +550,8 @@ class interface:
 		dialog.destroy()
 		if result==gtk.RESPONSE_OK: 
 			SaveSelected(self.Selected)
-			gtk.main_quit() #sys.exit(0)
+			gtk.main_quit() 
+			config.GraphicMode="Quit"
 
 	def SaveSelection(self,*args):
 		"""Saves all the selection of photos """
@@ -1004,5 +1126,19 @@ if __name__=='__main__':
 
 
 	AF,first=RangeTout(config.DefaultRepository)
-	interface(AF,first)
+	values=(AF,first,LoadSelected())
+	while config.GraphicMode!="Quit":
+		if config.GraphicMode=="Normal":	
+			ifc=interface(*values)
+			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected)
+			print ifc.CurIm
+			del ifc
+			gc.collect()
+		elif config.GraphicMode=="FullScreen":
+			ifc=FullScreenInterface(*values)
+			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected)
+			del ifc
+			gc.collect()
+		print config.GraphicMode
+
 
