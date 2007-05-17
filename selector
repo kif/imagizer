@@ -109,7 +109,7 @@ class FullScreenInterface:
 		"""Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
 		self.image=photo(self.AllJpegs[self.CurIm])
 		X,Y=self.xml.get_widget("FullScreen").get_size()
-		print "Taille fenetre %sx%s"%(X,Y)
+#		print "Taille fenetre %sx%s"%(X,Y)
 		pixbuf=self.image.show(X,Y)
 		self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
 		del pixbuf
@@ -119,7 +119,7 @@ class FullScreenInterface:
 	def keypressed(self,widget,event,*args):
 		"""keylogger"""
 		key = gtk.gdk.keyval_name (event.keyval)
-		print "Keyval = %s\t Key = %s"%(event.keyval,key)
+#		print "Keyval = %s\t Key = %s"%(event.keyval,key)
 		if key=="Page_Up":
 			self.previousJ()
 		elif key=="Page_Down":
