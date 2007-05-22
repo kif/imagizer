@@ -3723,7 +3723,7 @@ que vous utilisez pour archiver vos images</property>
   <property name="gravity">GDK_GRAVITY_CENTER</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
-  <signal name="destroy" handler="on_Principale_destroy" last_modification_time="Thu, 28 Oct 2004 07:21:12 GMT"/>
+  <signal name="destroy" handler="on_FullScreen_destroy" last_modification_time="Tue, 22 May 2007 17:43:29 GMT"/>
 
   <child>
     <widget class="GtkImage" id="image793">

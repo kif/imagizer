@@ -93,11 +93,14 @@ class FullScreenInterface:
 				self.Selected.append(i)
 		print "Initialisation de l'interface graphique ..."
 		self.xml=gtk.glade.XML(unifiedglade,root="FullScreen")
+		self.ShowImage()
+		self.flush_event_queue()
 		self.xml.get_widget("FullScreen").maximize()
 		self.flush_event_queue()
 		self.ShowImage()
+		self.flush_event_queue()
 		self.xml.get_widget("FullScreen").connect("key_press_event",self.keypressed)
-
+		self.xml.signal_connect('on_FullScreen_destroy',self.destroy)
 		gtk.main()
 
 	def flush_event_queue(self):
@@ -114,7 +117,11 @@ class FullScreenInterface:
 		self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
 		del pixbuf
 		gc.collect()
-		self.xml.get_widget("FullScreen").set_title("Selector : %s"%self.AllJpegs[self.CurIm])
+		if self.AllJpegs[self.CurIm] in self.Selected:
+			sel="[Selected]"
+		else:
+			sel=""
+		self.xml.get_widget("FullScreen").set_title("Selector : %s %s"%(self.AllJpegs[self.CurIm],sel))
 
 	def keypressed(self,widget,event,*args):
 		"""keylogger"""
@@ -149,6 +156,7 @@ class FullScreenInterface:
 		self.ShowImage()
 	def destroy(self,*args):
 		"""destroy clicked by user"""
+		SaveSelected(self.Selected)
 		gtk.main_quit()
 		config.GraphicMode="Quit"
 	def NormalScreen(self,*args):
@@ -186,10 +194,13 @@ class FullScreenInterface:
 		"""Select or unselect the image"""
 		if self.AllJpegs[self.CurIm] not in self.Selected: 
 			self.Selected.append(self.AllJpegs[self.CurIm])
+			sel="[Selected]"
 		else:
 			self.Selected.remove(self.AllJpegs[self.CurIm])
+			sel=""
 		self.Selected.sort()
-		
+		self.xml.get_widget("FullScreen").set_title("Selector : %s %s"%(self.AllJpegs[self.CurIm],sel))
+
 ############################
 ##### Normal Interface #####
 ############################
