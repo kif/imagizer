@@ -349,6 +349,8 @@ class ModelRangeTout:
 		AllFilesToProcess=[]
 		AllreadyDone=[]
 		NewFiles=[]
+		uid=os.getuid()
+		gid=os.getgid()
 		for i in AllJpegs:
 			if i.find(config.TrashDirectory)==0: continue
 			if i.find(config.SelectedDirectory)==0: continue
@@ -389,6 +391,11 @@ class ModelRangeTout:
 				ToProcess=os.path.join(date,heure[:-4]+"-%s.jpg"%s)
 				imagefile=os.path.join(RootDir,ToProcess)
 			shutil.move(os.path.join(RootDir,i),imagefile)
+			try:
+				os.chown(imagefile,uid,gid)
+				os.chmod(imagefile,config.DefaultFileMode)
+			except:
+				print "error in chown or chmod of %s"%imagefile
 			if config.AutoRotate and data["Orientation"]!="1":
 				photo(imagefile).autorotate()
 			AllreadyDone.append(ToProcess)
