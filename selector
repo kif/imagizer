@@ -131,7 +131,7 @@ class FullScreenInterface:
 			self.previousJ()
 		elif key=="Page_Down":
 			self.nextJ()
-		elif key=="c":
+		elif key=="e":
 			self.destroy()
 		elif key=="Right":
 			self.droite()
