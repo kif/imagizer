@@ -2006,6 +2006,7 @@ html_postamble = """
 if 'footer' in globals():
 	print footer
 -->
+<a name='end'>
 </body>
 </html>
 """
@@ -2992,11 +2993,11 @@ def main():
 <HEAD>
 	<link rel=stylesheet type="text/css" href="style.css">
 	<TITLE>Redirection</TITLE>
-	<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html">
+	<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#end">
 </HEAD>
 <BODY>
 	<H1>You should be reloacted to the correct URL in a second :</H1>
-	<p> <a href="html/dirindex.html">html/dirindex.html</a></p>
+	<p> <a href="html/dirindex.html#end">html/dirindex.html</a></p>
 </BODY>
 </HTML>''')
 				f.close()
