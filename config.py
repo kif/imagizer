@@ -77,6 +77,7 @@ class Config:
 		self.Coding="Latin-1"
 		self.ExportSingleDir=False
 		self.GraphicMode="Normal"
+		self.WebPageAnchor="end"
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -142,6 +143,7 @@ class Config:
 			elif j=="Locale".lower():self.Locale=i[1]
 			elif j=="Coding".lower():self.Coding=i[1]
 			elif j=="ExportSingleDir".lower():self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
+			elif j=="WebPageAnchor".lower():self.WebPageAnchor=i[1]
 			else: print "unknown key "+j
 		
 
@@ -206,6 +208,7 @@ class Config:
 		txt+="#The localization code, fr_FR is suggested for unix or FR for win32\nLocale: %s\n\n"%self.Locale
 		txt+="#Default encoding for text files, latin-1 is suggested,UTF-8 should be possible\nCoding: %s\n\n"%self.Coding
 		txt+="#All selected photos should be exported in a single directory\nExportSingleDir: %s\n\n"%self.ExportSingleDir
+		txt+="#Where should the dirindex page start-up ? [begin/end] \nWebPageAnchor: %s\n\n"%self.WebPageAnchor
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)

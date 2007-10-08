@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: Latin1 -*-
 #******************************************************************************\
 #* $Source$
@@ -1999,6 +1999,7 @@ html_preamble = \
    <title>%s</title>
 </head>
 <body>
+<a name='begin'>
 """
 
 html_postamble = """
@@ -2337,11 +2338,11 @@ if dir._parent:
 
 <!--tagcode:
 import sys
+import Image as PilImage
 if len( dir._subdirs ) > 0:
 	print '<h3>Sous-repertoires:</h3>'
 	# sort subdirs by time
 	subdirs = list(dir._subdirs)
-##	subdirs.sort(Dir_cmpdates)
 	if config.WebDirIndexStyle=="table":
 		print "<table>"
 		for d in subdirs:
@@ -2350,8 +2351,10 @@ if len( dir._subdirs ) > 0:
 				temp=os.path.splitext(d._attrfile["image"])[0]+opts.separator+config.Thumbnails["Suffix"]+config.Extensions[0]
 				temp1,temp2=os.path.split(temp)
 				filename=os.path.join(os.path.split(d._curdir)[1],temp1,config.Thumbnails["Suffix"],temp2)
-#				sys.stderr.write("cd= %s\\tcurdir=%s \\t rel=%s\\n"%(cd,d._curdir,rel(filename,cd)))
-				print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" ></a></center></td>'%(rel(d._pagefn,cd),rel(filename,os.path.split(cd)[1]),os.path.split(filename)[1])
+				longfilename=os.path.join(os.path.split(cd)[0],filename)
+				im = PilImage.open(longfilename)
+				width,height = im.size
+				print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" heigth=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,os.path.split(cd)[1]),os.path.split(filename)[1],height,width)
 			else:
 				print "<td> </td>"
 			if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
@@ -2372,8 +2375,6 @@ if len( dir._subdirs ) > 0:
 	else: # WebDirStyle is old fashion list
 		print '<ul>'
 		for d in subdirs:
-#			d_page = desc_index(d)
-#			if d_page:
 				comment=""
 				if  d._attrfile.has_key("comment"):
 					if len(d._attrfile["comment"])>50:
@@ -2392,8 +2393,6 @@ if len( dir._subdirs ) > 0:
 						print '<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment)
 				else:
 					print '<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment)
-#			else:
-#				print '<li><a href="%s">%s</a></li>' %( rel(d._pagefn,cd), d._basename )
 		print '</ul><p>'
 -->
 
@@ -2993,7 +2992,9 @@ def main():
 <HEAD>
 	<link rel=stylesheet type="text/css" href="style.css">
 	<TITLE>Redirection</TITLE>
-	<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#end">
+	<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#''')
+				f.write(config.WebPageAnchor)
+				f.write('''">
 </HEAD>
 <BODY>
 	<H1>You should be reloacted to the correct URL in a second :</H1>
