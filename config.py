@@ -78,6 +78,8 @@ class Config:
 		self.ExportSingleDir=False
 		self.GraphicMode="Normal"
 		self.WebPageAnchor="end"
+		self.SlideShowDelay=5.0
+		self.SlideShowType="chronological"
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -144,6 +146,9 @@ class Config:
 			elif j=="Coding".lower():self.Coding=i[1]
 			elif j=="ExportSingleDir".lower():self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
 			elif j=="WebPageAnchor".lower():self.WebPageAnchor=i[1]
+			elif j=="SlideShowDelay".lower():self.SlideShowDelay=float(i[1])
+			elif j=="SlideShowType".lower():self.SlideShowType=i[1]
+
 			else: print "unknown key "+j
 		
 
@@ -209,6 +214,9 @@ class Config:
 		txt+="#Default encoding for text files, latin-1 is suggested,UTF-8 should be possible\nCoding: %s\n\n"%self.Coding
 		txt+="#All selected photos should be exported in a single directory\nExportSingleDir: %s\n\n"%self.ExportSingleDir
 		txt+="#Where should the dirindex page start-up ? [begin/end] \nWebPageAnchor: %s\n\n"%self.WebPageAnchor
+		txt+="#Delay between imges in the slideshow? \nSlideShowDelay: %s\n\n"%self.SlideShowDelay
+		txt+="#Type of slideshow : chronological, anti-chronological or random ?\nSlideShowType: %s\n\n"%self.SlideShowType
+
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
 			j=eval("self.%s"%i)

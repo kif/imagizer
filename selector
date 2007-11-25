@@ -46,7 +46,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os,sys,string,shutil,time,gc,distutils.sysconfig,locale #re
+import os,sys,string,shutil,time,gc,distutils.sysconfig,locale,random #re
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
@@ -84,7 +84,7 @@ else:
 ################################
 
 class FullScreenInterface:
-	def __init__(self,AllJpegs=[],first=0,selected=[]):
+	def __init__(self,AllJpegs=[],first=0,selected=[],mode="FullScreen"):
 		self.AllJpegs=AllJpegs
 		self.Selected=[]
 		self.CurIm=first
@@ -101,12 +101,14 @@ class FullScreenInterface:
 		self.flush_event_queue()
 		self.xml.get_widget("FullScreen").connect("key_press_event",self.keypressed)
 		self.xml.signal_connect('on_FullScreen_destroy',self.destroy)
+		if mode=="SlideShow": self.SlideShow()
+		self.QuitSlideShow=True
 		gtk.main()
 
 	def flush_event_queue(self):
 		"""Updates the GTK GUI before comming back to the gtk.main()"""
-    	while gtk.events_pending():
-        	gtk.main_iteration()
+		while gtk.events_pending():
+			gtk.main_iteration()
 
 	def ShowImage(self):
 		"""Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
@@ -126,13 +128,17 @@ class FullScreenInterface:
 	def keypressed(self,widget,event,*args):
 		"""keylogger"""
 		key = gtk.gdk.keyval_name (event.keyval)
-#		print "Keyval = %s\t Key = %s"%(event.keyval,key)
+		#print "Keyval = %s\t Key = %s"%(event.keyval,key)
 		if key=="Page_Up":
 			self.previousJ()
 		elif key=="Page_Down":
 			self.nextJ()
+		elif key=="d":
+			self.SlideShow()
 		elif key=="e":
+			self.QuitSlideShow=True
 			self.destroy()
+
 		elif key=="Right":
 			self.droite()
 		elif key=="Left":
@@ -145,6 +151,14 @@ class FullScreenInterface:
 			self.previous()	
 		elif key=="s":
 			self.select_Shortcut()	
+		elif key in ["Escape","Q"]:
+			self.QuitSlideShow=True
+		elif key in ["KP_Add","plus"]:
+			config.SlideShowDelay+=1
+		elif key in ["KP_Subtract","minus"]:
+			config.SlideShowDelay-=1
+			if config.SlideShowDelay<0:config.SlideShowDelay=0
+
 
 	def droite(self,*args):
 		"""rotate the current image clockwise"""
@@ -200,13 +214,28 @@ class FullScreenInterface:
 			sel=""
 		self.Selected.sort()
 		self.xml.get_widget("FullScreen").set_title("Selector : %s %s"%(self.AllJpegs[self.CurIm],sel))
+	def SlideShow(self):
+		"""Starts the slide show"""
+		self.QuitSlideShow=False
+		while not self.QuitSlideShow:
+#			print "Delai= %s; type = %s"%(config.SlideShowDelay,config.SlideShowType)
+			if config.SlideShowType=="chronological":
+				self.CurIm=(self.CurIm+1)%len(self.AllJpegs)
+			elif config.SlideShowType=="antichronological":
+				self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
+			elif config.SlideShowType=="random":
+				self.CurIm=random.randint(0,len(self.AllJpegs)-1)	
+			self.ShowImage()
+			self.flush_event_queue()
+			time.sleep(config.SlideShowDelay)
+
 
 ############################
 ##### Normal Interface #####
 ############################
 class interface:
 	"""class interface that manages the GUI using Glade-2"""
-	def __init__(self,AllJpegs=[],first=0,selected=[]):
+	def __init__(self,AllJpegs=[],first=0,selected=[],mode="Default"):
 		self.AllJpegs=AllJpegs
 		self.Selected=[]
 		for i in selected:
@@ -235,35 +264,35 @@ class interface:
 		self.xml.get_widget("Filigrane").set_active(i)
 		
 		if config.ScreenSize==300:
-			self.xml.get_widget("t300").set_active(True)
+			self.xml.get_widget("t300").set_active(1)
 		elif config.ScreenSize==600:
-			self.xml.get_widget("t600").set_active(True)
+			self.xml.get_widget("t600").set_active(1)
 		elif config.ScreenSize==900:
-			self.xml.get_widget("t900").set_active(True)
+			self.xml.get_widget("t900").set_active(1)
 		else:
-			self.xml.get_widget("tauto").set_active(True)
+			self.xml.get_widget("tauto").set_active(1)
 			
 		if config.NbrPerPage == 9:
-			self.xml.get_widget("9PerPage").set_active(True)
+			self.xml.get_widget("9PerPage").set_active(1)
 		elif config.NbrPerPage == 12:
-			self.xml.get_widget("12PerPage").set_active(True)
+			self.xml.get_widget("12PerPage").set_active(1)
 		elif config.NbrPerPage == 16:
-			self.xml.get_widget("16PerPage").set_active(True)
+			self.xml.get_widget("16PerPage").set_active(1)
 		elif config.NbrPerPage == 20:
-			self.xml.get_widget("20PerPage").set_active(True)
+			self.xml.get_widget("20PerPage").set_active(1)
 		elif config.NbrPerPage == 25:
-			self.xml.get_widget("25PerPage").set_active(True)
+			self.xml.get_widget("25PerPage").set_active(1)
 		elif config.NbrPerPage == 30:
-			self.xml.get_widget("30PerPage").set_active(True)
+			self.xml.get_widget("30PerPage").set_active(1)
 			
 		if config.Interpolation == 0:
-			self.xml.get_widget("VLowQ").set_active(True)
+			self.xml.get_widget("VLowQ").set_active(1)
 		elif config.Interpolation == 1:
-			self.xml.get_widget("LowQ").set_active(True)
+			self.xml.get_widget("LowQ").set_active(1)
 		elif config.Interpolation == 2:
-			self.xml.get_widget("HiQ").set_active(True)
+			self.xml.get_widget("HiQ").set_active(1)
 		elif config.Interpolation == 3:
-			self.xml.get_widget("VHiQ").set_active(True)
+			self.xml.get_widget("VHiQ").set_active(1)
 		
 		self.flush_event_queue()
 		self.ShowImage()
@@ -309,7 +338,7 @@ class interface:
 		self.xml.signal_connect('on_20PerPage_activate',self.Set20PerPage)
 		self.xml.signal_connect('on_25PerPage_activate',self.Set25PerPage)
 		self.xml.signal_connect('on_30PerPage_activate',self.Set30PerPage)
-		
+		self.xml.signal_connect('on_configurer_dioporama_activate',self.SlideShowSetup)
 		
 		self.xml.signal_connect('on_enregistrerS_activate',self.SaveSelection)
 		self.xml.signal_connect('on_chargerS_activate',self.LoadSelection)
@@ -352,6 +381,7 @@ class interface:
 		self.xml.signal_connect('on_dernierNT_activate',self.lastNT)
 
 		self.xml.signal_connect('on_fullscreen_activate',self.FullScreen)
+		self.xml.signal_connect('on_lance_diaporama_activate',self.SlideShow)
 		gtk.main()
 
 
@@ -502,7 +532,13 @@ class interface:
 		self.xml.get_widget("Principale").destroy()
 		config.GraphicMode="FullScreen"
 		gtk.main_quit()
-	
+	def SlideShow(self,*args):
+		"""Switch to fullscreen mode and starts the SlideShow"""
+		self.settitle()
+		self.xml.get_widget("Principale").destroy()
+		config.GraphicMode="SlideShow"
+		gtk.main_quit()
+
 	def run(self,*args):
 		"""lauch the copy of all selected files then scale them to generate web pages"""
 		self.settitle()
@@ -867,6 +903,11 @@ class interface:
 		self.settitle()
 		AskMediaSizeInstance=AskMediaSize()
 
+	def SlideShowSetup(self,*args):
+		"""lauch a new window for seting up the slideshow"""
+		self.settitle()
+		SlideShowSetupInstance=AskSlideShowSetup()
+
 	def SelectNewerMedia(self,*args):
 		"""Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
 		Finally the last selected image is shown and the total size is printed"""
@@ -1074,6 +1115,56 @@ class RenameDay:
 		except:
 			pass
 		while gtk.events_pending():gtk.main_iteration()	
+class AskSlideShowSetup:
+	"""pop up a windows and asks for the setup of the SlideShow"""
+	def __init__(self):
+		self.config=Config()
+		self.xml=gtk.glade.XML(unifiedglade,root="Diaporama")
+		self.xml.signal_connect('on_Diaporama_destroy',self.destroy)
+		self.xml.signal_connect('on_cancel_clicked',self.destroy)
+		self.xml.signal_connect('on_apply_clicked',self.continu)
+		self.xml.signal_connect('on_Lauch_clicked',self.LauchSlideShow)
+		self.xml.get_widget("delai").set_value(self.config.SlideShowDelay)
+		if   self.config.SlideShowType.find("chrono")==0:
+			self.xml.get_widget("radio-chrono").set_active(1)
+		elif self.config.SlideShowType.find("anti")==0:
+			self.xml.get_widget("radio-antichrono").set_active(1)
+		else:
+			self.xml.get_widget("radio-random").set_active(1)			
+
+	def LauchSlideShow(self,*args):
+		"""retrieves the data, destroy the window and lauch the slideshow"""
+		self.config.SlideShowDelay=self.xml.get_widget("delai").get_value()
+		if self.xml.get_widget("radio-antichrono").get_active():
+			self.config.SlideShowType="antichronological"
+		elif self.xml.get_widget("radio-chrono").get_active():
+			self.config.SlideShowType="chronological"
+		else:
+			self.config.SlideShowType="random"
+		self.config.GraphicMode="SlideShow"
+		self.xml.get_widget("Diaporama").destroy()
+		gtk.main_quit()
+		
+
+
+	def continu(self,*args):
+		"""retrieves the data, destroy the window and goes on ...."""
+		self.config.SlideShowDelay=self.xml.get_widget("delai").get_value()
+		if self.xml.get_widget("radio-antichrono").get_active():
+			self.config.SlideShowType="antichronological"
+		elif self.xml.get_widget("radio-chrono").get_active():
+			self.config.SlideShowType="chronological"
+		else:
+			self.config.SlideShowType="random"
+		self.xml.get_widget("Diaporama").destroy()
+
+	def destroy(self,*args):
+		"""destroy clicked by user -> quit the program"""
+		try:
+			self.xml.get_widget("Diaporama").destroy()
+		except:
+			pass
+		while gtk.events_pending():gtk.main_iteration() 
 
 
 class AskMediaSize:
@@ -1137,19 +1228,17 @@ if __name__=='__main__':
 
 
 	AF,first=RangeTout(config.DefaultRepository)
-	values=(AF,first,LoadSelected())
+	values=(AF,first,LoadSelected(),config.GraphicMode)
 	while config.GraphicMode!="Quit":
 		if config.GraphicMode=="Normal":	
 			ifc=interface(*values)
-			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected)
-			print ifc.CurIm
+			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected,config.GraphicMode)
 			del ifc
 			gc.collect()
-		elif config.GraphicMode=="FullScreen":
+		elif config.GraphicMode in ["FullScreen","SlideShow"]:
 			ifc=FullScreenInterface(*values)
-			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected)
+			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected,config.GraphicMode)
 			del ifc
 			gc.collect()
 		print config.GraphicMode
-
-
+			
