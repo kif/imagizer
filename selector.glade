@@ -142,7 +142,7 @@
 			      <signal name="activate" handler="on_About_activate" last_modification_time="Thu, 06 Jan 2005 21:32:05 GMT"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1034">
+				<widget class="GtkImage" id="image1048">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-dialog-info</property>
 				  <property name="icon_size">1</property>
@@ -182,7 +182,7 @@
 			      <accelerator key="F" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1035">
+				<widget class="GtkImage" id="image1049">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-fullscreen</property>
 				  <property name="icon_size">1</property>
@@ -211,7 +211,7 @@
 			      <accelerator key="Delete" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1036">
+				<widget class="GtkImage" id="image1050">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-delete</property>
 				  <property name="icon_size">1</property>
@@ -239,7 +239,7 @@
 			      <signal name="activate" handler="on_nommer1_activate" last_modification_time="Thu, 25 May 2006 15:28:39 GMT"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1037">
+				<widget class="GtkImage" id="image1051">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-directory</property>
 				  <property name="icon_size">1</property>
@@ -260,7 +260,7 @@
 			      <property name="use_underline">True</property>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1038">
+				<widget class="GtkImage" id="image1052">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-execute</property>
 				  <property name="icon_size">1</property>
@@ -327,7 +327,7 @@
 				      <signal name="activate" handler="on_vide_selection1_activate" last_modification_time="Thu, 06 Jul 2006 12:16:50 GMT"/>
 
 				      <child internal-child="image">
-					<widget class="GtkImage" id="image1039">
+					<widget class="GtkImage" id="image1053">
 					  <property name="visible">True</property>
 					  <property name="stock">gtk-delete</property>
 					  <property name="icon_size">1</property>
@@ -360,7 +360,7 @@
 			      <accelerator key="e" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1040">
+				<widget class="GtkImage" id="image1054">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-stop</property>
 				  <property name="icon_size">1</property>
@@ -404,7 +404,7 @@
 			      <signal name="activate" handler="on_enregistrerP_activate" last_modification_time="Tue, 15 May 2007 15:05:22 GMT"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1041">
+				<widget class="GtkImage" id="image1055">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-floppy</property>
 				  <property name="icon_size">1</property>
@@ -460,7 +460,7 @@
 			      <property name="use_underline">True</property>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1042">
+				<widget class="GtkImage" id="image1056">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-zoom-100</property>
 				  <property name="icon_size">1</property>
@@ -710,7 +710,7 @@
 			      <signal name="activate" handler="on_chargerS_activate" last_modification_time="Tue, 11 Jan 2005 21:05:29 GMT"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1043">
+				<widget class="GtkImage" id="image1057">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-open</property>
 				  <property name="icon_size">1</property>
@@ -732,7 +732,7 @@
 			      <signal name="activate" handler="on_enregistrerS_activate" last_modification_time="Tue, 15 May 2007 15:06:38 GMT"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1044">
+				<widget class="GtkImage" id="image1058">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-save</property>
 				  <property name="icon_size">1</property>
@@ -761,7 +761,7 @@
 			      <accelerator key="S" modifiers="GDK_CONTROL_MASK" signal="activate"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1045">
+				<widget class="GtkImage" id="image1059">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-apply</property>
 				  <property name="icon_size">1</property>
@@ -782,7 +782,7 @@
 			      <signal name="activate" handler="on_inverserS_activate" last_modification_time="Thu, 06 Jan 2005 21:20:53 GMT"/>
 
 			      <child internal-child="image">
-				<widget class="GtkImage" id="image1046">
+				<widget class="GtkImage" id="image1060">
 				  <property name="visible">True</property>
 				  <property name="stock">gtk-refresh</property>
 				  <property name="icon_size">1</property>
@@ -890,7 +890,7 @@
 				      <signal name="activate" handler="on_moins_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				      <child internal-child="image">
-					<widget class="GtkImage" id="image1047">
+					<widget class="GtkImage" id="image1061">
 					  <property name="visible">True</property>
 					  <property name="stock">gtk-undo</property>
 					  <property name="icon_size">1</property>
@@ -929,7 +929,7 @@
 				      <signal name="activate" handler="on_plus_10_activate" last_modification_time="Thu, 06 Jan 2005 21:27:34 GMT"/>
 
 				      <child internal-child="image">
-					<widget class="GtkImage" id="image1048">
+					<widget class="GtkImage" id="image1062">
 					  <property name="visible">True</property>
 					  <property name="stock">gtk-redo</property>
 					  <property name="icon_size">1</property>
@@ -965,6 +965,15 @@
 
 			      <child>
 				<widget class="GtkMenu" id="jour1_menu">
+
+				  <child>
+				    <widget class="GtkImageMenuItem" id="indexJ">
+				      <property name="visible">True</property>
+				      <property name="label">gtk-index</property>
+				      <property name="use_stock">True</property>
+				      <signal name="activate" handler="on_indexJ_activate" last_modification_time="Sat, 15 Dec 2007 21:05:41 GMT"/>
+				    </widget>
+				  </child>
 
 				  <child>
 				    <widget class="GtkImageMenuItem" id="premierJ">
@@ -4067,6 +4076,99 @@ que vous utilisez pour archiver vos images</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
 	      <signal name="clicked" handler="on_cancel_clicked" last_modification_time="Sat, 24 Nov 2007 20:22:45 GMT"/>
+	    </widget>
+	    <packing>
+	      <property name="padding">0</property>
+	      <property name="expand">False</property>
+	      <property name="fill">False</property>
+	    </packing>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">True</property>
+	  <property name="fill">True</property>
+	</packing>
+      </child>
+    </widget>
+  </child>
+</widget>
+
+<widget class="GtkWindow" id="ChangeDir">
+  <property name="visible">True</property>
+  <property name="title" translatable="yes">Changer de jour</property>
+  <property name="type">GTK_WINDOW_TOPLEVEL</property>
+  <property name="window_position">GTK_WIN_POS_NONE</property>
+  <property name="modal">False</property>
+  <property name="resizable">True</property>
+  <property name="destroy_with_parent">False</property>
+  <property name="decorated">True</property>
+  <property name="skip_taskbar_hint">False</property>
+  <property name="skip_pager_hint">False</property>
+  <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+  <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
+  <property name="focus_on_map">True</property>
+  <property name="urgency_hint">False</property>
+  <signal name="destroy" handler="on_ChangeDir_destroy" last_modification_time="Wed, 12 Dec 2007 21:00:52 GMT"/>
+
+  <child>
+    <widget class="GtkVBox" id="vbox1">
+      <property name="visible">True</property>
+      <property name="homogeneous">False</property>
+      <property name="spacing">0</property>
+
+      <child>
+	<widget class="GtkComboBoxEntry" id="entry">
+	  <property name="width_request">400</property>
+	  <property name="visible">True</property>
+	  <property name="items" translatable="yes"></property>
+	  <property name="add_tearoffs">False</property>
+	  <property name="has_frame">True</property>
+	  <property name="focus_on_click">True</property>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">True</property>
+	  <property name="fill">True</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkHBox" id="hbox1">
+	  <property name="visible">True</property>
+	  <property name="homogeneous">False</property>
+	  <property name="spacing">0</property>
+
+	  <child>
+	    <placeholder/>
+	  </child>
+
+	  <child>
+	    <widget class="GtkButton" id="Ouvrir">
+	      <property name="visible">True</property>
+	      <property name="can_focus">True</property>
+	      <property name="label">gtk-open</property>
+	      <property name="use_stock">True</property>
+	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
+	      <signal name="clicked" handler="on_Ouvrir_clicked" last_modification_time="Wed, 12 Dec 2007 20:59:29 GMT"/>
+	    </widget>
+	    <packing>
+	      <property name="padding">0</property>
+	      <property name="expand">False</property>
+	      <property name="fill">False</property>
+	    </packing>
+	  </child>
+
+	  <child>
+	    <widget class="GtkButton" id="annuler">
+	      <property name="visible">True</property>
+	      <property name="can_focus">True</property>
+	      <property name="label">gtk-cancel</property>
+	      <property name="use_stock">True</property>
+	      <property name="relief">GTK_RELIEF_NORMAL</property>
+	      <property name="focus_on_click">True</property>
+	      <signal name="clicked" handler="on_annuler_clicked" last_modification_time="Wed, 12 Dec 2007 21:00:21 GMT"/>
 	    </widget>
 	    <packing>
 	      <property name="padding">0</property>

@@ -356,6 +356,7 @@ class interface:
 		self.xml.signal_connect('on_plus_10_activate',self.next10)
 		self.xml.signal_connect('on_moins_10_activate',self.previous10)
 
+		self.xml.signal_connect('on_indexJ_activate',self.indexJ)
 		self.xml.signal_connect('on_precedentJ_activate',self.previousJ)
 		self.xml.signal_connect('on_suivantJ_activate',self.nextJ)
 		self.xml.signal_connect('on_premierJ_activate',self.firstJ)
@@ -910,6 +911,12 @@ class interface:
 		if config.GraphicMode=="SlideShow":
 			self.xml.get_widget("Principale").destroy()
 			gtk.main_quit()
+	def indexJ(self,*args):
+		"""lauch a new window for selecting the day of interest"""
+		self.settitle()
+		ChangeJourInstance=SelectDay(self)
+
+
 
 	def SelectNewerMedia(self,*args):
 		"""Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
@@ -1201,7 +1208,44 @@ class AskMediaSize:
 
 
 
+class SelectDay:
+	def __init__(self,upperIface):
+		self.upperIface=upperIface
+		self.xml=gtk.glade.XML(unifiedglade,root="ChangeDir")
+		self.combobox=self.xml.get_widget("entry")
+		self.xml.signal_connect('on_ChangeDir_destroy',self.destroy)
+		self.xml.signal_connect('on_annuler_clicked',self.destroy)
+		self.xml.signal_connect('on_Ouvrir_clicked',self.continu)
+		self.days=[os.path.split(self.upperIface.AllJpegs[0])[0]]
+		self.combobox.append_text(self.days[0])
+		for image in self.upperIface.AllJpegs[1:]:
+			day=os.path.split(image)[0]
+			if day!=self.days[-1]:
+				self.days.append(day)
+				self.combobox.append_text(day)
+		self.curday=self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.CurIm])[0])
+		self.combobox.set_active(self.curday)
 
+		
+
+
+	def continu(self,*args):
+		"""just distroy the window and goes on ...."""
+		day = self.days[self.combobox.get_active()]
+		for i in range(len(self.upperIface.AllJpegs)):
+			if os.path.split(self.upperIface.AllJpegs[i])[0]==day:
+				break
+		self.upperIface.CurIm=i
+		self.upperIface.ShowImage()	
+		self.xml.get_widget("ChangeDir").destroy()
+
+	def destroy(self,*args):
+		"""destroy clicked by user -> quit the program"""
+		try:
+			self.xml.get_widget("ChangeDir").destroy()
+		except:
+			pass
+		while gtk.events_pending():gtk.main_iteration()	
 
 
 

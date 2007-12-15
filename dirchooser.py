@@ -28,7 +28,7 @@
 Library used by selector and the installer to select the working directories.
 """
 
-import distutils.sysconfig,os
+import distutils.sysconfig,os,sys
 
 try:
 	import pygtk ; pygtk.require('2.0')
