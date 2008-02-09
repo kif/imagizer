@@ -2363,7 +2363,7 @@ if len( dir._subdirs ) > 0:
 					height=3*width/4
 #					print "Default size h=%i w=%i"%(height,width)
 #				print mm+">"	
-				print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" heigth=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,os.path.split(cd)[1]),os.path.split(filename)[1],height,width)
+				print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" height=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,os.path.split(cd)[1]),os.path.split(filename)[1],height,width)
 			else:
 				print "<td> </td>"
 			if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
