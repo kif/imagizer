@@ -46,7 +46,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os,sys,string,shutil,time,gc,distutils.sysconfig,locale,random #re
+import os,sys,string,shutil,time,gc,distutils.sysconfig,locale,random 
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
@@ -217,6 +217,7 @@ class FullScreenInterface:
 	def SlideShow(self):
 		"""Starts the slide show"""
 		self.QuitSlideShow=False
+		self.RandomList=[]
 		while not self.QuitSlideShow:
 #			print "Delai= %s; type = %s"%(config.SlideShowDelay,config.SlideShowType)
 			if config.SlideShowType=="chronological":
@@ -224,7 +225,10 @@ class FullScreenInterface:
 			elif config.SlideShowType=="antichronological":
 				self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
 			elif config.SlideShowType=="random":
-				self.CurIm=random.randint(0,len(self.AllJpegs)-1)	
+				if len(self.RandomList)==0:
+					self.RandomList=range(len(self.AllJpegs))
+					random.shuffle(self.RandomList)
+				self.CurIm=self.RandomList.pop()
 			self.ShowImage()
 			self.flush_event_queue()
 			time.sleep(config.SlideShowDelay)
