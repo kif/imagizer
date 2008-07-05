@@ -225,7 +225,8 @@ else:
 	
 	
 from imagizer.config import Config
-import imagizer.EXIF as EXIF
+#import imagizer.EXIF as EXIF
+import pyexiv2
 from imagizer.config import Config
 from imagizer.parser import AttrFile
 
@@ -1959,27 +1960,42 @@ def sous_titre(i):
   return s_titre
 
 def exif(filename):
-	"""return exif data + title from the photo"""
-	clef=['Image Make','Image Model','Image DateTime','EXIF Flash',
-	'EXIF FocalLength','EXIF FNumber','EXIF ExposureTime',
-	'EXIF ISOSpeedRatings']
-	data={}
-	RawExif,comment=EXIF.process_file(open(filename,'rb'),0)
-	if comment:
-		try:
-			comment =  comment.encode("latin-1")
-		except:
-			sys.stderr.write("The title of %s is not encodable in latin-1\n"%filename)
-			comment = ""#  os.path.splitext( os.path.basename(filename) )[0]
-	else:
-		comment=""
+    """return exif data + title from the photo"""
+    clef=['Exif.Image.Make',
+ 'Exif.Image.Model',
+ 'Exif.Image.DateTime',
+ 'Exif.Photo.ExposureTime',
+ 'Exif.Photo.FNumber',
+ 'Exif.Photo.DateTimeOriginal',
+ 'Exif.Photo.DateTimeDigitized',
+ 'Exif.Photo.ShutterSpeedValue',
+ 'Exif.Photo.ApertureValue',
+ 'Exif.Photo.ExposureBiasValue',
+ 'Exif.Photo.Flash',
+ 'Exif.Photo.FocalLength',
+ 'Exif.Photo.ISOSpeedRatings' 
+]   
+    data={}
+#	RawExif,comment=EXIF.process_file(open(filename,'rb'),0)
+#	if comment:
+#		try:
+#			comment =  comment.encode("latin-1")
+#		except:
+#			sys.stderr.write("The title of %s is not encodable in latin-1\n"%filename)
+#			comment = ""#  os.path.splitext( os.path.basename(filename) )[0]
+#	else:
+#		comment=""
+    image_exif=pyexiv2.Image(filename)
+    image_exif.readMetadata()
+    comment=image_exif.getComment().decode("utf-8").encode("latin-1")
+#    print comment, comment.decode("utf-8")
 
-	for i in clef:
-		try:
-			data[i]=str(RawExif[i].printable).strip()
-		except:
-			data[i]=""
-	return data,comment
+    for i in clef:
+        try:
+            data[i]=image_exif.interpretedExifValue(i)
+        except:
+            data[i]=""
+    return data,comment
 
 
 #===============================================================================
@@ -2198,10 +2214,10 @@ if description:
 
 exif_tag=['Marque','Modele','Date','Focale','Ouverture','Vitesse',\
 		  'Iso', 'Flash']
-exif_key={'Marque' : 'Image Make' , 'Modele' : 'Image Model' , \
-		  'Date' : 'Image DateTime' , 'Focale' : 'EXIF FocalLength' ,\
-		  'Vitesse' : 'EXIF ExposureTime' , 'Ouverture' : 'EXIF FNumber',\
-		  'Iso' : 'EXIF ISOSpeedRatings' , 'Flash' : 'EXIF Flash' }
+exif_key={'Marque' : 'Exif.Image.Make' , 'Modele' : 'Exif.Image.Model' , \
+		  'Date' : 'Exif.Photo.DateTimeOriginal' , 'Focale' : 'Exif.Photo.FocalLength' ,\
+		  'Vitesse' :  'Exif.Photo.ExposureTime' , 'Ouverture' : 'Exif.Photo.FNumber' ,\
+		  'Iso' : 'Exif.Photo.ISOSpeedRatings' , 'Flash' : 'Exif.Photo.Flash' }
 
 if image._exif:
 	print '<tr>'

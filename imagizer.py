@@ -73,7 +73,7 @@ from config import Config
 config=Config()
 config.load(ConfFile)
 
-import EXIF
+import pyexiv2
 
 
 
@@ -580,165 +580,185 @@ def CopySelected(SelectedFiles):
 # # # # # # Début de la classe photo # # # # # # # # # # #
 
 class photo:
-	"""class photo that does all the operations available on photos"""
-	def __init__(self,filename):
-		self.filename=filename
-		self.fn=os.path.join(config.DefaultRepository,self.filename)
-		self.data=None
-		self.x=None
-		self.y=None
-		if not os.path.isfile(self.fn): print "Erreur, le fichier %s n'existe pas"%self.fn 
+    """class photo that does all the operations available on photos"""
+    def __init__(self,filename):
+        self.filename=filename
+        self.fn=os.path.join(config.DefaultRepository,self.filename)
+        self.data=None
+        self.x=None
+        self.y=None
+        if not os.path.isfile(self.fn): print "Erreur, le fichier %s n'existe pas"%self.fn 
 
-	def LoadPIL(self):
-		"""Load the image"""
-		self.f=Image.open(self.fn)
-	
-	def larg(self):
-		"""width-height of a jpeg file"""
-		self.taille()
-		return self.x-self.y
+    def LoadPIL(self):
+        """Load the image"""
+        self.f=Image.open(self.fn)
 
-	def taille(self):
-		"""width and height of a jpeg file"""
-		if self.x==None and self.y==None:
-			self.LoadPIL()
-			self.x,self.y=self.f.size
+    def larg(self):
+        """width-height of a jpeg file"""
+        self.taille()
+        return self.x-self.y
 
-	def SaveThumb(self,Thumbname,Size=160,Interpolation=1,Quality=75,Progressive=False,Optimize=False,ExifExtraction=False):
-		"""save a thumbnail of the given name, with the given size and the interpollation mathode (quality) 
-		resampling filters :
-		NONE = 0
-		NEAREST = 0
-		ANTIALIAS = 1 # 3-lobed lanczos
-		LINEAR = BILINEAR = 2
-		CUBIC = BICUBIC = 3
-		"""
-		if  os.path.isfile(Thumbname):
-			print "sorry, file %s exists"%Thumbname
-		else:
-			RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-			if RawExif.has_key("JPEGThumbnail") and ExifExtraction:
-				w=open(Thumbname,"wb")
-				w.write(RawExif["JPEGThumbnail"])
-				w.close()			
-			else:
-				self.LoadPIL()
-				self.g=self.f.copy()
-				self.g.thumbnail((Size,Size),Interpolation)
-				self.g.save(Thumbname,quality=Quality,progressive=Progressive,optimize=Optimize)
-			os.chmod(Thumbname,config.DefaultFileMode)
+    def taille(self):
+        """width and height of a jpeg file"""
+        if self.x==None and self.y==None:
+            self.LoadPIL()
+            self.x,self.y=self.f.size
 
-	
-	def Rotate(self,angle=0):
-		"""does a looseless rotation of the given jpeg file"""
-		if os.name == 'nt' and self.f!=None: del self.f
+    def SaveThumb(self,Thumbname,Size=160,Interpolation=1,Quality=75,Progressive=False,Optimize=False,ExifExtraction=False):
+        """save a thumbnail of the given name, with the given size and the interpollation mathode (quality) 
+        resampling filters :
+        NONE = 0
+        NEAREST = 0
+        ANTIALIAS = 1 # 3-lobed lanczos
+        LINEAR = BILINEAR = 2
+        CUBIC = BICUBIC = 3
+        """
+        if  os.path.isfile(Thumbname):
+            print "sorry, file %s exists"%Thumbname
+        else:
+            image_exif=pyexiv2.Image(self.fn)
+            image_exif.readMetadata()
+            #RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
+            extract=False
+            print "process file %s exists"%Thumbname
+            if ExifExtraction:
+                try:
+                    print "thumbnail embarqué?"
+                    image_exif.dumpThumbnailToFile(Thumbname[:-4])
+                    extract=True
+                except:
+                    extract=False
+            if not extract:
+                print "on essaie avec PIL"
+                self.LoadPIL()
+                self.g=self.f.copy()
+                self.g.thumbnail((Size,Size),Interpolation)
+                self.g.save(Thumbname,quality=Quality,progressive=Progressive,optimize=Optimize)
+            os.chmod(Thumbname,config.DefaultFileMode)
+
+    
+    def Rotate(self,angle=0):
+        """does a looseless rotation of the given jpeg file"""
+        if os.name == 'nt' and self.f!=None: del self.f
 #		self.taille()
-		if angle==90:
-			os.system('%s -ip -9 "%s"'%(exiftran,self.fn))	
-		elif angle==270:
-			os.system('%s -ip -2 "%s"'%(exiftran,self.fn))
-		elif angle==180:
-			os.system('%s -ip -1 "%s"'%(exiftran,self.fn))	
-		else:
-			print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
+        if angle==90:
+            os.system('%s -ip -9 "%s"'%(exiftran,self.fn))	
+        elif angle==270:
+            os.system('%s -ip -2 "%s"'%(exiftran,self.fn))
+        elif angle==180:
+            os.system('%s -ip -1 "%s"'%(exiftran,self.fn))	
+        else:
+            print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 
-	def Trash(self):
-		"""Send the file to the trash folder"""
-		Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
-		td=os.path.dirname(os.path.join(Trashdir,self.filename))
-		tf=os.path.join(Trashdir,self.filename)
-		if not os.path.isdir(td): makedir(td)
-		shutil.move(self.fn,os.path.join(Trashdir,self.filename))
-			
-	def exif(self):
-		"""return exif data + title from the photo"""
-		clef={
-			'Image Make': 'Marque',
-			'Image Model': 'Modele',
-			'Image DateTime': 'Heure',
-			'EXIF Flash':'Flash',
-			'EXIF FocalLength': 'Focale',
-			'EXIF FNumber': 'Ouverture',
-			'EXIF ExposureTime' :'Vitesse',
-			'EXIF ISOSpeedRatings': 'Iso',
-			'EXIF ExposureBiasValue': 'Bias',
-			'Image Orientation':'Orientation'}
+    def Trash(self):
+        """Send the file to the trash folder"""
+        Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
+        td=os.path.dirname(os.path.join(Trashdir,self.filename))
+        tf=os.path.join(Trashdir,self.filename)
+        if not os.path.isdir(td): makedir(td)
+        shutil.move(self.fn,os.path.join(Trashdir,self.filename))
+            
+    def exif(self):
+        """return exif data + title from the photo"""
+        clef={'Exif.Image.Make':'Marque',
+ 'Exif.Image.Model':'Modele',
+ 'Exif.Photo.DateTimeOriginal':'Heure',
+ 'Exif.Photo.ExposureTime':'Vitesse',
+ 'Exif.Photo.FNumber':'Ouverture',
+# 'Exif.Photo.DateTimeOriginal':'Heure2',
+ 'Exif.Photo.ExposureBiasValue':'Bias',
+ 'Exif.Photo.Flash':'Flash',
+ 'Exif.Photo.FocalLength':'Focale',
+ 'Exif.Photo.ISOSpeedRatings':'Iso' , 
+ 'Exif.Image.Orientation':'Orientation'
+}
+        
+        if self.data==None:
+            self.data={}
+            self.data["Taille"]="%.2f %s"%SmartSize(os.path.getsize(self.fn))
+            image_exif=pyexiv2.Image(self.fn)
+            image_exif.readMetadata()
+            self.data["Titre"]=image_exif.getComment()
 
-		if self.data==None:
-			self.data={}
-			self.data["Taille"]="%.2f %s"%SmartSize(os.path.getsize(self.fn))
-			RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-			if comment:
-				self.data["Titre"]=comment
-			else:
-				self.data["Titre"]=""
-			self.taille()
-			self.data["Resolution"]="%s x %s "%(self.x,self.y)
-			self.data["Orientation"]="1"
-			for i in clef:
-				try:
-					self.data[clef[i]]=str(RawExif[i].printable).strip()
-				except:
-					self.data[clef[i]]=""
-		return self.data
+#            RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
+#            if comment:
+#                self.data["Titre"]=comment
+#            else:
+#                self.data["Titre"]=""
+            self.taille()
+            self.data["Resolution"]="%s x %s "%(self.x,self.y)
+            self.data["Orientation"]="1"
+            for i in clef:
+                try:
+                    self.data[clef[i]]=image_exif.interpretedExifValue(i).decode("latin-1")
+                except:
+                    self.data[clef[i]]=""
+        return self.data
 
-	def has_title(self):
-		"""return true if the image is entitled"""
-		RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-		if comment:
-			return True	 
-		else:
-			return False
-	
-		
-	def show(self,Xsize=600,Ysize=600):
-		"""return a pixbuf to shows the image in a Gtk window"""
-		self.taille()			
-		pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
+    def has_title(self):
+        """return true if the image is entitled"""
+        if self.data==None:
+            self.exif()
+        if  self.data["Titre"]:
+            return True	 
+        else:
+            return False
+
+        
+    def show(self,Xsize=600,Ysize=600):
+        """return a pixbuf to shows the image in a Gtk window"""
+        self.taille()			
+        pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
 #		print "Taille voulue %sx%s"%(Xsize,Ysize)
-		R=min(float(Xsize)/self.x,float(Ysize)/self.y)
-		if R<1:
-			nx=int(R*self.x)
-			ny=int(R*self.y)
+        R=min(float(Xsize)/self.x,float(Ysize)/self.y)
+        if R<1:
+            nx=int(R*self.x)
+            ny=int(R*self.y)
 #			print  "Taille Obtenue  %sx%s"%(nx,ny)
-			scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[config.Interpolation])
-		else :
-			scaled_buf=pixbuf
-		return scaled_buf
-				
-	def name(self,titre):
-		"""write the title of the photo inside the description field, in the JPEG header"""	
-                if os.name == 'nt' and self.f!=None: del self.f
-		os.system('%s -ipc "%s"  "%s"'%(exiftran,titre,self.fn))
-		
-	def autorotate(self):
-		"""does autorotate the image according to the EXIF tag"""
-		if os.name == 'nt' and self.f!=None: del self.f
-		os.system('%s -aip "%s"'%(exiftran,self.fn))
+            scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[config.Interpolation])
+        else :
+            scaled_buf=pixbuf
+        return scaled_buf
+                
+    def name(self,titre):
+        """write the title of the photo inside the description field, in the JPEG header"""	
+        if os.name == 'nt' and self.f!=None: del self.f
+        image_exif=pyexiv2.Image(self.fn)
+        image_exif.readMetadata()
+#        print titre.decode("utf-8")
+#        tit=titre.decode("utf-8").encode("latin-1")
+        image_exif.setComment(titre)
+        image_exif.writeMetadata()
+#        os.system('%s -ipc "%s"  "%s"'%(exiftran,titre,self.fn))
+        
+    def autorotate(self):
+        """does autorotate the image according to the EXIF tag"""
+        if os.name == 'nt' and self.f!=None: del self.f
+        os.system('%s -aip "%s"'%(exiftran,self.fn))
 
-	def ContrastMask(self,outfile):
-		"""Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...
-		Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, en particulier A. Fayolles et F. Mantegazza
-		avril 2006
-		necessite numarray et PIL."""
-		try:
-			import numarray
-		except:
-			raise "This filter needs the numarray library available on http://www.stsci.edu/resources/software_hardware/numarray"
-		self.LoadPIL()
-		x,y=self.f.size
-		ImageFile.MAXBLOCK=x*y
-		img_array = numarray.fromstring(self.f.tostring(),type="UInt8").astype("UInt16") 
-		img_array.shape = (x, y, 3) 
-		red, green, blue = img_array[:,:,0], img_array[:,:,1],img_array[:,:,2]
-		desat_array = (numarray.minimum(numarray.minimum(red, green), blue) + numarray.maximum( numarray.maximum(red, green), blue))/2
-		inv_desat=255-desat_array
-		k=Image.fromstring("L",(x,y),inv_desat.astype("UInt8").tostring()).convert("RGB")
-		S=ImageChops.screen(self.f,k)
-		M=ImageChops.multiply(self.f,k)
-		F=ImageChops.add(ImageChops.multiply(self.f,S),ImageChops.multiply(ImageChops.invert(self.f),M))
-		F.save(os.path.join(config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
-		os.chmod(os.path.join(config.DefaultRepository,outfile),config.DefaultFileMode)
+    def ContrastMask(self,outfile):
+        """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...
+        Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, en particulier A. Fayolles et F. Mantegazza
+        avril 2006
+        necessite numarray et PIL."""
+        try:
+            import numarray
+        except:
+            raise "This filter needs the numarray library available on http://www.stsci.edu/resources/software_hardware/numarray"
+        self.LoadPIL()
+        x,y=self.f.size
+        ImageFile.MAXBLOCK=x*y
+        img_array = numarray.fromstring(self.f.tostring(),type="UInt8").astype("UInt16") 
+        img_array.shape = (x, y, 3) 
+        red, green, blue = img_array[:,:,0], img_array[:,:,1],img_array[:,:,2]
+        desat_array = (numarray.minimum(numarray.minimum(red, green), blue) + numarray.maximum( numarray.maximum(red, green), blue))/2
+        inv_desat=255-desat_array
+        k=Image.fromstring("L",(x,y),inv_desat.astype("UInt8").tostring()).convert("RGB")
+        S=ImageChops.screen(self.f,k)
+        M=ImageChops.multiply(self.f,k)
+        F=ImageChops.add(ImageChops.multiply(self.f,S),ImageChops.multiply(ImageChops.invert(self.f),M))
+        F.save(os.path.join(config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
+        os.chmod(os.path.join(config.DefaultRepository,outfile),config.DefaultFileMode)
 
 		
 # # # # # # fin de la classe photo # # # # # # # # # # #
