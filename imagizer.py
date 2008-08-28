@@ -690,7 +690,7 @@ class photo:
             self.data["Orientation"]="1"
             for i in clef:
                 try:
-                    self.data[clef[i]]=image_exif.interpretedExifValue(i).decode("latin-1")
+                    self.data[clef[i]]=image_exif.interpretedExifValue(i).decode(config.Coding)
                 except:
                     self.data[clef[i]]=""
         return self.data

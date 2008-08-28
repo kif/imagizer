@@ -30,7 +30,7 @@ The setup.py script allows to install Imagizer regardless to the operating syste
 
 from distutils.core import setup
 from math import log
-import os,sys,glob,distutils.sysconfig,shutil
+import os,sys,glob,distutils.sysconfig,shutil,locale
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
@@ -103,5 +103,5 @@ if not configured:
 		W=WarningSc(config.WebRepository,window="WWW-root")
 		config.WebRepository=W.directory
 		del W
-
+	config.Locale,config.Coding = locale.getdefaultlocale()
 	config.SaveConfig(ConfFile[0])	

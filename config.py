@@ -29,7 +29,7 @@ Config is a class containing all the configuration of the imagizer suite.
 Technically it is a Borg (design Pattern) so every instance of Config has exactly the same contents.
 """
 
-import os,sys,distutils.sysconfig
+import os,sys,distutils.sysconfig,locale
 
 installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
 #here we detect the OS runnng the program so that we can call exftran in the right way
@@ -73,8 +73,9 @@ class Config:
 		self.Burn="grave-rep $Selected"
 		self.WebServer="cp -r $Selected/* $WebRepository && generator" 
 		self.WebRepository="/var/www/imagizer"
-		self.Locale="fr_FR"
-		self.Coding="Latin-1"
+		self.Locale,self.Coding = locale.getdefaultlocale()
+#		self.Locale="fr_FR"
+#		self.Coding="Latin-1"
 		self.ExportSingleDir=False
 		self.GraphicMode="Normal"
 		self.WebPageAnchor="end"

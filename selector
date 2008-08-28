@@ -1032,7 +1032,7 @@ def SelectedSize(List):
 
 def SaveSelected(List):
 	"""save the list of selected files"""
-	print "Sauvegarde de la sélection"
+	print "Sauvegarde de la sélection".decode("Latin-1")
 	os.remove(Selected_file)
 	f=open(Selected_file,"w")
 	for ligne in List: f.write(ligne+"\n")
@@ -1043,7 +1043,7 @@ def SaveSelected(List):
 		
 def LoadSelected():
 	"""Load the list of selected files"""
-	print "Chargement de la sélection"
+	print "Chargement de la sélection".decode("Latin-1")
 	try:
 		lignes=open(Selected_file,"r").readlines()
 		select=[]
@@ -1287,7 +1287,7 @@ if __name__=='__main__':
 		for arg in sys.argv[1:]:
 			if arg[0]=="-":
 				if arg[1].lower()=="h":
-					print "Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n"
+					print "Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n".decode("Latin-1")
 					sys.exit(0)
 			else:
 				config.DefaultRepository=os.path.abspath(arg)
