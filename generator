@@ -2321,15 +2321,15 @@ desc_page = desc_index(dir)
 if desc_page:
 	if desc_page.has_key('title'):
 		print "<p><center><h3>"	
-		print desc_page['title']
+		print desc_page['title'].encode("Latin1")
 		print "</h3></center></p>"
 	if desc_page.has_key('date'):
 		print "<p><h4>"
-		print desc_page['date']
+		print desc_page['date'].encode("Latin1")
 		print "</h4></p>"
 	if desc_page.has_key('comment'):
 		print "<p>"
-		print desc_page['comment']
+		print desc_page['comment'].encode("Latin1")
 		print "</p>"
 -->
 </td></tr></table>
@@ -2383,7 +2383,7 @@ if len( dir._subdirs ) > 0:
 			else:
 				print "<td> </td>"
 			if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
-				print  '<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),d._attrfile["date"],d._attrfile["title"])				
+				print  '<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),d._attrfile["date"].encode("latin1"),d._attrfile["title"].encode("latin1"))				
 			else:
 				if len(d._basename)>11:
 					if d._basename[10] in [" ","_","-"]:
@@ -2391,7 +2391,7 @@ if len( dir._subdirs ) > 0:
 					else:
 						print '<td><a href="%s">%s</a></td>'%(rel(d._pagefn,cd),d._basename)
 			if d._attrfile.has_key("comment"):
-				print "<td>%s</td>"%d._attrfile["comment"]
+				print "<td>%s</td>"%d._attrfile["comment"].encode("latin1")
 			else:
 				print "<td> </td>"
 			print "</tr>"
@@ -2403,17 +2403,17 @@ if len( dir._subdirs ) > 0:
 				comment=""
 				if  d._attrfile.has_key("comment"):
 					if len(d._attrfile["comment"])>50:
-						words=re.sub("<BR>"," ",d._attrfile["comment"]).split()
+						words=re.sub("<BR>"," ",d._attrfile["comment"].encode("latin1")).split()
 						for w in words:
 							comment+=w+" "
 							if len(comment)>47:
 								comment+="..."
 								break 
 					else:
-						comment=re.sub("<BR>"," ",d._attrfile["comment"])
+						comment=re.sub("<BR>"," ",d._attrfile["comment"].encode("latin1"))
 				if d._attrfile.has_key("date") and d._attrfile.has_key("title"):  
 					if len(d._attrfile["date"])>0:
-						print '<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),d._attrfile["date"],d._attrfile["title"], comment)
+						print '<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),d._attrfile["date"].encode("latin1"),d._attrfile["title"].encode("latin1"), comment)
 					else:	
 						print '<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment)
 				else:

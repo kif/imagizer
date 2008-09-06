@@ -1097,28 +1097,28 @@ class RenameDay:
 		self.xml.signal_connect('on_Renommer_destroy',self.destroy)
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.get_widget("Date").set_text(self.comment["date"].decode(config.Coding).encode("UTF-8"))
-		self.xml.get_widget("Commentaire").set_text(self.comment["title"].decode(config.Coding).encode("UTF-8"))
+		self.xml.get_widget("Date").set_text(self.comment["date"].encode("UTF-8"))
+		self.xml.get_widget("Commentaire").set_text(self.comment["title"].encode("UTF-8"))
 		self.DescObj=self.xml.get_widget("Description").get_buffer()
 #		print 	self.comment["comment"]
-		comment=self.comment["comment"].decode(config.Coding).encode("UTF-8").strip().replace("<BR>","\n",)
+		comment=self.comment["comment"].encode("UTF-8").strip().replace("<BR>","\n",)
 		self.DescObj.set_text(comment)
 #		print 	comment
 
 	def continu(self,*args):
 		"""just distroy the window and goes on ...."""
 
-		self.newname=self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8").encode(config.Coding)
+		self.newname=self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8")
 		self.comment["title"]=self.newname
 		if self.newname=="":
 			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)
 		else:
-			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+latin1_to_ascii(self.newname).replace(" ","_",)
+			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+latin1_to_ascii(self.newname.encode("latin1")).replace(" ","_",)
 		self.newcommentfile=os.path.join(config.DefaultRepository,self.newdayname,config.CommentFile)
 		if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
 			mkdir(os.path.join(config.DefaultRepository,self.newdayname))
 		if self.DescObj.get_modified():
-			self.comment["comment"]=self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter()).strip().decode("UTF-8").encode(config.Coding).replace("\n","<BR>")
+			self.comment["comment"]=self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter()).strip().decode("UTF-8").replace("\n","<BR>")
 		self.comment.write()		
 
 
@@ -1155,6 +1155,7 @@ class RenameDay:
 		except:
 			pass
 		while gtk.events_pending():gtk.main_iteration()	
+
 class AskSlideShowSetup:
 	"""pop up a windows and asks for the setup of the SlideShow"""
 	def __init__(self,upperIface):

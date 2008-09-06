@@ -40,6 +40,7 @@ class AttrFile:
 		self._path = path
 		self._attrmap = {}
 		self._dirty = 0
+		self._attrmap["coding"]=config.Coding
 
 	#---------------------------------------------------------------------------
 	#
@@ -78,6 +79,10 @@ class AttrFile:
 			return
 
 		try:
+			coding=self._attrmap["coding"]
+		except:
+			coding=config.Coding
+		try:
 			# if there are no field, delete the file.
 			if len( self._attrmap ) == 0:
 				os.unlink( self._path )
@@ -87,7 +92,7 @@ class AttrFile:
 			for k in self._attrmap.keys():
 				f.write( k )
 				f.write( ": " )
-				f.write( self._attrmap[k] )
+				f.write( self._attrmap[k].encode(coding))
 				f.write( "\n\n" )
 			f.close()
 			os.chmod(self._path,config.DefaultFileMode)
@@ -125,6 +130,17 @@ class AttrFile:
 				pos = mo2.end()
 			else:
 				break
+		try:
+			coding=self._attrmap["coding"]
+		except:
+			coding=config.Coding
+
+		for key in self._attrmap.keys():
+			txt=self._attrmap[ key ]
+			try:
+				self._attrmap[ key ] = txt.decode(coding)
+			except:
+				self._attrmap[ key ] = txt
 
 	#---------------------------------------------------------------------------
 	#
