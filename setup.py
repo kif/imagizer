@@ -43,7 +43,7 @@ if os.name == 'nt': #sys.platform == 'win32':
 	scripts= ['selector.py',"generator.py"]
 
 elif os.name == 'posix':
-	shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
+#	shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
 	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
 	scripts= ['selector',"generator"]
 	execexiftran=os.path.join(os.getcwd(),"bin","exiftran")
