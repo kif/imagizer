@@ -1078,19 +1078,18 @@ class RenameDay:
 		except:
 			print "something is wrong with this name : "+self.dayname
 			return
-		self.comment["date"]=time.strftime("%A, %d %B %Y",self.timetuple).capitalize()
-		
+		self.comment["date"]=time.strftime("%A, %d %B %Y",self.timetuple).capitalize().decode(config.Coding)
 		if self.comment.has_key("title"):
 			self.name= self.comment["title"]
 		elif len(self.dayname)>10:
-			self.name=self.dayname[11:]
-			self.comment["title"]=self.name
+			self.name=self.dayname[11:].decode(config.Coding)
+			self.comment["title"]=self.name.decode(config.Coding)
 		else:
-			self.name=""
-			self.comment["title"]=self.name
-		self.comment["image"]=os.path.split(filename)[1]
+			self.name=u""
+			self.comment["title"]=self.name.decode(config.Coding)
+		self.comment["image"]=os.path.split(filename)[1].decode(config.Coding)
 		if not self.comment.has_key("comment"):
-			self.comment["comment"]=""
+			self.comment["comment"]=u""
 		self.AllPhotos=AllPhotos
 		self.selected=selected
 		self.xml=gtk.glade.XML(unifiedglade,root="Renommer")

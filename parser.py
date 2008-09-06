@@ -202,6 +202,10 @@ class AttrFile:
 			value = '\n' + value
 
 		if self._attrmap.has_key( field ):
+#			print "field %s: %s"%(type(field),field)
+#			print "attrmap[field] %s: %s"%(type(self._attrmap[ field ]), self._attrmap[ field ])
+#			print "value %s: %s"%(type(value),value)
+#			
 			if self._attrmap[ field ] == value:
 				return 0
 
