@@ -299,8 +299,8 @@ class interface:
         elif config.Interpolation == 3:
             self.xml.get_widget("VHiQ").set_active(1)
         
-        self.flush_event_queue()
         self.ShowImage()
+        self.flush_event_queue()
         
         self.xml.signal_connect('on_Principale_destroy',self.destroy)
         self.xml.signal_connect('on_arreter1_activate',self.destroy)
@@ -316,6 +316,7 @@ class interface:
         self.xml.signal_connect('on_quitter1_activate',self.die)
         self.xml.signal_connect('on_nommer1_activate',self.renommer)
         self.xml.signal_connect('on_executer1_activate',self.run)
+	self.xml.signal_connect('on_Synchronize_activate',self.synchronize)
         self.xml.signal_connect('on_copie_et_grave1_activate',self.Burn)
         self.xml.signal_connect('on_vers_page_web2_activate',self.ToWeb)
         self.xml.signal_connect('on_vide_selection1_activate',self.EmptySelected)
@@ -388,8 +389,9 @@ class interface:
 
         self.xml.signal_connect('on_fullscreen_activate',self.FullScreen)
         self.xml.signal_connect('on_lance_diaporama_activate',self.SlideShow)
+        self.ShowImage()
+        self.flush_event_queue()
         gtk.main()
-
 
     def flush_event_queue(self):
         """Updates the GTK GUI before comming back to the gtk.main()"""
@@ -650,7 +652,7 @@ class interface:
     def about(self,*args):
         """display a copyright message"""	
         self.settitle()
-        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.2 du 08/05/2006".decode("latin1"),Message=gtk.MESSAGE_INFO)
+        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.5 du 07/09/2008".decode("latin1"),Message=gtk.MESSAGE_INFO)
         
     
     def nextJ(self,*args):
@@ -950,6 +952,11 @@ class interface:
         self.settitle()
         ChangeJourInstance=SelectDay(self)
 
+    def synchronize(self,*args):
+   	"""lauch the synchronization window"""
+        self.settitle()
+        SynchroInstance=Synchronize(self.CurIm,self.AllJpegs,self.Selected)
+
 
     def SelectNewerMedia(self,*args):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
@@ -1235,6 +1242,106 @@ class AskMediaSize:
 		except:
 			pass
 		while gtk.events_pending():gtk.main_iteration()	
+
+class Synchronize:
+	"""Class for file synchronization between different repositories"""
+	def __init__(self,current,AllPhotos,selected):
+		#print "entering in Synchronize class with arguments %i,%i,%i"%(current,len(AllPhotos),len(selected))
+		self.config=Config()
+		#print self.config.SynchronizeType
+		self.current=current
+		self.AllPhotos=AllPhotos
+		self.Selected=selected
+		self.initST=self.config.SynchronizeType
+		self.xml=gtk.glade.XML(unifiedglade,root="Synchroniser")
+		self.xml.signal_connect('on_Synchroniser_destroy',self.destroy)
+		self.xml.signal_connect('on_cancel4_clicked',self.destroy)
+		self.xml.signal_connect('on_ok4_clicked',self.synchronize)
+		self.xml.signal_connect('on_apply4_clicked',self.apply)
+		self.xml.get_widget("SyncCommand").set_text(self.config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
+		if self.config.SynchronizeType.lower() == "newer":
+			self.xml.get_widget("SyncOlder").set_active(0)
+			self.xml.get_widget("SyncAll").set_active(0)
+			self.xml.get_widget("SyncSelected").set_active(0)
+			self.xml.get_widget("SyncNewer").set_active(1)
+		elif self.config.SynchronizeType.lower() == "older" :
+			self.xml.get_widget("SyncNewer").set_active(0)
+			self.xml.get_widget("SyncAll").set_active(0)
+			self.xml.get_widget("SyncSelected").set_active(0)
+			self.xml.get_widget("SyncOlder").set_active(1)
+		elif self.config.SynchronizeType.lower() == "all":
+			self.xml.get_widget("SyncSelected").set_active(0)
+			self.xml.get_widget("SyncOlder").set_active(0)
+			self.xml.get_widget("SyncNewer").set_active(0)
+			self.xml.get_widget("SyncAll").set_active(1)
+		elif self.config.SynchronizeType.lower() == "selected":
+			self.xml.get_widget("SyncOlder").set_active(0)
+			self.xml.get_widget("SyncAll").set_active(0)
+			self.xml.get_widget("SyncNewer").set_active(0)
+			self.xml.get_widget("SyncSelected").set_active(1)
+		else:
+			self.xml.get_widget("SyncAll").set_active(0)
+			self.xml.get_widget("SyncOlder").set_active(0)
+			self.xml.get_widget("SyncNewer").set_active(0)
+			self.xml.get_widget("SyncSelected").set_active(1)
+		self.xml.signal_connect('on_SyncAll_toggled',self.SetSyncAll)
+		self.xml.signal_connect('on_SyncNewer_toggled',self.SetSyncNewer)
+		self.xml.signal_connect('on_SyncOlder_toggled',self.SetSyncOlder)
+		self.xml.signal_connect('on_SyncSelected_toggled',self.SetSyncSelected)
+		while gtk.events_pending():gtk.main_iteration()
+
+	def SetSyncAll(self,*args):
+		#print "SetSyncAll activated"
+		self.config.SynchronizeType="All"
+        def SetSyncOlder(self,*args):
+		#print "SetSyncOld activated"
+                self.config.SynchronizeType="Older"
+        def SetSyncNewer(self,*args):
+		#print "SetSyncNew activated"
+                self.config.SynchronizeType="Newer"
+        def SetSyncSelected(self,*args):
+		#print "SetSyncSel activated"
+                self.config.SynchronizeType="Selected"
+	def Read(self):
+		"""read config from GUI"""
+		self.config.SynchronizeRep=self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
+		self.initST=self.config.SynchronizeType
+	def apply(self,*args):
+		self.Read()
+		self.destroy()
+	def synchronize(self,*args):
+		self.Read()
+		#print "entering Synchronize"
+		#print self.config.SynchronizeType
+		synchrofile=os.path.join(self.config.DefaultRepository,".synchro")
+		synchro=[]
+		if self.config.SynchronizeType.lower() == "selected":
+			#print "exec selected"
+			synchro=self.Selected
+		elif self.config.SynchronizeType.lower() == "newer":
+			#print "exec newer"
+			synchro=self.AllPhotos[self.current:]
+		elif self.config.SynchronizeType.lower() == "older":
+			#print "exec older"
+			synchro=self.AllPhotos[:self.current+1]
+		else:
+			#print "exec all"
+			synchro=self.AllPhotos
+		f=open(synchrofile,"w")
+		for i in synchro: f.write(i+"\n")
+		f.close()
+		os.system("rsync -v --files-from=%s %s/ %s"%(synchrofile,self.config.DefaultRepository,self.config.SynchronizeRep))
+#		sys.exec ("rsync--files-from=%s %s")%(synchrofile.self.config.SynchronizeRep)
+		self.destroy()
+	def destroy(self,*args):
+		"""destroy clicked by user -> quit the program"""
+		self.config.SynchronizeType=self.initST
+		#print self.config.SynchronizeType
+		try:
+			self.xml.get_widget("Synchroniser").destroy()
+		except:
+			pass
+		while gtk.events_pending():gtk.main_iteration()
 
 
 

@@ -81,6 +81,8 @@ class Config:
 		self.WebPageAnchor="end"
 		self.SlideShowDelay=5.0
 		self.SlideShowType="chronological"
+		self.SynchronizeRep="user@host:/mnt/photo"
+		self.SynchronizeType="Newer"
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -149,6 +151,8 @@ class Config:
 			elif j=="WebPageAnchor".lower():self.WebPageAnchor=i[1]
 			elif j=="SlideShowDelay".lower():self.SlideShowDelay=float(i[1])
 			elif j=="SlideShowType".lower():self.SlideShowType=i[1]
+			elif j=="SynchronizeRep".lower():self.SynchronizeRep=i[1]
+			elif j=="SynchronizeType".lower(): self.SynchronizeType=i[1]
 
 			else: print "unknown key "+j
 		
@@ -217,6 +221,9 @@ class Config:
 		txt+="#Where should the dirindex page start-up ? [begin/end] \nWebPageAnchor: %s\n\n"%self.WebPageAnchor
 		txt+="#Delay between imges in the slideshow? \nSlideShowDelay: %s\n\n"%self.SlideShowDelay
 		txt+="#Type of slideshow : chronological, anti-chronological or random ?\nSlideShowType: %s\n\n"%self.SlideShowType
+		txt+="#Remote repository to synchronize with (rsync like)\nSynchronizeRep: %s\n\n"%self.SynchronizeRep
+		txt+="#Synchronization type, acceptable values are Newer, Older, Selected and All\nSynchronizeType: %s\n\n"%self.SynchronizeType
+
 
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
