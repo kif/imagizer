@@ -1327,7 +1327,7 @@ def generateSummary( fn, allimages ):
 	try:
 		afn = join(opts.root, fn)
 		tfile = open( afn, "w" )
-		tfile.write( otext )
+		tfile.write( otext.encode("Latin1"))
 		tfile.close()
 
 	except IOError, e:
@@ -2105,7 +2105,7 @@ HR.sephr { background-color: black; height: 1px; width: 90%; }
 """
 
 fallbackTemplates[ 'template-image' ] = \
-(html_preamble % 'Image: <!--tag:image._title-->') + \
+(html_preamble % 'Image: <!--tag:image._title.encode("Latin1")-->') + \
 """
 
 <!-- quick navigator at the top -->
@@ -2260,7 +2260,7 @@ if pi:
 	between the floating thumbs-->
 
 <b>
-<!--tag:dirnav(cd, image._dir)-->
+<!--tag:dirnav(cd, image._dir).encode("Latin1")-->
 <!--tag:dirnavsep-->
 <a href="<!--tag:rel(image._filename, cd)-->">
 <!--tag:basename(image._filename)--></a>
@@ -2316,7 +2316,7 @@ desc_page = desc_index(dir)
 -->
 
 <table class="toptable dirtop"><tr><td>
-<p class="toptitle"><!--tag:dirnav(cd, dir)--></p>
+<p class="toptitle"><!--tag:dirnav(cd, dir).encode("Latin1")--></p>
 <!--tagcode:
 if desc_page:
 	if desc_page.has_key('title'):
