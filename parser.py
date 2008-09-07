@@ -23,7 +23,7 @@
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
 
-import re,os
+import re,os,sys
 import config 
 config=config.Config()
 

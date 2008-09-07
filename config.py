@@ -58,7 +58,7 @@ class Config:
 		self.AutoRotate=False
 		self.DefaultMode="664"
 		self.DefaultRepository=os.getcwd()
-		self.CommentFile="Comment.txt"
+		self.CommentFile="index.desc"
 		self.Interpolation=1
 		self.DefaultFileMode=int(self.DefaultMode,8)
 		self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal

@@ -1327,6 +1327,13 @@ class Synchronize:
 		else:
 			#print "exec all"
 			synchro=self.AllPhotos
+		days=[]
+		for photo in synchro:
+			day=os.path.split(photo)[0]
+			if not day in days: 
+				days.append(day)
+				if os.path.isfile(os.path.join(self.config.DefaultRepository,day,self.config.CommentFile)):synchro.append(os.path.join(day,self.config.CommentFile))
+		
 		f=open(synchrofile,"w")
 		for i in synchro: f.write(i+"\n")
 		f.close()
