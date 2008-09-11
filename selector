@@ -1333,7 +1333,6 @@ class Synchronize:
 			if not day in days: 
 				days.append(day)
 				if os.path.isfile(os.path.join(self.config.DefaultRepository,day,self.config.CommentFile)):synchro.append(os.path.join(day,self.config.CommentFile))
-		
 		f=open(synchrofile,"w")
 		for i in synchro: f.write(i+"\n")
 		f.close()
