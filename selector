@@ -1209,10 +1209,10 @@ class AskSlideShowSetup:
 
 	def destroy(self,*args):
 		"""destroy clicked by user -> quit the program"""
-		try:
-			self.xml.get_widget("Diaporama").destroy()
-		except:
-			pass
+#		try:
+#			self.xml.get_widget("Diaporama").destroy()
+#		except:
+#			pass
 		while gtk.events_pending():gtk.main_iteration() 
 
 
