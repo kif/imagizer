@@ -1327,6 +1327,7 @@ class Synchronize:
 		else:
 			#print "exec all"
 			synchro=self.AllPhotos
+		synchro.append(self.config.Selected_save)
 		days=[]
 		for photo in synchro:
 			day=os.path.split(photo)[0]
