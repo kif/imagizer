@@ -82,6 +82,8 @@ class AttrFile:
 			coding=self._attrmap["coding"]
 		except:
 			coding=config.Coding
+
+#		print "Coding= %s"%coding
 		try:
 			# if there are no field, delete the file.
 			if len( self._attrmap ) == 0:
@@ -92,6 +94,7 @@ class AttrFile:
 			for k in self._attrmap.keys():
 				f.write( k )
 				f.write( ": " )
+#				print self._attrmap[k]
 				f.write( self._attrmap[k].encode(coding))
 				f.write( "\n\n" )
 			f.close()

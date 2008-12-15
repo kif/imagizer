@@ -535,7 +535,7 @@ class Dir:
 			longtitle=os.path.split(self._basename)[1]
 			if not self._attrfile.has_key("date"):
 				try:
-					self._attrfile["date"]=time.strftime("%A, %d %B %Y",time.strptime(longtitle[:10],"%Y-%m-%d")).capitalize()
+					self._attrfile["date"]=time.strftime("%A, %d %B %Y",time.strptime(longtitle[:10],"%Y-%m-%d")).capitalize().decode(config.Coding)
 				except:
 					self._attrfile["date"]=""
 			if not self._attrfile.has_key("title"):
