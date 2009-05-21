@@ -605,7 +605,7 @@ class photo:
             self.x,self.y=self.f.size
 
     def SaveThumb(self,Thumbname,Size=160,Interpolation=1,Quality=75,Progressive=False,Optimize=False,ExifExtraction=False):
-        """save a thumbnail of the given name, with the given size and the interpollation mathode (quality) 
+        """save a thumbnail of the given name, with the given size and the interpolation methode (quality) 
         resampling filters :
         NONE = 0
         NEAREST = 0
@@ -629,7 +629,7 @@ class photo:
                 except:
                     extract=False
             if not extract:
-                print "on essaie avec PIL"
+#                print "on essaie avec PIL"
                 self.LoadPIL()
                 self.g=self.f.copy()
                 self.g.thumbnail((Size,Size),Interpolation)

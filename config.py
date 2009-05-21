@@ -48,7 +48,7 @@ class Config:
 	def __init__(self):
 		self.__dict__ = self.__shared_state
 	def default(self):
-		self.ScreenSize=600
+		self.ScreenSize=500
 		self.NbrPerPage=20
 		self.PagePrefix="page"
 		self.TrashDirectory="Trash"
@@ -95,7 +95,7 @@ class Config:
 		self.ScaledImages={
 			"Size":800,
 			"Suffix": "scaled",
-			"Interpolation":2,
+			"Interpolation":1,
 			"Progressive":False,
 			"Optimize":False,
 			"ExifExtraction":False,
@@ -230,7 +230,7 @@ class Config:
 			j=eval("self.%s"%i)
 			txt+="#%s size\nSize: %s \n\n"%(i,j["Size"])
 			txt+="#%s suffix\nSuffix: %s \n\n"%(i,j["Suffix"])
-			txt+="#%s downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias]\nInterpolation: %s \n\n"%(i,j["Interpolation"])
+			txt+="#%s downsampling quality [0=nearest, 1=antialias 2=bilinear, 3=bicubic]\nInterpolation: %s \n\n"%(i,j["Interpolation"])
 			txt+="#%s progressive JPEG files\nProgressive: %s \n\n"%(i,j["Progressive"])
 			txt+="#%s optimized JPEG (2 pass encoding)\nOptimize: %s \n\n"%(i,j["Optimize"])
 			txt+="#%s quality (in percent)\nQuality: %s \n\n"%(i,j["Quality"])

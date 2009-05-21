@@ -1,6 +1,6 @@
 [Selector]
 #Size on the images on the Screen, by default
-ScreenSize: 600 
+ScreenSize: 500 
 
 #Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]
 Interpolation: 1 
@@ -81,8 +81,8 @@ Size: 800
 #ScaledImages suffix
 Suffix: scaled 
 
-#ScaledImages downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias] 
-Interpolation: 2 
+#ScaledImages downsampling quality [0=nearest, 1=antialias,  2=bilinear, 3=bicubic] 
+Interpolation: 1
 
 #ScaledImages progressive JPEG files
 Progressive: True 
@@ -103,7 +103,7 @@ Size: 160
 #Thumbnails suffix
 Suffix: thumb 
 
-#Thumbnails downsampling quality [0=nearest, 1=bilinear, 2=bicubic, 3=antialias] 
+#Thumbnails downsampling quality [0=nearest, 1=antialias, 2=bilinear, 3=bicubic] 
 Interpolation: 1 
 
 #Thumbnails progressive JPEG files

@@ -976,7 +976,7 @@ class Image:
 
 			try:
 				im = PilImage.open(aimgfn)
-				im.thumbnail( (opts.thumb_size, opts.thumb_size) )
+				im.thumbnail( (opts.thumb_size, opts.thumb_size),config.Thumbnails["Interpolation"] )
 				im.save(athumbfn)
 
 				img._thumbsize = im.size
@@ -1092,7 +1092,7 @@ class Image:
 
 			try:
 				im = PilImage.open(aimgfn)
-				im.thumbnail( (opts.scaled_size, opts.scaled_size) )
+				im.thumbnail( (opts.scaled_size, opts.scaled_size), config.ScaledImages["Interpolation"] )
 				im.save(ascaledfn)
 
 				img._scaledsize = im.size
