@@ -55,6 +55,7 @@ class WarningSc:
 		self.xml.signal_connect('on_cancel_clicked',self.destroy)
 		self.xml.signal_connect('on_ok_clicked',self.continu)
 		self.xml.signal_connect('on_dirname_editing_done',self.continu)
+		while gtk.events_pending():gtk.main_iteration()
 		self.xml.get_widget("dirname").set_text(directory)		
 		gtk.main()
 	def continu(self,*args):

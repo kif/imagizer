@@ -98,6 +98,7 @@ if not configured:
 			print "Enter le chemin du repertoire racine du serveur WEB :"
 			config.WebRepository=raw_input("[%s] :"%config.WebRepository)
 			if os.path.isdir(config.WebRepository):break
+			print "No Such Dir"
 	else:
 		from dirchooser import WarningSc
 		W=WarningSc(config.WebRepository,window="WWW-root")
@@ -106,4 +107,5 @@ if not configured:
 	config.Locale,config.Coding = locale.getdefaultlocale()
 	LANG=os.getenv("LANG")
 	if LANG:config.Locale=LANG
-	config.SaveConfig(ConfFile[0])	
+	config.SaveConfig(ConfFile[0])
+	

@@ -2150,7 +2150,7 @@
                   <widget class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkEntry" id="dirname1">
+                      <widget class="GtkEntry" id="dirname">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">*</property>
