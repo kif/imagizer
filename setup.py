@@ -104,4 +104,6 @@ if not configured:
 		config.WebRepository=W.directory
 		del W
 	config.Locale,config.Coding = locale.getdefaultlocale()
+	LANG=os.getenv("LANG")
+	if LANG:config.Locale=LANG
 	config.SaveConfig(ConfFile[0])	
