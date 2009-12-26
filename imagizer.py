@@ -72,7 +72,11 @@ from signals import Signal
 from config import Config
 config=Config()
 config.load(ConfFile)
-
+if config.ImageCache > 100:
+	import imagecache
+	imageCache = imagecache.ImageCache( maxSize = config.ImageCache )
+else:
+    imageCache = None
 import pyexiv2
 
 
@@ -576,9 +580,9 @@ def CopySelected(SelectedFiles):
 
 
 
-
+##########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
-
+##########################################################
 class photo:
     """class photo that does all the operations available on photos"""
     def __init__(self,filename):
@@ -707,29 +711,39 @@ class photo:
         
     def show(self,Xsize=600,Ysize=600):
         """return a pixbuf to shows the image in a Gtk window"""
+        scaled_buf = None
         self.taille()			
-        pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
-#		print "Taille voulue %sx%s"%(Xsize,Ysize)
         R=min(float(Xsize)/self.x,float(Ysize)/self.y)
-        if R<1:
-            nx=int(R*self.x)
-            ny=int(R*self.y)
-#			print  "Taille Obtenue  %sx%s"%(nx,ny)
-            scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[config.Interpolation])
-        else :
-            scaled_buf=pixbuf
+        if R < 1:
+            nx = int( R*self.x )
+            ny = int( R*self.y )
+        else:
+            nx = self.x
+            ny = self.y
+        if imageCache is not None:
+           if self.filename in imageCache.ordered:
+                data = imageCache[ self.filename ]
+                if (data.get_width() == nx) and (data.get_height() == ny):
+                    scaled_buf = data
+                    print "Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes"%( self.filename, len( imageCache.ordered), (imageCache.size/1048576.0) ) 
+        if not scaled_buf:
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
+            if R<1:
+                scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[config.Interpolation])
+            else :
+                scaled_buf=pixbuf
+            if imageCache is not None:
+                imageCache[ self.filename ] = scaled_buf    
+                print "Sucessfully cached  %s, cache size: %i images, %.3f MBytes"%( self.filename, len(imageCache.ordered), (imageCache.size/1048576.0) ) 
         return scaled_buf
-                
+                    
     def name(self,titre):
         """write the title of the photo inside the description field, in the JPEG header"""	
         if os.name == 'nt' and self.f!=None: del self.f
         image_exif=pyexiv2.Image(self.fn)
         image_exif.readMetadata()
-#        print titre.decode("utf-8")
-#        tit=titre.decode("utf-8").encode("latin-1")
         image_exif.setComment(titre)
         image_exif.writeMetadata()
-#        os.system('%s -ipc "%s"  "%s"'%(exiftran,titre,self.fn))
         
     def autorotate(self):
         """does autorotate the image according to the EXIF tag"""
@@ -760,8 +774,10 @@ class photo:
         F.save(os.path.join(config.DefaultRepository,outfile),quality=90,progressive=True,Optimize=True)
         os.chmod(os.path.join(config.DefaultRepository,outfile),config.DefaultFileMode)
 
-		
+########################################################		
 # # # # # # fin de la classe photo # # # # # # # # # # #
+########################################################
+
 class signature:
 	def __init__(self,filename):
 		"""this filter allows add a signature to an image"""

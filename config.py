@@ -42,6 +42,8 @@ else:
 	sys.exit(1)
 
 ################################################################################################
+###############  Class Config for storing the cofiguratio in a Borg ############################
+################################################################################################
 class Config:
 	"""this class is a Borg : always returns the same values regardless to the instance of the object"""
 	__shared_state = {}
@@ -83,6 +85,7 @@ class Config:
 		self.SlideShowType="chronological"
 		self.SynchronizeRep="user@host:/mnt/photo"
 		self.SynchronizeType="Newer"
+		self.ImageCache=100000000
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -119,41 +122,41 @@ class Config:
 		config.read(files)
 		for i in config.items("Selector"):
 			j=i[0]
-			if j=="ScreenSize".lower():self.ScreenSize=int(i[1])
-			elif j=="Interpolation".lower():self.Interpolation=int(i[1])
-			elif j=="PagePrefix".lower():self.PagePrefix=i[1]
-			elif j=="NbrPerPage".lower():self.NbrPerPage=int(i[1])
-			elif j=="TrashDirectory".lower():self.TrashDirectory=i[1]
-			elif j=="SelectedDirectory".lower():self.SelectedDirectory=i[1]
-			elif j=="Selected_save".lower():self.Selected_save=i[1]
-			elif j=="AutoRotate".lower():self.AutoRotate=config.getboolean("Selector","AutoRotate")
-			elif j=="Filigrane".lower():self.Filigrane=config.getboolean("Selector","Filigrane")
-			elif j=="FiligraneSource".lower():self.FiligraneSource=i[1]
-			elif j=="FiligranePosition".lower():self.FiligranePosition=int(i[1])
-			elif j=="FiligraneQuality".lower():self.FiligraneQuality=int(i[1])
-			elif j=="FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
-			elif j=="FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
-			elif j=="CommentFile".lower():self.CommentFile=i[1]
-			elif j=="WebDirIndexStyle".lower():self.WebDirIndexStyle=i[1]
+			if j == "ScreenSize".lower():self.ScreenSize=int(i[1])
+			elif j == "Interpolation".lower():self.Interpolation=int(i[1])
+			elif j == "PagePrefix".lower():self.PagePrefix=i[1]
+			elif j == "NbrPerPage".lower():self.NbrPerPage=int(i[1])
+			elif j == "TrashDirectory".lower():self.TrashDirectory=i[1]
+			elif j == "SelectedDirectory".lower():self.SelectedDirectory=i[1]
+			elif j == "Selected_save".lower():self.Selected_save=i[1]
+			elif j == "AutoRotate".lower():self.AutoRotate=config.getboolean("Selector","AutoRotate")
+			elif j == "Filigrane".lower():self.Filigrane=config.getboolean("Selector","Filigrane")
+			elif j == "FiligraneSource".lower():self.FiligraneSource=i[1]
+			elif j == "FiligranePosition".lower():self.FiligranePosition=int(i[1])
+			elif j == "FiligraneQuality".lower():self.FiligraneQuality=int(i[1])
+			elif j == "FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
+			elif j == "FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
+			elif j == "CommentFile".lower():self.CommentFile=i[1]
+			elif j == "WebDirIndexStyle".lower():self.WebDirIndexStyle=i[1]
 
-			elif j=="DefaultFileMode".lower():
+			elif j == "DefaultFileMode".lower():
 				self.DefaultFileMode=int(i[1],8)
 				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
-			elif j=="Extensions".lower(): self.Extensions=i[1].split()
-			elif j=="DefaultRepository".lower():self.DefaultRepository=i[1]
-			elif j=="MediaSize".lower():self.MediaSize=float(i[1])
-			elif j=="Burn".lower(): self.Burn=i[1]
-			elif j=="WebServer".lower():self.WebServer=i[1]
-			elif j=="WebRepository".lower():self.WebRepository=i[1]
-			elif j=="Locale".lower():self.Locale=i[1]
-			elif j=="Coding".lower():self.Coding=i[1]
-			elif j=="ExportSingleDir".lower():self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
-			elif j=="WebPageAnchor".lower():self.WebPageAnchor=i[1]
-			elif j=="SlideShowDelay".lower():self.SlideShowDelay=float(i[1])
-			elif j=="SlideShowType".lower():self.SlideShowType=i[1]
-			elif j=="SynchronizeRep".lower():self.SynchronizeRep=i[1]
-			elif j=="SynchronizeType".lower(): self.SynchronizeType=i[1]
-
+			elif j == "Extensions".lower(): self.Extensions=i[1].split()
+			elif j == "DefaultRepository".lower():self.DefaultRepository=i[1]
+			elif j == "MediaSize".lower():self.MediaSize=float(i[1])
+			elif j == "Burn".lower(): self.Burn=i[1]
+			elif j == "WebServer".lower():self.WebServer=i[1]
+			elif j == "WebRepository".lower():self.WebRepository=i[1]
+			elif j == "Locale".lower():self.Locale=i[1]
+			elif j == "Coding".lower():self.Coding=i[1]
+			elif j == "ExportSingleDir".lower():self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
+			elif j == "WebPageAnchor".lower():self.WebPageAnchor=i[1]
+			elif j == "SlideShowDelay".lower():self.SlideShowDelay=float(i[1])
+			elif j == "SlideShowType".lower():self.SlideShowType=i[1]
+			elif j == "SynchronizeRep".lower():self.SynchronizeRep=i[1]
+			elif j == "SynchronizeType".lower(): self.SynchronizeType=i[1]
+			elif j == "ImageCache".lower(): self.ImageCache = int( i[1] )
 			else: print "unknown key "+j
 		
 
@@ -186,6 +189,7 @@ class Config:
 		print "Backup media size (CD,DVD) in Mb :%s"%self.MediaSize
 		print "Scaled imagesSize:\t\t  %s"%self.ScaledImages["Size"]
 		print "Thumbnail Size:\t\t\t  %s"%self.Thumbnails["Size"]
+		print "Caching of PixBuffers size:\t\t %s"%self.ImageCache
 
 	def SaveConfig(self,filename):
 		"""saves the default options"""
@@ -223,7 +227,7 @@ class Config:
 		txt+="#Type of slideshow : chronological, anti-chronological or random ?\nSlideShowType: %s\n\n"%self.SlideShowType
 		txt+="#Remote repository to synchronize with (rsync like)\nSynchronizeRep: %s\n\n"%self.SynchronizeRep
 		txt+="#Synchronization type, acceptable values are Newer, Older, Selected and All\nSynchronizeType: %s\n\n"%self.SynchronizeType
-
+		txt+="#Allow the creation of a Cache of images with the given size in byte\nCacheImage: %s\n\n"%self.ImageCache
 
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i
@@ -238,3 +242,4 @@ class Config:
 		w=open(filename,"w")
 		w.write(txt)
 		w.close()
+
