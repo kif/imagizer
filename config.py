@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006 - 2009,  Jérome Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -50,42 +50,42 @@ class Config:
 	def __init__(self):
 		self.__dict__ = self.__shared_state
 	def default(self):
-		self.ScreenSize=500
-		self.NbrPerPage=20
-		self.PagePrefix="page"
-		self.TrashDirectory="Trash"
-		self.SelectedDirectory="Selected"
-		self.Selected_save=".selected-photos"
-		self.Extensions=[".jpg", ".jpeg",".jpe",".jfif"]
-		self.AutoRotate=False
-		self.DefaultMode="664"
-		self.DefaultRepository=os.getcwd()
-		self.CommentFile="index.desc"
-		self.Interpolation=1
-		self.DefaultFileMode=int(self.DefaultMode,8)
-		self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
-		self.Filigrane=False
-		self.FiligraneSource=os.path.join(installdir,"signature.png")
-		self.FiligranePosition=5
-		self.FiligraneQuality=75
-		self.FiligraneOptimize=False		
+		self.ScreenSize =         500
+		self.NbrPerPage =         20
+		self.PagePrefix =         "page"
+		self.TrashDirectory =     "Trash"
+		self.SelectedDirectory =  "Selected"
+		self.Selected_save =      ".selected-photos"
+		self.Extensions =         [".jpg", ".jpeg",".jpe",".jfif"]
+		self.AutoRotate =         False
+		self.DefaultMode =        "664"
+		self.DefaultRepository =  os.getcwd()
+		self.CommentFile =        "index.desc"
+		self.Interpolation =      1
+		self.DefaultFileMode =    int(self.DefaultMode,8)
+		self.DefaultDirMode =     self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal
+		self.Filigrane =          False
+		self.FiligraneSource =    os.path.join(installdir,"signature.png")
+		self.FiligranePosition =  5
+		self.FiligraneQuality =   75
+		self.FiligraneOptimize =  False		
 		self.FiligraneProgressive=False	
-		self.WebDirIndexStyle="list"	
-		self.MediaSize=680
-		self.Burn="grave-rep $Selected"
-		self.WebServer="cp -r $Selected/* $WebRepository && generator" 
-		self.WebRepository="/var/www/imagizer"
+		self.WebDirIndexStyle =   "list"	
+		self.MediaSize =          680
+		self.Burn      =          "grave-rep $Selected"
+		self.WebServer =          "cp -r $Selected/* $WebRepository && generator" 
+		self.WebRepository =      "/var/www/imagizer"
 		self.Locale,self.Coding = locale.getdefaultlocale()
-#		self.Locale="fr_FR"
-#		self.Coding="Latin-1"
-		self.ExportSingleDir=False
-		self.GraphicMode="Normal"
-		self.WebPageAnchor="end"
-		self.SlideShowDelay=5.0
-		self.SlideShowType="chronological"
-		self.SynchronizeRep="user@host:/mnt/photo"
-		self.SynchronizeType="Newer"
-		self.ImageCache=100000000
+		self.ExportSingleDir =    False
+		self.GraphicMode =        "Normal"
+		self.WebPageAnchor =      "end"
+		self.SlideShowDelay =     5.0
+		self.SlideShowType =      "chronological"
+		self.SynchronizeRep =     "user@host:/mnt/photo"
+		self.SynchronizeType =    "Newer"
+		self.ImageCache =         100000000
+		self.ImageWidth =         None
+		self.ImageHeight =        None
 		self.Thumbnails={
 			"Size":160,
 			"Suffix": "thumb",
@@ -122,41 +122,43 @@ class Config:
 		config.read(files)
 		for i in config.items("Selector"):
 			j=i[0]
-			if j == "ScreenSize".lower():self.ScreenSize=int(i[1])
-			elif j == "Interpolation".lower():self.Interpolation=int(i[1])
-			elif j == "PagePrefix".lower():self.PagePrefix=i[1]
-			elif j == "NbrPerPage".lower():self.NbrPerPage=int(i[1])
-			elif j == "TrashDirectory".lower():self.TrashDirectory=i[1]
+			if j == "ScreenSize".lower():         self.ScreenSize=int(i[1])
+			elif j == "Interpolation".lower():    self.Interpolation=int(i[1])
+			elif j == "PagePrefix".lower():       self.PagePrefix=i[1]
+			elif j == "NbrPerPage".lower():       self.NbrPerPage=int(i[1])
+			elif j == "TrashDirectory".lower():   self.TrashDirectory=i[1]
 			elif j == "SelectedDirectory".lower():self.SelectedDirectory=i[1]
-			elif j == "Selected_save".lower():self.Selected_save=i[1]
-			elif j == "AutoRotate".lower():self.AutoRotate=config.getboolean("Selector","AutoRotate")
-			elif j == "Filigrane".lower():self.Filigrane=config.getboolean("Selector","Filigrane")
-			elif j == "FiligraneSource".lower():self.FiligraneSource=i[1]
+			elif j == "Selected_save".lower():    self.Selected_save=i[1]
+			elif j == "AutoRotate".lower():       self.AutoRotate=config.getboolean("Selector","AutoRotate")
+			elif j == "Filigrane".lower():        self.Filigrane=config.getboolean("Selector","Filigrane")
+			elif j == "FiligraneSource".lower():  self.FiligraneSource=i[1]
 			elif j == "FiligranePosition".lower():self.FiligranePosition=int(i[1])
-			elif j == "FiligraneQuality".lower():self.FiligraneQuality=int(i[1])
+			elif j == "FiligraneQuality".lower(): self.FiligraneQuality=int(i[1])
 			elif j == "FiligraneOptimize".lower():self.FiligraneOptimize=config.getboolean("Selector","FiligraneOptimize")
 			elif j == "FiligraneProgressive".lower():self.FiligraneProgressive=config.getboolean("Selector","FiligraneProgressive")
-			elif j == "CommentFile".lower():self.CommentFile=i[1]
-			elif j == "WebDirIndexStyle".lower():self.WebDirIndexStyle=i[1]
+			elif j == "CommentFile".lower():      self.CommentFile=i[1]
+			elif j == "WebDirIndexStyle".lower(): self.WebDirIndexStyle=i[1]
 
 			elif j == "DefaultFileMode".lower():
 				self.DefaultFileMode=int(i[1],8)
 				self.DefaultDirMode=self.DefaultFileMode+3145 #73 = +111 en octal ... 3145 +s mode octal	
-			elif j == "Extensions".lower(): self.Extensions=i[1].split()
+			elif j == "Extensions".lower():      self.Extensions=i[1].split()
 			elif j == "DefaultRepository".lower():self.DefaultRepository=i[1]
-			elif j == "MediaSize".lower():self.MediaSize=float(i[1])
-			elif j == "Burn".lower(): self.Burn=i[1]
-			elif j == "WebServer".lower():self.WebServer=i[1]
-			elif j == "WebRepository".lower():self.WebRepository=i[1]
-			elif j == "Locale".lower():self.Locale=i[1]
-			elif j == "Coding".lower():self.Coding=i[1]
-			elif j == "ExportSingleDir".lower():self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
-			elif j == "WebPageAnchor".lower():self.WebPageAnchor=i[1]
-			elif j == "SlideShowDelay".lower():self.SlideShowDelay=float(i[1])
-			elif j == "SlideShowType".lower():self.SlideShowType=i[1]
-			elif j == "SynchronizeRep".lower():self.SynchronizeRep=i[1]
+			elif j == "MediaSize".lower():       self.MediaSize=float(i[1])
+			elif j == "Burn".lower():            self.Burn=i[1]
+			elif j == "WebServer".lower():       self.WebServer=i[1]
+			elif j == "WebRepository".lower():   self.WebRepository=i[1]
+			elif j == "Locale".lower():          self.Locale=i[1]
+			elif j == "Coding".lower():          self.Coding=i[1]
+			elif j == "ExportSingleDir".lower(): self.ExportSingleDir=config.getboolean("Selector","ExportSingleDir")
+			elif j == "WebPageAnchor".lower():   self.WebPageAnchor=i[1]
+			elif j == "SlideShowDelay".lower():  self.SlideShowDelay=float(i[1])
+			elif j == "SlideShowType".lower():   self.SlideShowType=i[1]
+			elif j == "SynchronizeRep".lower():  self.SynchronizeRep=i[1]
 			elif j == "SynchronizeType".lower(): self.SynchronizeType=i[1]
-			elif j == "ImageCache".lower(): self.ImageCache = int( i[1] )
+			elif j == "ImageCache".lower():      self.ImageCache = int( i[1] )
+			elif j == "ImageWidth".lower():      self.ImageWidth = int( i[1] )
+			elif j == "ImageHeight".lower():     self.ImageHeight = int( i[1] )
 			else: print "unknown key "+j
 		
 
@@ -227,7 +229,12 @@ class Config:
 		txt+="#Type of slideshow : chronological, anti-chronological or random ?\nSlideShowType: %s\n\n"%self.SlideShowType
 		txt+="#Remote repository to synchronize with (rsync like)\nSynchronizeRep: %s\n\n"%self.SynchronizeRep
 		txt+="#Synchronization type, acceptable values are Newer, Older, Selected and All\nSynchronizeType: %s\n\n"%self.SynchronizeType
-		txt+="#Allow the creation of a Cache of images with the given size in byte\nCacheImage: %s\n\n"%self.ImageCache
+		txt+="#Allow the creation of a Cache of images with the given size in byte\nImageCache: %s\n\n"%self.ImageCache
+		if self.ImageWidth is not None:
+			txt+="#Width of the last image displayed ... should not be modified\nImageWidth:%s\n\n"%self.ImageWidth
+		if self.ImageHeight is not None:
+			txt+="#Height of the last image displayed ... should not be modified\nImageHeight:%s\n\n"%self.ImageHeight
+		
 
 		for i in ["ScaledImages","Thumbnails"]:
 			txt+="[%s]\n"%i

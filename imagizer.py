@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006 - 2009,  Jérome Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -402,6 +402,25 @@ class ModelRangeTout:
 				print "error in chown or chmod of %s"%imagefile
 			if config.AutoRotate and data["Orientation"]!="1":
 				photo(imagefile).autorotate()
+#Set the new images in cache for further display 
+                        if imageCache is not None:
+                                if config.ImageWidth and config.ImageHeight:
+                                    if imageCache.size + 3*config.ImageWidth*config.ImageHeight < imageCache.maxSize:
+                                        print "put in cache file "+ ToProcess
+                                        pixbuf = gtk.gdk.pixbuf_new_from_file( imagefile )
+                                        Xsize = pixbuf.get_width()
+                                        Ysize = pixbuf.get_height()                                 
+                                        R=min(float( config.ImageWidth) / float(Xsize),float( config.ImageHeight) / float(Ysize))
+                                        if R < 1:
+                                            nx = int( R*Xsize )
+                                            ny = int( R*Ysize )
+                                            scaled_buf=pixbuf.scale_simple( config.ImageWidth, config.ImageHeight, gtkInterpolation[config.Interpolation])
+                                        else:
+                                            nx = Xsize
+                                            ny = Ysize
+                                            scaled_buf=pixbuf
+                                        imageCache[ ToProcess ] = scaled_buf    
+##################################################
 			AllreadyDone.append(ToProcess)
 			NewFiles.append(ToProcess)
 		AllreadyDone.sort()
@@ -656,6 +675,13 @@ class photo:
 
     def Trash(self):
         """Send the file to the trash folder"""
+        #Remove from imageCache
+        if imageCache is not None:
+            if self.filename in imageCache.ordered:
+                pixBuf = imageCache.imageDict.pop( self.filename )
+                index = imageCache.ordered.index( self.filename )
+                imageCache.ordered.pop( index )
+                imageCache.size -= 3 * pixBuf.get_width() * pixBuf.get_height()
         Trashdir=os.path.join(config.DefaultRepository,config.TrashDirectory)
         td=os.path.dirname(os.path.join(Trashdir,self.filename))
         tf=os.path.join(Trashdir,self.filename)
@@ -712,6 +738,8 @@ class photo:
     def show(self,Xsize=600,Ysize=600):
         """return a pixbuf to shows the image in a Gtk window"""
         scaled_buf = None
+        if Xsize > config.ImageWidth :  config.ImageWidth = Xsize
+        if Ysize > config.ImageHeight: config.ImageHeight = Ysize
         self.taille()			
         R=min(float(Xsize)/self.x,float(Ysize)/self.y)
         if R < 1:
@@ -726,6 +754,10 @@ class photo:
                 if (data.get_width() == nx) and (data.get_height() == ny):
                     scaled_buf = data
                     print "Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes"%( self.filename, len( imageCache.ordered), (imageCache.size/1048576.0) ) 
+                elif (data.get_width() > nx) or (data.get_height() > ny):
+                    pixbuf = data
+                    print "Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes"%( self.filename, len( imageCache.ordered), (imageCache.size/1048576.0) ) 
+                    scaled_buf=pixbuf.scale_simple(nx,ny,gtkInterpolation[config.Interpolation])
         if not scaled_buf:
             pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
             if R<1:
