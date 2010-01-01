@@ -38,7 +38,7 @@ class ImageCache(dict):
     """
     __shared_state = {}
     __data_initialized = False
-    def __init__(self,maxSize=1000000):
+    def __init__(self, maxSize=1000000):
         self.__dict__ = self.__shared_state
         if  not ImageCache.__data_initialized :
             ImageCache.__data_initialized = True
@@ -50,23 +50,22 @@ class ImageCache(dict):
         """x.__setitem__(i, y) <==> x[i]=y"""
         self.imageDict[ key ] = value
         if key in self.ordered:
-            index=self.ordered.index( key )
-            self.ordered.pop( index )
-            pixBuf = self.imageDict[ key ] 
+            index = self.ordered.index(key)
+            self.ordered.pop(index)
+            pixBuf = self.imageDict[ key ]
             self.size -= 3 * pixBuf.get_width() * pixBuf.get_height()
-        self.size += 3 * value.get_width() * value.get_height() 
+        self.size += 3 * value.get_width() * value.get_height()
         if self.size > self.maxSize:
             firstKey = self.ordered[ 0 ]
-            print "Removing file %s from cache"% firstKey
-            firstPixBuf = self.imageDict.pop( firstKey )
+            print "Removing file %s from cache" % firstKey
+            firstPixBuf = self.imageDict.pop(firstKey)
             self.size -= 3 * firstPixBuf.get_width() * firstPixBuf.get_height()
             self.ordered = self.ordered[1:]
-        self.ordered.append( key ) 
+        self.ordered.append(key)
 
     def __getitem__(self, key):
         """x.__getitem__(y) <==> x[y]"""
-        index=self.ordered.index( key )
-        self.ordered.pop( index )
-        self.ordered.append( key )
+        index = self.ordered.index(key)
+        self.ordered.pop(index)
+        self.ordered.append(key)
         return self.imageDict[ key ]
-

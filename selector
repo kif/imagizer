@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: Latin1 -*-
+# -*- coding: UTF8 -*-
 #******************************************************************************\
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006,  JÈrome Kieffer <kieffer@terre-adelie.org>
-#* Conception : JÈrÙme KIEFFER, Mickael Profeta & Isabelle Letard
+#* Copyright (C) 2006,  J√©rome Kieffer <kieffer@terre-adelie.org>
+#* Conception : J√©r√¥me KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
 #* This program is free software; you can redistribute it and/or modify
@@ -27,18 +27,18 @@
 # version 0.3 : 28/10/2004
 # version 1.1 : 11/01/2005
 # version 1.2 : 13/02/2006 : includes a configuration file
-# version 1.3 : correction d'un bug quant ‡ l'allocation de mÈmoire dans libjpeg
+# version 1.3 : correction d'un bug quant √† l'allocation de m√©moire dans libjpeg
 # version 1.4 : 04/2006 : passage du pre-processing dans un bibliotheque externe utilisant le design pattern 
 #
 #
-# Liste des dÈpendances : python, PIL, Glade-2
-# Exiftran existe en version windows maintenant ... nous utilisons une verison modifiÈe ...!!!!
+# Liste des d√©pendances : python, PIL, Glade-2
+# Exiftran existe en version windows maintenant ... nous utilisons une verison modifi√©e ...!!!!
 #
 #todo liste des fonctions a implemanter ....
 # - se passer de exiftran
 # - la version windows et la version mac
-# - faire une doc dÈcente.
-# - proposer d'exporter toutes les photos dans un seul rÈpertoire (pas de jour)
+# - faire une doc d√©cente.
+# - proposer d'exporter toutes les photos dans un seul r√©pertoire (pas de jour)
 
 
 """
@@ -46,19 +46,19 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os,sys,string,shutil,time,gc,distutils.sysconfig,locale,random 
+import os, sys, string, shutil, time, gc, distutils.sysconfig, locale, random
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
-installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
+installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-	gimpexe="gimp-remote "
-	ConfFile=[os.path.join(os.getenv("ALLUSERSPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
+    gimpexe = "gimp-remote "
+    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
 elif os.name == 'posix':
-	gimpexe="gimp-remote "
-	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
+    gimpexe = "gimp-remote "
+    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
 else:
-	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-	sys.exit(1)
+    raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
+    sys.exit(1)
 
 
 #import imagizer.EXIF as EXIF
@@ -67,172 +67,172 @@ from imagizer.imagizer import *
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
 
-config=Config()
+config = Config()
 config.load(ConfFile)
-kpix= 3*config.ScaledImages["Size"]**2/4000
-if kpix>64:
-	ImageFile.MAXBLOCK = 1000*kpix 
+kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
+if kpix > 64:
+    ImageFile.MAXBLOCK = 1000 * kpix
 
 if os.getenv("LANGUAGE"):
-	try:
-		locale.setlocale(locale.LC_ALL,os.getenv("LANGUAGE"))
-	except:
-		locale.setlocale(locale.LC_ALL,config.Locale)
+    try:
+        locale.setlocale(locale.LC_ALL, os.getenv("LANGUAGE"))
+    except:
+        locale.setlocale(locale.LC_ALL, config.Locale)
 else:
-	locale.setlocale(locale.LC_ALL,config.Locale)
+    locale.setlocale(locale.LC_ALL, config.Locale)
 ################################
 ##### FullScreen Interface #####
 ################################
 
 class FullScreenInterface:
-	def __init__(self,AllJpegs=[],first=0,selected=[],mode="FullScreen"):
-		self.AllJpegs=AllJpegs
-		self.Selected=[]
-		self.CurIm=first
-		for i in selected:
-			if i in self.AllJpegs: 
-				self.Selected.append(i)
-		print "Initialisation de l'interface graphique ..."
-		self.xml=gtk.glade.XML(unifiedglade,root="FullScreen")
-		self.ShowImage()
-		self.flush_event_queue()
-		self.xml.get_widget("FullScreen").maximize()
-		self.flush_event_queue()
-		self.ShowImage()
-		self.flush_event_queue()
-		self.xml.get_widget("FullScreen").connect("key_press_event",self.keypressed)
-		self.xml.signal_connect('on_FullScreen_destroy',self.destroy)
-		if mode=="SlideShow": self.SlideShow()
-		self.QuitSlideShow=True
-		gtk.main()
+    def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen"):
+        self.AllJpegs = AllJpegs
+        self.Selected = []
+        self.CurIm = first
+        for i in selected:
+            if i in self.AllJpegs:
+                self.Selected.append(i)
+        print "Initialisation de l'interface graphique ..."
+        self.xml = gtk.glade.XML(unifiedglade, root="FullScreen")
+        self.ShowImage()
+        self.flush_event_queue()
+        self.xml.get_widget("FullScreen").maximize()
+        self.flush_event_queue()
+        self.ShowImage()
+        self.flush_event_queue()
+        self.xml.get_widget("FullScreen").connect("key_press_event", self.keypressed)
+        self.xml.signal_connect('on_FullScreen_destroy', self.destroy)
+        if mode == "SlideShow": self.SlideShow()
+        self.QuitSlideShow = True
+        gtk.main()
 
-	def flush_event_queue(self):
-		"""Updates the GTK GUI before comming back to the gtk.main()"""
-		while gtk.events_pending():
-			gtk.main_iteration()
+    def flush_event_queue(self):
+        """Updates the GTK GUI before coming back to the gtk.main()"""
+        while gtk.events_pending():
+            gtk.main_iteration()
 
-	def ShowImage(self):
-		"""Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-		self.image=photo(self.AllJpegs[self.CurIm])
-		X,Y=self.xml.get_widget("FullScreen").get_size()
-#		print "Taille fenetre %sx%s"%(X,Y)
-		pixbuf=self.image.show(X,Y)
-		self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
-		del pixbuf
-		gc.collect()
-		if self.AllJpegs[self.CurIm] in self.Selected:
-			sel="[Selected]"
-		else:
-			sel=""
-		self.xml.get_widget("FullScreen").set_title("Selector : %s %s"%(self.AllJpegs[self.CurIm],sel))
+    def ShowImage(self):
+        """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+        self.image = photo(self.AllJpegs[self.CurIm])
+        X, Y = self.xml.get_widget("FullScreen").get_size()
+#        print "Taille fenetre %sx%s"%(X,Y)
+        pixbuf = self.image.show(X, Y)
+        self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
+        del pixbuf
+        gc.collect()
+        if self.AllJpegs[self.CurIm] in self.Selected:
+            sel = "[Selected]"
+        else:
+            sel = ""
+        self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.CurIm], sel))
 
-	def keypressed(self,widget,event,*args):
-		"""keylogger"""
-		key = gtk.gdk.keyval_name (event.keyval)
-		#print "Keyval = %s\t Key = %s"%(event.keyval,key)
-		if key=="Page_Up":
-			self.previousJ()
-		elif key=="Page_Down":
-			self.nextJ()
-		elif key=="d":
-			self.SlideShow()
-		elif key=="e":
-			self.QuitSlideShow=True
-			self.destroy()
+    def keypressed(self, widget, event, *args):
+        """keylogger"""
+        key = gtk.gdk.keyval_name (event.keyval)
+        #print "Keyval = %s\t Key = %s"%(event.keyval,key)
+        if key == "Page_Up":
+            self.previousJ()
+        elif key == "Page_Down":
+            self.nextJ()
+        elif key == "d":
+            self.SlideShow()
+        elif key == "e":
+            self.QuitSlideShow = True
+            self.destroy()
 
-		elif key=="Right":
-			self.droite()
-		elif key=="Left":
-			self.gauche()
-		elif key=="f":
-			self.NormalScreen()	
-		elif key=="Down":
-			self.next()
-		elif key=="Up":
-			self.previous()	
-		elif key=="s":
-			self.select_Shortcut()	
-		elif key in ["Escape","Q"]:
-			self.QuitSlideShow=True
-		elif key in ["KP_Add","plus"]:
-			config.SlideShowDelay+=1
-		elif key in ["KP_Subtract","minus"]:
-			config.SlideShowDelay-=1
-			if config.SlideShowDelay<0:config.SlideShowDelay=0
+        elif key == "Right":
+            self.droite()
+        elif key == "Left":
+            self.gauche()
+        elif key == "f":
+            self.NormalScreen()
+        elif key == "Down":
+            self.next()
+        elif key == "Up":
+            self.previous()
+        elif key == "s":
+            self.select_Shortcut()
+        elif key in ["Escape", "Q"]:
+            self.QuitSlideShow = True
+        elif key in ["KP_Add", "plus"]:
+            config.SlideShowDelay += 1
+        elif key in ["KP_Subtract", "minus"]:
+            config.SlideShowDelay -= 1
+            if config.SlideShowDelay < 0:config.SlideShowDelay = 0
 
 
-	def droite(self,*args):
-		"""rotate the current image clockwise"""
-		self.image.Rotate(90)
-		self.ShowImage()	
-	def gauche(self,*args):
-		"""rotate the current image clockwise"""
-		self.image.Rotate(270)
-		self.ShowImage()
-	def destroy(self,*args):
-		"""destroy clicked by user"""
-		SaveSelected(self.Selected)
-		gtk.main_quit()
-		config.GraphicMode="Quit"
-	def NormalScreen(self,*args):
-		"""Switch to Normal mode"""
-		self.xml.get_widget("FullScreen").destroy()
-		config.GraphicMode="Normal"
-		gtk.main_quit()
-	def next(self,*args):
-		"""Switch to the next image"""	
-		self.CurIm=(self.CurIm+1)%len(self.AllJpegs)
-		self.ShowImage()
-	def previous(self,*args):
-		"""Switch to the previous image"""	
-		self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
-		self.ShowImage()			
-	def nextJ(self,*args):
-		"""Switch to the first image of the next day"""	
-		jour=os.path.dirname(self.AllJpegs[self.CurIm])
-		for i in range(self.CurIm,len(self.AllJpegs)):
-			jc=os.path.dirname(self.AllJpegs[i])
-			if jc>jour: break
-		self.CurIm=i
-		self.ShowImage()	
-	def previousJ(self,*args):
-		"""Switch to the first image of the previous day"""	
-		if self.CurIm==0: return
-		jour=os.path.dirname(self.AllJpegs[self.CurIm])
-		for i in range(self.CurIm-1,-1,-1):
-			jc=os.path.dirname(self.AllJpegs[i])
-			jd=os.path.dirname(self.AllJpegs[i-1])
-			if (jc<jour) and (jd<jc): break
-		self.CurIm=i
-		self.ShowImage()	
-	def select_Shortcut(self,*args):
-		"""Select or unselect the image"""
-		if self.AllJpegs[self.CurIm] not in self.Selected: 
-			self.Selected.append(self.AllJpegs[self.CurIm])
-			sel="[Selected]"
-		else:
-			self.Selected.remove(self.AllJpegs[self.CurIm])
-			sel=""
-		self.Selected.sort()
-		self.xml.get_widget("FullScreen").set_title("Selector : %s %s"%(self.AllJpegs[self.CurIm],sel))
-	def SlideShow(self):
-		"""Starts the slide show"""
-		self.QuitSlideShow=False
-		self.RandomList=[]
-		while not self.QuitSlideShow:
-#			print "Delai= %s; type = %s"%(config.SlideShowDelay,config.SlideShowType)
-			if config.SlideShowType=="chronological":
-				self.CurIm=(self.CurIm+1)%len(self.AllJpegs)
-			elif config.SlideShowType=="antichronological":
-				self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
-			elif config.SlideShowType=="random":
-				if len(self.RandomList)==0:
-					self.RandomList=range(len(self.AllJpegs))
-					random.shuffle(self.RandomList)
-				self.CurIm=self.RandomList.pop()
-			self.ShowImage()
-			self.flush_event_queue()
-			time.sleep(config.SlideShowDelay)
+    def droite(self, *args):
+        """rotate the current image clockwise"""
+        self.image.Rotate(90)
+        self.ShowImage()
+    def gauche(self, *args):
+        """rotate the current image clockwise"""
+        self.image.Rotate(270)
+        self.ShowImage()
+    def destroy(self, *args):
+        """destroy clicked by user"""
+        SaveSelected(self.Selected)
+        gtk.main_quit()
+        config.GraphicMode = "Quit"
+    def NormalScreen(self, *args):
+        """Switch to Normal mode"""
+        self.xml.get_widget("FullScreen").destroy()
+        config.GraphicMode = "Normal"
+        gtk.main_quit()
+    def next(self, *args):
+        """Switch to the next image"""
+        self.CurIm = (self.CurIm + 1) % len(self.AllJpegs)
+        self.ShowImage()
+    def previous(self, *args):
+        """Switch to the previous image"""
+        self.CurIm = (self.CurIm - 1) % len(self.AllJpegs)
+        self.ShowImage()
+    def nextJ(self, *args):
+        """Switch to the first image of the next day"""
+        jour = os.path.dirname(self.AllJpegs[self.CurIm])
+        for i in range(self.CurIm, len(self.AllJpegs)):
+            jc = os.path.dirname(self.AllJpegs[i])
+            if jc > jour: break
+        self.CurIm = i
+        self.ShowImage()
+    def previousJ(self, *args):
+        """Switch to the first image of the previous day"""
+        if self.CurIm == 0: return
+        jour = os.path.dirname(self.AllJpegs[self.CurIm])
+        for i in range(self.CurIm - 1, -1, -1):
+            jc = os.path.dirname(self.AllJpegs[i])
+            jd = os.path.dirname(self.AllJpegs[i - 1])
+            if (jc < jour) and (jd < jc): break
+        self.CurIm = i
+        self.ShowImage()
+    def select_Shortcut(self, *args):
+        """Select or unselect the image"""
+        if self.AllJpegs[self.CurIm] not in self.Selected:
+            self.Selected.append(self.AllJpegs[self.CurIm])
+            sel = "[Selected]"
+        else:
+            self.Selected.remove(self.AllJpegs[self.CurIm])
+            sel = ""
+        self.Selected.sort()
+        self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.CurIm], sel))
+    def SlideShow(self):
+        """Starts the slide show"""
+        self.QuitSlideShow = False
+        self.RandomList = []
+        while not self.QuitSlideShow:
+#            print "Delai= %s; type = %s"%(config.SlideShowDelay,config.SlideShowType)
+            if config.SlideShowType == "chronological":
+                self.CurIm = (self.CurIm + 1) % len(self.AllJpegs)
+            elif config.SlideShowType == "antichronological":
+                self.CurIm = (self.CurIm - 1) % len(self.AllJpegs)
+            elif config.SlideShowType == "random":
+                if len(self.RandomList) == 0:
+                    self.RandomList = range(len(self.AllJpegs))
+                    random.shuffle(self.RandomList)
+                self.CurIm = self.RandomList.pop()
+            self.ShowImage()
+            self.flush_event_queue()
+            time.sleep(config.SlideShowDelay)
 
 
 ############################
@@ -240,43 +240,43 @@ class FullScreenInterface:
 ############################
 class interface:
     """class interface that manages the GUI using Glade-2"""
-    def __init__(self,AllJpegs=[],first=0,selected=[],mode="Default"):
-        self.AllJpegs=AllJpegs
-        self.Selected=[]
+    def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default"):
+        self.AllJpegs = AllJpegs
+        self.Selected = []
         for i in selected:
-            if i in self.AllJpegs: 
+            if i in self.AllJpegs:
                 self.Selected.append(i)
-        self.CurIm=first
-        self.Xmin=350
+        self.CurIm = first
+        self.Xmin = 350
 
-        
+
         print "Initialisation de l'interface graphique ..."
-        self.xml=gtk.glade.XML(unifiedglade,root="Principale")
-        self.xml.get_widget("Principale").set_size_request(config.ScreenSize+self.Xmin,config.ScreenSize)
-        self.xml.get_widget("Principale").resize(config.ScreenSize+self.Xmin,config.ScreenSize)
+        self.xml = gtk.glade.XML(unifiedglade, root="Principale")
+        self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
+        self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
 
-        self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir,"logo.png")))
+        self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "logo.png")))
         self.flush_event_queue()
         if config.AutoRotate:
-            i=1
+            i = 1
         else:
-            i=0
+            i = 0
         self.xml.get_widget("Autorotate").set_active(i)
         if config.Filigrane:
-            i=1
+            i = 1
         else:
-            i=0
+            i = 0
         self.xml.get_widget("Filigrane").set_active(i)
-        
-        if config.ScreenSize==300:
+
+        if config.ScreenSize == 300:
             self.xml.get_widget("t300").set_active(1)
-        elif config.ScreenSize==600:
+        elif config.ScreenSize == 600:
             self.xml.get_widget("t600").set_active(1)
-        elif config.ScreenSize==900:
+        elif config.ScreenSize == 900:
             self.xml.get_widget("t900").set_active(1)
         else:
             self.xml.get_widget("tauto").set_active(1)
-            
+
         if config.NbrPerPage == 9:
             self.xml.get_widget("9PerPage").set_active(1)
         elif config.NbrPerPage == 12:
@@ -289,7 +289,7 @@ class interface:
             self.xml.get_widget("25PerPage").set_active(1)
         elif config.NbrPerPage == 30:
             self.xml.get_widget("30PerPage").set_active(1)
-            
+
         if config.Interpolation == 0:
             self.xml.get_widget("VLowQ").set_active(1)
         elif config.Interpolation == 1:
@@ -298,97 +298,97 @@ class interface:
             self.xml.get_widget("HiQ").set_active(1)
         elif config.Interpolation == 3:
             self.xml.get_widget("VHiQ").set_active(1)
-        
+
         self.ShowImage()
         self.flush_event_queue()
-        
-        self.xml.signal_connect('on_Principale_destroy',self.destroy)
-        self.xml.signal_connect('on_arreter1_activate',self.destroy)
-        self.xml.signal_connect('on_suivant_clicked',self.next)
-        self.xml.signal_connect('on_precedant_clicked',self.previous)
-        self.xml.signal_connect('on_droite_clicked',self.droite)
-        self.xml.signal_connect('on_gauche_clicked',self.gauche)
-        self.xml.signal_connect('on_Selection_toggled',self.select)
-        self.xml.signal_connect('on_selectionner_activate',self.select_Shortcut)
-        self.xml.signal_connect('on_photo_client_event',self.next)
-        
-        self.xml.signal_connect('on_About_activate',self.about)
-        self.xml.signal_connect('on_quitter1_activate',self.die)
-        self.xml.signal_connect('on_nommer1_activate',self.renommer)
-        self.xml.signal_connect('on_executer1_activate',self.run)
-	self.xml.signal_connect('on_Synchronize_activate',self.synchronize)
-        self.xml.signal_connect('on_copie_et_grave1_activate',self.Burn)
-        self.xml.signal_connect('on_vers_page_web2_activate',self.ToWeb)
-        self.xml.signal_connect('on_vide_selection1_activate',self.EmptySelected)
-        self.xml.signal_connect('on_copie1_activate',self.copy)
-        self.xml.signal_connect('on_poubelle_activate',self.poubelle)
-        self.xml.signal_connect('on_Poubelle_clicked',self.poubelle)
-        self.xml.signal_connect('on_Gimp_clicked',self.gimp)
-        self.xml.signal_connect('on_Filter_clicked',self.filter)
-        
-        self.xml.signal_connect('on_enregistrerP_activate',self.SavePref)
-        self.xml.signal_connect('on_Autorotate_activate',self.DefAutoRotate)
-        self.xml.signal_connect('on_Filigrane_activate',self.DefFiligrane)
-        self.xml.signal_connect('on_taille_media_activate',self.DefMediaSize)
-        self.xml.signal_connect('on_tauto_activate',self.SizeCurrent)
-        self.xml.signal_connect('on_t300_activate',self.Size300)
-        self.xml.signal_connect('on_t600_activate',self.Size600)
-        self.xml.signal_connect('on_t900_activate',self.Size900)
-        self.xml.signal_connect('on_VLowQ_activate',self.SetInterpol0)
-        self.xml.signal_connect('on_LowQ_activate',self.SetInterpol1)
-        self.xml.signal_connect('on_HiQ_activate',self.SetInterpol2)
-        self.xml.signal_connect('on_VHiQ_activate',self.SetInterpol3)
-        self.xml.signal_connect('on_9PerPage_activate',self.Set9PerPage)
-        self.xml.signal_connect('on_12PerPage_activate',self.Set12PerPage)
-        self.xml.signal_connect('on_16PerPage_activate',self.Set16PerPage)
-        self.xml.signal_connect('on_20PerPage_activate',self.Set20PerPage)
-        self.xml.signal_connect('on_25PerPage_activate',self.Set25PerPage)
-        self.xml.signal_connect('on_30PerPage_activate',self.Set30PerPage)
-        self.xml.signal_connect('on_configurer_dioporama_activate',self.SlideShowSetup)
-        
-        self.xml.signal_connect('on_enregistrerS_activate',self.SaveSelection)
-        self.xml.signal_connect('on_chargerS_activate',self.LoadSelection)
-        self.xml.signal_connect('on_inverserS_activate',self.InvertSelection)
-        self.xml.signal_connect('on_aucun1_activate',self.SelectNone)
-        self.xml.signal_connect('on_TouS_activate',self.SelectAll)
-        self.xml.signal_connect('on_taille_selection_activate',self.CalculateSize)
-        self.xml.signal_connect('on_media_apres_activate',self.SelectNewerMedia)
-        self.xml.signal_connect('on_media_avant_activate',self.SelectOlderMedia)
-        
-        self.xml.signal_connect('on_precedentI_activate',self.previous)
-        self.xml.signal_connect('on_suivantI_activate',self.next)
-        self.xml.signal_connect('on_premierI_activate',self.first)
-        self.xml.signal_connect('on_dernierI_activate',self.last)
-        self.xml.signal_connect('on_plus_10_activate',self.next10)
-        self.xml.signal_connect('on_moins_10_activate',self.previous10)
 
-        self.xml.signal_connect('on_indexJ_activate',self.indexJ)
-        self.xml.signal_connect('on_precedentJ_activate',self.previousJ)
-        self.xml.signal_connect('on_suivantJ_activate',self.nextJ)
-        self.xml.signal_connect('on_premierJ_activate',self.firstJ)
-        self.xml.signal_connect('on_dernierJ_activate',self.lastJ)
+        self.xml.signal_connect('on_Principale_destroy', self.destroy)
+        self.xml.signal_connect('on_arreter1_activate', self.destroy)
+        self.xml.signal_connect('on_suivant_clicked', self.next)
+        self.xml.signal_connect('on_precedant_clicked', self.previous)
+        self.xml.signal_connect('on_droite_clicked', self.droite)
+        self.xml.signal_connect('on_gauche_clicked', self.gauche)
+        self.xml.signal_connect('on_Selection_toggled', self.select)
+        self.xml.signal_connect('on_selectionner_activate', self.select_Shortcut)
+        self.xml.signal_connect('on_photo_client_event', self.next)
 
-        self.xml.signal_connect('on_precedentS_activate',self.previousS)
-        self.xml.signal_connect('on_suivantS_activate',self.nextS)
-        self.xml.signal_connect('on_premierS_activate',self.firstS)
-        self.xml.signal_connect('on_dernierS_activate',self.lastS)
+        self.xml.signal_connect('on_About_activate', self.about)
+        self.xml.signal_connect('on_quitter1_activate', self.die)
+        self.xml.signal_connect('on_nommer1_activate', self.renommer)
+        self.xml.signal_connect('on_executer1_activate', self.run)
+        self.xml.signal_connect('on_Synchronize_activate', self.synchronize)
+        self.xml.signal_connect('on_copie_et_grave1_activate', self.Burn)
+        self.xml.signal_connect('on_vers_page_web2_activate', self.ToWeb)
+        self.xml.signal_connect('on_vide_selection1_activate', self.EmptySelected)
+        self.xml.signal_connect('on_copie1_activate', self.copy)
+        self.xml.signal_connect('on_poubelle_activate', self.poubelle)
+        self.xml.signal_connect('on_Poubelle_clicked', self.poubelle)
+        self.xml.signal_connect('on_Gimp_clicked', self.gimp)
+        self.xml.signal_connect('on_Filter_clicked', self.filter)
 
-        self.xml.signal_connect('on_precedentNS_activate',self.previousNS)
-        self.xml.signal_connect('on_suivantNS_activate',self.nextNS)
-        self.xml.signal_connect('on_premierNS_activate',self.firstNS)
-        self.xml.signal_connect('on_dernierNS_activate',self.lastNS)
+        self.xml.signal_connect('on_enregistrerP_activate', self.SavePref)
+        self.xml.signal_connect('on_Autorotate_activate', self.DefAutoRotate)
+        self.xml.signal_connect('on_Filigrane_activate', self.DefFiligrane)
+        self.xml.signal_connect('on_taille_media_activate', self.DefMediaSize)
+        self.xml.signal_connect('on_tauto_activate', self.SizeCurrent)
+        self.xml.signal_connect('on_t300_activate', self.Size300)
+        self.xml.signal_connect('on_t600_activate', self.Size600)
+        self.xml.signal_connect('on_t900_activate', self.Size900)
+        self.xml.signal_connect('on_VLowQ_activate', self.SetInterpol0)
+        self.xml.signal_connect('on_LowQ_activate', self.SetInterpol1)
+        self.xml.signal_connect('on_HiQ_activate', self.SetInterpol2)
+        self.xml.signal_connect('on_VHiQ_activate', self.SetInterpol3)
+        self.xml.signal_connect('on_9PerPage_activate', self.Set9PerPage)
+        self.xml.signal_connect('on_12PerPage_activate', self.Set12PerPage)
+        self.xml.signal_connect('on_16PerPage_activate', self.Set16PerPage)
+        self.xml.signal_connect('on_20PerPage_activate', self.Set20PerPage)
+        self.xml.signal_connect('on_25PerPage_activate', self.Set25PerPage)
+        self.xml.signal_connect('on_30PerPage_activate', self.Set30PerPage)
+        self.xml.signal_connect('on_configurer_dioporama_activate', self.SlideShowSetup)
 
-        self.xml.signal_connect('on_premierT_activate',self.firstT)
-        self.xml.signal_connect('on_precedentT_activate',self.previousT)
-        self.xml.signal_connect('on_suivantT_activate',self.nextT)
-        self.xml.signal_connect('on_dernierT_activate',self.lastT)
-        self.xml.signal_connect('on_premierNT_activate',self.firstNT)
-        self.xml.signal_connect('on_precedentNT_activate',self.previousNT)
-        self.xml.signal_connect('on_suivantNT_activate',self.nextNT)
-        self.xml.signal_connect('on_dernierNT_activate',self.lastNT)
+        self.xml.signal_connect('on_enregistrerS_activate', self.SaveSelection)
+        self.xml.signal_connect('on_chargerS_activate', self.LoadSelection)
+        self.xml.signal_connect('on_inverserS_activate', self.InvertSelection)
+        self.xml.signal_connect('on_aucun1_activate', self.SelectNone)
+        self.xml.signal_connect('on_TouS_activate', self.SelectAll)
+        self.xml.signal_connect('on_taille_selection_activate', self.CalculateSize)
+        self.xml.signal_connect('on_media_apres_activate', self.SelectNewerMedia)
+        self.xml.signal_connect('on_media_avant_activate', self.SelectOlderMedia)
 
-        self.xml.signal_connect('on_fullscreen_activate',self.FullScreen)
-        self.xml.signal_connect('on_lance_diaporama_activate',self.SlideShow)
+        self.xml.signal_connect('on_precedentI_activate', self.previous)
+        self.xml.signal_connect('on_suivantI_activate', self.next)
+        self.xml.signal_connect('on_premierI_activate', self.first)
+        self.xml.signal_connect('on_dernierI_activate', self.last)
+        self.xml.signal_connect('on_plus_10_activate', self.next10)
+        self.xml.signal_connect('on_moins_10_activate', self.previous10)
+
+        self.xml.signal_connect('on_indexJ_activate', self.indexJ)
+        self.xml.signal_connect('on_precedentJ_activate', self.previousJ)
+        self.xml.signal_connect('on_suivantJ_activate', self.nextJ)
+        self.xml.signal_connect('on_premierJ_activate', self.firstJ)
+        self.xml.signal_connect('on_dernierJ_activate', self.lastJ)
+
+        self.xml.signal_connect('on_precedentS_activate', self.previousS)
+        self.xml.signal_connect('on_suivantS_activate', self.nextS)
+        self.xml.signal_connect('on_premierS_activate', self.firstS)
+        self.xml.signal_connect('on_dernierS_activate', self.lastS)
+
+        self.xml.signal_connect('on_precedentNS_activate', self.previousNS)
+        self.xml.signal_connect('on_suivantNS_activate', self.nextNS)
+        self.xml.signal_connect('on_premierNS_activate', self.firstNS)
+        self.xml.signal_connect('on_dernierNS_activate', self.lastNS)
+
+        self.xml.signal_connect('on_premierT_activate', self.firstT)
+        self.xml.signal_connect('on_precedentT_activate', self.previousT)
+        self.xml.signal_connect('on_suivantT_activate', self.nextT)
+        self.xml.signal_connect('on_dernierT_activate', self.lastT)
+        self.xml.signal_connect('on_premierNT_activate', self.firstNT)
+        self.xml.signal_connect('on_precedentNT_activate', self.previousNT)
+        self.xml.signal_connect('on_suivantNT_activate', self.nextNT)
+        self.xml.signal_connect('on_dernierNT_activate', self.lastNT)
+
+        self.xml.signal_connect('on_fullscreen_activate', self.FullScreen)
+        self.xml.signal_connect('on_lance_diaporama_activate', self.SlideShow)
         self.ShowImage()
         self.flush_event_queue()
         gtk.main()
@@ -401,1037 +401,1037 @@ class interface:
 
     def settitle(self):
         """Set the new title of the image"""
-        newtitle=self.xml.get_widget("Titre").get_text()
-        if newtitle!=self.oldtitle:
-            self.image.name(newtitle)		
+        newtitle = self.xml.get_widget("Titre").get_text()
+        if newtitle != self.oldtitle:
+            self.image.name(newtitle)
 
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        self.image=photo(self.AllJpegs[self.CurIm])
-        X,Y=self.xml.get_widget("Principale").get_size()
-#		print "Taille fenetre %sx%s"%(X,Y)
-        if X<=self.Xmin : X=self.Xmin+config.ScreenSize
-        pixbuf=self.image.show(X-self.Xmin,Y)
-        
+        self.image = photo(self.AllJpegs[self.CurIm])
+        X, Y = self.xml.get_widget("Principale").get_size()
+#        print "Taille fenetre %sx%s"%(X,Y)
+        if X <= self.Xmin : X = self.Xmin + config.ScreenSize
+        pixbuf = self.image.show(X - self.Xmin, Y)
+
         self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
-        data=self.image.exif()
+        data = self.image.exif()
         data.pop("Orientation")
         for i in data:
             self.xml.get_widget(i).set_text(data[i])
-        self.xml.get_widget("Principale").set_title("Selector : %s"%self.AllJpegs[self.CurIm])
+        self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.CurIm])
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
-        self.oldtitle=data["Titre"]             
+        self.oldtitle = data["Titre"]
 
 
-    def next(self,*args):
-        """Switch to the next image"""	
+    def next(self, *args):
+        """Switch to the next image"""
         self.settitle()
-        self.CurIm=(self.CurIm+1)%len(self.AllJpegs)
+        self.CurIm = (self.CurIm + 1) % len(self.AllJpegs)
         self.ShowImage()
-    
-    def next10(self,*args):
-        """Switch forward of 10 images """	
+
+    def next10(self, *args):
+        """Switch forward of 10 images """
         self.settitle()
-        self.CurIm=self.CurIm+10
-        if self.CurIm>len(self.AllJpegs):self.CurIm=len(self.AllJpegs)-1
-        self.ShowImage()	
-        
-    def previous(self,*args):
-        """Switch to the previous image"""	
-        self.settitle()
-        self.CurIm=(self.CurIm-1)%len(self.AllJpegs)
+        self.CurIm = self.CurIm + 10
+        if self.CurIm > len(self.AllJpegs):self.CurIm = len(self.AllJpegs) - 1
         self.ShowImage()
-    
-    def previous10(self,*args):
-        """Switch 10 images backward"""	
+
+    def previous(self, *args):
+        """Switch to the previous image"""
         self.settitle()
-        self.CurIm=self.CurIm-10
-        if self.CurIm<0: self.CurIm=0
-        self.ShowImage()	
-        
-    def first(self,*args):
+        self.CurIm = (self.CurIm - 1) % len(self.AllJpegs)
+        self.ShowImage()
+
+    def previous10(self, *args):
+        """Switch 10 images backward"""
+        self.settitle()
+        self.CurIm = self.CurIm - 10
+        if self.CurIm < 0: self.CurIm = 0
+        self.ShowImage()
+
+    def first(self, *args):
         """switch to the first image"""
         self.settitle()
-        self.CurIm=0
+        self.CurIm = 0
         self.ShowImage()
-    def last(self,*args):
+    def last(self, *args):
         """switch to the last image"""
         self.settitle()
-        self.CurIm=len(self.AllJpegs)-1
+        self.CurIm = len(self.AllJpegs) - 1
         self.ShowImage()
-    def droite(self,*args):
+    def droite(self, *args):
         """rotate the current image clockwise"""
         self.settitle()
         self.image.Rotate(90)
-        self.ShowImage()	
-    def gauche(self,*args):
+        self.ShowImage()
+    def gauche(self, *args):
         """rotate the current image clockwise"""
         self.settitle()
         self.image.Rotate(270)
         self.ShowImage()
-    
-    def poubelle(self,*args):
+
+    def poubelle(self, *args):
         """Send the current file to the trash"""
         self.settitle()
         if self.AllJpegs[self.CurIm] in  self.Selected:self.Selected.remove(self.AllJpegs[self.CurIm])
         self.AllJpegs.remove(self.AllJpegs[self.CurIm])
         self.image.Trash()
-        self.CurIm=self.CurIm%len(self.AllJpegs)
+        self.CurIm = self.CurIm % len(self.AllJpegs)
         self.ShowImage()
-    
-    def gimp(self,*args):
+
+    def gimp(self, *args):
         """Edit the current file with the Gimp"""
         self.settitle()
-        filename=self.AllJpegs[self.CurIm]
-        base,ext=os.path.splitext(filename)
-        newname=base+"-Gimp"+ext
+        filename = self.AllJpegs[self.CurIm]
+        base, ext = os.path.splitext(filename)
+        newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.CurIm=self.AllJpegs.index(newname)
-        newnamefull=os.path.join(config.DefaultRepository,newname)
-        shutil.copy(os.path.join(config.DefaultRepository,filename),newnamefull)
-        os.chmod(newnamefull,config.DefaultFileMode)
-        os.system(gimpexe+newnamefull)
+        self.CurIm = self.AllJpegs.index(newname)
+        newnamefull = os.path.join(config.DefaultRepository, newname)
+        shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
+        os.chmod(newnamefull, config.DefaultFileMode)
+        os.system(gimpexe + newnamefull)
         self.ShowImage()
-    
-    def filter(self,*args):
+
+    def filter(self, *args):
         """Filter the current image with a contrast mask"""
         self.settitle()
-        filename=self.AllJpegs[self.CurIm]
-        base,ext=os.path.splitext(filename)
-        newname=base+"-Filtered"+ext
+        filename = self.AllJpegs[self.CurIm]
+        base, ext = os.path.splitext(filename)
+        newname = base + "-Filtered" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.CurIm=self.AllJpegs.index(newname)
+        self.CurIm = self.AllJpegs.index(newname)
         photo(filename).ContrastMask(newname)
         self.ShowImage()
-    
-    def select_Shortcut(self,*args):
+
+    def select_Shortcut(self, *args):
         """Select or unselect the image"""
         self.settitle()
-        etat=not(self.xml.get_widget("Selection").get_active())
+        etat = not(self.xml.get_widget("Selection").get_active())
         if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
         if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
         self.Selected.sort()
         self.xml.get_widget("Selection").set_active(etat)
-    
-    def select(self,*args):
+
+    def select(self, *args):
         """Select or unselect the image"""
         self.settitle()
-        etat=self.xml.get_widget("Selection").get_active()
+        etat = self.xml.get_widget("Selection").get_active()
         if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
         if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
         self.Selected.sort()
-    
-    def destroy(self,*args):
+
+    def destroy(self, *args):
         """destroy clicked by user"""
         self.settitle()
         gtk.main_quit()
-        config.GraphicMode="Quit"
-        
-    def FullScreen(self,*args):
+        config.GraphicMode = "Quit"
+
+    def FullScreen(self, *args):
         """Switch to fullscreen mode"""
         self.settitle()
         self.xml.get_widget("Principale").destroy()
-        config.GraphicMode="FullScreen"
+        config.GraphicMode = "FullScreen"
         gtk.main_quit()
-    
-    def SlideShow(self,*args):
+
+    def SlideShow(self, *args):
         """Switch to fullscreen mode and starts the SlideShow"""
         self.settitle()
         self.xml.get_widget("Principale").destroy()
-        config.GraphicMode="SlideShow"
+        config.GraphicMode = "SlideShow"
         gtk.main_quit()
-    
-    def run(self,*args):
+
+    def run(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
         self.settitle()
         ProcessSelected(self.Selected)
-        self.Selected=[]
+        self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
         print "Done"
-    
-    def ToWeb(self,*args):
+
+    def ToWeb(self, *args):
         """lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
         self.settitle()
         ProcessSelected(self.Selected)
-        self.Selected=[]
+        self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
-        SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
-        out=os.system(config.WebServer.replace("$WebRepository",config.WebRepository).replace("$Selected",SelectedDir))
-        if out != 0 : print "Error n∞ : %i"%out
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
+        if out != 0 : print "Error n¬∞ : %i" % out
         print "Done"
-    
-    def EmptySelected(self,*args):
+
+    def EmptySelected(self, *args):
         """remove all the files in the "Selected" folder"""
-        SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         for dirs in os.listdir(SelectedDir):
-            curfile=os.path.join(SelectedDir,dirs)
+            curfile = os.path.join(SelectedDir, dirs)
             if os.path.isdir(curfile):
                 recursive_delete(curfile)
             else:
                 os.remove(curfile)
         print "Done"
-    
-    def copy(self,*args):
+
+    def copy(self, *args):
         """lauch the copy of all selected files"""
         self.settitle()
         CopySelected(self.Selected)
-        self.Selected=[]
+        self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
         print "Done"
-    
-    def Burn(self,*args):
+
+    def Burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
         self.settitle()
         CopySelected(self.Selected)
-        self.Selected=[]
+        self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
-        SelectedDir=os.path.join(config.DefaultRepository,config.SelectedDirectory)
-        out=os.system(config.Burn.replace("$Selected",SelectedDir))
-        if out != 0 : print "Error n∞ : %i"%out
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        out = os.system(config.Burn.replace("$Selected", SelectedDir))
+        if out != 0 : print "Error n¬∞ : %i" % out
         print "Done"
-    
-    
-    
-    def die(self,*args):
+
+
+
+    def die(self, *args):
         """you wanna leave the program ??"""
         self.settitle()
-        dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_QUESTION,gtk.BUTTONS_OK_CANCEL,"Voulez vous vraiment quitter ce programme ?")
-        result=dialog.run()
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Voulez vous vraiment quitter ce programme ?")
+        result = dialog.run()
         dialog.destroy()
-        if result==gtk.RESPONSE_OK: 
+        if result == gtk.RESPONSE_OK:
             SaveSelected(self.Selected)
-            gtk.main_quit() 
-            config.GraphicMode="Quit"
-    
-    def SaveSelection(self,*args):
+            gtk.main_quit()
+            config.GraphicMode = "Quit"
+
+    def SaveSelection(self, *args):
         """Saves all the selection of photos """
         self.settitle()
         SaveSelected(self.Selected)
-    
-    def LoadSelection(self,*args):
+
+    def LoadSelection(self, *args):
         """Load a previously saved  selection of photos """
         self.settitle()
-        self.Selected=LoadSelected()
+        self.Selected = LoadSelected()
         for i in self.Selected:
-            if not(i in self.AllJpegs): 
+            if not(i in self.AllJpegs):
                 self.Selected.remove(i)
         self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.Selected)
-    
-    
-    
-    
-    def SelectAll(self,*args):
+
+
+
+
+    def SelectAll(self, *args):
         """Select all photos for processing"""
         self.settitle()
-        self.Selected=self.AllJpegs
+        self.Selected = self.AllJpegs
         self.xml.get_widget("Selection").set_active(True)
-    
-    def SelectNone(self,*args):
+
+    def SelectNone(self, *args):
         """Select NO photos and empty selection"""
         self.settitle()
-        self.Selected=[]
+        self.Selected = []
         self.xml.get_widget("Selection").set_active(False)
-    
-    def InvertSelection(self,*args):
+
+    def InvertSelection(self, *args):
         """Invert the selection of photos """
         self.settitle()
-        temp=self.AllJpegs[:]
+        temp = self.AllJpegs[:]
         for i in self.Selected:
             temp.remove(i)
-        self.Selected=temp
+        self.Selected = temp
         self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.Selected)
 
 
-    def about(self,*args):
-        """display a copyright message"""	
+    def about(self, *args):
+        """display a copyright message"""
         self.settitle()
-        MessageError("Selector vous permet de mÈlanger, de sÈlectionner et de tourner \ndes photos provenant de plusieurs sources.\n…crit par JÈrÙme Kieffer <kieffer@terre-adelie.org>\nVersion 1.5 du 07/09/2008".decode("latin1"),Message=gtk.MESSAGE_INFO)
-        
-    
-    def nextJ(self,*args):
-        """Switch to the first image of the next day"""	
-        self.settitle()
-        jour=os.path.dirname(self.AllJpegs[self.CurIm])
-        for i in range(self.CurIm,len(self.AllJpegs)):
-            jc=os.path.dirname(self.AllJpegs[i])
-            if jc>jour: break
-        self.CurIm=i
-        self.ShowImage()	
+        MessageError("Selector vous permet de m√©langer, de s√©lectionner et de tourner \ndes photos provenant de plusieurs sources.\n√âcrit par J√©r√¥me Kieffer <kieffer@terre-adelie.org>\nVersion 1.5 du 07/09/2008".decode("latin1"), Message=gtk.MESSAGE_INFO)
 
-    def previousJ(self,*args):
-        """Switch to the first image of the previous day"""	
-        self.settitle()
-        if self.CurIm==0: return
-        jour=os.path.dirname(self.AllJpegs[self.CurIm])
-        for i in range(self.CurIm-1,-1,-1):
-            jc=os.path.dirname(self.AllJpegs[i])
-            jd=os.path.dirname(self.AllJpegs[i-1])
-            if (jc<jour) and (jd<jc): break
-        self.CurIm=i
-        self.ShowImage()	
 
-    def firstJ(self,*args):
+    def nextJ(self, *args):
+        """Switch to the first image of the next day"""
+        self.settitle()
+        jour = os.path.dirname(self.AllJpegs[self.CurIm])
+        for i in range(self.CurIm, len(self.AllJpegs)):
+            jc = os.path.dirname(self.AllJpegs[i])
+            if jc > jour: break
+        self.CurIm = i
+        self.ShowImage()
+
+    def previousJ(self, *args):
+        """Switch to the first image of the previous day"""
+        self.settitle()
+        if self.CurIm == 0: return
+        jour = os.path.dirname(self.AllJpegs[self.CurIm])
+        for i in range(self.CurIm - 1, -1, -1):
+            jc = os.path.dirname(self.AllJpegs[i])
+            jd = os.path.dirname(self.AllJpegs[i - 1])
+            if (jc < jour) and (jd < jc): break
+        self.CurIm = i
+        self.ShowImage()
+
+    def firstJ(self, *args):
         """switch to the first image of the first day"""
         self.settitle()
-        self.CurIm=0
+        self.CurIm = 0
         self.ShowImage()
 
-    def lastJ(self,*args):
+    def lastJ(self, *args):
         """switch to the first image of the last day"""
         self.settitle()
-        lastday=os.path.dirname(self.AllJpegs[-1])
-        for i in range(len(self.AllJpegs)-1,-1,-1):
-            jc=os.path.dirname(self.AllJpegs[i])
-            jd=os.path.dirname(self.AllJpegs[i-1])
-            if (jc==lastday) and (jd<jc): break
-        self.CurIm=i
-        self.ShowImage()	
+        lastday = os.path.dirname(self.AllJpegs[-1])
+        for i in range(len(self.AllJpegs) - 1, -1, -1):
+            jc = os.path.dirname(self.AllJpegs[i])
+            jd = os.path.dirname(self.AllJpegs[i - 1])
+            if (jc == lastday) and (jd < jc): break
+        self.CurIm = i
+        self.ShowImage()
 
-    def firstS(self,*args):
+    def firstS(self, *args):
         """switch to the first image selected"""
         self.settitle()
-        if len(self.Selected)==0:return
-        self.CurIm=self.AllJpegs.index(self.Selected[0])
+        if len(self.Selected) == 0:return
+        self.CurIm = self.AllJpegs.index(self.Selected[0])
         self.ShowImage()
 
-    def lastS(self,*args):
+    def lastS(self, *args):
         """switch to the last image selected"""
         self.settitle()
-        if len(self.Selected)==0:return
-        self.CurIm=self.AllJpegs.index(self.Selected[-1])
+        if len(self.Selected) == 0:return
+        self.CurIm = self.AllJpegs.index(self.Selected[-1])
         self.ShowImage()
 
-    def nextS(self,*args):
+    def nextS(self, *args):
         """switch to the next image selected"""
-        self.settitle()	
-        if len(self.Selected)==0:return
-        for i in self.AllJpegs[self.CurIm+1:]:
+        self.settitle()
+        if len(self.Selected) == 0:return
+        for i in self.AllJpegs[self.CurIm + 1:]:
             if i in self.Selected:
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def previousS(self,*args):
+    def previousS(self, *args):
         """switch to the previous image selected"""
-        self.settitle()	
-        if len(self.Selected)==0:return
-        temp=self.AllJpegs[:self.CurIm]
+        self.settitle()
+        if len(self.Selected) == 0:return
+        temp = self.AllJpegs[:self.CurIm]
         temp.reverse()
         for i in temp:
             if i in self.Selected:
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def firstNS(self,*args):
+    def firstNS(self, *args):
         """switch to the first image NOT selected"""
         self.settitle()
         for i in self.AllJpegs:
             if i not in self.Selected:
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def lastNS(self,*args):
+    def lastNS(self, *args):
         """switch to the last image NOT selected"""
         self.settitle()
-        temp=self.AllJpegs[:]
+        temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
             if i not in self.Selected:
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def nextNS(self,*args):
+    def nextNS(self, *args):
         """switch to the next image NOT selected"""
-        self.settitle()	
-        for i in self.AllJpegs[self.CurIm+1:]:
+        self.settitle()
+        for i in self.AllJpegs[self.CurIm + 1:]:
             if i not in self.Selected:
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def previousNS(self,*args):
+    def previousNS(self, *args):
         """switch to the previous image NOT selected"""
-        self.settitle()	
-        temp=self.AllJpegs[:self.CurIm]
+        self.settitle()
+        temp = self.AllJpegs[:self.CurIm]
         temp.reverse()
         for i in temp:
             if i not in self.Selected:
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def firstT(self,*args):
+    def firstT(self, *args):
         """switch to the first titeled image"""
-        self.settitle()	
+        self.settitle()
         for i in self.AllJpegs:
             if photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def	previousT(self,*args):
+    def    previousT(self, *args):
         """switch to the previous titeled image"""
-        self.settitle()	
-        temp=self.AllJpegs[:self.CurIm]
+        self.settitle()
+        temp = self.AllJpegs[:self.CurIm]
         temp.reverse()
         for i in temp:
             if photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def nextT(self,*args):
+    def nextT(self, *args):
         """switch to the next titeled image"""
-        self.settitle()	
-        for i in self.AllJpegs[self.CurIm+1:]:
+        self.settitle()
+        for i in self.AllJpegs[self.CurIm + 1:]:
             if photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def lastT(self,*args):
+    def lastT(self, *args):
         """switch to the last titeled image"""
-        self.settitle()	
-        temp=self.AllJpegs[:]
+        self.settitle()
+        temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
             if photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def firstNT(self,*args):
+    def firstNT(self, *args):
         """switch to the first non-titeled image"""
-        self.settitle()	
+        self.settitle()
         for i in self.AllJpegs:
             if not photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def	previousNT(self,*args):
+    def    previousNT(self, *args):
         """switch to the previous non-titeled image"""
-        self.settitle()	
-        temp=self.AllJpegs[:self.CurIm]
+        self.settitle()
+        temp = self.AllJpegs[:self.CurIm]
         temp.reverse()
         for i in temp:
             if not photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def nextNT(self,*args):
+    def nextNT(self, *args):
         """switch to the next non-titeled image"""
-        self.settitle()	
-        for i in self.AllJpegs[self.CurIm+1:]:
+        self.settitle()
+        for i in self.AllJpegs[self.CurIm + 1:]:
             if not photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def lastNT(self,*args):
+    def lastNT(self, *args):
         """switch to the last non-titeled image"""
-        self.settitle()	
-        temp=self.AllJpegs[:]
+        self.settitle()
+        temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
             if not photo(i).has_title():
-                self.CurIm=self.AllJpegs.index(i)
+                self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
 
 
-    def SavePref(self,*args):
+    def SavePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
         config.SaveConfig(ConfFile[-1])
 
-    def DefAutoRotate(self,*args):
+    def DefAutoRotate(self, *args):
         """Set the autorotate flag"""
-        config.AutoRotate=self.xml.get_widget("Autorotate").get_active()
+        config.AutoRotate = self.xml.get_widget("Autorotate").get_active()
 
-    def DefFiligrane(self,*args):
+    def DefFiligrane(self, *args):
         """Set the Signature/Filigrane flag"""
-        config.Filigrane=self.xml.get_widget("Filigrane").get_active()
+        config.Filigrane = self.xml.get_widget("Filigrane").get_active()
 
-    def SizeCurrent(self,*args):
-        """reads the current size of the image and defines it as default for next-time"""	
-        X,Y=self.xml.get_widget("Principale").get_size()
-        config.ScreenSize=max(X-self.Xmin,Y)
+    def SizeCurrent(self, *args):
+        """reads the current size of the image and defines it as default for next-time"""
+        X, Y = self.xml.get_widget("Principale").get_size()
+        config.ScreenSize = max(X - self.Xmin, Y)
 
-    def Size300(self,*args):
-        """reads the current size of the image and defines it as default for next-time"""	
-        X,Y=self.xml.get_widget("Principale").get_size()
-        config.ScreenSize=300
-        self.xml.get_widget("Principale").resize(config.ScreenSize+323,config.ScreenSize)
+    def Size300(self, *args):
+        """reads the current size of the image and defines it as default for next-time"""
+        X, Y = self.xml.get_widget("Principale").get_size()
+        config.ScreenSize = 300
+        self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
-    def Size600(self,*args):
-        """reads the current size of the image and defines it as default for next-time"""	
-        X,Y=self.xml.get_widget("Principale").get_size()
-        config.ScreenSize=600
-        self.xml.get_widget("Principale").resize(config.ScreenSize+323,config.ScreenSize)
+    def Size600(self, *args):
+        """reads the current size of the image and defines it as default for next-time"""
+        X, Y = self.xml.get_widget("Principale").get_size()
+        config.ScreenSize = 600
+        self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
-    def Size900(self,*args):
-        """reads the current size of the image and defines it as default for next-time"""	
-        X,Y=self.xml.get_widget("Principale").get_size()
-        config.ScreenSize=900
-        self.xml.get_widget("Principale").resize(config.ScreenSize+323,config.ScreenSize)
+    def Size900(self, *args):
+        """reads the current size of the image and defines it as default for next-time"""
+        X, Y = self.xml.get_widget("Principale").get_size()
+        config.ScreenSize = 900
+        self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
-    def	SetInterpol0(self,*args):
+    def    SetInterpol0(self, *args):
         """set interpolation level to nearest"""
-        config.Interpolation=0
+        config.Interpolation = 0
 
-    def	SetInterpol1(self,*args):
+    def    SetInterpol1(self, *args):
         """set interpolation level to tiles"""
-        config.Interpolation=1
+        config.Interpolation = 1
 
-    def	SetInterpol2(self,*args):
+    def    SetInterpol2(self, *args):
         """set interpolation level to bilinear"""
-        config.Interpolation=2
+        config.Interpolation = 2
 
-    def	SetInterpol3(self,*args):
+    def    SetInterpol3(self, *args):
         """set interpolation level to hyperbolic"""
-        config.Interpolation=3
+        config.Interpolation = 3
 
-    def Set30PerPage(self,*args):
+    def Set30PerPage(self, *args):
         """set 30 images per web-page"""
-        config.NbrPerPage=30
+        config.NbrPerPage = 30
 
-    def Set25PerPage(self,*args):
+    def Set25PerPage(self, *args):
         """set 25 images per web-page"""
-        config.NbrPerPage=25
+        config.NbrPerPage = 25
 
-    def Set20PerPage(self,*args):
+    def Set20PerPage(self, *args):
         """set 20 images per web-page"""
-        config.NbrPerPage=20
+        config.NbrPerPage = 20
 
-    def Set16PerPage(self,*args):
+    def Set16PerPage(self, *args):
         """set 16 images per web-page"""
-        config.NbrPerPage=16
+        config.NbrPerPage = 16
 
-    def Set12PerPage(self,*args):
+    def Set12PerPage(self, *args):
         """set 12 images per web-page"""
-        config.NbrPerPage=12
+        config.NbrPerPage = 12
 
-    def Set9PerPage(self,*args):
+    def Set9PerPage(self, *args):
         """set  9 images per web-page"""
-        config.NbrPerPage= 9
+        config.NbrPerPage = 9
 
-    def renommer(self,*args):
+    def renommer(self, *args):
         """lauch a new window and ask for anew name for the current directory"""
         self.settitle()
-        renamdayinstance=RenameDay(self.AllJpegs[self.CurIm],self.AllJpegs,self.Selected)
-        self.AllJpegs=renamdayinstance.AllPhotos
-        self.Selected=renamdayinstance.selected		
+        renamdayinstance = RenameDay(self.AllJpegs[self.CurIm], self.AllJpegs, self.Selected)
+        self.AllJpegs = renamdayinstance.AllPhotos
+        self.Selected = renamdayinstance.selected
 
-    def DefMediaSize(self,*args):
+    def DefMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
         self.settitle()
-        AskMediaSizeInstance=AskMediaSize()
+        AskMediaSizeInstance = AskMediaSize()
 
-    def SlideShowSetup(self,*args):
+    def SlideShowSetup(self, *args):
         """lauch a new window for seting up the slideshow"""
         self.settitle()
-        SlideShowSetupInstance=AskSlideShowSetup(self)
-        if config.GraphicMode=="SlideShow":
+        SlideShowSetupInstance = AskSlideShowSetup(self)
+        if config.GraphicMode == "SlideShow":
             self.xml.get_widget("Principale").destroy()
             gtk.main_quit()
 
-    def indexJ(self,*args):
+    def indexJ(self, *args):
         """lauch a new window for selecting the day of interest"""
         self.settitle()
-        ChangeJourInstance=SelectDay(self)
+        ChangeJourInstance = SelectDay(self)
 
-    def synchronize(self,*args):
-   	"""lauch the synchronization window"""
+    def synchronize(self, *args):
+        """lauch the synchronization window"""
         self.settitle()
-        SynchroInstance=Synchronize(self.CurIm,self.AllJpegs,self.Selected)
+        SynchroInstance = Synchronize(self.CurIm, self.AllJpegs, self.Selected)
 
 
-    def SelectNewerMedia(self,*args):
+    def SelectNewerMedia(self, *args):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
         Finally the last selected image is shown and the total size is printed"""
         self.settitle()
-        size=SelectedSize(self.Selected)
-        initsize=size
-        maxsize=config.MediaSize*1024*1024
-        init=len(self.Selected)
+        size = SelectedSize(self.Selected)
+        initsize = size
+        maxsize = config.MediaSize * 1024 * 1024
+        init = len(self.Selected)
         for i in self.AllJpegs[self.CurIm:]:
             if i in self.Selected:
                 continue
-            size+=os.path.getsize(os.path.join(config.DefaultRepository,i))
-            if size>=maxsize:
-                size-=os.path.getsize(os.path.join(config.DefaultRepository,i))
+            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
+            if size >= maxsize:
+                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
                 break
             else:
                 self.Selected.append(i)
         self.Selected.sort()
-        if len(self.Selected)==0:return
-        self.CurIm=self.AllJpegs.index(self.Selected[-1])
+        if len(self.Selected) == 0:return
+        self.CurIm = self.AllJpegs.index(self.Selected[-1])
         self.ShowImage()
-        t=SmartSize(size)+(len(self.Selected),)+SmartSize(initsize)+(init,)
-        txt="%.2f %s de donnÈes dans %i images sÈlectionnÈes dont\n%.2f %s de donnÈes dans %i images prÈcÈdement sÈlectionnÈes "%t
-        dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,txt.decode("latin-1"))
-        result=dialog.run()
+        t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
+        txt = "%.2f %s de donn√©es dans %i images s√©lectionn√©es dont\n%.2f %s de donn√©es dans %i images pr√©c√©dement s√©lectionn√©es " % t
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("latin-1"))
+        result = dialog.run()
         dialog.destroy()
 
-    def SelectOlderMedia(self,*args):
+    def SelectOlderMedia(self, *args):
         """Calculate the size of the selected images then add older images to complete the media (CD or DVD). 
         Finally the first selected image is shown and the total size is printed"""
         self.settitle()
-        size=SelectedSize(self.Selected)
-        initsize=size
-        maxsize=config.MediaSize*1024*1024
-        init=len(self.Selected)
-        tmplist=self.AllJpegs[:self.CurIm]
+        size = SelectedSize(self.Selected)
+        initsize = size
+        maxsize = config.MediaSize * 1024 * 1024
+        init = len(self.Selected)
+        tmplist = self.AllJpegs[:self.CurIm]
         tmplist.reverse()
         for i in tmplist:
             if i in self.Selected:
                 continue
-            size+=os.path.getsize(os.path.join(config.DefaultRepository,i))
-            if size>=maxsize:
-                size-=os.path.getsize(os.path.join(config.DefaultRepository,i))
+            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
+            if size >= maxsize:
+                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
                 break
             else:
                 self.Selected.append(i)
         self.Selected.sort()
-        if len(self.Selected)==0:return
-        self.CurIm=self.AllJpegs.index(self.Selected[0])
+        if len(self.Selected) == 0:return
+        self.CurIm = self.AllJpegs.index(self.Selected[0])
         self.ShowImage()
-        t=SmartSize(size)+(len(self.Selected),)+SmartSize(initsize)+(init,)
-        txt="%.2f %s de donnÈes dans %i images sÈlectionnÈes dont\n%.2f %s de donnÈes dans %i images prÈcÈdement sÈlectionnÈes "%t
-        dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,txt.decode("latin-1"))
-        result=dialog.run()
+        t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
+        txt = "%.2f %s de donn√©es dans %i images s√©lectionn√©es dont\n%.2f %s de donn√©es dans %i images pr√©c√©dement s√©lectionn√©es " % t
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("latin-1"))
+        result = dialog.run()
         dialog.destroy()
 
 
-    def CalculateSize(self,*args):
+    def CalculateSize(self, *args):
         """Calculate the size of the selection and print it"""
         self.settitle()
-        size=SelectedSize(self.Selected)
-        t=SmartSize(size)+(len(self.Selected),)
-        txt="%.2f %s de donnÈes dans %i images sÈlectionnÈes"%t
-        dialog = gtk.MessageDialog(None,0,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,txt.decode("latin-1"))
-        result=dialog.run()
+        size = SelectedSize(self.Selected)
+        t = SmartSize(size) + (len(self.Selected),)
+        txt = "%.2f %s de donn√©es dans %i images s√©lectionn√©es" % t
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("latin-1"))
+        result = dialog.run()
         dialog.destroy()
 
 
 
 # # # # # # fin de la classe interface graphique # # # # # #
 
-	
+
 def SelectedSize(List):
-	"""Return the size of the selection in byte (octets)"""
-	size=0
-	for File in List:
-		size+=os.path.getsize(os.path.join(config.DefaultRepository,File))
-	return size
+    """Return the size of the selection in byte (octets)"""
+    size = 0
+    for File in List:
+        size += os.path.getsize(os.path.join(config.DefaultRepository, File))
+    return size
 
 def SaveSelected(List):
-	"""save the list of selected files"""
-	print "Sauvegarde de la sÈlection".decode("Latin-1")
-	os.remove(Selected_file)
-	f=open(Selected_file,"w")
-	for ligne in List: f.write(ligne+"\n")
-	f.close()
-	os.chmod(Selected_file,config.DefaultFileMode)
+    """save the list of selected files"""
+    print "Sauvegarde de la s√©lection".decode("Latin-1")
+    os.remove(Selected_file)
+    f = open(Selected_file, "w")
+    for ligne in List: f.write(ligne + "\n")
+    f.close()
+    os.chmod(Selected_file, config.DefaultFileMode)
 
 
-		
+
 def LoadSelected():
-	"""Load the list of selected files"""
-	print "Chargement de la sÈlection".decode("Latin-1")
-	try:
-		lignes=open(Selected_file,"r").readlines()
-		select=[]
-		for ligne in lignes :
-			select.append(ligne.strip())
-		return select
-	except:
-		return []	
+    """Load the list of selected files"""
+    print "Chargement de la s√©lection".decode("Latin-1")
+    try:
+        lignes = open(Selected_file, "r").readlines()
+        select = []
+        for ligne in lignes :
+            select.append(ligne.strip())
+        return select
+    except:
+        return []
 
 
-def MessageError(text,Message=gtk.MESSAGE_ERROR):
-        dialog = gtk.MessageDialog(None, 0, Message,gtk.BUTTONS_OK,text)
+def MessageError(text, Message=gtk.MESSAGE_ERROR):
+        dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
         dialog.set_default_response(gtk.BUTTONS_OK)
         dialog.run()
         dialog.destroy()
 
 
-class RenameDay: 
-	"""prompt a windows and asks for a name for the day"""
-	def __init__(self,filename,AllPhotos,selected):
-		self.dayname=os.path.dirname(filename)
-		self.commentfile=os.path.join(config.DefaultRepository,self.dayname,config.CommentFile)
-		self.comment= AttrFile(self.commentfile)
-		if os.path.isfile(self.commentfile):
-			try:
-				self.comment.read()
-			except:
-				pass
+class RenameDay:
+    """prompt a windows and asks for a name for the day"""
+    def __init__(self, filename, AllPhotos, selected):
+        self.dayname = os.path.dirname(filename)
+        self.commentfile = os.path.join(config.DefaultRepository, self.dayname, config.CommentFile)
+        self.comment = AttrFile(self.commentfile)
+        if os.path.isfile(self.commentfile):
+            try:
+                self.comment.read()
+            except:
+                pass
 
-		try:
-			self.timetuple=time.strptime(self.dayname[:10],"%Y-%m-%d")
-		except:
-			print "something is wrong with this name : "+self.dayname
-			return
-		self.comment["date"]=time.strftime("%A, %d %B %Y",self.timetuple).capitalize().decode(config.Coding)
-		if self.comment.has_key("title"):
-			self.name= self.comment["title"]
-		elif len(self.dayname)>10:
-			self.name=self.dayname[11:].decode(config.Coding)
-			self.comment["title"]=self.name.decode(config.Coding)
-		else:
-			self.name=u""
-			self.comment["title"]=self.name.decode(config.Coding)
-		self.comment["image"]=os.path.split(filename)[1].decode(config.Coding)
-		if not self.comment.has_key("comment"):
-			self.comment["comment"]=u""
-		self.AllPhotos=AllPhotos
-		self.selected=selected
-		self.xml=gtk.glade.XML(unifiedglade,root="Renommer")
-		self.xml.signal_connect('on_Renommer_destroy',self.destroy)
-		self.xml.signal_connect('on_cancel_clicked',self.destroy)
-		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.get_widget("Date").set_text(self.comment["date"].encode("UTF-8"))
-		self.xml.get_widget("Commentaire").set_text(self.comment["title"].encode("UTF-8"))
-		self.DescObj=self.xml.get_widget("Description").get_buffer()
-#		print 	self.comment["comment"]
-		comment=self.comment["comment"].encode("UTF-8").strip().replace("<BR>","\n",)
-		self.DescObj.set_text(comment)
-#		print 	comment
+        try:
+            self.timetuple = time.strptime(self.dayname[:10], "%Y-%m-%d")
+        except:
+            print "something is wrong with this name : " + self.dayname
+            return
+        self.comment["date"] = time.strftime("%A, %d %B %Y", self.timetuple).capitalize().decode(config.Coding)
+        if self.comment.has_key("title"):
+            self.name = self.comment["title"]
+        elif len(self.dayname) > 10:
+            self.name = self.dayname[11:].decode(config.Coding)
+            self.comment["title"] = self.name.decode(config.Coding)
+        else:
+            self.name = u""
+            self.comment["title"] = self.name.decode(config.Coding)
+        self.comment["image"] = os.path.split(filename)[1].decode(config.Coding)
+        if not self.comment.has_key("comment"):
+            self.comment["comment"] = u""
+        self.AllPhotos = AllPhotos
+        self.selected = selected
+        self.xml = gtk.glade.XML(unifiedglade, root="Renommer")
+        self.xml.signal_connect('on_Renommer_destroy', self.destroy)
+        self.xml.signal_connect('on_cancel_clicked', self.destroy)
+        self.xml.signal_connect('on_ok_clicked', self.continu)
+        self.xml.get_widget("Date").set_text(self.comment["date"].encode("UTF-8"))
+        self.xml.get_widget("Commentaire").set_text(self.comment["title"].encode("UTF-8"))
+        self.DescObj = self.xml.get_widget("Description").get_buffer()
+#        print     self.comment["comment"]
+        comment = self.comment["comment"].encode("UTF-8").strip().replace("<BR>", "\n",)
+        self.DescObj.set_text(comment)
+#        print     comment
 
-	def continu(self,*args):
-		"""just distroy the window and goes on ...."""
+    def continu(self, *args):
+        """just distroy the window and goes on ...."""
 
-		self.newname=self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8")
-		self.comment["title"]=self.newname
-		if self.newname=="":
-			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)
-		else:
-			self.newdayname=time.strftime("%Y-%m-%d",self.timetuple)+"-"+latin1_to_ascii(self.newname.encode("latin1")).replace(" ","_",)
-		self.newcommentfile=os.path.join(config.DefaultRepository,self.newdayname,config.CommentFile)
-		if not os.path.isdir(os.path.join(config.DefaultRepository,self.newdayname)):
-			mkdir(os.path.join(config.DefaultRepository,self.newdayname))
-		if self.DescObj.get_modified():
-			self.comment["comment"]=self.DescObj.get_text(self.DescObj.get_start_iter(),self.DescObj.get_end_iter()).strip().decode("UTF-8").replace("\n","<BR>")
-		self.comment.write()		
+        self.newname = self.xml.get_widget("Commentaire").get_text().strip().decode("UTF-8")
+        self.comment["title"] = self.newname
+        if self.newname == "":
+            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
+        else:
+            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + latin1_to_ascii(self.newname.encode("latin1")).replace(" ", "_",)
+        self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
+        if not os.path.isdir(os.path.join(config.DefaultRepository, self.newdayname)):
+            mkdir(os.path.join(config.DefaultRepository, self.newdayname))
+        if self.DescObj.get_modified():
+            self.comment["comment"] = self.DescObj.get_text(self.DescObj.get_start_iter(), self.DescObj.get_end_iter()).strip().decode("UTF-8").replace("\n", "<BR>")
+        self.comment.write()
 
 
-		if self.newname!=self.name:
-			idx=0
-			for photofile in self.AllPhotos[:]:
-				if os.path.dirname(photofile)==self.dayname:
-					newphotofile=os.path.join(self.newdayname,os.path.split(photofile)[-1])
-					if os.path.isfile(os.path.join(config.DefaultRepository,newphotofile)):
-						base=os.path.splitext(os.path.join(config.DefaultRepository,newphotofile))
-						count=0
-						for i in os.listdir(os.path.join(config.DefaultRepository,self.newdayname)):
-							if i.find(base)==0:count+=1
-						newphotofile=os.path.splitext(newphotofile)+"-%i.jpg"%count
-					print "%s -> %s" %(photofile,newphotofile)
-					self.AllPhotos[idx]=newphotofile
-					os.rename(os.path.join(config.DefaultRepository,photofile),os.path.join(config.DefaultRepository,newphotofile))
-					if photofile in self.selected:
-						self.selected[self.selected.index(photofile)]=newphotofile
-				idx+=1
+        if self.newname != self.name:
+            idx = 0
+            for photofile in self.AllPhotos[:]:
+                if os.path.dirname(photofile) == self.dayname:
+                    newphotofile = os.path.join(self.newdayname, os.path.split(photofile)[-1])
+                    if os.path.isfile(os.path.join(config.DefaultRepository, newphotofile)):
+                        base = os.path.splitext(os.path.join(config.DefaultRepository, newphotofile))
+                        count = 0
+                        for i in os.listdir(os.path.join(config.DefaultRepository, self.newdayname)):
+                            if i.find(base) == 0:count += 1
+                        newphotofile = os.path.splitext(newphotofile) + "-%i.jpg" % count
+                    print "%s -> %s" % (photofile, newphotofile)
+                    self.AllPhotos[idx] = newphotofile
+                    os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
+                    if photofile in self.selected:
+                        self.selected[self.selected.index(photofile)] = newphotofile
+                idx += 1
 #move or remove the comment file if necessary
-			if os.path.isfile(self.commentfile):# and not  os.path.isfile(self.newcommentfile):
-				os.rename(self.commentfile,self.newcommentfile)
-#			elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
-#				 os.remove(self.commentfile)
-			if len(os.listdir(os.path.join(config.DefaultRepository,self.dayname)))==0:
-				os.rmdir(os.path.join(config.DefaultRepository,self.dayname))		
-		self.xml.get_widget("Renommer").destroy()
+            if os.path.isfile(self.commentfile):# and not  os.path.isfile(self.newcommentfile):
+                os.rename(self.commentfile, self.newcommentfile)
+#            elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
+#                 os.remove(self.commentfile)
+            if len(os.listdir(os.path.join(config.DefaultRepository, self.dayname))) == 0:
+                os.rmdir(os.path.join(config.DefaultRepository, self.dayname))
+        self.xml.get_widget("Renommer").destroy()
 
-	def destroy(self,*args):
-		"""destroy clicked by user -> quit the program"""
-		try:
-			self.xml.get_widget("Renommer").destroy()
-		except:
-			pass
-		while gtk.events_pending():gtk.main_iteration()	
+    def destroy(self, *args):
+        """destroy clicked by user -> quit the program"""
+        try:
+            self.xml.get_widget("Renommer").destroy()
+        except:
+            pass
+        while gtk.events_pending():gtk.main_iteration()
 
 class AskSlideShowSetup:
-	"""pop up a windows and asks for the setup of the SlideShow"""
-	def __init__(self,upperIface):
-		self.config=Config()
-		self.upperIface=upperIface
-		self.xml=gtk.glade.XML(unifiedglade,root="Diaporama")
-		self.xml.signal_connect('on_Diaporama_destroy',self.destroy)
-		self.xml.signal_connect('on_cancel_clicked',self.destroy)
-		self.xml.signal_connect('on_apply_clicked',self.continu)
-		self.xml.signal_connect('on_Lauch_clicked',self.LauchSlideShow)
-		self.xml.get_widget("delai").set_value(self.config.SlideShowDelay)
-		if   self.config.SlideShowType.find("chrono")==0:
-			self.xml.get_widget("radio-chrono").set_active(1)
-		elif self.config.SlideShowType.find("anti")==0:
-			self.xml.get_widget("radio-antichrono").set_active(1)
-		else:
-			self.xml.get_widget("radio-random").set_active(1)			
+    """pop up a windows and asks for the setup of the SlideShow"""
+    def __init__(self, upperIface):
+        self.config = Config()
+        self.upperIface = upperIface
+        self.xml = gtk.glade.XML(unifiedglade, root="Diaporama")
+        self.xml.signal_connect('on_Diaporama_destroy', self.destroy)
+        self.xml.signal_connect('on_cancel_clicked', self.destroy)
+        self.xml.signal_connect('on_apply_clicked', self.continu)
+        self.xml.signal_connect('on_Lauch_clicked', self.LauchSlideShow)
+        self.xml.get_widget("delai").set_value(self.config.SlideShowDelay)
+        if   self.config.SlideShowType.find("chrono") == 0:
+            self.xml.get_widget("radio-chrono").set_active(1)
+        elif self.config.SlideShowType.find("anti") == 0:
+            self.xml.get_widget("radio-antichrono").set_active(1)
+        else:
+            self.xml.get_widget("radio-random").set_active(1)
 
-	def LauchSlideShow(self,*args):
-		"""retrieves the data, destroy the window and lauch the slideshow"""
-		self.config.SlideShowDelay=self.xml.get_widget("delai").get_value()
-		if self.xml.get_widget("radio-antichrono").get_active():
-			self.config.SlideShowType="antichronological"
-		elif self.xml.get_widget("radio-chrono").get_active():
-			self.config.SlideShowType="chronological"
-		else:
-			self.config.SlideShowType="random"
-		self.config.GraphicMode="SlideShow"
-		self.xml.get_widget("Diaporama").destroy()
-		self.upperIface.xml.get_widget("lance_diaporama").activate()
-#		self.xml.signal_connect('on_lance_diaporama_activate'
-		
+    def LauchSlideShow(self, *args):
+        """retrieves the data, destroy the window and lauch the slideshow"""
+        self.config.SlideShowDelay = self.xml.get_widget("delai").get_value()
+        if self.xml.get_widget("radio-antichrono").get_active():
+            self.config.SlideShowType = "antichronological"
+        elif self.xml.get_widget("radio-chrono").get_active():
+            self.config.SlideShowType = "chronological"
+        else:
+            self.config.SlideShowType = "random"
+        self.config.GraphicMode = "SlideShow"
+        self.xml.get_widget("Diaporama").destroy()
+        self.upperIface.xml.get_widget("lance_diaporama").activate()
+#        self.xml.signal_connect('on_lance_diaporama_activate'
 
 
-	def continu(self,*args):
-		"""retrieves the data, destroy the window and goes on ...."""
-		self.config.SlideShowDelay=self.xml.get_widget("delai").get_value()
-		if self.xml.get_widget("radio-antichrono").get_active():
-			self.config.SlideShowType="antichronological"
-		elif self.xml.get_widget("radio-chrono").get_active():
-			self.config.SlideShowType="chronological"
-		else:
-			self.config.SlideShowType="random"
-		self.xml.get_widget("Diaporama").destroy()
 
-	def destroy(self,*args):
-		"""destroy clicked by user -> quit the program"""
-#		try:
-#			self.xml.get_widget("Diaporama").destroy()
-#		except:
-#			pass
-		while gtk.events_pending():gtk.main_iteration() 
+    def continu(self, *args):
+        """retrieves the data, destroy the window and goes on ...."""
+        self.config.SlideShowDelay = self.xml.get_widget("delai").get_value()
+        if self.xml.get_widget("radio-antichrono").get_active():
+            self.config.SlideShowType = "antichronological"
+        elif self.xml.get_widget("radio-chrono").get_active():
+            self.config.SlideShowType = "chronological"
+        else:
+            self.config.SlideShowType = "random"
+        self.xml.get_widget("Diaporama").destroy()
+
+    def destroy(self, *args):
+        """destroy clicked by user -> quit the program"""
+#        try:
+#            self.xml.get_widget("Diaporama").destroy()
+#        except:
+#            pass
+        while gtk.events_pending():gtk.main_iteration()
 
 
 class AskMediaSize:
-	"""prompt a windows and asks for the size of the backup media"""
-	def __init__(self):
-		self.config=Config()
-		self.xml=gtk.glade.XML(unifiedglade,root="TailleCD")
-		self.xml.signal_connect('on_TailleCD_destroy',self.destroy)
-		self.xml.signal_connect('on_cancel_clicked',self.destroy)
-		self.xml.signal_connect('on_ok_clicked',self.continu)
-		self.xml.get_widget("TailleMo").set_text(str(self.config.MediaSize))		
+    """prompt a windows and asks for the size of the backup media"""
+    def __init__(self):
+        self.config = Config()
+        self.xml = gtk.glade.XML(unifiedglade, root="TailleCD")
+        self.xml.signal_connect('on_TailleCD_destroy', self.destroy)
+        self.xml.signal_connect('on_cancel_clicked', self.destroy)
+        self.xml.signal_connect('on_ok_clicked', self.continu)
+        self.xml.get_widget("TailleMo").set_text(str(self.config.MediaSize))
 
-	def continu(self,*args):
-		"""just distroy the window and goes on ...."""
-		txt=self.xml.get_widget("TailleMo").get_text().strip().decode("UTF-8").encode(config.Coding)
-		try:
-			self.config.MediaSize=abs(float(txt))
-		except:
-			print "%s does not seem to be the size of a media"%txt
-		self.xml.get_widget("TailleCD").destroy()
+    def continu(self, *args):
+        """just distroy the window and goes on ...."""
+        txt = self.xml.get_widget("TailleMo").get_text().strip().decode("UTF-8").encode(config.Coding)
+        try:
+            self.config.MediaSize = abs(float(txt))
+        except:
+            print "%s does not seem to be the size of a media" % txt
+        self.xml.get_widget("TailleCD").destroy()
 
-	def destroy(self,*args):
-		"""destroy clicked by user -> quit the program"""
-		try:
-			self.xml.get_widget("TailleCD").destroy()
-		except:
-			pass
-		while gtk.events_pending():gtk.main_iteration()	
+    def destroy(self, *args):
+        """destroy clicked by user -> quit the program"""
+        try:
+            self.xml.get_widget("TailleCD").destroy()
+        except:
+            pass
+        while gtk.events_pending():gtk.main_iteration()
 
 class Synchronize:
-	"""Class for file synchronization between different repositories"""
-	def __init__(self,current,AllPhotos,selected):
-		#print "entering in Synchronize class with arguments %i,%i,%i"%(current,len(AllPhotos),len(selected))
-		self.config=Config()
-		#print self.config.SynchronizeType
-		self.current=current
-		self.AllPhotos=AllPhotos
-		self.Selected=selected
-		self.initST=self.config.SynchronizeType
-		self.xml=gtk.glade.XML(unifiedglade,root="Synchroniser")
-		self.xml.signal_connect('on_Synchroniser_destroy',self.destroy)
-		self.xml.signal_connect('on_cancel4_clicked',self.destroy)
-		self.xml.signal_connect('on_ok4_clicked',self.synchronize)
-		self.xml.signal_connect('on_apply4_clicked',self.apply)
-		self.xml.get_widget("SyncCommand").set_text(self.config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
-		if self.config.SynchronizeType.lower() == "newer":
-			self.xml.get_widget("SyncOlder").set_active(0)
-			self.xml.get_widget("SyncAll").set_active(0)
-			self.xml.get_widget("SyncSelected").set_active(0)
-			self.xml.get_widget("SyncNewer").set_active(1)
-		elif self.config.SynchronizeType.lower() == "older" :
-			self.xml.get_widget("SyncNewer").set_active(0)
-			self.xml.get_widget("SyncAll").set_active(0)
-			self.xml.get_widget("SyncSelected").set_active(0)
-			self.xml.get_widget("SyncOlder").set_active(1)
-		elif self.config.SynchronizeType.lower() == "all":
-			self.xml.get_widget("SyncSelected").set_active(0)
-			self.xml.get_widget("SyncOlder").set_active(0)
-			self.xml.get_widget("SyncNewer").set_active(0)
-			self.xml.get_widget("SyncAll").set_active(1)
-		elif self.config.SynchronizeType.lower() == "selected":
-			self.xml.get_widget("SyncOlder").set_active(0)
-			self.xml.get_widget("SyncAll").set_active(0)
-			self.xml.get_widget("SyncNewer").set_active(0)
-			self.xml.get_widget("SyncSelected").set_active(1)
-		else:
-			self.xml.get_widget("SyncAll").set_active(0)
-			self.xml.get_widget("SyncOlder").set_active(0)
-			self.xml.get_widget("SyncNewer").set_active(0)
-			self.xml.get_widget("SyncSelected").set_active(1)
-		self.xml.signal_connect('on_SyncAll_toggled',self.SetSyncAll)
-		self.xml.signal_connect('on_SyncNewer_toggled',self.SetSyncNewer)
-		self.xml.signal_connect('on_SyncOlder_toggled',self.SetSyncOlder)
-		self.xml.signal_connect('on_SyncSelected_toggled',self.SetSyncSelected)
-		while gtk.events_pending():gtk.main_iteration()
+    """Class for file synchronization between different repositories"""
+    def __init__(self, current, AllPhotos, selected):
+        #print "entering in Synchronize class with arguments %i,%i,%i"%(current,len(AllPhotos),len(selected))
+        self.config = Config()
+        #print self.config.SynchronizeType
+        self.current = current
+        self.AllPhotos = AllPhotos
+        self.Selected = selected
+        self.initST = self.config.SynchronizeType
+        self.xml = gtk.glade.XML(unifiedglade, root="Synchroniser")
+        self.xml.signal_connect('on_Synchroniser_destroy', self.destroy)
+        self.xml.signal_connect('on_cancel4_clicked', self.destroy)
+        self.xml.signal_connect('on_ok4_clicked', self.synchronize)
+        self.xml.signal_connect('on_apply4_clicked', self.apply)
+        self.xml.get_widget("SyncCommand").set_text(self.config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
+        if self.config.SynchronizeType.lower() == "newer":
+            self.xml.get_widget("SyncOlder").set_active(0)
+            self.xml.get_widget("SyncAll").set_active(0)
+            self.xml.get_widget("SyncSelected").set_active(0)
+            self.xml.get_widget("SyncNewer").set_active(1)
+        elif self.config.SynchronizeType.lower() == "older" :
+            self.xml.get_widget("SyncNewer").set_active(0)
+            self.xml.get_widget("SyncAll").set_active(0)
+            self.xml.get_widget("SyncSelected").set_active(0)
+            self.xml.get_widget("SyncOlder").set_active(1)
+        elif self.config.SynchronizeType.lower() == "all":
+            self.xml.get_widget("SyncSelected").set_active(0)
+            self.xml.get_widget("SyncOlder").set_active(0)
+            self.xml.get_widget("SyncNewer").set_active(0)
+            self.xml.get_widget("SyncAll").set_active(1)
+        elif self.config.SynchronizeType.lower() == "selected":
+            self.xml.get_widget("SyncOlder").set_active(0)
+            self.xml.get_widget("SyncAll").set_active(0)
+            self.xml.get_widget("SyncNewer").set_active(0)
+            self.xml.get_widget("SyncSelected").set_active(1)
+        else:
+            self.xml.get_widget("SyncAll").set_active(0)
+            self.xml.get_widget("SyncOlder").set_active(0)
+            self.xml.get_widget("SyncNewer").set_active(0)
+            self.xml.get_widget("SyncSelected").set_active(1)
+        self.xml.signal_connect('on_SyncAll_toggled', self.SetSyncAll)
+        self.xml.signal_connect('on_SyncNewer_toggled', self.SetSyncNewer)
+        self.xml.signal_connect('on_SyncOlder_toggled', self.SetSyncOlder)
+        self.xml.signal_connect('on_SyncSelected_toggled', self.SetSyncSelected)
+        while gtk.events_pending():gtk.main_iteration()
 
-	def SetSyncAll(self,*args):
-		#print "SetSyncAll activated"
-		self.config.SynchronizeType="All"
-        def SetSyncOlder(self,*args):
-		#print "SetSyncOld activated"
-                self.config.SynchronizeType="Older"
-        def SetSyncNewer(self,*args):
-		#print "SetSyncNew activated"
-                self.config.SynchronizeType="Newer"
-        def SetSyncSelected(self,*args):
-		#print "SetSyncSel activated"
-                self.config.SynchronizeType="Selected"
-	def Read(self):
-		"""read config from GUI"""
-		self.config.SynchronizeRep=self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
-		self.initST=self.config.SynchronizeType
-	def apply(self,*args):
-		self.Read()
-		self.destroy()
-	def synchronize(self,*args):
-		self.Read()
-		#print "entering Synchronize"
-		#print self.config.SynchronizeType
-		synchrofile=os.path.join(self.config.DefaultRepository,".synchro")
-		synchro=[]
-		if self.config.SynchronizeType.lower() == "selected":
-			#print "exec selected"
-			synchro=self.Selected
-		elif self.config.SynchronizeType.lower() == "newer":
-			#print "exec newer"
-			synchro=self.AllPhotos[self.current:]
-		elif self.config.SynchronizeType.lower() == "older":
-			#print "exec older"
-			synchro=self.AllPhotos[:self.current+1]
-		else:
-			#print "exec all"
-			synchro=self.AllPhotos
-		synchro.append(self.config.Selected_save)
-		days=[]
-		for photo in synchro:
-			day=os.path.split(photo)[0]
-			if not day in days: 
-				days.append(day)
-				if os.path.isfile(os.path.join(self.config.DefaultRepository,day,self.config.CommentFile)):synchro.append(os.path.join(day,self.config.CommentFile))
-		f=open(synchrofile,"w")
-		for i in synchro: f.write(i+"\n")
-		f.close()
-		os.system("rsync -v --files-from=%s %s/ %s"%(synchrofile,self.config.DefaultRepository,self.config.SynchronizeRep))
-#		sys.exec ("rsync--files-from=%s %s")%(synchrofile.self.config.SynchronizeRep)
-		self.destroy()
-	def destroy(self,*args):
-		"""destroy clicked by user -> quit the program"""
-		self.config.SynchronizeType=self.initST
-		#print self.config.SynchronizeType
-		try:
-			self.xml.get_widget("Synchroniser").destroy()
-		except:
-			pass
-		while gtk.events_pending():gtk.main_iteration()
+    def SetSyncAll(self, *args):
+        #print "SetSyncAll activated"
+        self.config.SynchronizeType = "All"
+        def SetSyncOlder(self, *args):
+        #print "SetSyncOld activated"
+                self.config.SynchronizeType = "Older"
+        def SetSyncNewer(self, *args):
+        #print "SetSyncNew activated"
+                self.config.SynchronizeType = "Newer"
+        def SetSyncSelected(self, *args):
+        #print "SetSyncSel activated"
+                self.config.SynchronizeType = "Selected"
+    def Read(self):
+        """read config from GUI"""
+        self.config.SynchronizeRep = self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
+        self.initST = self.config.SynchronizeType
+    def apply(self, *args):
+        self.Read()
+        self.destroy()
+    def synchronize(self, *args):
+        self.Read()
+        #print "entering Synchronize"
+        #print self.config.SynchronizeType
+        synchrofile = os.path.join(self.config.DefaultRepository, ".synchro")
+        synchro = []
+        if self.config.SynchronizeType.lower() == "selected":
+            #print "exec selected"
+            synchro = self.Selected
+        elif self.config.SynchronizeType.lower() == "newer":
+            #print "exec newer"
+            synchro = self.AllPhotos[self.current:]
+        elif self.config.SynchronizeType.lower() == "older":
+            #print "exec older"
+            synchro = self.AllPhotos[:self.current + 1]
+        else:
+            #print "exec all"
+            synchro = self.AllPhotos
+        synchro.append(self.config.Selected_save)
+        days = []
+        for photo in synchro:
+            day = os.path.split(photo)[0]
+            if not day in days:
+                days.append(day)
+                if os.path.isfile(os.path.join(self.config.DefaultRepository, day, self.config.CommentFile)):synchro.append(os.path.join(day, self.config.CommentFile))
+        f = open(synchrofile, "w")
+        for i in synchro: f.write(i + "\n")
+        f.close()
+        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, self.config.DefaultRepository, self.config.SynchronizeRep))
+#        sys.exec ("rsync--files-from=%s %s")%(synchrofile.self.config.SynchronizeRep)
+        self.destroy()
+    def destroy(self, *args):
+        """destroy clicked by user -> quit the program"""
+        self.config.SynchronizeType = self.initST
+        #print self.config.SynchronizeType
+        try:
+            self.xml.get_widget("Synchroniser").destroy()
+        except:
+            pass
+        while gtk.events_pending():gtk.main_iteration()
 
 
 
 class SelectDay:
-	def __init__(self,upperIface):
-		self.upperIface=upperIface
-		self.xml=gtk.glade.XML(unifiedglade,root="ChangeDir")
-		self.combobox=self.xml.get_widget("entry")
-		self.xml.signal_connect('on_ChangeDir_destroy',self.destroy)
-		self.xml.signal_connect('on_annuler_clicked',self.destroy)
-		self.xml.signal_connect('on_Ouvrir_clicked',self.continu)
-		self.days=[os.path.split(self.upperIface.AllJpegs[0])[0]]
-		self.combobox.append_text(self.days[0])
-		for image in self.upperIface.AllJpegs[1:]:
-			day=os.path.split(image)[0]
-			if day!=self.days[-1]:
-				self.days.append(day)
-				self.combobox.append_text(day)
-		self.curday=self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.CurIm])[0])
-		self.combobox.set_active(self.curday)
-
-		
-
-
-	def continu(self,*args):
-		"""just distroy the window and goes on ...."""
-		day = self.days[self.combobox.get_active()]
-		for i in range(len(self.upperIface.AllJpegs)):
-			if os.path.split(self.upperIface.AllJpegs[i])[0]==day:
-				break
-		self.upperIface.CurIm=i
-		self.upperIface.ShowImage()	
-		self.xml.get_widget("ChangeDir").destroy()
-
-	def destroy(self,*args):
-		"""destroy clicked by user -> quit the program"""
-		try:
-			self.xml.get_widget("ChangeDir").destroy()
-		except:
-			pass
-		while gtk.events_pending():gtk.main_iteration()	
+    def __init__(self, upperIface):
+        self.upperIface = upperIface
+        self.xml = gtk.glade.XML(unifiedglade, root="ChangeDir")
+        self.combobox = self.xml.get_widget("entry")
+        self.xml.signal_connect('on_ChangeDir_destroy', self.destroy)
+        self.xml.signal_connect('on_annuler_clicked', self.destroy)
+        self.xml.signal_connect('on_Ouvrir_clicked', self.continu)
+        self.days = [os.path.split(self.upperIface.AllJpegs[0])[0]]
+        self.combobox.append_text(self.days[0])
+        for image in self.upperIface.AllJpegs[1:]:
+            day = os.path.split(image)[0]
+            if day != self.days[-1]:
+                self.days.append(day)
+                self.combobox.append_text(day)
+        self.curday = self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.CurIm])[0])
+        self.combobox.set_active(self.curday)
 
 
 
 
+    def continu(self, *args):
+        """just distroy the window and goes on ...."""
+        day = self.days[self.combobox.get_active()]
+        for i in range(len(self.upperIface.AllJpegs)):
+            if os.path.split(self.upperIface.AllJpegs[i])[0] == day:
+                break
+        self.upperIface.CurIm = i
+        self.upperIface.ShowImage()
+        self.xml.get_widget("ChangeDir").destroy()
 
-if __name__=='__main__':
-	
-	if len(sys.argv)>1: 
-		for arg in sys.argv[1:]:
-			if arg[0]=="-":
-				if arg[1].lower()=="h":
-					print "Selector classe des photos,\nil prend comme paramettre le chemin dÈbut de recherche et comme option:\n -nowarning : Èvite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accÈlËrer le tri.\n".decode("Latin-1")
-					sys.exit(0)
-			else:
-				config.DefaultRepository=os.path.abspath(arg)
-
-	
-	config.PrintConfig()
-	Selected_file=os.path.join(config.DefaultRepository,config.Selected_save)
-	if not os.path.isfile(Selected_file):
-		W=WarningSc(config.DefaultRepository)
-		config.DefaultRepository=W.directory
-		del W
-		Selected_file=os.path.join(config.DefaultRepository,config.Selected_save)
-	
-	if not os.path.isfile(Selected_file):
-		f=open(Selected_file,"w")
-		f.close()
+    def destroy(self, *args):
+        """destroy clicked by user -> quit the program"""
+        try:
+            self.xml.get_widget("ChangeDir").destroy()
+        except:
+            pass
+        while gtk.events_pending():gtk.main_iteration()
 
 
-	AF,first=RangeTout(config.DefaultRepository)
-	values=(AF,first,LoadSelected(),config.GraphicMode)
-	while config.GraphicMode!="Quit":
-		if config.GraphicMode=="Normal":	
-			ifc=interface(*values)
-			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected,config.GraphicMode)
-			del ifc
-			gc.collect()
-		elif config.GraphicMode in ["FullScreen","SlideShow"]:
-			ifc=FullScreenInterface(*values)
-			values=(ifc.AllJpegs,ifc.CurIm,ifc.Selected,config.GraphicMode)
-			del ifc
-			gc.collect()
-		print config.GraphicMode
-			
+
+
+
+if __name__ == '__main__':
+
+    if len(sys.argv) > 1:
+        for arg in sys.argv[1:]:
+            if arg[0] == "-":
+                if arg[1].lower() == "h":
+                    print "Selector classe des photos,\nil prend comme paramettre le chemin d√©but de recherche et comme option:\n -nowarning : √©vite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, acc√©l√®rer le tri.\n".decode("Latin-1")
+                    sys.exit(0)
+            else:
+                config.DefaultRepository = os.path.abspath(arg)
+
+
+    config.PrintConfig()
+    Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
+    if not os.path.isfile(Selected_file):
+        W = WarningSc(config.DefaultRepository)
+        config.DefaultRepository = W.directory
+        del W
+        Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
+
+    if not os.path.isfile(Selected_file):
+        f = open(Selected_file, "w")
+        f.close()
+
+
+    AF, first = RangeTout(config.DefaultRepository)
+    values = (AF, first, LoadSelected(), config.GraphicMode)
+    while config.GraphicMode != "Quit":
+        if config.GraphicMode == "Normal":
+            ifc = interface(*values)
+            values = (ifc.AllJpegs, ifc.CurIm, ifc.Selected, config.GraphicMode)
+            del ifc
+            gc.collect()
+        elif config.GraphicMode in ["FullScreen", "SlideShow"]:
+            ifc = FullScreenInterface(*values)
+            values = (ifc.AllJpegs, ifc.CurIm, ifc.Selected, config.GraphicMode)
+            del ifc
+            gc.collect()
+        print config.GraphicMode
+

@@ -1,11 +1,11 @@
 #!/usr/bin/env python 
-# -*- coding: Latin1 -*-
+# -*- coding: UTF8 -*-
 #******************************************************************************\
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+#* Copyright (C) 2006,  JÃ©rome Kieffer <kieffer@terre-adelie.org>
+#* Conception : JÃ©rÃ´me KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
 #* This program is free software; you can redistribute it and/or modify
@@ -30,82 +30,81 @@ The setup.py script allows to install Imagizer regardless to the operating syste
 
 from distutils.core import setup
 from math import log
-import os,sys,glob,distutils.sysconfig,shutil,locale
+import os, sys, glob, distutils.sysconfig, shutil, locale
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
-installdir=os.path.join(distutils.sysconfig.get_python_lib(),"imagizer")
+installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-	execexiftran=os.path.join(os.getcwd(),"bin","exiftran.exe")
-	ConfFile=[os.path.join(os.getenv("ALLUSERSPROFILE"),"imagizer.conf"),os.path.join(os.getenv("USERPROFILE"),"imagizer.conf")]
-	shutil.copy('selector','selector.py')
-	shutil.copy('generator','generator.py')
-	shutil.copy('imagizer.conf-windows','imagizer.conf')
-	scripts= ['selector.py',"generator.py"]
+    execexiftran = os.path.join(os.getcwd(), "bin", "exiftran.exe")
+    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+    shutil.copy('selector', 'selector.py')
+    shutil.copy('generator', 'generator.py')
+    shutil.copy('imagizer.conf-windows', 'imagizer.conf')
+    scripts = ['selector.py', "generator.py"]
 
 elif os.name == 'posix':
-#	shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
-	ConfFile=["/etc/imagizer.conf",os.path.join(os.getenv("HOME"),".imagizer")]
-	scripts= ['selector',"generator"]
-	execexiftran=os.path.join(os.getcwd(),"bin","exiftran")
-	shutil.copy('imagizer.conf-unix','imagizer.conf')
+#    shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
+    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
+    scripts = ['selector', "generator"]
+    execexiftran = os.path.join(os.getcwd(), "bin", "exiftran")
+    shutil.copy('imagizer.conf-unix', 'imagizer.conf')
 
 else:
-	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-	sys.exit(1)
+    raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
+    sys.exit(1)
 
-configured=False
+configured = False
 for i in ConfFile:
-	if os.path.isfile(i):configured=True 
+    if os.path.isfile(i):configured = True
 
 
 ### trick to make an auto-install under windows :
-if len(sys.argv)==1:
-	sys.argv.append("install")
+if len(sys.argv) == 1:
+    sys.argv.append("install")
 
 
 
-setup(name= 'Imagizer',
-	version= '1.0',
-	author= 'Jerome Kieffer',
-	author_email= 'Jerome.Kieffer@terre-adelie.org',
-	url= 'http://wiki.terre-adelie.org/Imagizer',
-	description= "Imagizer is a manager for a repository of photos",
-	license= 'GNU GPL v2',
-	scripts= scripts,
-	data_files= [
-		(installdir, ["selector.glade",execexiftran]+
-		glob.glob(os.path.join("pixmaps","*.png"))+
-		glob.glob(os.path.join("pixmaps","*.ico"))),
-		(os.path.split(ConfFile[0])[0],['imagizer.conf'])
-	],
-	packages= ['imagizer'],
-	package_dir= {'imagizer': ''},
-	)
-os.remove("imagizer.conf") 
+setup(name='Imagizer',
+    version='1.0',
+    author='Jerome Kieffer',
+    author_email='Jerome.Kieffer@terre-adelie.org',
+    url='http://wiki.terre-adelie.org/Imagizer',
+    description="Imagizer is a manager for a repository of photos",
+    license='GNU GPL v2',
+    scripts=scripts,
+    data_files=[
+        (installdir, ["selector.glade", execexiftran] +
+        glob.glob(os.path.join("pixmaps", "*.png")) +
+        glob.glob(os.path.join("pixmaps", "*.ico"))),
+        (os.path.split(ConfFile[0])[0], ['imagizer.conf'])
+    ],
+    packages=['imagizer'],
+    package_dir={'imagizer': ''},
+    )
+os.remove("imagizer.conf")
 
 if not configured:
-	import config
-	config=config.Config()
-	config.load(ConfFile)
-	try:
-		import pygtk ; pygtk.require('2.0')
-		import gtk,gtk.glade
-		textinterface=False
-	except:
-		textinterface=True
-	if textinterface:
-		while True:
-			print "Enter le chemin du repertoire racine du serveur WEB :"
-			config.WebRepository=raw_input("[%s] :"%config.WebRepository)
-			if os.path.isdir(config.WebRepository):break
-			print "No Such Dir"
-	else:
-		from dirchooser import WarningSc
-		W=WarningSc(config.WebRepository,window="WWW-root")
-		config.WebRepository=W.directory
-		del W
-	config.Locale,config.Coding = locale.getdefaultlocale()
-	LANG=os.getenv("LANG")
-	if LANG:config.Locale=LANG
-	config.SaveConfig(ConfFile[0])
-	
+    import config
+    config = config.Config()
+    config.load(ConfFile)
+    try:
+        import pygtk ; pygtk.require('2.0')
+        import gtk, gtk.glade
+        textinterface = False
+    except:
+        textinterface = True
+    if textinterface:
+        while True:
+            print "Enter le chemin du repertoire racine du serveur WEB :"
+            config.WebRepository = raw_input("[%s] :" % config.WebRepository)
+            if os.path.isdir(config.WebRepository):break
+            print "No Such Dir"
+    else:
+        from dirchooser import WarningSc
+        W = WarningSc(config.WebRepository, window="WWW-root")
+        config.WebRepository = W.directory
+        del W
+    config.Locale, config.Coding = locale.getdefaultlocale()
+    LANG = os.getenv("LANG")
+    if LANG:config.Locale = LANG
+
