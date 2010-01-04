@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006 - 2009,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -335,7 +335,7 @@ class ModelRangeTout:
 	def __init__(self):
 		"""
 		"""
-		self.__label = "Rangement photo"
+		self.__label = "Initial renaming of new images .... "
 		self.startSignal = Signal()
 		self.refreshSignal = Signal()
 		self.finishSignal = Signal()
@@ -670,15 +670,18 @@ class photo:
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 
-    def Trash(self):
-        """Send the file to the trash folder"""
-        #Remove from imageCache
+    def RemoveFromCache(self):
+    	"""remove the curent image from the Cache .... for various reasons"""
         if imageCache is not None:
             if self.filename in imageCache.ordered:
                 pixBuf = imageCache.imageDict.pop(self.filename)
                 index = imageCache.ordered.index(self.filename)
                 imageCache.ordered.pop(index)
                 imageCache.size -= 3 * pixBuf.get_width() * pixBuf.get_height()
+
+    def Trash(self):
+        """Send the file to the trash folder"""
+        self.RemoveFromCache()
         Trashdir = os.path.join(config.DefaultRepository, config.TrashDirectory)
         td = os.path.dirname(os.path.join(Trashdir, self.filename))
         tf = os.path.join(Trashdir, self.filename)
@@ -750,10 +753,10 @@ class photo:
                 data = imageCache[ self.filename ]
                 if (data.get_width() == nx) and (data.get_height() == ny):
                     scaled_buf = data
-                    print "Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0))
+                    if config.DEBUG: print("Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
                 elif (data.get_width() > nx) or (data.get_height() > ny):
                     pixbuf = data
-                    print "Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0))
+                    if config.DEBUG: print("Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
                     scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
         if not scaled_buf:
             pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
@@ -763,7 +766,7 @@ class photo:
                 scaled_buf = pixbuf
             if imageCache is not None:
                 imageCache[ self.filename ] = scaled_buf
-                print "Sucessfully cached  %s, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0))
+                if config.DEBUG: print("Sucessfully cached  %s, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
         return scaled_buf
 
     def name(self, titre):

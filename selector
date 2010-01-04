@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006-2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -29,7 +29,7 @@
 # version 1.2 : 13/02/2006 : includes a configuration file
 # version 1.3 : correction d'un bug quant à l'allocation de mémoire dans libjpeg
 # version 1.4 : 04/2006 : passage du pre-processing dans un bibliotheque externe utilisant le design pattern 
-#
+# version 1.75: using some cache to speed-up display
 #
 # Liste des dépendances : python, PIL, Glade-2
 # Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
@@ -80,9 +80,9 @@ if os.getenv("LANGUAGE"):
         locale.setlocale(locale.LC_ALL, config.Locale)
 else:
     locale.setlocale(locale.LC_ALL, config.Locale)
-################################
-##### FullScreen Interface #####
-################################
+################################################################################
+#  ##### FullScreen Interface #####
+################################################################################
 
 class FullScreenInterface:
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen"):
@@ -235,9 +235,10 @@ class FullScreenInterface:
             time.sleep(config.SlideShowDelay)
 
 
-############################
-##### Normal Interface #####
-############################
+################################################################################
+# ##### Normal Interface #####
+################################################################################
+
 class interface:
     """class interface that manages the GUI using Glade-2"""
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default"):
@@ -250,7 +251,7 @@ class interface:
         self.Xmin = 350
 
 
-        print "Initialisation de l'interface graphique ..."
+        if config.DEBUG: print("Initialization of the graphical interface ...")
         self.xml = gtk.glade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
@@ -497,6 +498,7 @@ class interface:
         os.chmod(newnamefull, config.DefaultFileMode)
         os.system(gimpexe + newnamefull)
         self.ShowImage()
+        self.image.RemoveFromCache()
 
     def filter(self, *args):
         """Filter the current image with a contrast mask"""
@@ -1027,7 +1029,9 @@ class interface:
 
 
 
-# # # # # # fin de la classe interface graphique # # # # # #
+################################################################################
+# # # # # # # fin de la classe interface graphique # # # # # #
+################################################################################
 
 
 def SelectedSize(List):
@@ -1039,18 +1043,16 @@ def SelectedSize(List):
 
 def SaveSelected(List):
     """save the list of selected files"""
-    print "Sauvegarde de la sélection".decode("Latin-1")
+    if config.DEBUG: print "Sauving selection into file"
     os.remove(Selected_file)
     f = open(Selected_file, "w")
     for ligne in List: f.write(ligne + "\n")
     f.close()
     os.chmod(Selected_file, config.DefaultFileMode)
 
-
-
 def LoadSelected():
     """Load the list of selected files"""
-    print "Chargement de la sélection".decode("Latin-1")
+    if config.DEBUG: print "Loading selection from file"
     try:
         lignes = open(Selected_file, "r").readlines()
         select = []
@@ -1246,9 +1248,10 @@ class AskMediaSize:
 class Synchronize:
     """Class for file synchronization between different repositories"""
     def __init__(self, current, AllPhotos, selected):
-        #print "entering in Synchronize class with arguments %i,%i,%i"%(current,len(AllPhotos),len(selected))
         self.config = Config()
-        #print self.config.SynchronizeType
+        if self.config.DEBUG:
+            print("Entering in Synchronize class with arguments %i,%i,%i" % (current, len(AllPhotos), len(selected)))
+            print("Recorded Synchronize type: %s" % self.config.SynchronizeType)
         self.current = current
         self.AllPhotos = AllPhotos
         self.Selected = selected
@@ -1291,17 +1294,17 @@ class Synchronize:
         while gtk.events_pending():gtk.main_iteration()
 
     def SetSyncAll(self, *args):
-        #print "SetSyncAll activated"
+        if self.config.DEBUG: print("SetSyncAll activated")
         self.config.SynchronizeType = "All"
-        def SetSyncOlder(self, *args):
-        #print "SetSyncOld activated"
-                self.config.SynchronizeType = "Older"
-        def SetSyncNewer(self, *args):
-        #print "SetSyncNew activated"
-                self.config.SynchronizeType = "Newer"
-        def SetSyncSelected(self, *args):
-        #print "SetSyncSel activated"
-                self.config.SynchronizeType = "Selected"
+    def SetSyncOlder(self, *args):
+        if self.config.DEBUG: print ("SetSyncOld activated")
+        self.config.SynchronizeType = "Older"
+    def SetSyncNewer(self, *args):
+        if self.config.DEBUG: print ("SetSyncNew activated")
+        self.config.SynchronizeType = "Newer"
+    def SetSyncSelected(self, *args):
+        if self.config.DEBUG: print ("SetSyncSel activated")
+        self.config.SynchronizeType = "Selected"
     def Read(self):
         """read config from GUI"""
         self.config.SynchronizeRep = self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
@@ -1311,21 +1314,20 @@ class Synchronize:
         self.destroy()
     def synchronize(self, *args):
         self.Read()
-        #print "entering Synchronize"
-        #print self.config.SynchronizeType
+        if self.config.DEBUG: print ("entering Synchronize with mode %s" % self.config.SynchronizeType)
         synchrofile = os.path.join(self.config.DefaultRepository, ".synchro")
         synchro = []
         if self.config.SynchronizeType.lower() == "selected":
-            #print "exec selected"
+            if self.config.DEBUG: print ("exec selected")
             synchro = self.Selected
         elif self.config.SynchronizeType.lower() == "newer":
-            #print "exec newer"
+            if self.config.DEBUG: print ("exec newer")
             synchro = self.AllPhotos[self.current:]
         elif self.config.SynchronizeType.lower() == "older":
-            #print "exec older"
+            if self.config.DEBUG: print ("exec older")
             synchro = self.AllPhotos[:self.current + 1]
         else:
-            #print "exec all"
+            if self.config.DEBUG: print ("exec all")
             synchro = self.AllPhotos
         synchro.append(self.config.Selected_save)
         days = []
@@ -1338,12 +1340,10 @@ class Synchronize:
         for i in synchro: f.write(i + "\n")
         f.close()
         os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, self.config.DefaultRepository, self.config.SynchronizeRep))
-#        sys.exec ("rsync--files-from=%s %s")%(synchrofile.self.config.SynchronizeRep)
         self.destroy()
     def destroy(self, *args):
         """destroy clicked by user -> quit the program"""
         self.config.SynchronizeType = self.initST
-        #print self.config.SynchronizeType
         try:
             self.xml.get_widget("Synchroniser").destroy()
         except:
@@ -1389,27 +1389,33 @@ class SelectDay:
             self.xml.get_widget("ChangeDir").destroy()
         except:
             pass
-        while gtk.events_pending():gtk.main_iteration()
+        while gtk.events_pending():
+            gtk.main_iteration()
 
-
-
-
+################################################################################
+# Main program of selector
+################################################################################
 
 if __name__ == '__main__':
-
+    printWarning = True
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             if arg[0] == "-":
                 if arg[1].lower() == "h":
-                    print "Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n".decode("Latin-1")
+                    print "Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n".decode("UTF8")
                     sys.exit(0)
-            else:
+                elif arg.lower().find("-debug") >= 0:
+                    config.DEBUG = True
+                elif arg.lower().find("-noautorotate") >= 0:
+                    config.AutoRotate = False
+                elif arg.lower().find("-nowarning") >= 0:
+                    printWarning = False
+            elif os.path.isdir(arg):
                 config.DefaultRepository = os.path.abspath(arg)
-
 
     config.PrintConfig()
     Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
-    if not os.path.isfile(Selected_file):
+    if (printWarning == True) and (not os.path.isfile(Selected_file)):
         W = WarningSc(config.DefaultRepository)
         config.DefaultRepository = W.directory
         del W
@@ -1433,5 +1439,5 @@ if __name__ == '__main__':
             values = (ifc.AllJpegs, ifc.CurIm, ifc.Selected, config.GraphicMode)
             del ifc
             gc.collect()
-        print config.GraphicMode
+        if config.DEBUG: print "Switching to mode %s" % config.GraphicMode
 

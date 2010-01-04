@@ -86,6 +86,7 @@ class Config:
         self.ImageCache = 100000000
         self.ImageWidth = None
         self.ImageHeight = None
+        self.DEBUG = None
         self.Thumbnails = {
             "Size":160,
             "Suffix": "thumb",
@@ -179,19 +180,29 @@ class Config:
             exec("self.%s=dico" % k)
 
     def PrintConfig(self):
-        print "#" * 80
-        print "Size on the images on the Screen: %s" % self.ScreenSize
-        print "Page prefix:\t\t\t  %s" % self.PagePrefix
-        print "Number of images per page:\t  %s" % self.NbrPerPage
-        print "Use Exif for Auto-Rotate:\t  %s" % self.AutoRotate
-        print "Default mode for files (octal):\t  %o" % self.DefaultFileMode
-        print "JPEG extensions:\t\t %s" % self.Extensions
-        print "Default photo repository:\t  %s" % self.DefaultRepository
-        print "Add signature for exported images:%s" % self.Filigrane
-        print "Backup media size (CD,DVD) in Mb :%s" % self.MediaSize
-        print "Scaled imagesSize:\t\t  %s" % self.ScaledImages["Size"]
-        print "Thumbnail Size:\t\t\t  %s" % self.Thumbnails["Size"]
-        print "Caching of PixBuffers size:\t\t %s" % self.ImageCache
+        #print("#" * 80)
+        print("Size on the images on the Screen: %s pixels in the largest dimension" % self.ScreenSize)
+        print("Page prefix:\t\t\t  %s" % self.PagePrefix)
+        print("Number of images per page:\t  %s" % self.NbrPerPage)
+        print("Use Exif for Auto-Rotate:\t  %s" % self.AutoRotate)
+        print("Default mode for files (octal):\t  %o" % self.DefaultFileMode)
+        print("JPEG extensions:\t\t %s" % self.Extensions)
+        print("Default photo repository:\t  %s" % self.DefaultRepository)
+        print("Add signature for exported images:%s" % self.Filigrane)
+        print("Backup media size (CD,DVD):\t  %s MByte" % self.MediaSize)
+        print("Scaled imagesSize:\t\t  %s pixels in the largest dimension" % self.ScaledImages["Size"])
+        print("Thumbnail Size:\t\t\t  %s pixels in the largest dimension" % self.Thumbnails["Size"])
+        cache = ""
+        lenCache = len(str(self.ImageCache))
+        if lenCache in range(4, 7):
+            cache = "%.1f kByte" % (float(self.ImageCache) / 1024.0)
+        elif lenCache in range(7, 10):
+            cache = "%.1f MByte" % (float(self.ImageCache) / 1048576.0)
+        elif lenCache in range(10, 13):
+            cache = "%.1f GByte" % (float(self.ImageCache) / 1073741824.)
+        else:
+            cache = "%i Byte" % self.ImageCache
+        print("Caching of PixBuffers size:\t  %s" % cache)
 
     def SaveConfig(self, filename):
         """saves the default options"""

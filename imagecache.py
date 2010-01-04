@@ -57,7 +57,7 @@ class ImageCache(dict):
         self.size += 3 * value.get_width() * value.get_height()
         if self.size > self.maxSize:
             firstKey = self.ordered[ 0 ]
-            print "Removing file %s from cache" % firstKey
+            if config.DEBUG: print "Removing file %s from cache" % firstKey
             firstPixBuf = self.imageDict.pop(firstKey)
             self.size -= 3 * firstPixBuf.get_width() * firstPixBuf.get_height()
             self.ordered = self.ordered[1:]
