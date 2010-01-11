@@ -47,6 +47,7 @@ elif os.name == 'posix':
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
     scripts = ['selector', "generator"]
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran")
+    os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
 
 else:
@@ -107,4 +108,19 @@ if not configured:
     config.Locale, config.Coding = locale.getdefaultlocale()
     LANG = os.getenv("LANG")
     if LANG:config.Locale = LANG
+
+    try:
+        import pyexiv2
+    except:
+        raise "You should install pyexiv2 by: #aptitude install python-pyexiv2"
+
+    try:
+        import Image, ImageStat, ImageChops, ImageFile
+    except:
+        raise "Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/\ninstall it by # aptitude install python-imaging"
+    try:
+        import pygtk ; pygtk.require('2.0')
+        import gtk, gtk.glade
+    except:
+        raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/\nPLease install it with # aptitude install python-glade2"
 

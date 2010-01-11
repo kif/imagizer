@@ -654,7 +654,7 @@ class interface:
     def about(self, *args):
         """display a copyright message"""
         self.settitle()
-        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.5 du 07/09/2008".decode("latin1"), Message=gtk.MESSAGE_INFO)
+        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.76 du 01/01/2010".decode("UTF8"), Message=gtk.MESSAGE_INFO)
 
 
     def nextJ(self, *args):
@@ -983,7 +983,7 @@ class interface:
         self.ShowImage()
         t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("latin-1"))
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         result = dialog.run()
         dialog.destroy()
 
@@ -1012,7 +1012,7 @@ class interface:
         self.ShowImage()
         t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("latin-1"))
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         result = dialog.run()
         dialog.destroy()
 
@@ -1023,7 +1023,7 @@ class interface:
         size = SelectedSize(self.Selected)
         t = SmartSize(size) + (len(self.Selected),)
         txt = "%.2f %s de données dans %i images sélectionnées" % t
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("latin-1"))
+        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         result = dialog.run()
         dialog.destroy()
 
