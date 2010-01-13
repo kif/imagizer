@@ -28,7 +28,8 @@
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
-
+from config import Config
+config = Config()
 ################################################################################################
 ###############  Class ImageCache for storing the bitmaps in a Borg ############################
 ################################################################################################
@@ -57,7 +58,7 @@ class ImageCache(dict):
         self.size += 3 * value.get_width() * value.get_height()
         if self.size > self.maxSize:
             firstKey = self.ordered[ 0 ]
-            if config.DEBUG: print "Removing file %s from cache" % firstKey
+            if config.DEBUG: print("Removing file %s from cache" % firstKey)
             firstPixBuf = self.imageDict.pop(firstKey)
             self.size -= 3 * firstPixBuf.get_width() * firstPixBuf.get_height()
             self.ordered = self.ordered[1:]

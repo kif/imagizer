@@ -199,7 +199,7 @@ class Config:
         elif lenCache in range(7, 10):
             cache = "%.1f MByte" % (float(self.ImageCache) / 1048576.0)
         elif lenCache in range(10, 13):
-            cache = "%.1f GByte" % (float(self.ImageCache) / 1073741824.)
+            cache = "%.1f GByte" % (float(self.ImageCache) / 1073741824.0)
         else:
             cache = "%i Byte" % self.ImageCache
         print("Caching of PixBuffers size:\t  %s" % cache)

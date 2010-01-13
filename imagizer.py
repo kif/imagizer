@@ -69,7 +69,7 @@ from signals import Signal
 from config import Config
 config = Config()
 config.load(ConfFile)
-if config.ImageCache > 100:
+if config.ImageCache > 1:
 	import imagecache
 	imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
 else:
@@ -660,13 +660,28 @@ class photo:
     def Rotate(self, angle=0):
         """does a looseless rotation of the given jpeg file"""
         if os.name == 'nt' and self.f != None: del self.f
-#		self.taille()
+        self.taille()
+        x = self.x
+        y = self.y
+
         if angle == 90:
-            os.system('%s -ip -9 "%s"' % (exiftran, self.fn))
+            os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
+            if imageCache is not None:
+                imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
+                self.x = y
+                self.y = x
         elif angle == 270:
-            os.system('%s -ip -2 "%s"' % (exiftran, self.fn))
+            os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
+            if imageCache is not None:
+                imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+                self.x = y
+                self.y = x
         elif angle == 180:
-            os.system('%s -ip -1 "%s"' % (exiftran, self.fn))
+            os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
+            if imageCache is not None:
+                imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
+                self.x = x
+                self.y = y
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 
@@ -703,18 +718,12 @@ class photo:
  'Exif.Image.Orientation':'Orientation'
 }
 
-        if self.data == None:
+        if self.data is None:
             self.data = {}
             self.data["Taille"] = "%.2f %s" % SmartSize(os.path.getsize(self.fn))
             image_exif = pyexiv2.Image(self.fn)
             image_exif.readMetadata()
             self.data["Titre"] = image_exif.getComment()
-
-#            RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
-#            if comment:
-#                self.data["Titre"]=comment
-#            else:
-#                self.data["Titre"]=""
             self.taille()
             self.data["Resolution"] = "%s x %s " % (self.x, self.y)
             self.data["Orientation"] = "1"
@@ -755,6 +764,7 @@ class photo:
                     scaled_buf = data
                     if config.DEBUG: print("Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
                 elif (data.get_width() > nx) or (data.get_height() > ny):
+                    if config.DEBUG:print("nx=%i,\tny=%i,\tw=%i,h=%i" % (nx, ny, data.get_width(), data.get_height()))
                     pixbuf = data
                     if config.DEBUG: print("Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
                     scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])

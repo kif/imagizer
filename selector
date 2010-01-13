@@ -86,6 +86,7 @@ else:
 
 class FullScreenInterface:
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen"):
+        self.image = None
         self.AllJpegs = AllJpegs
         self.Selected = []
         self.CurIm = first
@@ -113,9 +114,12 @@ class FullScreenInterface:
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        self.image = photo(self.AllJpegs[self.CurIm])
+        if self.image == None:
+            self.image = photo(self.AllJpegs[self.CurIm])
+        elif self.image.filename != self.AllJpegs[self.CurIm]:
+            self.image = photo(self.AllJpegs[self.CurIm])
         X, Y = self.xml.get_widget("FullScreen").get_size()
-#        print "Taille fenetre %sx%s"%(X,Y)
+        if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
         pixbuf = self.image.show(X, Y)
         self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
         del pixbuf
@@ -249,6 +253,7 @@ class interface:
                 self.Selected.append(i)
         self.CurIm = first
         self.Xmin = 350
+        self.image = None
 
 
         if config.DEBUG: print("Initialization of the graphical interface ...")
@@ -409,9 +414,12 @@ class interface:
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        self.image = photo(self.AllJpegs[self.CurIm])
+        if self.image == None:
+            self.image = photo(self.AllJpegs[self.CurIm])
+        elif self.image.filename != self.AllJpegs[self.CurIm]:
+            self.image = photo(self.AllJpegs[self.CurIm])
         X, Y = self.xml.get_widget("Principale").get_size()
-#        print "Taille fenetre %sx%s"%(X,Y)
+        if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
         pixbuf = self.image.show(X - self.Xmin, Y)
 
@@ -419,7 +427,7 @@ class interface:
         del pixbuf
         gc.collect()
         data = self.image.exif()
-        data.pop("Orientation")
+        if data.has_key("Orientation"): data.pop("Orientation")
         for i in data:
             self.xml.get_widget(i).set_text(data[i])
         self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.CurIm])
@@ -468,8 +476,9 @@ class interface:
         self.settitle()
         self.image.Rotate(90)
         self.ShowImage()
+
     def gauche(self, *args):
-        """rotate the current image clockwise"""
+        """rotate the current image counterclockwise"""
         self.settitle()
         self.image.Rotate(270)
         self.ShowImage()
