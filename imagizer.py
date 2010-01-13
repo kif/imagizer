@@ -69,7 +69,7 @@ from signals import Signal
 from config import Config
 config = Config()
 config.load(ConfFile)
-if config.ImageCache > 1:
+if config.ImageCache > 1000:
 	import imagecache
 	imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
 else:
@@ -608,6 +608,7 @@ class photo:
         self.x = None
         self.y = None
         if not os.path.isfile(self.fn): print "Erreur, le fichier %s n'existe pas" % self.fn
+        self.bImageCache = (imageCache is not None)
 
     def LoadPIL(self):
         """Load the image"""
@@ -663,25 +664,36 @@ class photo:
         self.taille()
         x = self.x
         y = self.y
-
         if angle == 90:
-            os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
             if imageCache is not None:
+            	os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
                 imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
                 self.x = y
                 self.y = x
+            else:
+            	os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
+            	self.x = None
+            	self.y = None
         elif angle == 270:
-            os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
             if imageCache is not None:
+            	os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
                 imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
                 self.x = y
                 self.y = x
+            else:
+            	os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
+            	self.x = None
+            	self.y = None
         elif angle == 180:
-            os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
             if imageCache is not None:
+            	os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
                 imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
                 self.x = x
                 self.y = y
+            else:
+            	os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
+            	self.x = None
+            	self.y = None
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 

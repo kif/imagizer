@@ -116,7 +116,7 @@ class FullScreenInterface:
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         if self.image == None:
             self.image = photo(self.AllJpegs[self.CurIm])
-        elif self.image.filename != self.AllJpegs[self.CurIm]:
+        elif self.image.filename != self.AllJpegs[self.CurIm]  or not self.image.bImageCache:
             self.image = photo(self.AllJpegs[self.CurIm])
         X, Y = self.xml.get_widget("FullScreen").get_size()
         if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
@@ -416,7 +416,7 @@ class interface:
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         if self.image == None:
             self.image = photo(self.AllJpegs[self.CurIm])
-        elif self.image.filename != self.AllJpegs[self.CurIm]:
+        elif self.image.filename != self.AllJpegs[self.CurIm] or not self.image.bImageCache:
             self.image = photo(self.AllJpegs[self.CurIm])
         X, Y = self.xml.get_widget("Principale").get_size()
         if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
