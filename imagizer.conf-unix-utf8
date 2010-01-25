@@ -112,7 +112,7 @@ Size: 800
 Suffix: scaled 
 
 #ScaledImages downsampling quality [0=nearest, 1=antialias 2=bilinear, 3=bicubic]
-Interpolation: 2 
+Interpolation: 1 
 
 #ScaledImages progressive JPEG files
 Progressive: True 
