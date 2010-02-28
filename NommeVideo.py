@@ -483,7 +483,7 @@ if __name__ == "__main__":
         html.element("a name='begin'")
 
         for i in date:
-            html.element("b", videos[i][0].DateTime.date().strftime("%A, %d %B %Y").capitalize())
+            html.element("b", videos[i][0].DateTime.date().strftime("%A, %d %B %Y").capitalize().decode(local))
             html.start("table", {"cellspacing":10})
             for j in videos[i]:
                 j.GenThumb()
@@ -497,7 +497,7 @@ if __name__ == "__main__":
                 html.stop("a")
                 html.stop("td")
                 html.start("td")
-                html.data(j.DateTime.time().strftime("%Hh%Mm%Ss"))
+                html.data(j.DateTime.time().strftime("%Hh%Mm%Ss").decode(local))
                 html.start("br")
     #            print j.Duration
                 html.data("Durée %is" % j.Duration.seconds, "UTF8")
