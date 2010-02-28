@@ -119,7 +119,7 @@ class Video:
             self.Duration = self.metadata.get("duration")
             self.Width = self.metadata.get("width")
             try:
-                self.title = self.metadata.get("title").decode(fileEncoding)
+                self.title = self.metadata.get("title")#.decode(fileEncoding)
             except:
                 self.title = ""
             self.Height = self.metadata.get("height")
@@ -502,7 +502,7 @@ if __name__ == "__main__":
     #            print j.Duration
                 html.data("Durée %is" % j.Duration.seconds, "UTF8")
                 html.stop("td")
-                html.element("td", j.title)
+                html.element("td", j.title, fileEncoding)
                 html.stop("tr")
             html.stop("table")
             html.start("hr/")
