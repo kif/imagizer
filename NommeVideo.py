@@ -39,6 +39,7 @@ class Video:
         self.FullPath = OP.abspath(infile)
         print "Processing %s" % self.FullPath
         [self.Path, self.Video] = OP.split(self.FullPath)
+        self.title = u""
         self.Width = 0
         self.Height = 0
         self.Rotate = None
@@ -80,10 +81,11 @@ class Video:
 
     def __repr__(self):
         """Returns some information on the current video flux"""
-        txt = self.Video + "\n"
+        txt = u"%s\n" % self.Video
         txt += "Producer: %s\tWidth= %i\tHeigth= %i\n" % (self.Producer, self.Width, self.Height)
+        txt += "Type: %s,\t title:%s\n" % (type(self.title), self.title)
         for i in self.data:
-            txt += "%s:\t%s\n" % (i, self.data[i])
+            txt += "\t%s:\t%s\n" % (i, self.data[i])
         return txt
 
     def MkDir(self):
@@ -119,9 +121,16 @@ class Video:
             self.Duration = self.metadata.get("duration")
             self.Width = self.metadata.get("width")
             try:
-                self.title = self.metadata.get("title")#.decode(fileEncoding)
+                self.title = self.metadata.get("title")
             except:
                 self.title = ""
+            convertLatin1ToUTF8 = False
+            for i in self.title:
+                #print i, ord(i)
+                if ord(i) > 127: convertLatin1ToUTF8 = True
+            if convertLatin1ToUTF8:
+                self.title = self.title.encode("latin1").decode("UTF8")
+#Work-around for latin1 related bug 
             self.Height = self.metadata.get("height")
             try:
                 self.FrameRate = self.metadata.get("frame_rate")
@@ -452,8 +461,10 @@ if __name__ == "__main__":
             RootDir = sys.argv[1]
     if sys.argv[0].lower().find("nommevideo") >= 0:
         Action = "Rename"
-    else:
+    elif sys.argv[0].lower().find("genhtml") >= 0:
         Action = "GenHTML"
+    else: #sys.argv[0].lower().find("genhtml") >= 0:
+        Action = "DEBUG"
     UpperDir = OP.split(RootDir)[0]
     if Action == "Rename":
         for filename in FindFile(RootDir):
@@ -467,7 +478,7 @@ if __name__ == "__main__":
                 print vi
                 vi.SetTitle()
                 vi.PBSRencode()
-    else:
+    elif Action == "GenHTML":
         videos = {}
         for filename in FindFile(RootDir):
             vi = Video(filename)
@@ -500,9 +511,9 @@ if __name__ == "__main__":
                 html.data(j.DateTime.time().strftime("%Hh%Mm%Ss").decode(local))
                 html.start("br")
     #            print j.Duration
-                html.data("Durée %is" % j.Duration.seconds, "UTF8")
+                html.data(u"Dur\xe9e %is" % j.Duration.seconds)
                 html.stop("td")
-                html.element("td", j.title, fileEncoding)
+                html.element("td", j.title)
                 html.stop("tr")
             html.stop("table")
             html.start("hr/")
@@ -512,6 +523,23 @@ if __name__ == "__main__":
         for j in videos[i]:
             print j.DateTime
 
-
-
+    else:
+        videos = {}
+        for filename in FindFile(RootDir):
+            vi = Video(filename)
+            if not videos.has_key(vi.DateTime.date().isoformat()):
+                videos[vi.DateTime.date().isoformat()] = [vi]
+            else:
+                videos[vi.DateTime.date().isoformat()].append(vi)
+        date = videos.keys()
+        date.sort()
+        print date
+        for i in date:
+            for j in videos[i]:
+                try:
+                    print j
+                except:
+                    print "error"
+                    sys.stdout.write(j.__repr__())
+                print "#" * 50
 
