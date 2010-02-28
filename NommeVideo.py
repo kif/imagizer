@@ -119,7 +119,7 @@ class Video:
             self.Duration = self.metadata.get("duration")
             self.Width = self.metadata.get("width")
             try:
-                self.title = self.metadata.get("title")#.decode(enc)
+                self.title = self.metadata.get("title").decode(fileEncoding)
             except:
                 self.title = ""
             self.Height = self.metadata.get("height")
