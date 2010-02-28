@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- Coding: UTF8 -*-
+# -*- coding: UTF-8 -*-
 #Written by Jerome Kieffer 20100228 Licence GPLv3+
 #Find all the videos and renames them, compress then .... and write an html file to set online
 
@@ -71,7 +71,7 @@ class Video:
         if OP.isfile(self.CommentFile):
             for l in open(OP.splitext(self.FullPath.replace(" ", "_"))[0] + ".txt").readlines():
                 if len(l) > 2:
-                    k, d = l.decode(enc).split(None, 1)
+                    k, d = l.decode(fileEncoding).split(None, 1)
                     self.data[k] = d.strip()
         self.Date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(self.data["ICRD"], "%Y-%m-%d")))
         if self.Date.date < self.DateTime.date:
@@ -204,7 +204,7 @@ class Video:
         else:
             os.system('mplayer "%s"' % self.FullPath)
             rotate = raw_input("What rotation should be applied to the file ? [0] ")
-            rotate = rotate.strip().lower().decode(locale)
+            rotate = rotate.strip().lower().decode(local)
             print rotate
             if rotate in ["90", "cw"]:
                 self.Rotate = u"Rotated 90 clock-wise"
@@ -500,7 +500,7 @@ if __name__ == "__main__":
                 html.data(j.DateTime.time().strftime("%Hh%Mm%Ss"))
                 html.start("br")
     #            print j.Duration
-                html.data("Dur￩e %is" % j.Duration.seconds)
+                html.data("Durée %is" % j.Duration.seconds, "UTF8")
                 html.stop("td")
                 html.element("td", j.title)
                 html.stop("tr")
