@@ -38,14 +38,14 @@ if os.name == 'nt': #sys.platform == 'win32':
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran.exe")
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
     shutil.copy('selector', 'selector.py')
-    shutil.copy('generator', 'generator.py')
+    shutil.copy('generator', 'generator.py', "NommeVideo.py")
     shutil.copy('imagizer.conf-windows', 'imagizer.conf')
     scripts = ['selector.py', "generator.py"]
 
 elif os.name == 'posix':
 #    shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
-    scripts = ['selector', "generator"]
+    scripts = ['selector', "generator", "NommeVideo.py"]
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran")
     os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
