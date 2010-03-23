@@ -29,7 +29,6 @@ The setup.py script allows to install Imagizer regardless to the operating syste
 """
 
 from distutils.core import setup
-from math import log
 import os, sys, glob, distutils.sysconfig, shutil, locale
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
@@ -38,14 +37,14 @@ if os.name == 'nt': #sys.platform == 'win32':
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran.exe")
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
     shutil.copy('selector', 'selector.py')
-    shutil.copy('generator', 'generator.py', "NommeVideo.py")
+    shutil.copy('generator', 'generator.py')
     shutil.copy('imagizer.conf-windows', 'imagizer.conf')
-    scripts = ['selector.py', "generator.py"]
+    scripts = ['selector.py', "generator.py", "NommeVideo.py", "ConvertIndex.descLatin1ToUTF8.py"]
 
 elif os.name == 'posix':
 #    shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
-    scripts = ['selector', "generator", "NommeVideo.py"]
+    scripts = ['selector', "generator", "NommeVideo.py", "ConvertIndex.descLatin1ToUTF8.py"]
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran")
     os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
@@ -92,7 +91,7 @@ if not configured:
         import pygtk ; pygtk.require('2.0')
         import gtk, gtk.glade
         textinterface = False
-    except:
+    except ImportError:
         textinterface = True
     if textinterface:
         while True:
@@ -121,6 +120,6 @@ if not configured:
     try:
         import pygtk ; pygtk.require('2.0')
         import gtk, gtk.glade
-    except:
-        raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/\nPLease install it with # aptitude install python-glade2"
+    except ImportError:
+        raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/\nPLease install it with # aptitude install python-glade2")
 
