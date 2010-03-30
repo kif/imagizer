@@ -29,17 +29,17 @@ Config is a class containing all the configuration of the imagizer suite.
 Technically it is a Borg (design Pattern) so every instance of Config has exactly the same contents.
 """
 
-import os, sys, distutils.sysconfig, locale
+import os, distutils.sysconfig, locale
 
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
-    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
 elif os.name == 'posix':
-    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
+    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
 else:
-    raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-    sys.exit(1)
+    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
+    #sys.exit(1)
 
 ################################################################################################
 ###############  Class Config for storing the cofiguratio in a Borg ############################
@@ -48,8 +48,14 @@ class Config:
     """this class is a Borg : always returns the same values regardless to the instance of the object"""
     __shared_state = {}
     def __init__(self):
+        """
+        This is  a Borg, so the constructor is more or less empty
+        """
         self.__dict__ = self.__shared_state
     def default(self):
+        """
+        a kind of renamed constructor .... initializing default values
+        """
         self.ScreenSize = 500
         self.NbrPerPage = 20
         self.PagePrefix = "page"

@@ -29,49 +29,49 @@ General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 
-import os, sys, string, shutil, time, re, gc, distutils.sysconfig
+import os, sys, shutil, time, re, gc, distutils.sysconfig
 
 try:
-	import Image, ImageStat, ImageChops, ImageFile
+    import Image, ImageStat, ImageChops, ImageFile
 except:
-	raise "Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/"
+    raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 try:
-	import pygtk ; pygtk.require('2.0')
-	import gtk, gtk.glade
-except:
-		raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
+    import pygtk ; pygtk.require('2.0')
+    import gtk
+    import gtk.glade as GTKglade
+except ImportError:
+    raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 #Variables globales qui sont des CONSTANTES !
 gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP_BILINEAR, gtk.gdk.INTERP_HYPER]
-#gtk.gdk.INTERP_NEAREST	Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
-#gtk.gdk.INTERP_TILES	This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
-#gtk.gdk.INTERP_BILINEAR	Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
-#gtk.gdk.INTERP_HYPER	This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
+#gtk.gdk.INTERP_NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
+#gtk.gdk.INTERP_TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
+#gtk.gdk.INTERP_BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
+#gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
 
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-	exiftran = os.path.join(installdir, "exiftran.exe ")
-	gimpexe = "gimp-remote "
-	ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+    exiftran = os.path.join(installdir, "exiftran.exe ")
+    gimpexe = "gimp-remote "
+    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
 elif os.name == 'posix':
-	MaxJPEGMem = 100000 # OK up to 10 Mpix
-	exiftran = "JPEGMEM=%i %s " % (MaxJPEGMem, os.path.join(installdir, "exiftran "))
-	gimpexe = "gimp-remote "
-	ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
+    MaxJPEGMem = 100000 # OK up to 10 Mpix
+    exiftran = "JPEGMEM=%i %s " % (MaxJPEGMem, os.path.join(installdir, "exiftran "))
+    gimpexe = "gimp-remote "
+    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
 else:
-	raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-	sys.exit(1)
+    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
 
-#sys.path.append(installdir)	
+#sys.path.append(installdir)    
 unifiedglade = os.path.join(installdir, "selector.glade")
 from signals import Signal
 from config import Config
 config = Config()
 config.load(ConfFile)
 if config.ImageCache > 1000:
-	import imagecache
-	imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
+    import imagecache
+    imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
 else:
     imageCache = None
 import pyexiv2
@@ -79,519 +79,522 @@ import pyexiv2
 
 
 #class Model:
-#	""" Implémentation de l'applicatif
-#	"""
-#	def __init__(self, label):
-#		"""
-#		"""
-#		self.__label = label
-#		self.startSignal = Signal()
-#		self.refreshSignal = Signal()
-#		
-#	def start(self):
-#		""" Lance les calculs
-#		"""
-#		self.startSignal.emit(self.__label, NBVALUES)
-#		for i in xrange(NBVALUES):
-#			time.sleep(0.5)
-#			
-#			# On lève le signal de rafraichissement des vues éventuelles
-#			# Note qu'ici on ne sait absolument pas si quelque chose s'affiche ou non
-#			# ni de quelle façon c'est affiché.
-#			self.refreshSignal.emit(i)
+#    """ Implémentation de l'applicatif
+#    """
+#    def __init__(self, label):
+#        """
+#        """
+#        self.__label = label
+#        self.startSignal = Signal()
+#        self.refreshSignal = Signal()
+#        
+#    def start(self):
+#        """ Lance les calculs
+#        """
+#        self.startSignal.emit(self.__label, NBVALUES)
+#        for i in xrange(NBVALUES):
+#            time.sleep(0.5)
+#            
+#            # On lève le signal de rafraichissement des vues éventuelles
+#            # Note qu'ici on ne sait absolument pas si quelque chose s'affiche ou non
+#            # ni de quelle façon c'est affiché.
+#            self.refreshSignal.emit(i)
 
 
 
 class ModelProcessSelected:
-	"""Implemantation MVC de la procedure ProcessSelected"""
-	def __init__(self):
-		"""
-		"""
-		self.__label = "Un moment..."
-		self.startSignal = Signal()
-		self.refreshSignal = Signal()
-		self.finishSignal = Signal()
-		self.NbrJobsSignal = Signal()
-	def start(self, List):
-		""" Lance les calculs
-		"""
+    """Implemantation MVC de la procedure ProcessSelected"""
+    def __init__(self):
+        """
+        """
+        self.__label = "Un moment..."
+        self.startSignal = Signal()
+        self.refreshSignal = Signal()
+        self.finishSignal = Signal()
+        self.NbrJobsSignal = Signal()
+    def start(self, List):
+        """ Lance les calculs
+        """
 
-		def SplitIntoPages(pathday, GlobalCount):
-			"""Split a directory (pathday) into pages of 20 images"""
-			files = []
-			for  i in os.listdir(pathday):
-				if os.path.splitext(i)[1] in config.Extensions:files.append(i)
-			files.sort()
-			if  len(files) > config.NbrPerPage:
-				pages = 1 + (len(files) - 1) / config.NbrPerPage
-				for i in range(1, pages + 1):
-					folder = os.path.join(pathday, config.PagePrefix + str(i))
-					if not os.path.isdir(folder): mkdir(folder)
-				for j in range(len(files)):
-					i = 1 + (j) / config.NbrPerPage
-					filename = os.path.join(pathday, config.PagePrefix + str(i), files[j])
-					self.refreshSignal.emit(GlobalCount, files[j])
-					GlobalCount += 1
-					shutil.move(os.path.join(pathday, files[j]), filename)
-					ScaleImage(filename, filigrane)
-			else:
-				for j in files:
-					self.refreshSignal.emit(GlobalCount, j)
-					GlobalCount += 1
-					ScaleImage(os.path.join(pathday, j), filigrane)
-			return GlobalCount
-		def ArrangeOneFile(dirname, filename):
-				try:
-					timetuple = time.strptime(filename[:19], "%Y-%m-%d_%Hh%Mm%S")
-					suffix = filename[19:]
-				except:
-					return
-				daydir = os.path.join(SelectedDir, time.strftime("%Y-%m-%d", timetuple))
-				if not os.path.isdir(daydir):
-					os.mkdir(daydir)
-				shutil.move(os.path.join(dirname, filename), os.path.join(daydir, time.strftime("%Hh%Mm%S", timetuple) + suffix))
+        def SplitIntoPages(pathday, GlobalCount):
+            """Split a directory (pathday) into pages of 20 images"""
+            files = []
+            for  i in os.listdir(pathday):
+                if os.path.splitext(i)[1] in config.Extensions:files.append(i)
+            files.sort()
+            if  len(files) > config.NbrPerPage:
+                pages = 1 + (len(files) - 1) / config.NbrPerPage
+                for i in range(1, pages + 1):
+                    folder = os.path.join(pathday, config.PagePrefix + str(i))
+                    if not os.path.isdir(folder): mkdir(folder)
+                for j in range(len(files)):
+                    i = 1 + (j) / config.NbrPerPage
+                    filename = os.path.join(pathday, config.PagePrefix + str(i), files[j])
+                    self.refreshSignal.emit(GlobalCount, files[j])
+                    GlobalCount += 1
+                    shutil.move(os.path.join(pathday, files[j]), filename)
+                    ScaleImage(filename, filigrane)
+            else:
+                for j in files:
+                    self.refreshSignal.emit(GlobalCount, j)
+                    GlobalCount += 1
+                    ScaleImage(os.path.join(pathday, j), filigrane)
+            return GlobalCount
+        def ArrangeOneFile(dirname, filename):
+            try:
+                timetuple = time.strptime(filename[:19], "%Y-%m-%d_%Hh%Mm%S")
+                suffix = filename[19:]
+            except ValueError:
+                try:
+                    timetuple = time.strptime(filename[:11], "%Y-%m-%d_")
+                    suffix = filename[11:]
+                except ValueError:
+                    print("Unable to handle such file: %s" % filename)
+                    return
+            daydir = os.path.join(SelectedDir, time.strftime("%Y-%m-%d", timetuple))
+            if not os.path.isdir(daydir):
+                os.mkdir(daydir)
+            shutil.move(os.path.join(dirname, filename), os.path.join(daydir, time.strftime("%Hh%Mm%S", timetuple) + suffix))
 
+        self.startSignal.emit(self.__label, max(1, len(List)))
+        if config.Filigrane:
+            filigrane = signature(config.FiligraneSource)
+        else:
+            filigrane = None
 
-		self.startSignal.emit(self.__label, max(1, len(List)))
-		if config.Filigrane:
-			filigrane = signature(config.FiligraneSource)
-		else:
-			filigrane = None
-
-		SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
-		self.refreshSignal.emit(-1, "copie des fichiers existants")
-		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        self.refreshSignal.emit(-1, "copie des fichiers existants")
+        if not os.path.isdir(SelectedDir):     mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
-		AlsoProcess = 0
-		for day in os.listdir(SelectedDir):
+        AlsoProcess = 0
+        for day in os.listdir(SelectedDir):
 #if SingleDir : revert to a foldered structure
-			DayOrFile = os.path.join(SelectedDir, day)
-			if os.path.isfile(DayOrFile):
-				ArrangeOneFile(SelectedDir, day)
-				AlsoProcess += 1
+            DayOrFile = os.path.join(SelectedDir, day)
+            if os.path.isfile(DayOrFile):
+                ArrangeOneFile(SelectedDir, day)
+                AlsoProcess += 1
 #end SingleDir normalization
-			elif os.path.isdir(DayOrFile):
-				if day in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
-					recursive_delete(DayOrFile)
-				elif day.find(config.PagePrefix) == 0: #subpages in SIngleDir mode that need to be flatten
-					for File in os.listdir(DayOrFile):
-						if 	os.path.isfile(os.path.join(DayOrFile, File)):
-							ArrangeOneFile(DayOrFile, File)
-							AlsoProcess += 1
-#						elif os.path.isdir(os.path.join(DayOrFile,File)) and File in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
-#							recursive_delete(os.path.join(DayOrFile,File))
-					recursive_delete(DayOrFile)
-				else:
-					for File in os.listdir(DayOrFile):
-						if File.find(config.PagePrefix) == 0:
-							if os.path.isdir(os.path.join(SelectedDir, day, File)):
-								for ImageFile in os.listdir(os.path.join(SelectedDir, day, File)):
-									src = os.path.join(SelectedDir, day, File, ImageFile)
-									dst = os.path.join(SelectedDir, day, ImageFile)
-									if os.path.isfile(src) and not os.path.exists(dst):
-										shutil.move(src, dst)
-										AlsoProcess += 1
-									if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]):
-										shutil.rmtree(src)
-						else:
-							if os.path.splitext(File)[1] in config.Extensions:
-								AlsoProcess += 1
+            elif os.path.isdir(DayOrFile):
+                if day in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
+                    recursive_delete(DayOrFile)
+                elif day.find(config.PagePrefix) == 0: #subpages in SIngleDir mode that need to be flatten
+                    for File in os.listdir(DayOrFile):
+                        if     os.path.isfile(os.path.join(DayOrFile, File)):
+                            ArrangeOneFile(DayOrFile, File)
+                            AlsoProcess += 1
+#                        elif os.path.isdir(os.path.join(DayOrFile,File)) and File in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
+#                            recursive_delete(os.path.join(DayOrFile,File))
+                    recursive_delete(DayOrFile)
+                else:
+                    for File in os.listdir(DayOrFile):
+                        if File.find(config.PagePrefix) == 0:
+                            if os.path.isdir(os.path.join(SelectedDir, day, File)):
+                                for strImageFile in os.listdir(os.path.join(SelectedDir, day, File)):
+                                    src = os.path.join(SelectedDir, day, File, strImageFile)
+                                    dst = os.path.join(SelectedDir, day, strImageFile)
+                                    if os.path.isfile(src) and not os.path.exists(dst):
+                                        shutil.move(src, dst)
+                                        AlsoProcess += 1
+                                    if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]):
+                                        shutil.rmtree(src)
+                        else:
+                            if os.path.splitext(File)[1] in config.Extensions:
+                                AlsoProcess += 1
 
-#######then copy the selected files to their folders###########################		
-		for File in List:
-			dest = os.path.join(SelectedDir, File)
-			src = os.path.join(config.DefaultRepository, File)
-			destdir = os.path.dirname(dest)
-			if not os.path.isdir(destdir): makedir(destdir)
-			if not os.path.exists(dest):
-				print "copie de %s " % (File)
-				shutil.copy(src, dest)
-				os.chmod(dest, config.DefaultFileMode)
-				AlsoProcess += 1
-			else :
-				print "%s existe déja" % (dest)
-		if AlsoProcess > 0:self.NbrJobsSignal.emit(AlsoProcess)
+#######then copy the selected files to their folders###########################        
+        for File in List:
+            dest = os.path.join(SelectedDir, File)
+            src = os.path.join(config.DefaultRepository, File)
+            destdir = os.path.dirname(dest)
+            if not os.path.isdir(destdir): makedir(destdir)
+            if not os.path.exists(dest):
+                print "copie de %s " % (File)
+                shutil.copy(src, dest)
+                os.chmod(dest, config.DefaultFileMode)
+                AlsoProcess += 1
+            else :
+                print "%s existe déja" % (dest)
+        if AlsoProcess > 0:self.NbrJobsSignal.emit(AlsoProcess)
 ######copy the comments of the directory to the Selected directory 
-		AlreadyDone = []
-		for File in List:
-			directory = os.path.split(File)[0]
-			if directory in AlreadyDone:
-				continue
-			else:
-				AlreadyDone.append(directory)
-				dst = os.path.join(SelectedDir, directory, config.CommentFile)
-				src = os.path.join(config.DefaultRepository, directory, config.CommentFile)
-				if os.path.isfile(src):
-					shutil.copy(src, dst)
+        AlreadyDone = []
+        for File in List:
+            directory = os.path.split(File)[0]
+            if directory in AlreadyDone:
+                continue
+            else:
+                AlreadyDone.append(directory)
+                dst = os.path.join(SelectedDir, directory, config.CommentFile)
+                src = os.path.join(config.DefaultRepository, directory, config.CommentFile)
+                if os.path.isfile(src):
+                    shutil.copy(src, dst)
 
 ########finaly recreate the structure with pages or make a single page ########################
-		dirs = os.listdir(SelectedDir)
-		dirs.sort()
-#		print "config.ExportSingleDir = "+str(config.ExportSingleDir)
-		if config.ExportSingleDir: #SingleDir
-			#first move all files to the root
-			for day in dirs:
-				daydir = os.path.join(SelectedDir, day)
-				for filename in os.listdir(daydir):
-					try:
-#						print day,filename,day[:10]+"_"+filename[:8]
-						timetuple = time.strptime(day[:10] + "_" + filename[:8], "%Y-%m-%d_%Hh%Mm%S")
-#						print timetuple
-#						suffix1=day[10:]
-						suffix = filename[8:]
-#						print suffix1,suffix2
-#						print suffix
-					except:
-						continue
-					src = os.path.join(daydir, filename)
-					dst = os.path.join(SelectedDir, time.strftime("%Y-%m-%d_%Hh%Mm%S", timetuple) + suffix)
-					shutil.move(src, dst)
-				recursive_delete(daydir)
-			SplitIntoPages(SelectedDir, 0)
-		else: #Multidir
-			GlobalCount = 0
-			for day in dirs:
-				GlobalCount = SplitIntoPages(os.path.join(SelectedDir, day), GlobalCount)
+        dirs = os.listdir(SelectedDir)
+        dirs.sort()
+#        print "config.ExportSingleDir = "+str(config.ExportSingleDir)
+        if config.ExportSingleDir: #SingleDir
+            #first move all files to the root
+            for day in dirs:
+                daydir = os.path.join(SelectedDir, day)
+                for filename in os.listdir(daydir):
+                    try:
+                        timetuple = time.strptime(day[:10] + "_" + filename[:8], "%Y-%m-%d_%Hh%Mm%S")
+                        suffix = filename[8:]
+                    except ValueError:
+                        try:
+                            timetuple = time.strptime(day[:10], "%Y-%m-%d")
+                            suffix = filename
+                        except ValueError:
+                            print ("Unable to handle dir: %s\t file: %s" % (day, filename))
+                            continue
+                    src = os.path.join(daydir, filename)
+                    dst = os.path.join(SelectedDir, time.strftime("%Y-%m-%d_%Hh%Mm%S", timetuple) + suffix)
+                    shutil.move(src, dst)
+                recursive_delete(daydir)
+            SplitIntoPages(SelectedDir, 0)
+        else: #Multidir
+            GlobalCount = 0
+            for day in dirs:
+                GlobalCount = SplitIntoPages(os.path.join(SelectedDir, day), GlobalCount)
 
-		self.finishSignal.emit()
+        self.finishSignal.emit()
 
 
 
 class ModelCopySelected:
-	"""Implemantation MVC de la procedure CopySelected"""
-	def __init__(self):
-		"""
-		"""
-		self.__label = "Un moment..."
-		self.startSignal = Signal()
-		self.refreshSignal = Signal()
-		self.finishSignal = Signal()
-		self.NbrJobsSignal = Signal()
-	def start(self, List):
-		""" Lance les calculs
-		"""
-		self.startSignal.emit(self.__label, max(1, len(List)))
-		if config.Filigrane:
-			filigrane = signature(config.FiligraneSource)
-		else:
-			filigrane = None
+    """Implemantation MVC de la procedure CopySelected"""
+    def __init__(self):
+        """
+        """
+        self.__label = "Un moment..."
+        self.startSignal = Signal()
+        self.refreshSignal = Signal()
+        self.finishSignal = Signal()
+        self.NbrJobsSignal = Signal()
+    def start(self, List):
+        """ Lance les calculs
+        """
+        self.startSignal.emit(self.__label, max(1, len(List)))
+        if config.Filigrane:
+            filigrane = signature(config.FiligraneSource)
+        else:
+            filigrane = None
 
-		SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
-		self.refreshSignal.emit(-1, "copie des fichiers existants")
-		if not os.path.isdir(SelectedDir): 	mkdir(SelectedDir)
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        self.refreshSignal.emit(-1, "copie des fichiers existants")
+        if not os.path.isdir(SelectedDir):     mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
-		for day in os.listdir(SelectedDir):
-			for File in os.listdir(os.path.join(SelectedDir, day)):
-				if File.find(config.PagePrefix) == 0:
-					if os.path.isdir(os.path.join(SelectedDir, day, File)):
-						for ImageFile in os.listdir(os.path.join(SelectedDir, day, File)):
-							src = os.path.join(SelectedDir, day, File, ImageFile)
-							dst = os.path.join(SelectedDir, day, ImageFile)
-							if os.path.isfile(src) and not os.path.exists(dst):
-								shutil.move(src, dst)
-							if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]):
-								shutil.rmtree(src)
+        for day in os.listdir(SelectedDir):
+            for File in os.listdir(os.path.join(SelectedDir, day)):
+                if File.find(config.PagePrefix) == 0:
+                    if os.path.isdir(os.path.join(SelectedDir, day, File)):
+                        for strImageFile in os.listdir(os.path.join(SelectedDir, day, File)):
+                            src = os.path.join(SelectedDir, day, File, strImageFile)
+                            dst = os.path.join(SelectedDir, day, strImageFile)
+                            if os.path.isfile(src) and not os.path.exists(dst):
+                                shutil.move(src, dst)
+                            if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]):
+                                shutil.rmtree(src)
 
-#######then copy the selected files to their folders###########################		
-		GlobalCount = 0
-		for File in List:
-			dest = os.path.join(SelectedDir, File)
-			src = os.path.join(config.DefaultRepository, File)
-			destdir = os.path.dirname(dest)
-			self.refreshSignal.emit(GlobalCount, File)
-			GlobalCount += 1
-			if not os.path.isdir(destdir): makedir(destdir)
-			if not os.path.exists(dest):
-				if filigrane:
-					Img = Image.open(src)
-					filigrane.substract(Img).save(dest, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
-				else:
-					shutil.copy(src, dest)
-				os.chmod(dest, config.DefaultFileMode)
-			else :
-				print "%s existe déja" % (dest)
+#######then copy the selected files to their folders###########################        
+        GlobalCount = 0
+        for File in List:
+            dest = os.path.join(SelectedDir, File)
+            src = os.path.join(config.DefaultRepository, File)
+            destdir = os.path.dirname(dest)
+            self.refreshSignal.emit(GlobalCount, File)
+            GlobalCount += 1
+            if not os.path.isdir(destdir): makedir(destdir)
+            if not os.path.exists(dest):
+                if filigrane:
+                    Img = Image.open(src)
+                    filigrane.substract(Img).save(dest, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
+                else:
+                    shutil.copy(src, dest)
+                os.chmod(dest, config.DefaultFileMode)
+            else :
+                print "%s existe déja" % (dest)
 ######copy the comments of the directory to the Selected directory 
-		AlreadyDone = []
-		for File in List:
-			directory = os.path.split(File)[0]
-			if directory in AlreadyDone:
-				continue
-			else:
-				AlreadyDone.append(directory)
-				dst = os.path.join(SelectedDir, directory, config.CommentFile)
-				src = os.path.join(config.DefaultRepository, directory, config.CommentFile)
-				if os.path.isfile(src):
-					shutil.copy(src, dst)
-		self.finishSignal.emit()
+        AlreadyDone = []
+        for File in List:
+            directory = os.path.split(File)[0]
+            if directory in AlreadyDone:
+                continue
+            else:
+                AlreadyDone.append(directory)
+                dst = os.path.join(SelectedDir, directory, config.CommentFile)
+                src = os.path.join(config.DefaultRepository, directory, config.CommentFile)
+                if os.path.isfile(src):
+                    shutil.copy(src, dst)
+        self.finishSignal.emit()
 
 
 
 
 class ModelRangeTout:
-	"""Implemantation MVC de la procedure RangeTout
-	moves all the JPEG files to a directory named from 
-	their day and with the name according to the time"""
+    """Implemantation MVC de la procedure RangeTout
+    moves all the JPEG files to a directory named from 
+    their day and with the name according to the time"""
 
-	def __init__(self):
-		"""
-		"""
-		self.__label = "Initial renaming of new images .... "
-		self.startSignal = Signal()
-		self.refreshSignal = Signal()
-		self.finishSignal = Signal()
-		self.NbrJobsSignal = Signal()
+    def __init__(self):
+        """
+        """
+        self.__label = "Initial renaming of new images .... "
+        self.startSignal = Signal()
+        self.refreshSignal = Signal()
+        self.finishSignal = Signal()
+        self.NbrJobsSignal = Signal()
 
 
-	def start(self, RootDir):
-		""" Lance les calculs
-		"""
-		config.DefaultRepository = RootDir
-		AllJpegs = FindFile(RootDir)
-		AllFilesToProcess = []
-		AllreadyDone = []
-		NewFiles = []
-		uid = os.getuid()
-		gid = os.getgid()
-		for i in AllJpegs:
-			if i.find(config.TrashDirectory) == 0: continue
-			if i.find(config.SelectedDirectory) == 0: continue
-			try:
-				a = int(i[:4])
-				m = int(i[5:7])
-				j = int(i[8:10])
-				if (a >= 0000) and (m <= 12) and (j <= 31) and (i[4] in ["-", "_", "."]) and (i[7] in ["-", "_"]):
-					AllreadyDone.append(i)
-				else:
-					AllFilesToProcess.append(i)
-			except :
-				AllFilesToProcess.append(i)
-		AllFilesToProcess.sort()
-		NumFiles = len(AllFilesToProcess)
-		self.startSignal.emit(self.__label, NumFiles)
-		for h in range(NumFiles):
-			i = AllFilesToProcess[h]
-			self.refreshSignal.emit(h, i)
-			data = photo(i).exif()
-			try:
-				datei, heurei = data["Heure"].split()
-				date = re.sub(":", "-", datei)
-				heurej = re.sub(":", "h", heurei, 1)
-				model = data["Modele"].split(",")[-1]
-				heure = latin1_to_ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
-			except:
-				date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(RootDir, i))))
-				heure = latin1_to_ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(RootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
-			if not (os.path.isdir(os.path.join(RootDir, date))) : mkdir(os.path.join(RootDir, date))
-			imagefile = os.path.join(RootDir, date, heure)
-			ToProcess = os.path.join(date, heure)
-			if os.path.isfile(imagefile):
-				print "Problème ... %s existe déja " % i
-				s = 0
-				for j in os.listdir(os.path.join(RootDir, date)):
-					if j.find(heure[:-4]) == 0:s += 1
-				ToProcess = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
-				imagefile = os.path.join(RootDir, ToProcess)
-			shutil.move(os.path.join(RootDir, i), imagefile)
-			try:
-				os.chown(imagefile, uid, gid)
-				os.chmod(imagefile, config.DefaultFileMode)
-			except:
-				print "error in chown or chmod of %s" % imagefile
-			if config.AutoRotate and data["Orientation"] != "1":
-				photo(imagefile).autorotate()
+    def start(self, RootDir):
+        """ Lance les calculs
+        """
+        config.DefaultRepository = RootDir
+        AllJpegs = FindFile(RootDir)
+        AllFilesToProcess = []
+        AllreadyDone = []
+        NewFiles = []
+        uid = os.getuid()
+        gid = os.getgid()
+        for i in AllJpegs:
+            if i.find(config.TrashDirectory) == 0: continue
+            if i.find(config.SelectedDirectory) == 0: continue
+            try:
+                a = int(i[:4])
+                m = int(i[5:7])
+                j = int(i[8:10])
+                if (a >= 0000) and (m <= 12) and (j <= 31) and (i[4] in ["-", "_", "."]) and (i[7] in ["-", "_"]):
+                    AllreadyDone.append(i)
+                else:
+                    AllFilesToProcess.append(i)
+            except ValueError:
+                AllFilesToProcess.append(i)
+        AllFilesToProcess.sort()
+        NumFiles = len(AllFilesToProcess)
+        self.startSignal.emit(self.__label, NumFiles)
+        for h in range(NumFiles):
+            i = AllFilesToProcess[h]
+            self.refreshSignal.emit(h, i)
+            data = photo(i).exif()
+            try:
+                datei, heurei = data["Heure"].split()
+                date = re.sub(":", "-", datei)
+                heurej = re.sub(":", "h", heurei, 1)
+                model = data["Modele"].split(",")[-1]
+                heure = latin1_to_ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
+            except ValueError:
+                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(RootDir, i))))
+                heure = latin1_to_ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(RootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
+            if not (os.path.isdir(os.path.join(RootDir, date))) : mkdir(os.path.join(RootDir, date))
+            strImageFile = os.path.join(RootDir, date, heure)
+            ToProcess = os.path.join(date, heure)
+            if os.path.isfile(strImageFile):
+                print "Problème ... %s existe déja " % i
+                s = 0
+                for j in os.listdir(os.path.join(RootDir, date)):
+                    if j.find(heure[:-4]) == 0:s += 1
+                ToProcess = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
+                strImageFile = os.path.join(RootDir, ToProcess)
+            shutil.move(os.path.join(RootDir, i), strImageFile)
+            try:
+                os.chown(strImageFile, uid, gid)
+                os.chmod(strImageFile, config.DefaultFileMode)
+            except OSError:
+                print "error in chown or chmod of %s" % strImageFile
+            if config.AutoRotate and data["Orientation"] != "1":
+                photo(strImageFile).autorotate()
 #Set the new images in cache for further display 
-                        if imageCache is not None:
-                                if config.ImageWidth and config.ImageHeight:
-                                    if imageCache.size + 3 * config.ImageWidth * config.ImageHeight < imageCache.maxSize:
-                                        print "put in cache file " + ToProcess
-                                        pixbuf = gtk.gdk.pixbuf_new_from_file(imagefile)
-                                        Xsize = pixbuf.get_width()
-                                        Ysize = pixbuf.get_height()
-                                        R = min(float(config.ImageWidth) / float(Xsize), float(config.ImageHeight) / float(Ysize))
-                                        if R < 1:
-                                            nx = int(R * Xsize)
-                                            ny = int(R * Ysize)
-                                            scaled_buf = pixbuf.scale_simple(config.ImageWidth, config.ImageHeight, gtkInterpolation[config.Interpolation])
-                                        else:
-                                            nx = Xsize
-                                            ny = Ysize
-                                            scaled_buf = pixbuf
-                                        imageCache[ ToProcess ] = scaled_buf
+                if imageCache is not None:
+                    if config.ImageWidth and config.ImageHeight:
+                        if imageCache.size + 3 * config.ImageWidth * config.ImageHeight < imageCache.maxSize:
+                            print "put in cache file " + ToProcess
+                            pixbuf = gtk.gdk.pixbuf_new_from_file(strImageFile)
+                            Xsize = pixbuf.get_width()
+                            Ysize = pixbuf.get_height()
+                            R = min(float(config.ImageWidth) / float(Xsize), float(config.ImageHeight) / float(Ysize))
+                            if R < 1:
+                                scaled_buf = pixbuf.scale_simple(config.ImageWidth, config.ImageHeight, gtkInterpolation[config.Interpolation])
+                            else:
+                                scaled_buf = pixbuf
+                            imageCache[ ToProcess ] = scaled_buf
 ##################################################
-			AllreadyDone.append(ToProcess)
-			NewFiles.append(ToProcess)
-		AllreadyDone.sort()
-		self.finishSignal.emit()
+            AllreadyDone.append(ToProcess)
+            NewFiles.append(ToProcess)
+        AllreadyDone.sort()
+        self.finishSignal.emit()
 
-		if len(NewFiles) > 0:
-			FirstImage = min(NewFiles)
-			return AllreadyDone, AllreadyDone.index(FirstImage)
-		else:
-			return AllreadyDone, 0
-
-
-
-
+        if len(NewFiles) > 0:
+            FirstImage = min(NewFiles)
+            return AllreadyDone, AllreadyDone.index(FirstImage)
+        else:
+            return AllreadyDone, 0
 
 class Controler:
-	""" Implémentation du contrôleur de la vue utilisant la console"""
-	def __init__(self, model, view):
-#		self.__model = model # Ne sert pas ici, car on ne fait que des actions modèle -> vue
-		self.__view = view
+    """ Implémentation du contrôleur de la vue utilisant la console"""
+    def __init__(self, model, view):
+#        self.__model = model # Ne sert pas ici, car on ne fait que des actions modèle -> vue
+        self.__view = view
 
-		# Connection des signaux
-		model.startSignal.connect(self.__startCallback)
-		model.refreshSignal.connect(self.__refreshCallback)
-		model.finishSignal.connect(self.__stopCallback)
-		model.NbrJobsSignal.connect(self.__NBJCallback)
-	def __startCallback(self, label, nbVal):
-		""" Callback pour le signal de début de progressbar."""
-		self.__view.creatProgressBar(label, nbVal)
-	def __refreshCallback(self, i, filename):
-		""" Mise à jour de la progressbar."""
-		self.__view.updateProgressBar(i, filename)
-	def __stopCallback(self):
-		""" Callback pour le signal de fin de splashscreen."""
-		self.__view.finish()
-	def __NBJCallback(self, NbrJobs):
-		""" Callback pour redefinir le nombre de job totaux."""
-		self.__view.ProgressBarMax(NbrJobs)
+        # Connection des signaux
+        model.startSignal.connect(self.__startCallback)
+        model.refreshSignal.connect(self.__refreshCallback)
+        model.finishSignal.connect(self.__stopCallback)
+        model.NbrJobsSignal.connect(self.__NBJCallback)
+    def __startCallback(self, label, nbVal):
+        """ Callback pour le signal de début de progressbar."""
+        self.__view.creatProgressBar(label, nbVal)
+    def __refreshCallback(self, i, filename):
+        """ Mise à jour de la progressbar."""
+        self.__view.updateProgressBar(i, filename)
+    def __stopCallback(self):
+        """ Callback pour le signal de fin de splashscreen."""
+        self.__view.finish()
+    def __NBJCallback(self, NbrJobs):
+        """ Callback pour redefinir le nombre de job totaux."""
+        self.__view.ProgressBarMax(NbrJobs)
 
 
 
 class ControlerX:
-	""" Implémentation du contrôleur. C'est lui qui lie les modèle et la(les) vue(s)."""
-	def __init__(self, model, viewx):
-#		self.__model = model # Ne sert pas ici, car on ne fait que des actions modèle -> vue
-		self.__viewx = viewx
-		# Connection des signaux
-		model.startSignal.connect(self.__startCallback)
-		model.refreshSignal.connect(self.__refreshCallback)
-		model.finishSignal.connect(self.__stopCallback)
-		model.NbrJobsSignal.connect(self.__NBJCallback)
-	def __startCallback(self, label, nbVal):
-		""" Callback pour le signal de début de progressbar."""
-		self.__viewx.creatProgressBar(label, nbVal)
-	def __refreshCallback(self, i, filename):
-		""" Mise à jour de la progressbar.	"""
-		self.__viewx.updateProgressBar(i, filename)
-	def __stopCallback(self):
-		""" ferme la fenetre. Callback pour le signal de fin de splashscreen."""
-		self.__viewx.finish()
-	def __NBJCallback(self, NbrJobs):
-		""" Callback pour redefinir le nombre de job totaux."""
-		self.__viewx.ProgressBarMax(NbrJobs)
+    """ Implémentation du contrôleur. C'est lui qui lie les modèle et la(les) vue(s)."""
+    def __init__(self, model, viewx):
+#        self.__model = model # Ne sert pas ici, car on ne fait que des actions modèle -> vue
+        self.__viewx = viewx
+        # Connection des signaux
+        model.startSignal.connect(self.__startCallback)
+        model.refreshSignal.connect(self.__refreshCallback)
+        model.finishSignal.connect(self.__stopCallback)
+        model.NbrJobsSignal.connect(self.__NBJCallback)
+    def __startCallback(self, label, nbVal):
+        """ Callback pour le signal de début de progressbar."""
+        self.__viewx.creatProgressBar(label, nbVal)
+    def __refreshCallback(self, i, filename):
+        """ Mise à jour de la progressbar.    """
+        self.__viewx.updateProgressBar(i, filename)
+    def __stopCallback(self):
+        """ ferme la fenetre. Callback pour le signal de fin de splashscreen."""
+        self.__viewx.finish()
+    def __NBJCallback(self, NbrJobs):
+        """ Callback pour redefinir le nombre de job totaux."""
+        self.__viewx.ProgressBarMax(NbrJobs)
 
 
 
 class View:
-	""" Implémentation de la vue.
-	Utilisation de la console.
-	"""
-	def __init__(self):
-		""" On initialise la vue."""
-		self.__nbVal = None
-	def creatProgressBar(self, label, nbVal):
-		""" Création de la progressbar.		"""
-		self.__nbVal = nbVal
-		print label
+    """ Implémentation de la vue.
+    Utilisation de la console.
+    """
+    def __init__(self):
+        """ On initialise la vue."""
+        self.__nbVal = None
+    def creatProgressBar(self, label, nbVal):
+        """ Création de la progressbar.        """
+        self.__nbVal = nbVal
+        print label
 
-	def ProgressBarMax(self, nbVal):
-		"""re-definit le nombre maximum de la progress-bar"""
-		self.__nbVal = nbVal
-#		print "Modification du maximum : %i"%self.__nbVal	
+    def ProgressBarMax(self, nbVal):
+        """re-definit le nombre maximum de la progress-bar"""
+        self.__nbVal = nbVal
+#        print "Modification du maximum : %i"%self.__nbVal    
 
-	def updateProgressBar(self, h, filename):
-		""" Mise à jour de la progressbar
-		"""
-		print "%5.1f %% processing  ... %s" % (100.0 * (h + 1) / self.__nbVal, filename)
-	def finish(self):
-		"""nothin in text mode"""
-		pass
+    def updateProgressBar(self, h, filename):
+        """ Mise à jour de la progressbar
+        """
+        print "%5.1f %% processing  ... %s" % (100.0 * (h + 1) / self.__nbVal, filename)
+    def finish(self):
+        """nothin in text mode"""
+        pass
 
 class ViewX:
-	""" Implémentation de la vue comme un splashscren
-	"""
-	def __init__(self):
-		""" On initialise la vue.
-		Ici, on ne fait rien, car la progressbar sera créée au moment
-		où on en aura besoin. Dans un cas réel, on initialise les widgets
-		de l'interface graphique
-		"""
-		self.__nbVal = None
-	def creatProgressBar(self, label, nbVal):
-		""" Création de la progressbar.
-		"""
-		self.xml = gtk.glade.XML(unifiedglade, root="splash")
-		self.xml.get_widget("image").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "Splash.png")))
-		self.pb = self.xml.get_widget("progress")
-		self.xml.get_widget("splash").set_title(label)
-		self.xml.get_widget("splash").show()
-		while gtk.events_pending():gtk.main_iteration()
-		self.__nbVal = nbVal
-	def ProgressBarMax(self, nbVal):
-		"""re-definit le nombre maximum de la progress-bar"""
-		self.__nbVal = nbVal
+    """ 
+    Implementation of the view as a splashscren
+    """
+    def __init__(self):
+        """ 
+        Initialization of the view in the constructor 
 
-	def updateProgressBar(self, h, filename):
-		""" Mise à jour de la progressbar
-		Dans le cas d'un toolkit, c'est ici qu'il faudra appeler le traitement
-		des évènements.
-		set the progress-bar to the given value with the given name
-		@param h: current number of the file
-		@type val: integer or float
-		@param name: name of the current element
-		@type name: string 
-		@return: None"""
-		if h < self.__nbVal:
-			self.pb.set_fraction(float(h + 1) / self.__nbVal)
-		else:
-			self.pb.set_fraction(1.0)
-		self.pb.set_text(filename)
-		while gtk.events_pending():gtk.main_iteration()
-	def finish(self):
-		"""destroys the interface of the splash screen"""
-		self.xml.get_widget("splash").destroy()
-		while gtk.events_pending():gtk.main_iteration()
-		del self.xml
-		gc.collect()
+        Ici, on ne fait rien, car la progressbar sera créée au moment
+        où on en aura besoin. Dans un cas réel, on initialise les widgets
+        de l'interface graphique
+        """
+        self.__nbVal = None
+        self.xml = None
+        self.pb = None
+
+    def creatProgressBar(self, label, nbVal):
+        """ 
+        Creation of a progress bar.
+        """
+        self.xml = GTKglade.XML(unifiedglade, root="splash")
+        self.xml.get_widget("image").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "Splash.png")))
+        self.pb = self.xml.get_widget("progress")
+        self.xml.get_widget("splash").set_title(label)
+        self.xml.get_widget("splash").show()
+        while gtk.events_pending():gtk.main_iteration()
+        self.__nbVal = nbVal
+    def ProgressBarMax(self, nbVal):
+        """re-definit le nombre maximum de la progress-bar"""
+        self.__nbVal = nbVal
+
+    def updateProgressBar(self, h, filename):
+        """ Mise à jour de la progressbar
+        Dans le cas d'un toolkit, c'est ici qu'il faudra appeler le traitement
+        des évènements.
+        set the progress-bar to the given value with the given name
+        @param h: current number of the file
+        @type val: integer or float
+        @param name: name of the current element
+        @type name: string 
+        @return: None"""
+        if h < self.__nbVal:
+            self.pb.set_fraction(float(h + 1) / self.__nbVal)
+        else:
+            self.pb.set_fraction(1.0)
+        self.pb.set_text(filename)
+        while gtk.events_pending():gtk.main_iteration()
+    def finish(self):
+        """destroys the interface of the splash screen"""
+        self.xml.get_widget("splash").destroy()
+        while gtk.events_pending():gtk.main_iteration()
+        del self.xml
+        gc.collect()
 
 
 def RangeTout(repository):
-	"""moves all the JPEG files to a directory named from their day and with the 
-	name according to the time
-	This is a MVC implementation"""
-	model = ModelRangeTout()
-	view = View()
-	ctrl = Controler(model, view)
-	viewx = ViewX()
-	ctrlx = ControlerX(model, viewx)
-	return model.start(repository)
+    """moves all the JPEG files to a directory named from their day and with the 
+    name according to the time
+    This is a MVC implementation"""
+    model = ModelRangeTout()
+    view = View()
+    Controler(model, view)
+    viewx = ViewX()
+    ControlerX(model, viewx)
+    return model.start(repository)
 
 def ProcessSelected(SelectedFiles):
-	"""This procedure uses the MVC implementation of processSelected
-	It makes a copy of all selected photos and scales them
-	copy all the selected files to "selected" subdirectory, 20 per page
-	"""
-	print "execution %s" % SelectedFiles
-	model = ModelProcessSelected()
-	view = View()
-	ctrl = Controler(model, view)
-	viewx = ViewX()
-	ctrlx = ControlerX(model, viewx)
-	model.start(SelectedFiles)
+    """This procedure uses the MVC implementation of processSelected
+    It makes a copy of all selected photos and scales them
+    copy all the selected files to "selected" subdirectory, 20 per page
+    """
+    print "execution %s" % SelectedFiles
+    model = ModelProcessSelected()
+    view = View()
+    Controler(model, view)
+    viewx = ViewX()
+    ControlerX(model, viewx)
+    model.start(SelectedFiles)
 
 def CopySelected(SelectedFiles):
-	"""This procedure makes a copy of all selected photos and scales them
-	copy all the selected files to "selected" subdirectory
-	"""
-	print "Copy %s" % SelectedFiles
-	model = ModelCopySelected()
-	view = View()
-	ctrl = Controler(model, view)
-	viewx = ViewX()
-	ctrlx = ControlerX(model, viewx)
-	model.start(SelectedFiles)
+    """This procedure makes a copy of all selected photos and scales them
+    copy all the selected files to "selected" subdirectory
+    """
+    print "Copy %s" % SelectedFiles
+    model = ModelCopySelected()
+    view = View()
+    Controler(model, view)
+    viewx = ViewX()
+    ControlerX(model, viewx)
+    model.start(SelectedFiles)
 
 
 
@@ -607,7 +610,10 @@ class photo:
         self.data = None
         self.x = None
         self.y = None
-        if not os.path.isfile(self.fn): print "Erreur, le fichier %s n'existe pas" % self.fn
+        self.g = None
+        self.f = None
+        if not os.path.isfile(self.fn):
+            print "Erreur, le fichier %s n'existe pas" % self.fn
         self.bImageCache = (imageCache is not None)
 
     def LoadPIL(self):
@@ -644,10 +650,9 @@ class photo:
             print "process file %s exists" % Thumbname
             if ExifExtraction:
                 try:
-                    print "thumbnail embarqué?"
                     image_exif.dumpThumbnailToFile(Thumbname[:-4])
                     extract = True
-                except:
+                except OSError:
                     extract = False
             if not extract:
 #                print "on essaie avec PIL"
@@ -666,39 +671,39 @@ class photo:
         y = self.y
         if angle == 90:
             if imageCache is not None:
-            	os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
+                os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
                 imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
                 self.x = y
                 self.y = x
             else:
-            	os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
-            	self.x = None
-            	self.y = None
+                os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
+                self.x = None
+                self.y = None
         elif angle == 270:
             if imageCache is not None:
-            	os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
+                os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
                 imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
                 self.x = y
                 self.y = x
             else:
-            	os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
-            	self.x = None
-            	self.y = None
+                os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
+                self.x = None
+                self.y = None
         elif angle == 180:
             if imageCache is not None:
-            	os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
+                os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
                 imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
                 self.x = x
                 self.y = y
             else:
-            	os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
-            	self.x = None
-            	self.y = None
+                os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
+                self.x = None
+                self.y = None
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
 
     def RemoveFromCache(self):
-    	"""remove the curent image from the Cache .... for various reasons"""
+        """remove the curent image from the Cache .... for various reasons"""
         if imageCache is not None:
             if self.filename in imageCache.ordered:
                 pixBuf = imageCache.imageDict.pop(self.filename)
@@ -711,7 +716,7 @@ class photo:
         self.RemoveFromCache()
         Trashdir = os.path.join(config.DefaultRepository, config.TrashDirectory)
         td = os.path.dirname(os.path.join(Trashdir, self.filename))
-        tf = os.path.join(Trashdir, self.filename)
+        #tf = os.path.join(Trashdir, self.filename)
         if not os.path.isdir(td): makedir(td)
         shutil.move(self.fn, os.path.join(Trashdir, self.filename))
 
@@ -770,7 +775,7 @@ class photo:
             nx = self.x
             ny = self.y
         if imageCache is not None:
-           if self.filename in imageCache.ordered:
+            if self.filename in imageCache.ordered:
                 data = imageCache[ self.filename ]
                 if (data.get_width() == nx) and (data.get_height() == ny):
                     scaled_buf = data
@@ -808,144 +813,147 @@ class photo:
         """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...
         Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, en particulier A. Fayolles et F. Mantegazza
         avril 2006
-        necessite numarray et PIL."""
+        necessite numpy et PIL."""
         try:
-            import numarray
+            import numpy
         except:
-            raise "This filter needs the numarray library available on http://www.stsci.edu/resources/software_hardware/numarray"
+            raise ImportError("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
         self.LoadPIL()
         x, y = self.f.size
         ImageFile.MAXBLOCK = x * y
-        img_array = numarray.fromstring(self.f.tostring(), type="UInt8").astype("UInt16")
-        img_array.shape = (x, y, 3)
+        img_array = numpy.fromstring(self.f.tostring(), dtype="UInt8").astype("UInt16")
+        img_array.shape = (y, x, 3)
         red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
-        desat_array = (numarray.minimum(numarray.minimum(red, green), blue) + numarray.maximum(numarray.maximum(red, green), blue)) / 2
+        desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2
         inv_desat = 255 - desat_array
-        k = Image.fromstring("L", (x, y), inv_desat.astype("UInt8").tostring()).convert("RGB")
+        k = Image.fromarray(inv_desat, "L").convert("RGB")
         S = ImageChops.screen(self.f, k)
         M = ImageChops.multiply(self.f, k)
         F = ImageChops.add(ImageChops.multiply(self.f, S), ImageChops.multiply(ImageChops.invert(self.f), M))
         F.save(os.path.join(config.DefaultRepository, outfile), quality=90, progressive=True, Optimize=True)
         os.chmod(os.path.join(config.DefaultRepository, outfile), config.DefaultFileMode)
 
-########################################################		
+########################################################        
 # # # # # # fin de la classe photo # # # # # # # # # # #
 ########################################################
 
 class signature:
-	def __init__(self, filename):
-		"""this filter allows add a signature to an image"""
-		self.sig = Image.open(filename)
-		self.sig.convert("RGB")
-		(self.xs, self.ys) = self.sig.size
-		self.bigsig = self.sig
-		#The signature file is entented to be white on a black background, this inverts the color if necessary
-		if ImageStat.Stat(self.sig)._getmean() > 127:
-			self.sig = ImageChops.invert(self.sig)
+    def __init__(self, filename):
+        """
+        this filter allows add a signature to an image
+        """
+        self.img = None
+        self.sig = Image.open(filename)
+        self.sig.convert("RGB")
+        (self.xs, self.ys) = self.sig.size
+        self.bigsig = self.sig
+        #The signature file is entented to be white on a black background, this inverts the color if necessary
+        if ImageStat.Stat(self.sig)._getmean() > 127:
+            self.sig = ImageChops.invert(self.sig)
 
-		self.orientation = -1 #this is an impossible value
-		(self.x, self.y) = (self.xs, self.ys)
+        self.orientation = -1 #this is an impossible value
+        (self.x, self.y) = (self.xs, self.ys)
 
-	def mask(self, orientation=5):
-		"""
-		x and y are the size of the initial image
-		the orientation correspond to the position on a clock :
-		0 for the center
-		1 or 2 upper right
-		3 centered in heith right side ...."""
-		if orientation == self.orientation and (self.x, self.y) == self.bigsig.size:
-			#no need to change the mask
-			return
-		self.orientation = orientation
-		self.bigsig = Image.new("RGB", (self.x, self.y), (0, 0, 0))
-		if self.x < self.xs or self.y < self.ys :
-			#the signature is larger than the image
-			return
-		if self.orientation == 0:
-			self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, self.y / 2 - self.ys / 2, self.x / 2 - self.xs / 2 + self.xs, self.y / 2 - self.ys / 2 + self.ys))
-		elif self.orientation in [1, 2]:
-			self.bigsig.paste(self.sig, (self.x - self.xs, 0, self.x, self.ys))
-		elif self.orientation == 3:
-			self.bigsig.paste(self.sig, (self.x - self.xs, self.y / 2 - self.ys / 2, self.x, self.y / 2 - self.ys / 2 + self.ys))
-		elif self.orientation in [ 5, 4]:
-			self.bigsig.paste(self.sig, (self.x - self.xs, self.y - self.ys, self.x, self.y))
-		elif self.orientation == 6:
-			self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, self.y - self.ys, self.x / 2 - self.xs / 2 + self.xs, self.y))
-		elif self.orientation in [7, 8]:
-			self.bigsig.paste(self.sig, (0, self.y - self.ys, self.xs, self.y))
-		elif self.orientation == 9:
-			self.bigsig.paste(self.sig, (0, self.y / 2 - self.ys / 2, self.xs, self.y / 2 - self.ys / 2 + self.ys))
-		elif self.orientation in [10, 11]:
-			self.bigsig.paste(self.sig, (0, 0, self.xs, self.ys))
-		elif self.orientation == 12:
-			self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, 0, self.x / 2 - self.xs / 2 + self.xs, self.ys))
-		return
+    def mask(self, orientation=5):
+        """
+        x and y are the size of the initial image
+        the orientation correspond to the position on a clock :
+        0 for the center
+        1 or 2 upper right
+        3 centered in heith right side ...."""
+        if orientation == self.orientation and (self.x, self.y) == self.bigsig.size:
+            #no need to change the mask
+            return
+        self.orientation = orientation
+        self.bigsig = Image.new("RGB", (self.x, self.y), (0, 0, 0))
+        if self.x < self.xs or self.y < self.ys :
+            #the signature is larger than the image
+            return
+        if self.orientation == 0:
+            self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, self.y / 2 - self.ys / 2, self.x / 2 - self.xs / 2 + self.xs, self.y / 2 - self.ys / 2 + self.ys))
+        elif self.orientation in [1, 2]:
+            self.bigsig.paste(self.sig, (self.x - self.xs, 0, self.x, self.ys))
+        elif self.orientation == 3:
+            self.bigsig.paste(self.sig, (self.x - self.xs, self.y / 2 - self.ys / 2, self.x, self.y / 2 - self.ys / 2 + self.ys))
+        elif self.orientation in [ 5, 4]:
+            self.bigsig.paste(self.sig, (self.x - self.xs, self.y - self.ys, self.x, self.y))
+        elif self.orientation == 6:
+            self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, self.y - self.ys, self.x / 2 - self.xs / 2 + self.xs, self.y))
+        elif self.orientation in [7, 8]:
+            self.bigsig.paste(self.sig, (0, self.y - self.ys, self.xs, self.y))
+        elif self.orientation == 9:
+            self.bigsig.paste(self.sig, (0, self.y / 2 - self.ys / 2, self.xs, self.y / 2 - self.ys / 2 + self.ys))
+        elif self.orientation in [10, 11]:
+            self.bigsig.paste(self.sig, (0, 0, self.xs, self.ys))
+        elif self.orientation == 12:
+            self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, 0, self.x / 2 - self.xs / 2 + self.xs, self.ys))
+        return
 
-	def substract(self, inimage, orientation=5):
-		"""apply a substraction mask on the image"""
-		self.img = inimage
-		self.x, self.y = self.img.size
-		ImageFile.MAXBLOCK = self.x * self.y
-		self.mask(orientation)
-		k = ImageChops.difference(self.img, self.bigsig)
-		return k
+    def substract(self, inimage, orientation=5):
+        """apply a substraction mask on the image"""
+        self.img = inimage
+        self.x, self.y = self.img.size
+        ImageFile.MAXBLOCK = self.x * self.y
+        self.mask(orientation)
+        k = ImageChops.difference(self.img, self.bigsig)
+        return k
 
 
 
 ############################################################################################################
 
 def makedir(filen):
-		"""creates the tree structure for the file"""
-		dire = os.path.dirname(filen)
-		if os.path.isdir(dire):
-				mkdir(filen)
-		else:
-				makedir(dire)
-				mkdir(filen)
+    """creates the tree structure for the file"""
+    dire = os.path.dirname(filen)
+    if os.path.isdir(dire):
+        mkdir(filen)
+    else:
+        makedir(dire)
+        mkdir(filen)
 
 def mkdir(filename):
-	"""create an empty directory with the given rights"""
-#	config=Config()
-	os.mkdir(filename)
-	os.chmod(filename, config.DefaultDirMode)
+    """create an empty directory with the given rights"""
+#    config=Config()
+    os.mkdir(filename)
+    os.chmod(filename, config.DefaultDirMode)
 
 
 def FindFile(RootDir):
-	"""returns a list of the files with the given suffix in the given dir
-	files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
-	"""
-	files = []
-#	config=Config()
-	for i in config.Extensions:
-		files += parser().FindExts(RootDir, i)
-	good = []
-	l = len(RootDir) + 1
-	for i in files: good.append(i.strip()[l:])
-	good.sort()
-	return good
+    """returns a list of the files with the given suffix in the given dir
+    files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
+    """
+    files = []
+#    config=Config()
+    for i in config.Extensions:
+        files += parser().FindExts(RootDir, i)
+    good = []
+    l = len(RootDir) + 1
+    for i in files: good.append(i.strip()[l:])
+    good.sort()
+    return good
 
 
 #######################################################################################
 def ScaleImage(filename, filigrane=None):
-	"""common processing for one image : create a subfolder "scaled" and "thumb" : """
-#	config=Config()
-	rootdir = os.path.dirname(filename)
-	scaledir = os.path.join(rootdir, config.ScaledImages["Suffix"])
-	thumbdir = os.path.join(rootdir, config.Thumbnails["Suffix"])
-	if not os.path.isdir(scaledir) : mkdir(scaledir)
-	if not os.path.isdir(thumbdir) : mkdir(thumbdir)
-	Img = photo(filename)
-	Param = config.ScaledImages.copy()
-	Param.pop("Suffix")
-	Param["Thumbname"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
-	Img.SaveThumb(**Param)
-	Param = config.Thumbnails.copy()
-	Param.pop("Suffix")
-	Param["Thumbname"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
-	Img.SaveThumb(**Param)
-	if filigrane:
-		filigrane.substract(Img.f).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
-		os.chmod(filename, config.DefaultFileMode)
+    """common processing for one image : create a subfolder "scaled" and "thumb" : """
+#    config=Config()
+    rootdir = os.path.dirname(filename)
+    scaledir = os.path.join(rootdir, config.ScaledImages["Suffix"])
+    thumbdir = os.path.join(rootdir, config.Thumbnails["Suffix"])
+    if not os.path.isdir(scaledir) : mkdir(scaledir)
+    if not os.path.isdir(thumbdir) : mkdir(thumbdir)
+    Img = photo(filename)
+    Param = config.ScaledImages.copy()
+    Param.pop("Suffix")
+    Param["Thumbname"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
+    Img.SaveThumb(**Param)
+    Param = config.Thumbnails.copy()
+    Param.pop("Suffix")
+    Param["Thumbname"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
+    Img.SaveThumb(**Param)
+    if filigrane:
+        filigrane.substract(Img.f).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
+        os.chmod(filename, config.DefaultFileMode)
 
 
 
@@ -953,115 +961,117 @@ def ScaleImage(filename, filigrane=None):
 
 
 def latin1_to_ascii (unicrap):
-	"""This takes a UNICODE string and replaces Latin-1 characters with
-		something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
-		This function makes a best effort to convert Latin-1 characters into 
-		ASCII equivalents. It does not just strip out the Latin-1 characters.
-		All characters in the standard 7-bit ASCII range are preserved. 
-		In the 8th bit range all the Latin-1 accented letters are converted 
-		to unaccented equivalents. Most symbol characters are converted to 
-		something meaningful. Anything not converted is deleted.
-	"""
-	xlate = {0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
-		0xc6:'Ae', 0xc7:'C',
-		0xc8:'E', 0xc9:'E', 0xca:'E', 0xcb:'E',
-		0xcc:'I', 0xcd:'I', 0xce:'I', 0xcf:'I',
-		0xd0:'Th', 0xd1:'N',
-		0xd2:'O', 0xd3:'O', 0xd4:'O', 0xd5:'O', 0xd6:'O', 0xd8:'O',
-		0xd9:'U', 0xda:'U', 0xdb:'U', 0xdc:'U',
-		0xdd:'Y', 0xde:'th', 0xdf:'ss',
-		0xe0:'a', 0xe1:'a', 0xe2:'a', 0xe3:'a', 0xe4:'a', 0xe5:'a',
-		0xe6:'ae', 0xe7:'c',
-		0xe8:'e', 0xe9:'e', 0xea:'e', 0xeb:'e',
-		0xec:'i', 0xed:'i', 0xee:'i', 0xef:'i',
-		0xf0:'th', 0xf1:'n',
-		0xf2:'o', 0xf3:'o', 0xf4:'o', 0xf5:'o', 0xf6:'o', 0xf8:'o',
-		0xf9:'u', 0xfa:'u', 0xfb:'u', 0xfc:'u',
-		0xfd:'y', 0xfe:'th', 0xff:'y',
-		0xa1:'!', 0xa2:'{cent}', 0xa3:'{pound}', 0xa4:'{currency}',
-		0xa5:'{yen}', 0xa6:'|', 0xa7:'{section}', 0xa8:'{umlaut}',
-		0xa9:'{C}', 0xaa:'{^a}', 0xab:'<<', 0xac:'{not}',
-		0xad:'-', 0xae:'{R}', 0xaf:'_', 0xb0:'{degrees}',
-		0xb1:'{+/-}', 0xb2:'{^2}', 0xb3:'{^3}', 0xb4:"'",
-		0xb5:'{micro}', 0xb6:'{paragraph}', 0xb7:'*', 0xb8:'{cedilla}',
-		0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>',
-		0xbc:'{1/4}', 0xbd:'{1/2}', 0xbe:'{3/4}', 0xbf:'?',
-		0xd7:'*', 0xf7:'/'
-		}
+    """This takes a UNICODE string and replaces Latin-1 characters with
+        something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
+        This function makes a best effort to convert Latin-1 characters into 
+        ASCII equivalents. It does not just strip out the Latin-1 characters.
+        All characters in the standard 7-bit ASCII range are preserved. 
+        In the 8th bit range all the Latin-1 accented letters are converted 
+        to unaccented equivalents. Most symbol characters are converted to 
+        something meaningful. Anything not converted is deleted.
+    """
+    xlate = {0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
+        0xc6:'Ae', 0xc7:'C',
+        0xc8:'E', 0xc9:'E', 0xca:'E', 0xcb:'E',
+        0xcc:'I', 0xcd:'I', 0xce:'I', 0xcf:'I',
+        0xd0:'Th', 0xd1:'N',
+        0xd2:'O', 0xd3:'O', 0xd4:'O', 0xd5:'O', 0xd6:'O', 0xd8:'O',
+        0xd9:'U', 0xda:'U', 0xdb:'U', 0xdc:'U',
+        0xdd:'Y', 0xde:'th', 0xdf:'ss',
+        0xe0:'a', 0xe1:'a', 0xe2:'a', 0xe3:'a', 0xe4:'a', 0xe5:'a',
+        0xe6:'ae', 0xe7:'c',
+        0xe8:'e', 0xe9:'e', 0xea:'e', 0xeb:'e',
+        0xec:'i', 0xed:'i', 0xee:'i', 0xef:'i',
+        0xf0:'th', 0xf1:'n',
+        0xf2:'o', 0xf3:'o', 0xf4:'o', 0xf5:'o', 0xf6:'o', 0xf8:'o',
+        0xf9:'u', 0xfa:'u', 0xfb:'u', 0xfc:'u',
+        0xfd:'y', 0xfe:'th', 0xff:'y',
+        0xa1:'!', 0xa2:'{cent}', 0xa3:'{pound}', 0xa4:'{currency}',
+        0xa5:'{yen}', 0xa6:'|', 0xa7:'{section}', 0xa8:'{umlaut}',
+        0xa9:'{C}', 0xaa:'{^a}', 0xab:'<<', 0xac:'{not}',
+        0xad:'-', 0xae:'{R}', 0xaf:'_', 0xb0:'{degrees}',
+        0xb1:'{+/-}', 0xb2:'{^2}', 0xb3:'{^3}', 0xb4:"'",
+        0xb5:'{micro}', 0xb6:'{paragraph}', 0xb7:'*', 0xb8:'{cedilla}',
+        0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>',
+        0xbc:'{1/4}', 0xbd:'{1/2}', 0xbe:'{3/4}', 0xbf:'?',
+        0xd7:'*', 0xf7:'/'
+        }
 
-	r = []
-	for i in unicrap:
-		if xlate.has_key(ord(i)):
-			r.append(xlate[ord(i)])
-		elif ord(i) >= 0x80:
-			pass
-		else:
-			r.append(str(i))
-	return "".join(r)
+    r = []
+    for i in unicrap:
+        if xlate.has_key(ord(i)):
+            r.append(xlate[ord(i)])
+        elif ord(i) >= 0x80:
+            pass
+        else:
+            r.append(str(i))
+    return "".join(r)
 
 def SmartSize(size):
-	"""print the size of files in a pretty way"""
-	unit = "o"
-	fsize = float(size)
-	if len(str(size)) > 3:
-		size /= 1024
-		fsize /= 1024.0
-		unit = "ko"
-		if len(str(size)) > 3:
-			size = size / 1024
-			fsize /= 1024.0
-			unit = "Mo"
-			if len(str(size)) > 3:
-				size = size / 1024
-				fsize /= 1024.0
-				unit = "Go"
-	return fsize, unit
+    """print the size of files in a pretty way"""
+    unit = "o"
+    fsize = float(size)
+    if len(str(size)) > 3:
+        size /= 1024
+        fsize /= 1024.0
+        unit = "ko"
+        if len(str(size)) > 3:
+            size = size / 1024
+            fsize /= 1024.0
+            unit = "Mo"
+            if len(str(size)) > 3:
+                size = size / 1024
+                fsize /= 1024.0
+                unit = "Go"
+    return fsize, unit
 
 
-
-#############################################################################
+################################################################################
+# We should refactorize this with os.walk !!!
+################################################################################
 class parser:
-	"""this class searches all the jpeg files"""
-	def __init__(self):
-		self.imagelist = []
+    """this class searches all the jpeg files"""
+    def __init__(self):
+        self.imagelist = []
+        self.root = None
+        self.suffix = None
 
-	def OneDir(self, curent):
-		""" append all the imagesfiles to the list, then goes recursively to the subdirectories"""
-		ls = os.listdir(curent)
-		subdirs = []
-		for i in ls:
-			a = os.path.join(curent, i)
-			if	os.path.isdir(a):
-				self.OneDir(a)
-			if  os.path.isfile(a):
-				if i[(-len(self.suffix)):].lower() == self.suffix:
-					self.imagelist.append(os.path.join(curent, i))
-	def FindExts(self, root, suffix):
-		self.root = root
-		self.suffix = suffix
-		self.OneDir(self.root)
-		return self.imagelist
+    def OneDir(self, curent):
+        """ append all the imagesfiles to the list, then goes recursively to the subdirectories"""
+        ls = os.listdir(curent)
+        for i in ls:
+            a = os.path.join(curent, i)
+            if    os.path.isdir(a):
+                self.OneDir(a)
+            if  os.path.isfile(a):
+                if i[(-len(self.suffix)):].lower() == self.suffix:
+                    self.imagelist.append(os.path.join(curent, i))
+    def FindExts(self, root, suffix):
+        self.root = root
+        self.suffix = suffix
+        self.OneDir(self.root)
+        return self.imagelist
 
 
 def recursive_delete(dirname):
-	files = os.listdir(dirname)
-	for filename in files:
-		path = os.path.join (dirname, filename)
-		if os.path.isdir(path):
-			recursive_delete(path)
-		else:
-			print 'Removing file: "%s"' % path
-			retval = os.remove(path)
+    files = os.listdir(dirname)
+    for filename in files:
+        path = os.path.join (dirname, filename)
+        if os.path.isdir(path):
+            recursive_delete(path)
+        else:
+            print 'Removing file: "%s"' % path
+            os.remove(path)
 
-	print 'Removing directory:', dirname
-	os.rmdir(dirname)
+    print 'Removing directory:', dirname
+    os.rmdir(dirname)
 
 
 
 
 if __name__ == "__main__":
-	####################################################################################	
-	#Definition de la classe des variables de configuration globales : Borg"""
-	config.DefaultRepository = os.path.abspath(sys.argv[1])
-	print config.DefaultRepository
-	RangeTout(sys.argv[1])
+    ####################################################################################    
+    #Definition de la classe des variables de configuration globales : Borg"""
+    config.DefaultRepository = os.path.abspath(sys.argv[1])
+    print config.DefaultRepository
+    RangeTout(sys.argv[1])
