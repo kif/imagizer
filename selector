@@ -46,26 +46,32 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os, sys, string, shutil, time, gc, distutils.sysconfig, locale, random
+import os, distutils.sysconfig, locale, random
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
     gimpexe = "gimp-remote "
-    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
 elif os.name == 'posix':
     gimpexe = "gimp-remote "
-    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
+    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
 else:
-    raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-    sys.exit(1)
+    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
 
 
 #import imagizer.EXIF as EXIF
-import pyexiv2
+#import pyexiv2
 from imagizer.imagizer import *
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
+
+try:
+    import pygtk ; pygtk.require('2.0')
+    import gtk
+    import gtk.glade as GTKglade
+except ImportError:
+    raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 
 config = Config()
 config.load(ConfFile)
@@ -80,6 +86,7 @@ if os.getenv("LANGUAGE"):
         locale.setlocale(locale.LC_ALL, config.Locale)
 else:
     locale.setlocale(locale.LC_ALL, config.Locale)
+
 ################################################################################
 #  ##### FullScreen Interface #####
 ################################################################################
@@ -94,7 +101,7 @@ class FullScreenInterface:
             if i in self.AllJpegs:
                 self.Selected.append(i)
         print "Initialisation de l'interface graphique ..."
-        self.xml = gtk.glade.XML(unifiedglade, root="FullScreen")
+        self.xml = GTKglade.XML(unifiedglade, root="FullScreen")
         self.ShowImage()
         self.flush_event_queue()
         self.xml.get_widget("FullScreen").maximize()
@@ -257,7 +264,7 @@ class interface:
 
 
         if config.DEBUG: print("Initialization of the graphical interface ...")
-        self.xml = gtk.glade.XML(unifiedglade, root="Principale")
+        self.xml = GTKglade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
 
@@ -882,19 +889,19 @@ class interface:
 
     def Size300(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
-        X, Y = self.xml.get_widget("Principale").get_size()
+#        X, Y = self.xml.get_widget("Principale").get_size()
         config.ScreenSize = 300
         self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def Size600(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
-        X, Y = self.xml.get_widget("Principale").get_size()
+#        X, Y = self.xml.get_widget("Principale").get_size()
         config.ScreenSize = 600
         self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def Size900(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
-        X, Y = self.xml.get_widget("Principale").get_size()
+#        X, Y = self.xml.get_widget("Principale").get_size()
         config.ScreenSize = 900
         self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
@@ -948,12 +955,12 @@ class interface:
     def DefMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
         self.settitle()
-        AskMediaSizeInstance = AskMediaSize()
+        AskMediaSize()
 
     def SlideShowSetup(self, *args):
         """lauch a new window for seting up the slideshow"""
         self.settitle()
-        SlideShowSetupInstance = AskSlideShowSetup(self)
+        AskSlideShowSetup(self)
         if config.GraphicMode == "SlideShow":
             self.xml.get_widget("Principale").destroy()
             gtk.main_quit()
@@ -961,12 +968,12 @@ class interface:
     def indexJ(self, *args):
         """lauch a new window for selecting the day of interest"""
         self.settitle()
-        ChangeJourInstance = SelectDay(self)
+        SelectDay(self)
 
     def synchronize(self, *args):
         """lauch the synchronization window"""
         self.settitle()
-        SynchroInstance = Synchronize(self.CurIm, self.AllJpegs, self.Selected)
+        Synchronize(self.CurIm, self.AllJpegs, self.Selected)
 
 
     def SelectNewerMedia(self, *args):
@@ -993,8 +1000,11 @@ class interface:
         t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
-        result = dialog.run()
+        dialog.run()
         dialog.destroy()
+#        result = dialog.run()
+#        dialog.destroy()
+
 
     def SelectOlderMedia(self, *args):
         """Calculate the size of the selected images then add older images to complete the media (CD or DVD). 
@@ -1022,7 +1032,7 @@ class interface:
         t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
-        result = dialog.run()
+        dialog.run()
         dialog.destroy()
 
 
@@ -1033,7 +1043,7 @@ class interface:
         t = SmartSize(size) + (len(self.Selected),)
         txt = "%.2f %s de données dans %i images sélectionnées" % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
-        result = dialog.run()
+        dialog.run()
         dialog.destroy()
 
 
@@ -1073,10 +1083,10 @@ def LoadSelected():
 
 
 def MessageError(text, Message=gtk.MESSAGE_ERROR):
-        dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
-        dialog.set_default_response(gtk.BUTTONS_OK)
-        dialog.run()
-        dialog.destroy()
+    dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
+    dialog.set_default_response(gtk.BUTTONS_OK)
+    dialog.run()
+    dialog.destroy()
 
 
 class RenameDay:
@@ -1110,7 +1120,7 @@ class RenameDay:
             self.comment["comment"] = u""
         self.AllPhotos = AllPhotos
         self.selected = selected
-        self.xml = gtk.glade.XML(unifiedglade, root="Renommer")
+        self.xml = GTKglade.XML(unifiedglade, root="Renommer")
         self.xml.signal_connect('on_Renommer_destroy', self.destroy)
         self.xml.signal_connect('on_cancel_clicked', self.destroy)
         self.xml.signal_connect('on_ok_clicked', self.continu)
@@ -1178,7 +1188,7 @@ class AskSlideShowSetup:
     def __init__(self, upperIface):
         self.config = Config()
         self.upperIface = upperIface
-        self.xml = gtk.glade.XML(unifiedglade, root="Diaporama")
+        self.xml = GTKglade.XML(unifiedglade, root="Diaporama")
         self.xml.signal_connect('on_Diaporama_destroy', self.destroy)
         self.xml.signal_connect('on_cancel_clicked', self.destroy)
         self.xml.signal_connect('on_apply_clicked', self.continu)
@@ -1231,7 +1241,7 @@ class AskMediaSize:
     """prompt a windows and asks for the size of the backup media"""
     def __init__(self):
         self.config = Config()
-        self.xml = gtk.glade.XML(unifiedglade, root="TailleCD")
+        self.xml = GTKglade.XML(unifiedglade, root="TailleCD")
         self.xml.signal_connect('on_TailleCD_destroy', self.destroy)
         self.xml.signal_connect('on_cancel_clicked', self.destroy)
         self.xml.signal_connect('on_ok_clicked', self.continu)
@@ -1265,7 +1275,7 @@ class Synchronize:
         self.AllPhotos = AllPhotos
         self.Selected = selected
         self.initST = self.config.SynchronizeType
-        self.xml = gtk.glade.XML(unifiedglade, root="Synchroniser")
+        self.xml = GTKglade.XML(unifiedglade, root="Synchroniser")
         self.xml.signal_connect('on_Synchroniser_destroy', self.destroy)
         self.xml.signal_connect('on_cancel4_clicked', self.destroy)
         self.xml.signal_connect('on_ok4_clicked', self.synchronize)
@@ -1364,7 +1374,7 @@ class Synchronize:
 class SelectDay:
     def __init__(self, upperIface):
         self.upperIface = upperIface
-        self.xml = gtk.glade.XML(unifiedglade, root="ChangeDir")
+        self.xml = GTKglade.XML(unifiedglade, root="ChangeDir")
         self.combobox = self.xml.get_widget("entry")
         self.xml.signal_connect('on_ChangeDir_destroy', self.destroy)
         self.xml.signal_connect('on_annuler_clicked', self.destroy)
