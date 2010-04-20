@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-#Written by Jerome Kieffer 20100228 Licence GPLv3+
+#Written by Jerome Kieffer 20100420 Licence GPLv3+
 #Find all the videos and renames them, compress then .... and write an html file to set online
 
 import os.path as OP
@@ -8,9 +8,9 @@ import os, sys, tempfile, shutil, datetime, time, locale
 from hachoir_core.error import HachoirError
 from hachoir_core.cmd_line import unicodeFilename
 from hachoir_parser import createParser
-from hachoir_core.tools import makePrintable
+#from hachoir_core.tools import makePrintable
 from hachoir_metadata import extractMetadata
-from hachoir_core.i18n import getTerminalCharset
+#from hachoir_core.i18n import getTerminalCharset
 
 local = locale.getdefaultlocale()[1]
 webEncoding = "latin1"
@@ -49,11 +49,11 @@ class Video:
         self.DateTime = datetime.datetime.fromtimestamp(OP.getmtime(self.FullPath))
         self.LoadMetadata()
         if self.Producer.lower().strip() in ["mencoder", "transcode", "imagizer"]:
-           if self.Video.lower().startswith("dscf")  :self.Producer = "Fuji"
-           elif self.Video.lower().startswith("mvi_"):self.Producer = "Canon"
-           elif self.Video.lower().startswith("mov") :self.Producer = "Sony"
-           elif self.Video.lower().startswith("sdc") :self.Producer = "Samsung"
-           print "DEBUG", self.Video.lower(), self.Producer
+            if self.Video.lower().startswith("dscf")  :self.Producer = "Fuji"
+            elif self.Video.lower().startswith("mvi_"):self.Producer = "Canon"
+            elif self.Video.lower().startswith("mov") :self.Producer = "Sony"
+            elif self.Video.lower().startswith("sdc") :self.Producer = "Samsung"
+            print "DEBUG", self.Video.lower(), self.Producer
         dirname = OP.split(self.Path)[1]
         dirdate = None
         if len(dirname) >= 10:
@@ -154,7 +154,7 @@ class Video:
                 for n in self.metadata.iterGroups():
                     if n.header.find("Video stream") == 0:
                         self.VideoCodec = n.get("compression")
-                        selfVideoBpP = n.get("bits_per_pixel")
+                        self.VideoBpP = n.get("bits_per_pixel")
                     elif n.header.find("Audio stream") == 0:
                         self.AudioCodec = n.get("compression")
                         self.AudioBitRate = n.get("bit_rate")
@@ -303,13 +303,16 @@ class Video:
         DoVideo = DoResize or not (self.Video.lower().endswith(".avi"))
         DoVideo = DoVideo or not (self.VideoCodec.lower().find("h264") >= 0 or self.VideoCodec.lower().find("avc1") >= 0)
         if DoAudio:
-            wavaudio = "audio.wav"
+            rawaudio = "audio-%s.wav" % self.AudioSampleRate
+#            pbsfile.write(mplayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.FullPath, rawaudio))
+            pbsfile.write(mplayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.FullPath))
             if self.AudioSampleRate == 44100:
-                 pbsfile.write(mplayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (wavaudio, self.FullPath))
+                wavaudio = rawaudio
             else:
-                rawaudio = "audio.raw"
-                pbsfile.write(mplayer + " %s -dumpaudio   -dumpfile %s \n" % (self.FullPath, rawaudio))
-                pbsfile.write(sox + " -r %s -c %s -u -b -t raw %s -r 44100 %s resample \n" % (self.AudioSampleRate, self.AudioChannel, rawaudio, wavaudio))
+                newSampleRate = 44100
+                wavaudio = "audio-%s.wav" % newSampleRate
+#                pbsfile.write(sox + " -r %s -c %s -u -b -t raw %s -r 44100 %s resample \n" % (self.AudioSampleRate, self.AudioChannel, rawaudio, wavaudio))
+                pbsfile.write(sox + " %s -r %s  %s resample \n" % (rawaudio, newSampleRate, wavaudio))
                 pbsfile.write("rm %s \n" % rawaudio)
 
         tmpavi = "temporary.avi"
@@ -375,7 +378,6 @@ class parser:
     def OneDir(self, curent):
         """ append all the imagesfiles to the list, then goes recursively to the subdirectories"""
         ls = os.listdir(curent)
-        subdirs = []
         for i in ls:
             a = os.path.join(curent, i)
             if    os.path.isdir(a):
