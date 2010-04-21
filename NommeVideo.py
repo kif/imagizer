@@ -303,17 +303,21 @@ class Video:
         DoVideo = DoResize or not (self.Video.lower().endswith(".avi"))
         DoVideo = DoVideo or not (self.VideoCodec.lower().find("h264") >= 0 or self.VideoCodec.lower().find("avc1") >= 0)
         if DoAudio:
-            rawaudio = "audio-%s.wav" % self.AudioSampleRate
-#            pbsfile.write(mplayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.FullPath, rawaudio))
-            pbsfile.write(mplayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.FullPath))
-            if self.AudioSampleRate == 44100:
-                wavaudio = rawaudio
-            else:
-                newSampleRate = 44100
-                wavaudio = "audio-%s.wav" % newSampleRate
-#                pbsfile.write(sox + " -r %s -c %s -u -b -t raw %s -r 44100 %s resample \n" % (self.AudioSampleRate, self.AudioChannel, rawaudio, wavaudio))
-                pbsfile.write(sox + " %s -r %s  %s resample \n" % (rawaudio, newSampleRate, wavaudio))
+            newSampleRate = 44100
+            wavaudio = "audio-%s.wav" % newSampleRate
+            if (self.AudioSampleRate == 11024) and (self.AudioChannel == 1): #specific Ixus 
+                rawaudio = "audio-%s.raw" % self.AudioSampleRate
+                pbsfile.write(mplayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.FullPath, rawaudio))
+                pbsfile.write(sox + " -r %s -c %s -u -b -t raw %s -r 44100 %s resample \n" % (self.AudioSampleRate, self.AudioChannel, rawaudio, wavaudio))
                 pbsfile.write("rm %s \n" % rawaudio)
+            else:
+                rawaudio = "audio-%s.wav" % self.AudioSampleRate
+                pbsfile.write(mplayer + ' -vc null -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.FullPath))
+                if self.AudioSampleRate == 44100:
+                    wavaudio = rawaudio
+                else:
+                    pbsfile.write(sox + " %s -r %s  %s resample \n" % (rawaudio, newSampleRate, wavaudio))
+                    pbsfile.write("rm %s \n" % rawaudio)
 
         tmpavi = "temporary.avi"
         if DoResize:
