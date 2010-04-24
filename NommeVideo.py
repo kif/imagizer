@@ -312,12 +312,12 @@ class Video:
                 pbsfile.write("rm %s \n" % rawaudio)
             else:
                 rawaudio = "audio-%s.wav" % self.AudioSampleRate
-                pbsfile.write(mplayer + ' -vc null -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.FullPath))
-                if self.AudioSampleRate == 44100:
-                    wavaudio = rawaudio
-                else:
-                    pbsfile.write(sox + " %s -r %s  %s resample \n" % (rawaudio, newSampleRate, wavaudio))
-                    pbsfile.write("rm %s \n" % rawaudio)
+                pbsfile.write(mplayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.FullPath))
+            if self.AudioSampleRate == 44100:
+                wavaudio = rawaudio
+            else:
+                pbsfile.write(sox + " %s -r %s  %s resample \n" % (rawaudio, newSampleRate, wavaudio))
+                pbsfile.write("rm %s \n" % rawaudio)
 
         tmpavi = "temporary.avi"
         if DoResize:
