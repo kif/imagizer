@@ -1,0 +1,38 @@
+<html><head><title>Epydoc Redirect Page</title>
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="pragma" content="no-cache" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+<!--
+var pages = ["script-ConvertIndex_descLatin1ToUTF8_py-m", "imagizer.imagizer.ModelProcessSelected-c", "imagizer.signals._WeakMethod_FuncHost-c", "imagizer.imagizer.ModelCopySelected-c", "script-selector.FullScreenInterface-c", "script-selector.AskSlideShowSetup-c", "imagizer.imagizer.ModelRangeTout-c", "imagizer.imagecache.ImageCache-c", "imagizer.dirchooser.WarningSc-c", "script-generator.StringStream-c", "imagizer.imagizer.ControlerX-c", "script-selector.AskMediaSize-c", "imagizer.imagizer.Controler-c", "imagizer.imagizer.signature-c", "imagizer.signals.WeakMethod-c", "script-selector.Synchronize-c", "imagizer.NommeVideo.parser-c", "imagizer.NommeVideo.Video-c", "script-selector.RenameDay-c", "script-selector.SelectDay-c", "script-selector.interface-c", "imagizer.NommeVideo.HTML-c", "imagizer.imagizer.parser-c", "imagizer.parser.AttrFile-c", "imagizer.imagizer.ViewX-c", "imagizer.imagizer.photo-c", "imagizer.signals.Signal-c", "script-generator.FCache-c", "imagizer.config.Config-c", "imagizer.imagizer.View-c", "script-generator.Entry-c", "script-generator.Image-c", "script-generator.Dir-c", "imagizer.NommeVideo-m", "imagizer.dirchooser-m", "imagizer.imagecache-m", "imagizer.imagizer-m", "imagizer.signals-m", "imagizer.winpath-m", "script-generator-m", "imagizer.config-m", "imagizer.parser-m", "script-selector-m", "imagizer.faces-m", "imagizer.setup-m", "imagizer-m"];
+var dottedName = get_anchor();
+if (dottedName) {
+    var target = redirect_url(dottedName);
+    if (target) window.location.replace(target);
+}
+// -->
+</script>
+
+<h3>Epydoc Auto-redirect page</h3>
+
+<p>When javascript is enabled, this page will redirect URLs of
+the form <tt>redirect.html#<i>dotted.name</i></tt> to the
+documentation for the object with the given fully-qualified
+dotted name.</p>
+<p><a id="message"> &nbsp; </a></p>
+
+<script type="text/javascript">
+<!--
+if (dottedName) {
+    var msg = document.getElementById("message");
+    msg.innerHTML = "No documentation found for <tt>"+
+                    dottedName+"</tt>";
+}
+// -->
+</script>
+
+</body>
+</html>

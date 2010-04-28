@@ -87,36 +87,43 @@ if not configured:
     import config
     config = config.Config()
     config.load(ConfFile)
-    try:
-        import pygtk ; pygtk.require('2.0')
-        import gtk, gtk.glade
-        textinterface = False
-    except ImportError:
-        textinterface = True
-    if textinterface:
-        while True:
-            print "Enter le chemin du repertoire racine du serveur WEB :"
-            config.WebRepository = raw_input("[%s] :" % config.WebRepository)
-            if os.path.isdir(config.WebRepository):break
-            print "No Such Dir"
-    else:
-        from dirchooser import WarningSc
-        W = WarningSc(config.WebRepository, window="WWW-root")
-        config.WebRepository = W.directory
-        del W
+#    textinterface = True
+#    try:
+#        import pygtk ; pygtk.require('2.0')
+#        import gtk, gtk.glade
+        #textinterface = False
+#    except ImportError:
+
+#        textinterface = True
+#    if textinterface:
+    while True:
+        print "Enter le chemin du repertoire racine du serveur WEB :"
+        config.WebRepository = raw_input("[%s] :" % config.WebRepository)
+        if os.path.isdir(config.WebRepository):
+            break
+        print "No Such Directory"
+#    else:
+#        from dirchooser import WarningSc
+#        W = WarningSc(config.WebRepository, window="WWW-root")
+#        config.WebRepository = W.directory
+#        del W
     config.Locale, config.Coding = locale.getdefaultlocale()
     LANG = os.getenv("LANG")
-    if LANG:config.Locale = LANG
+    if LANG:
+        config.Locale = LANG
+    config.PrintConfig()
+    config.SaveConfig("/etc/imagizer.conf")
+    print "Configuration finished .... Saving it\nYou can modify it in /etc/imagizer.conf"
 
     try:
         import pyexiv2
     except:
-        raise "You should install pyexiv2 by: #aptitude install python-pyexiv2"
+        raise ImportError("You should install pyexiv2 by: #aptitude install python-pyexiv2")
 
     try:
         import Image, ImageStat, ImageChops, ImageFile
     except:
-        raise "Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/\ninstall it by # aptitude install python-imaging"
+        raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/\ninstall it by # aptitude install python-imaging")
     try:
         import pygtk ; pygtk.require('2.0')
         import gtk, gtk.glade
