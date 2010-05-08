@@ -78,7 +78,6 @@ __revision__ = "$Id$"
 
 import weakref
 import inspect
-import sets
 
 
 class Signal(object):
@@ -112,7 +111,7 @@ class Signal(object):
                 slot(*args, **kwargs)
             else:
                 del self.__slots[i]
-                
+
     def emit(self, *args, **kwargs):
         """
         """
@@ -130,7 +129,7 @@ class Signal(object):
         else:
             o = _WeakMethod_FuncHost(slot)
             self.__slots.append(WeakMethod(o.func))
-            
+
             # we stick a copy in here just to keep the instance alive
             self.__funchost.append(o)
 
@@ -160,14 +159,14 @@ class Signal(object):
         self.__slots = []
         self.__funchost = []
         self.__methodhost = []
-        
+
 
 class _WeakMethod_FuncHost:
     """
     """
     def __init__(self, func):
         self.hostedFunction = func
-        
+
     def func(self, *args, **kwargs):
         self.hostedFunction(*args, **kwargs)
 
@@ -180,7 +179,7 @@ class WeakMethod:
     def __init__(self, f):
         self.f = f.im_func
         self.c = weakref.ref(f.im_self)
-        
+
     def __call__(self, *args, **kwargs):
         if self.c() == None:
             return

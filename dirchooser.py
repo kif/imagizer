@@ -27,7 +27,7 @@
 Library used by selector and the installer to select the working directories.
 """
 
-import distutils.sysconfig, os, sys
+import os, sys
 
 try:
     import pygtk ; pygtk.require('2.0')
@@ -38,10 +38,10 @@ except:
 from config import Config
 config = Config()
 
-unifiedglade = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer", "selector.glade")
+unifiedglade = os.path.join(os.path.dirname(__file__), "selector.glade")
 
 class WarningSc:
-    """print a warning before starting the program and allows to chang the working directory"""
+    """print a warning before starting the program and allows to change the working directory"""
     def __init__(self, directory, window="dialog-warning"):
         self.directory = directory
         self.window = window

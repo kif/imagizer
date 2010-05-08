@@ -29,9 +29,8 @@ Config is a class containing all the configuration of the imagizer suite.
 Technically it is a Borg (design Pattern) so every instance of Config has exactly the same contents.
 """
 
-import os, distutils.sysconfig, locale
-
-installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
+import os, locale
+installdir = os.path.dirname(__file__)
 #here we detect the OS runnng the program so that we can call exftran in the right way
 if os.name == 'nt': #sys.platform == 'win32':
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]

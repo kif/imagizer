@@ -29,7 +29,7 @@ General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 
-import os, sys, shutil, time, re, gc, distutils.sysconfig
+import os, sys, shutil, time, re, gc
 
 try:
     import Image, ImageStat, ImageChops, ImageFile
@@ -50,7 +50,7 @@ gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP
 
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
-installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
+installdir = os.path.dirname(__file__)
 if os.name == 'nt': #sys.platform == 'win32':
     exiftran = os.path.join(installdir, "exiftran.exe ")
     gimpexe = "gimp-remote "
