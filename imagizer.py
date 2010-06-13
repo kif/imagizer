@@ -69,7 +69,7 @@ from signals import Signal
 from config import Config
 config = Config()
 config.load(ConfFile)
-if config.ImageCache > 1000:
+if config.ImageCache > 1:
     import imagecache
     imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
 else:
@@ -210,7 +210,10 @@ class ModelProcessSelected:
             if not os.path.exists(dest):
                 print "copie de %s " % (File)
                 shutil.copy(src, dest)
-                os.chmod(dest, config.DefaultFileMode)
+                try:
+                    os.chmod(dest, config.DefaultFileMode)
+                except OSError:
+                    print("Warning: unable to chmod %s" % dest)
                 AlsoProcess += 1
             else :
                 print "%s existe déja" % (dest)
@@ -311,7 +314,10 @@ class ModelCopySelected:
                     filigrane.substract(Img).save(dest, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
                 else:
                     shutil.copy(src, dest)
-                os.chmod(dest, config.DefaultFileMode)
+                try:
+                    os.chmod(dest, config.DefaultFileMode)
+                except OSError:
+                    print("Warning: unable to chmod %s" % dest)
             else :
                 print "%s existe déja" % (dest)
 ######copy the comments of the directory to the Selected directory 
@@ -375,16 +381,21 @@ class ModelRangeTout:
         for h in range(NumFiles):
             i = AllFilesToProcess[h]
             self.refreshSignal.emit(h, i)
-            data = photo(i).exif()
+            myPhoto = photo(i)
+            try:
+                imageCache[i] = myPhoto
+            except:
+                pass
+            data = myPhoto.readExif()
             try:
                 datei, heurei = data["Heure"].split()
                 date = re.sub(":", "-", datei)
                 heurej = re.sub(":", "h", heurei, 1)
                 model = data["Modele"].split(",")[-1]
-                heure = latin1_to_ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
+                heure = unicode_to_ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
             except ValueError:
                 date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(RootDir, i))))
-                heure = latin1_to_ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(RootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
+                heure = unicode_to_ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(RootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
             if not (os.path.isdir(os.path.join(RootDir, date))) : mkdir(os.path.join(RootDir, date))
             strImageFile = os.path.join(RootDir, date, heure)
             ToProcess = os.path.join(date, heure)
@@ -400,23 +411,15 @@ class ModelRangeTout:
                 os.chown(strImageFile, uid, gid)
                 os.chmod(strImageFile, config.DefaultFileMode)
             except OSError:
-                print "error in chown or chmod of %s" % strImageFile
-            if config.AutoRotate and data["Orientation"] != "1":
-                photo(strImageFile).autorotate()
+                print "Warning: unable to chown ot chmod  %s" % strImageFile
+            myPhoto = photo(strImageFile)
+            if config.AutoRotate:
+                myPhoto.autorotate()
 #Set the new images in cache for further display 
-                if imageCache is not None:
-                    if config.ImageWidth and config.ImageHeight:
-                        if imageCache.size + 3 * config.ImageWidth * config.ImageHeight < imageCache.maxSize:
-                            print "put in cache file " + ToProcess
-                            pixbuf = gtk.gdk.pixbuf_new_from_file(strImageFile)
-                            Xsize = pixbuf.get_width()
-                            Ysize = pixbuf.get_height()
-                            R = min(float(config.ImageWidth) / float(Xsize), float(config.ImageHeight) / float(Ysize))
-                            if R < 1:
-                                scaled_buf = pixbuf.scale_simple(config.ImageWidth, config.ImageHeight, gtkInterpolation[config.Interpolation])
-                            else:
-                                scaled_buf = pixbuf
-                            imageCache[ ToProcess ] = scaled_buf
+            try:
+                imageCache[ ToProcess ] = myPhoto
+            except:
+                pass
 ##################################################
             AllreadyDone.append(ToProcess)
             NewFiles.append(ToProcess)
@@ -607,29 +610,30 @@ class photo:
     def __init__(self, filename):
         self.filename = filename
         self.fn = os.path.join(config.DefaultRepository, self.filename)
-        self.data = None
-        self.x = None
-        self.y = None
-        self.g = None
-        self.f = None
+        self.metadata = None
+        self.pixelsX = None
+        self.pixelsY = None
+        self.pil = None
+        self.exif = None
         if not os.path.isfile(self.fn):
             print "Erreur, le fichier %s n'existe pas" % self.fn
         self.bImageCache = (imageCache is not None)
+        self.scaledPixbuffer = None
 
     def LoadPIL(self):
         """Load the image"""
-        self.f = Image.open(self.fn)
+        self.pil = Image.open(self.fn)
 
     def larg(self):
         """width-height of a jpeg file"""
         self.taille()
-        return self.x - self.y
+        return self.pixelsX - self.pixelsY
 
     def taille(self):
         """width and height of a jpeg file"""
-        if self.x == None and self.y == None:
+        if self.pixelsX == None and self.pixelsY == None:
             self.LoadPIL()
-            self.x, self.y = self.f.size
+            self.pixelsX, self.pixelsY = self.pil.size
 
     def SaveThumb(self, Thumbname, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
         """save a thumbnail of the given name, with the given size and the interpolation methode (quality) 
@@ -643,84 +647,91 @@ class photo:
         if  os.path.isfile(Thumbname):
             print "sorry, file %s exists" % Thumbname
         else:
-            image_exif = pyexiv2.Image(self.fn)
-            image_exif.readMetadata()
-            #RawExif,comment=EXIF.process_file(open(self.fn,'rb'),0)
+            if self.exif is None:
+                self.exif = pyexiv2.Image(self.fn)
+                self.exif.readMetadata()
             extract = False
             print "process file %s exists" % Thumbname
             if ExifExtraction:
                 try:
-                    image_exif.dumpThumbnailToFile(Thumbname[:-4])
+                    self.exif.dumpThumbnailToFile(Thumbname[:-4])
                     extract = True
-                except OSError:
+                except (OSError, IOError):
                     extract = False
             if not extract:
 #                print "on essaie avec PIL"
-                self.LoadPIL()
-                self.g = self.f.copy()
-                self.g.thumbnail((Size, Size), Interpolation)
-                self.g.save(Thumbname, quality=Quality, progressive=Progressive, optimize=Optimize)
-            os.chmod(Thumbname, config.DefaultFileMode)
+                if self.pil is None:
+                    self.LoadPIL()
+                copyOfImage = self.pil.copy()
+                copyOfImage.thumbnail((Size, Size), Interpolation)
+                copyOfImage.save(Thumbname, quality=Quality, progressive=Progressive, optimize=Optimize)
+            try:
+                os.chmod(Thumbname, config.DefaultFileMode)
+            except OSError:
+                print("Warning: unable to chmod %s" % Thumbname)
 
 
     def Rotate(self, angle=0):
         """does a looseless rotation of the given jpeg file"""
-        if os.name == 'nt' and self.f != None: del self.f
+        if os.name == 'nt' and self.pil != None:
+            del self.pil
         self.taille()
-        x = self.x
-        y = self.y
+        x = self.pixelsX
+        y = self.pixelsY
         if angle == 90:
             if imageCache is not None:
                 os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
-                imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
-                self.x = y
-                self.y = x
+                self.scaledPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
+                self.pixelsX = y
+                self.pixelsY = x
+                self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
                 os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
-                self.x = None
-                self.y = None
+                self.pixelsX = None
+                self.pixelsY = None
         elif angle == 270:
             if imageCache is not None:
                 os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
-                imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
-                self.x = y
-                self.y = x
+                self.scaledPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+                self.pixelsX = y
+                self.pixelsY = x
+                self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
                 os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
-                self.x = None
-                self.y = None
+                self.pixelsX = None
+                self.pixelsY = None
         elif angle == 180:
             if imageCache is not None:
                 os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
-                imageCache[self.filename] = imageCache[self.filename].rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
-                self.x = x
-                self.y = y
+                self.scaledPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
             else:
                 os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
-                self.x = None
-                self.y = None
+                self.pixelsX = None
+                self.pixelsY = None
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
+
 
     def RemoveFromCache(self):
         """remove the curent image from the Cache .... for various reasons"""
         if imageCache is not None:
             if self.filename in imageCache.ordered:
-                pixBuf = imageCache.imageDict.pop(self.filename)
+                imageCache.imageDict.pop(self.filename)
                 index = imageCache.ordered.index(self.filename)
                 imageCache.ordered.pop(index)
-                imageCache.size -= 3 * pixBuf.get_width() * pixBuf.get_height()
+                imageCache.size -= 1
+
 
     def Trash(self):
         """Send the file to the trash folder"""
         self.RemoveFromCache()
         Trashdir = os.path.join(config.DefaultRepository, config.TrashDirectory)
         td = os.path.dirname(os.path.join(Trashdir, self.filename))
-        #tf = os.path.join(Trashdir, self.filename)
         if not os.path.isdir(td): makedir(td)
         shutil.move(self.fn, os.path.join(Trashdir, self.filename))
 
-    def exif(self):
+
+    def readExif(self):
         """return exif data + title from the photo"""
         clef = {'Exif.Image.Make':'Marque',
  'Exif.Image.Model':'Modele',
@@ -735,27 +746,35 @@ class photo:
  'Exif.Image.Orientation':'Orientation'
 }
 
-        if self.data is None:
-            self.data = {}
-            self.data["Taille"] = "%.2f %s" % SmartSize(os.path.getsize(self.fn))
-            image_exif = pyexiv2.Image(self.fn)
-            image_exif.readMetadata()
-            self.data["Titre"] = image_exif.getComment()
-            self.taille()
-            self.data["Resolution"] = "%s x %s " % (self.x, self.y)
-            self.data["Orientation"] = "1"
+        if self.metadata is None:
+            self.metadata = {}
+            self.metadata["Taille"] = "%.2f %s" % SmartSize(os.path.getsize(self.fn))
+            self.exif = pyexiv2.Image(self.fn)
+            self.exif.readMetadata()
+            self.metadata["Titre"] = self.exif.getComment()
+            if self.pixelsX and self.pixelsY:
+                self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
+            else:
+                try:
+                    self.pixelsX = self.exif["Exif.Photo.PixelXDimension"]
+                    self.pixelsY = self.exif["Exif.Photo.PixelYDimension"]
+                except IndexError:
+                    self.taille()
+                self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
+            self.metadata["Orientation"] = "1"
             for i in clef:
                 try:
-                    self.data[clef[i]] = image_exif.interpretedExifValue(i).decode(config.Coding)
+                    self.metadata[clef[i]] = self.exif.interpretedExifValue(i).decode(config.Coding)
                 except:
-                    self.data[clef[i]] = ""
-        return self.data
+                    self.metadata[clef[i]] = ""
+        return self.metadata.copy()
+
 
     def has_title(self):
         """return true if the image is entitled"""
-        if self.data == None:
-            self.exif()
-        if  self.data["Titre"]:
+        if self.metadata == None:
+            self.readExif()
+        if  self.metadata["Titre"]:
             return True
         else:
             return False
@@ -764,50 +783,64 @@ class photo:
     def show(self, Xsize=600, Ysize=600):
         """return a pixbuf to shows the image in a Gtk window"""
         scaled_buf = None
-        if Xsize > config.ImageWidth :  config.ImageWidth = Xsize
-        if Ysize > config.ImageHeight: config.ImageHeight = Ysize
+        if Xsize > config.ImageWidth :
+            config.ImageWidth = Xsize
+        if Ysize > config.ImageHeight:
+            config.ImageHeight = Ysize
         self.taille()
-        R = min(float(Xsize) / self.x, float(Ysize) / self.y)
+        R = min(float(Xsize) / self.pixelsX, float(Ysize) / self.pixelsY)
         if R < 1:
-            nx = int(R * self.x)
-            ny = int(R * self.y)
+            nx = int(R * self.pixelsX)
+            ny = int(R * self.pixelsY)
         else:
-            nx = self.x
-            ny = self.y
-        if imageCache is not None:
-            if self.filename in imageCache.ordered:
-                data = imageCache[ self.filename ]
-                if (data.get_width() == nx) and (data.get_height() == ny):
-                    scaled_buf = data
-                    if config.DEBUG: print("Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
-                elif (data.get_width() > nx) or (data.get_height() > ny):
-                    if config.DEBUG:print("nx=%i,\tny=%i,\tw=%i,h=%i" % (nx, ny, data.get_width(), data.get_height()))
-                    pixbuf = data
-                    if config.DEBUG: print("Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
-                    scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
+            nx = self.pixelsX
+            ny = self.pixelsY
+
+        if self.scaledPixbuffer is not None:
+            if (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
+                scaled_buf = self.scaledPixbuffer
+                if config.DEBUG:
+                    print("Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
+            elif (self.scaledPixbuffer.get_width() > nx) or (self.scaledPixbuffer.get_height() > ny):
+                if config.DEBUG:
+                    print("nx=%i,\tny=%i,\tw=%i,h=%i" % (nx, ny, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+                pixbuf = self.scaledPixbuffer
+                if config.DEBUG:
+                    print("Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
+                scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
         if not scaled_buf:
             pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
             if R < 1:
                 scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
             else :
                 scaled_buf = pixbuf
-            if imageCache is not None:
-                imageCache[ self.filename ] = scaled_buf
                 if config.DEBUG: print("Sucessfully cached  %s, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
+        self.scaledPixbuffer = scaled_buf
         return scaled_buf
 
     def name(self, titre):
         """write the title of the photo inside the description field, in the JPEG header"""
-        if os.name == 'nt' and self.f != None: del self.f
-        image_exif = pyexiv2.Image(self.fn)
-        image_exif.readMetadata()
-        image_exif.setComment(titre)
-        image_exif.writeMetadata()
+        if os.name == 'nt' and self.pil != None:
+            self.pil = None
+        self.exif.setComment(titre)
+        self.exif.writeMetadata()
+
 
     def autorotate(self):
         """does autorotate the image according to the EXIF tag"""
-        if os.name == 'nt' and self.f != None: del self.f
-        os.system('%s -aip "%s"' % (exiftran, self.fn))
+        if os.name == 'nt' and self.pil is not None:
+            del self.pil
+
+        metadata = self.readExif()
+        if metadata["Orientation"] != 1:
+            os.system('%s -aip "%s" &' % (exiftran, self.fn))
+            if metadata["Orientation"] > 4:
+                self.pixelsX = self.exif["Exif.Photo.PixelYDimension"]
+                self.pixelsY = self.exif["Exif.Photo.PixelXDimension"]
+                self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
+#                self.metadata["Resolution"] = "%s x %s" % (self.metadata["Resolution"].split(" x ")[1], self.metadata["Resolution"].split(" x ")[0])
+            self.metadata["Orientation"] = 1
+
 
     def ContrastMask(self, outfile):
         """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...
@@ -819,19 +852,23 @@ class photo:
         except:
             raise ImportError("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
         self.LoadPIL()
-        x, y = self.f.size
+        x, y = self.pil.size
         ImageFile.MAXBLOCK = x * y
-        img_array = numpy.fromstring(self.f.tostring(), dtype="UInt8").astype("UInt16")
+        img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("UInt16")
         img_array.shape = (y, x, 3)
         red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
         desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2
         inv_desat = 255 - desat_array
         k = Image.fromarray(inv_desat, "L").convert("RGB")
-        S = ImageChops.screen(self.f, k)
-        M = ImageChops.multiply(self.f, k)
-        F = ImageChops.add(ImageChops.multiply(self.f, S), ImageChops.multiply(ImageChops.invert(self.f), M))
+        S = ImageChops.screen(self.pil, k)
+        M = ImageChops.multiply(self.pil, k)
+        F = ImageChops.add(ImageChops.multiply(self.pil, S), ImageChops.multiply(ImageChops.invert(self.pil), M))
         F.save(os.path.join(config.DefaultRepository, outfile), quality=90, progressive=True, Optimize=True)
-        os.chmod(os.path.join(config.DefaultRepository, outfile), config.DefaultFileMode)
+        try:
+            os.chmod(os.path.join(config.DefaultRepository, outfile), config.DefaultFileMode)
+        except:
+            print("Warning: unable to chmod %s" % outfile)
+
 
 ########################################################        
 # # # # # # fin de la classe photo # # # # # # # # # # #
@@ -915,8 +952,10 @@ def mkdir(filename):
     """create an empty directory with the given rights"""
 #    config=Config()
     os.mkdir(filename)
-    os.chmod(filename, config.DefaultDirMode)
-
+    try:
+        os.chmod(filename, config.DefaultDirMode)
+    except OSError:
+        print("Warning: unable to chmod %s" % filename)
 
 def FindFile(RootDir):
     """returns a list of the files with the given suffix in the given dir
@@ -953,22 +992,21 @@ def ScaleImage(filename, filigrane=None):
     Img.SaveThumb(**Param)
     if filigrane:
         filigrane.substract(Img.f).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
-        os.chmod(filename, config.DefaultFileMode)
+        try:
+            os.chmod(filename, config.DefaultFileMode)
+        except OSError:
+            print("Warning: unable to chmod %s" % filename)
 
-
-
-
-
-
-def latin1_to_ascii (unicrap):
-    """This takes a UNICODE string and replaces Latin-1 characters with
-        something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
-        This function makes a best effort to convert Latin-1 characters into 
-        ASCII equivalents. It does not just strip out the Latin-1 characters.
-        All characters in the standard 7-bit ASCII range are preserved. 
-        In the 8th bit range all the Latin-1 accented letters are converted 
-        to unaccented equivalents. Most symbol characters are converted to 
-        something meaningful. Anything not converted is deleted.
+def unicode_to_ascii(unicrap):
+    """
+    This takes a UNICODE string and replaces unicode characters with
+    something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
+    This function makes a best effort to convert unicode characters into 
+    ASCII equivalents. It does not just strip out the Latin-1 characters.
+    All characters in the standard 7-bit ASCII range are preserved. 
+    In the 8th bit range all the Latin-1 accented letters are converted 
+    to unaccented equivalents. Most symbol characters are converted to 
+    something meaningful. Anything not converted is deleted.
     """
     xlate = {0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
         0xc6:'Ae', 0xc7:'C',

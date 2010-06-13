@@ -46,10 +46,15 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os, distutils.sysconfig, locale, random
+import os, locale, random, gc, time, shutil, sys
+
+try:
+    import ImageFile
+except:
+    raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
-installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
+
 if os.name == 'nt': #sys.platform == 'win32':
     gimpexe = "gimp-remote "
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
@@ -60,9 +65,7 @@ else:
     raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
 
 
-#import imagizer.EXIF as EXIF
-#import pyexiv2
-from imagizer.imagizer import *
+from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, unicode_to_ascii, mkdir, RangeTout, installdir
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
 
@@ -78,6 +81,12 @@ config.load(ConfFile)
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
     ImageFile.MAXBLOCK = 1000 * kpix
+
+if config.ImageCache > 1:
+    from imagizer.imagecache import ImageCache
+    imageCache = ImageCache(maxSize=config.ImageCache)
+else:
+    imageCache = None
 
 if os.getenv("LANGUAGE"):
     try:
@@ -121,10 +130,13 @@ class FullScreenInterface:
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        if self.image == None:
+        try:
+            self.image = imageCache[self.AllJpegs[self.CurIm]]
+        except:
             self.image = photo(self.AllJpegs[self.CurIm])
-        elif self.image.filename != self.AllJpegs[self.CurIm]  or not self.image.bImageCache:
-            self.image = photo(self.AllJpegs[self.CurIm])
+            if imageCache is not None:
+                imageCache[self.AllJpegs[self.CurIm]] = self.image
+
         X, Y = self.xml.get_widget("FullScreen").get_size()
         if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
         pixbuf = self.image.show(X, Y)
@@ -421,10 +433,12 @@ class interface:
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        if self.image == None:
+        try:
+            self.image = imageCache[self.AllJpegs[self.CurIm]]
+        except:
             self.image = photo(self.AllJpegs[self.CurIm])
-        elif self.image.filename != self.AllJpegs[self.CurIm] or not self.image.bImageCache:
-            self.image = photo(self.AllJpegs[self.CurIm])
+            if imageCache is not None:
+                imageCache[self.AllJpegs[self.CurIm]] = self.image
         X, Y = self.xml.get_widget("Principale").get_size()
         if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
@@ -433,7 +447,7 @@ class interface:
         self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
-        data = self.image.exif()
+        data = self.image.readExif()
         if data.has_key("Orientation"): data.pop("Orientation")
         for i in data:
             self.xml.get_widget(i).set_text(data[i])
@@ -526,7 +540,13 @@ class interface:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.CurIm = self.AllJpegs.index(newname)
-        photo(filename).ContrastMask(newname)
+        try:
+            myPhoto = imageCache[filename]
+        except:
+            myPhoto = photo(filename)
+            if imageCache is not None:
+                imageCache[filename] = myPhoto
+        myPhoto.ContrastMask(newname)
         self.ShowImage()
 
     def select_Shortcut(self, *args):
@@ -792,7 +812,13 @@ class interface:
         """switch to the first titeled image"""
         self.settitle()
         for i in self.AllJpegs:
-            if photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -803,7 +829,13 @@ class interface:
         temp = self.AllJpegs[:self.CurIm]
         temp.reverse()
         for i in temp:
-            if photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -812,7 +844,13 @@ class interface:
         """switch to the next titeled image"""
         self.settitle()
         for i in self.AllJpegs[self.CurIm + 1:]:
-            if photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -823,7 +861,13 @@ class interface:
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            if photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -832,18 +876,30 @@ class interface:
         """switch to the first non-titeled image"""
         self.settitle()
         for i in self.AllJpegs:
-            if not photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if not myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
-    def    previousNT(self, *args):
+    def previousNT(self, *args):
         """switch to the previous non-titeled image"""
         self.settitle()
         temp = self.AllJpegs[:self.CurIm]
         temp.reverse()
         for i in temp:
-            if not photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if not myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -852,7 +908,13 @@ class interface:
         """switch to the next non-titeled image"""
         self.settitle()
         for i in self.AllJpegs[self.CurIm + 1:]:
-            if not photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if not myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -863,7 +925,13 @@ class interface:
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            if not photo(i).has_title():
+            try:
+                myPhoto = imageCache[i]
+            except:
+                myPhoto = photo(i)
+                if imageCache is not None:
+                    imageCache[i] = myPhoto
+            if not myPhoto.has_title():
                 self.CurIm = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
@@ -1140,7 +1208,7 @@ class RenameDay:
         if self.newname == "":
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
         else:
-            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + latin1_to_ascii(self.newname.encode("latin1")).replace(" ", "_",)
+            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode_to_ascii(self.newname.encode("latin1")).replace(" ", "_",)
         self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
         if not os.path.isdir(os.path.join(config.DefaultRepository, self.newdayname)):
             mkdir(os.path.join(config.DefaultRepository, self.newdayname))

@@ -88,7 +88,7 @@ class Config:
         self.SlideShowType = "chronological"
         self.SynchronizeRep = "user@host:/mnt/photo"
         self.SynchronizeType = "Newer"
-        self.ImageCache = 100000000
+        self.ImageCache = 100
         self.ImageWidth = None
         self.ImageHeight = None
         self.DEBUG = None
@@ -197,17 +197,7 @@ class Config:
         print("Backup media size (CD,DVD):\t  %s MByte" % self.MediaSize)
         print("Scaled imagesSize:\t\t  %s pixels in the largest dimension" % self.ScaledImages["Size"])
         print("Thumbnail Size:\t\t\t  %s pixels in the largest dimension" % self.Thumbnails["Size"])
-        cache = ""
-        lenCache = len(str(self.ImageCache))
-        if lenCache in range(4, 7):
-            cache = "%.1f kByte" % (float(self.ImageCache) / 1024.0)
-        elif lenCache in range(7, 10):
-            cache = "%.1f MByte" % (float(self.ImageCache) / 1048576.0)
-        elif lenCache in range(10, 13):
-            cache = "%.1f GByte" % (float(self.ImageCache) / 1073741824.0)
-        else:
-            cache = "%i Byte" % self.ImageCache
-        print("Caching of PixBuffers size:\t  %s" % cache)
+        print("Caching of %s images " % self.ImageCache)
 
     def SaveConfig(self, filename):
         """saves the default options"""
@@ -245,7 +235,7 @@ class Config:
         txt += "#Type of slideshow : chronological, anti-chronological or random ?\nSlideShowType: %s\n\n" % self.SlideShowType
         txt += "#Remote repository to synchronize with (rsync like)\nSynchronizeRep: %s\n\n" % self.SynchronizeRep
         txt += "#Synchronization type, acceptable values are Newer, Older, Selected and All\nSynchronizeType: %s\n\n" % self.SynchronizeType
-        txt += "#Allow the creation of a Cache of images with the given size in byte\nImageCache: %s\n\n" % self.ImageCache
+        txt += "#Allow the creation of a Cache of images with the given size in number of images\nImageCache: %s\n\n" % self.ImageCache
         if self.ImageWidth is not None:
             txt += "#Width of the last image displayed ... should not be modified\nImageWidth:%s\n\n" % self.ImageWidth
         if self.ImageHeight is not None:

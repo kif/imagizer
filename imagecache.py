@@ -35,11 +35,11 @@ config = Config()
 ################################################################################################
 class ImageCache(dict):
     """this class is a Borg : always returns the same values regardless to the instance of the object
-    it is used as data storage for bitmaps ... with a limit of max_len
+    it is used as data storage for images ... with a limit on the number of images to keep in memory.
     """
     __shared_state = {}
     __data_initialized = False
-    def __init__(self, maxSize=1000000):
+    def __init__(self, maxSize=100):
         self.__dict__ = self.__shared_state
         if  not ImageCache.__data_initialized :
             ImageCache.__data_initialized = True
@@ -53,14 +53,14 @@ class ImageCache(dict):
         if key in self.ordered:
             index = self.ordered.index(key)
             self.ordered.pop(index)
-            pixBuf = self.imageDict[ key ]
-            self.size -= 3 * pixBuf.get_width() * pixBuf.get_height()
-        self.size += 3 * value.get_width() * value.get_height()
+            self.size -= 1
+        self.size += 1
         if self.size > self.maxSize:
             firstKey = self.ordered[ 0 ]
-            if config.DEBUG: print("Removing file %s from cache" % firstKey)
-            firstPixBuf = self.imageDict.pop(firstKey)
-            self.size -= 3 * firstPixBuf.get_width() * firstPixBuf.get_height()
+            if config.DEBUG:
+                print("Removing file %s from cache" % firstKey)
+            self.imageDict.pop(firstKey)
+            self.size -= 1
             self.ordered = self.ordered[1:]
         self.ordered.append(key)
 

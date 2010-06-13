@@ -90,13 +90,13 @@ SlideShowDelay: 5.0
 SlideShowType: chronological
 
 #Remote repository to synchronize with (rsync like)
-SynchronizeRep: jerome@paragonia:/home/photo
+SynchronizeRep: jerome@patagonia:/home/photo
 
 #Synchronization type, acceptable values are Newer, Older, Selected and All
 SynchronizeType: Newer
 
-#Allow the creation of a Cache of images with the given size in byte
-ImageCache: 500000000
+#Allow the creation of a Cache of images with the given number of images
+ImageCache: 500
 
 #Width of the last image displayed ... should not be modified
 ImageWidth:1024
