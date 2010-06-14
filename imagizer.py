@@ -822,6 +822,7 @@ class photo:
         """write the title of the photo inside the description field, in the JPEG header"""
         if os.name == 'nt' and self.pil != None:
             self.pil = None
+        self.metadata["Titre"] = titre
         self.exif.setComment(titre)
         self.exif.writeMetadata()
 
