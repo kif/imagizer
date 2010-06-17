@@ -448,7 +448,7 @@ class interface:
         del pixbuf
         gc.collect()
         data = self.image.readExif()
-        if data.has_key("Orientation"): data.pop("Orientation")
+#        if data.has_key("Orientation"): data.pop("Orientation")
         for i in data:
             self.xml.get_widget(i).set_text(data[i])
         self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.CurIm])

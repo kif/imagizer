@@ -619,6 +619,7 @@ class photo:
             print "Erreur, le fichier %s n'existe pas" % self.fn
         self.bImageCache = (imageCache is not None)
         self.scaledPixbuffer = None
+        self.orientation = 1
 
     def LoadPIL(self):
         """Load the image"""
@@ -743,7 +744,7 @@ class photo:
  'Exif.Photo.Flash':'Flash',
  'Exif.Photo.FocalLength':'Focale',
  'Exif.Photo.ISOSpeedRatings':'Iso' ,
- 'Exif.Image.Orientation':'Orientation'
+# 'Exif.Image.Orientation':'Orientation'
 }
 
         if self.metadata is None:
@@ -761,12 +762,13 @@ class photo:
                 except IndexError:
                     self.taille()
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
-            self.metadata["Orientation"] = "1"
-            for i in clef:
+            if "Exif.Image.Orientation" in self.exif.exifKeys():
+                self.orientation = self.exif["Exif.Image.Orientation"]
+            for key in clef:
                 try:
-                    self.metadata[clef[i]] = self.exif.interpretedExifValue(i).decode(config.Coding)
+                    self.metadata[clef[key]] = self.exif.interpretedExifValue(key).decode(config.Coding)
                 except:
-                    self.metadata[clef[i]] = ""
+                    self.metadata[clef[key]] = u""
         return self.metadata.copy()
 
 
@@ -832,15 +834,14 @@ class photo:
         if os.name == 'nt' and self.pil is not None:
             del self.pil
 
-        metadata = self.readExif()
-        if metadata["Orientation"] != 1:
+        self.readExif()
+        if self.orientation != 1:
             os.system('%s -aip "%s" &' % (exiftran, self.fn))
-            if metadata["Orientation"] > 4:
+            if self.orientation > 4:
                 self.pixelsX = self.exif["Exif.Photo.PixelYDimension"]
                 self.pixelsY = self.exif["Exif.Photo.PixelXDimension"]
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
-#                self.metadata["Resolution"] = "%s x %s" % (self.metadata["Resolution"].split(" x ")[1], self.metadata["Resolution"].split(" x ")[0])
-            self.metadata["Orientation"] = 1
+            self.orientation = 1
 
 
     def ContrastMask(self, outfile):
