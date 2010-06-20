@@ -679,10 +679,13 @@ class photo:
         self.taille()
         x = self.pixelsX
         y = self.pixelsY
+        if config.DEBUG:
+            print("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+
         if angle == 90:
             if imageCache is not None:
                 os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
-                self.scaledPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
+                newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
                 self.pixelsX = y
                 self.pixelsY = x
                 self.metadata["Resolution"] = "%i x % i" % (y, x)
@@ -693,7 +696,7 @@ class photo:
         elif angle == 270:
             if imageCache is not None:
                 os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
-                self.scaledPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+                newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
                 self.pixelsX = y
                 self.pixelsY = x
                 self.metadata["Resolution"] = "%i x % i" % (y, x)
@@ -704,13 +707,17 @@ class photo:
         elif angle == 180:
             if imageCache is not None:
                 os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
-                self.scaledPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
+                newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
             else:
                 os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
+        if imageCache is not None:
+            self.scaledPixbuffer = newPixbuffer
+        if config.DEBUG:
+            print("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, self.pixelsX, self.pixelsY, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
 
 
     def RemoveFromCache(self):
@@ -790,34 +797,41 @@ class photo:
         if Ysize > config.ImageHeight:
             config.ImageHeight = Ysize
         self.taille()
+
+#        Prepare the big image to be put in cache
+        Rbig = min(float(config.ImageWidth) / self.pixelsX, float(config.ImageHeight) / self.pixelsY)
+        if Rbig < 1:
+            nxBig = int(round(Rbig * self.pixelsX))
+            nyBig = int(round(Rbig * self.pixelsY))
+        else:
+            nxBig = self.pixelsX
+            nyBig = self.pixelsY
+
         R = min(float(Xsize) / self.pixelsX, float(Ysize) / self.pixelsY)
         if R < 1:
-            nx = int(R * self.pixelsX)
-            ny = int(R * self.pixelsY)
+            nx = int(round(R * self.pixelsX))
+            ny = int(round(R * self.pixelsY))
         else:
             nx = self.pixelsX
             ny = self.pixelsY
 
-        if self.scaledPixbuffer is not None:
-            if (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
-                scaled_buf = self.scaledPixbuffer
-                if config.DEBUG:
-                    print("Sucessfully fetched %s from cache, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
-            elif (self.scaledPixbuffer.get_width() > nx) or (self.scaledPixbuffer.get_height() > ny):
-                if config.DEBUG:
-                    print("nx=%i,\tny=%i,\tw=%i,h=%i" % (nx, ny, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
-                pixbuf = self.scaledPixbuffer
-                if config.DEBUG:
-                    print("Fetched data for %s have to be rescaled, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
-                scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
-        if not scaled_buf:
+        if self.scaledPixbuffer is None:
             pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
-            if R < 1:
-                scaled_buf = pixbuf.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
+#            Put in Cache the "BIG" image
+            if Rbig < 1:
+                self.scaledPixbuffer = pixbuf.scale_simple(nxBig, nyBig, gtkInterpolation[config.Interpolation])
             else :
-                scaled_buf = pixbuf
-                if config.DEBUG: print("Sucessfully cached  %s, cache size: %i images, %.3f MBytes" % (self.filename, len(imageCache.ordered), (imageCache.size / 1048576.0)))
-        self.scaledPixbuffer = scaled_buf
+                self.scaledPixbuffer = pixbuf
+            if config.DEBUG:
+                    print("Sucessfully cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
+        if (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
+            scaled_buf = self.scaledPixbuffer
+            if config.DEBUG:
+                print("Sucessfully fetched %s from cache, directly with the right size." % (self.filename))
+        else:
+            if config.DEBUG:
+                print("%s pixmap in buffer but not with the right shape: nx=%i,\tny=%i,\tw=%i,h=%i" % (self.filename, nx, ny, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+            scaled_buf = self.scaledPixbuffer.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
         return scaled_buf
 
     def name(self, titre):
