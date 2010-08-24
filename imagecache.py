@@ -70,3 +70,32 @@ class ImageCache(dict):
         self.ordered.pop(index)
         self.ordered.append(key)
         return self.imageDict[ key ]
+
+    def keys(self):
+        """ returns the list of keys, ordered"""
+        return self.ordered[:]
+
+    def pop(self, key):
+        """remove a key for the dictionary and return it's value"""
+        try:
+            index = self.ordered.index(key)
+        except:
+            raise KeyError
+        self.ordered.pop(index)
+        myData = self.imageDict.pop(key)
+        return myData
+
+    def rename(self, oldKey, newKey):
+        """change the name of a key without affecting anything else
+        If the name is not present: do nothing.
+        """
+        try:
+            index = self.ordered.index(oldKey)
+        except:
+            return
+        self.ordered[index] = newKey
+        myData = self.imageDict.pop(oldKey)
+        self.imageDict[newKey] = myData
+
+
+

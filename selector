@@ -56,10 +56,8 @@ except:
 #here we detect the OS runnng the program so that we can call exftran in the right way
 
 if os.name == 'nt': #sys.platform == 'win32':
-    gimpexe = "gimp-remote "
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
 elif os.name == 'posix':
-    gimpexe = "gimp-remote "
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
 else:
     raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
@@ -526,7 +524,7 @@ class interface:
         newnamefull = os.path.join(config.DefaultRepository, newname)
         shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
-        os.system(gimpexe + newnamefull)
+        os.system("%s %s" % (config.Gimp, newnamefull))
         self.ShowImage()
         self.image.RemoveFromCache()
 
@@ -1219,7 +1217,7 @@ class RenameDay:
 
         if self.newname != self.name:
             idx = 0
-            for photofile in self.AllPhotos[:]:
+            for photofile in self.AllPhotos:
                 if os.path.dirname(photofile) == self.dayname:
                     newphotofile = os.path.join(self.newdayname, os.path.split(photofile)[-1])
                     if os.path.isfile(os.path.join(config.DefaultRepository, newphotofile)):
@@ -1229,7 +1227,10 @@ class RenameDay:
                             if i.find(base) == 0:count += 1
                         newphotofile = os.path.splitext(newphotofile) + "-%i.jpg" % count
                     print "%s -> %s" % (photofile, newphotofile)
+                    if (imageCache is not None):
+                        imageCache.rename(photofile, newphotofile)
                     self.AllPhotos[idx] = newphotofile
+
                     os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
                     if photofile in self.selected:
                         self.selected[self.selected.index(photofile)] = newphotofile

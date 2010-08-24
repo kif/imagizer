@@ -53,12 +53,10 @@ gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP
 installdir = os.path.dirname(__file__)
 if os.name == 'nt': #sys.platform == 'win32':
     exiftran = os.path.join(installdir, "exiftran.exe ")
-    gimpexe = "gimp-remote "
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
 elif os.name == 'posix':
     MaxJPEGMem = 100000 # OK up to 10 Mpix
     exiftran = "JPEGMEM=%i %s " % (MaxJPEGMem, os.path.join(installdir, "exiftran "))
-    gimpexe = "gimp-remote "
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
 else:
     raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
