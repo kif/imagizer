@@ -31,6 +31,8 @@ It handles images, progress bars and configuration file.
 
 import os, sys, shutil, time, re, gc
 
+from Exiftran import Exiftran
+
 try:
     import Image, ImageStat, ImageChops, ImageFile
 except:
@@ -52,14 +54,14 @@ gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.dirname(__file__)
 if os.name == 'nt': #sys.platform == 'win32':
-    exiftran = os.path.join(installdir, "exiftran.exe ")
+#    exiftran = os.path.join(installdir, "exiftran.exe ")
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
 elif os.name == 'posix':
-    MaxJPEGMem = 100000 # OK up to 10 Mpix
-    exiftran = "JPEGMEM=%i %s " % (MaxJPEGMem, os.path.join(installdir, "exiftran "))
+#    MaxJPEGMem = 100000 # OK up to 10 Mpix
+#    exiftran = "JPEGMEM=%i %s " % (MaxJPEGMem, os.path.join(installdir, "exiftran "))
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
-else:
-    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
+#else:
+#    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
 
 #sys.path.append(installdir)    
 unifiedglade = os.path.join(installdir, "selector.glade")
@@ -682,32 +684,38 @@ class photo:
 
         if angle == 90:
             if imageCache is not None:
-                os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
+                Exiftran.rotate90(self.fn)
+#                os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
                 self.pixelsX = y
                 self.pixelsY = x
                 self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
-                os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
+                Exiftran.rotate90(self.fn)
+#                os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 270:
             if imageCache is not None:
-                os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
+                Exiftran.rotate270(self.fn)
+#                os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
                 self.pixelsX = y
                 self.pixelsY = x
                 self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
-                os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
+                Exiftran.rotate270(self.fn)
+#                os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 180:
             if imageCache is not None:
-                os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
+                Exiftran.rotate180(self.fn)
+#                os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
             else:
-                os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
+                Exiftran.rotate180(self.fn)
+#                os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         else:
@@ -848,7 +856,8 @@ class photo:
 
         self.readExif()
         if self.orientation != 1:
-            os.system('%s -aip "%s" &' % (exiftran, self.fn))
+            Exiftran.autorotate(self.fn)
+#            os.system('%s -aip "%s" &' % (exiftran, self.fn))
             if self.orientation > 4:
                 self.pixelsX = self.exif["Exif.Photo.PixelYDimension"]
                 self.pixelsY = self.exif["Exif.Photo.PixelXDimension"]

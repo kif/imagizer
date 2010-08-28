@@ -29,6 +29,7 @@ The setup.py script allows to install Imagizer regardless to the operating syste
 """
 
 from distutils.core import setup
+from distutils.extension import Extension
 import os, sys, glob, distutils.sysconfig, shutil, locale
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
@@ -80,6 +81,15 @@ setup(name='Imagizer',
     ],
     packages=['imagizer'],
     package_dir={'imagizer': ''},
+    ext_modules=[
+         Extension(
+             name='libexiftran',
+             sources=glob.glob(os.path.join("libexiftran", "*.c")),
+             define_macros=[],
+             libraries=["jpeg", "exif", "m"],
+    #               include_dirs=["/usr/include/libexif"]
+         ),
+    ],
     )
 os.remove("imagizer.conf")
 
