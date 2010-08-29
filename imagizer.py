@@ -413,8 +413,12 @@ class ModelRangeTout:
             except OSError:
                 print "Warning: unable to chown ot chmod  %s" % strImageFile
             myPhoto = photo(strImageFile)
+#            Save the old image name in exif tag
+            myPhoto.storeOriginalName(i)
+
             if config.AutoRotate:
                 myPhoto.autorotate()
+
 #Set the new images in cache for further display 
             try:
                 imageCache[ ToProcess ] = myPhoto
@@ -772,7 +776,7 @@ class photo:
                 try:
                     self.pixelsX = self.exif["Exif.Photo.PixelXDimension"]
                     self.pixelsY = self.exif["Exif.Photo.PixelYDimension"]
-                except IndexError:
+                except (IndexError, KeyError):
                     self.taille()
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             if "Exif.Image.Orientation" in self.exif.exifKeys():
@@ -848,6 +852,18 @@ class photo:
         self.exif.setComment(titre)
         self.exif.writeMetadata()
 
+    def storeOriginalName(self, originalName):
+        """
+        Save the original name of the file into the Exif.Photo.UserComment tag.
+        This tag is usually not used, people prefer the JPEG tag for entiteling images.
+        
+        @param  originalName: name of the file before it was processed by selector
+        @type   originalName: python string
+        """
+        if self.metadata == None:
+            self.readExif()
+        self.exif["Exif.Photo.UserComment"] = originalName
+        self.exif.writeMetadata()
 
     def autorotate(self):
         """does autorotate the image according to the EXIF tag"""
