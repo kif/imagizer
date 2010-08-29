@@ -67,6 +67,7 @@ from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, Process
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
 
+
 try:
     import pygtk ; pygtk.require('2.0')
     import gtk
@@ -344,6 +345,7 @@ class interface:
         self.xml.signal_connect('on_vers_page_web2_activate', self.ToWeb)
         self.xml.signal_connect('on_vide_selection1_activate', self.EmptySelected)
         self.xml.signal_connect('on_copie1_activate', self.copy)
+        self.xml.signal_connect('on_importer1_activate', self.importImages)
         self.xml.signal_connect('on_poubelle_activate', self.poubelle)
         self.xml.signal_connect('on_Poubelle_clicked', self.poubelle)
         self.xml.signal_connect('on_Gimp_clicked', self.gimp)
@@ -688,7 +690,7 @@ class interface:
     def about(self, *args):
         """display a copyright message"""
         self.settitle()
-        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion 1.76 du 01/01/2010".decode("UTF8"), Message=gtk.MESSAGE_INFO)
+        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion $\Id$".decode("UTF8"), Message=gtk.MESSAGE_INFO)
 
 
     def nextJ(self, *args):
@@ -1012,11 +1014,18 @@ class interface:
         config.NbrPerPage = 9
 
     def renommer(self, *args):
-        """lauch a new window and ask for anew name for the current directory"""
+        """Launch a new window and ask for anew name for the current directory"""
         self.settitle()
         renamdayinstance = RenameDay(self.AllJpegs[self.CurIm], self.AllJpegs, self.Selected)
         self.AllJpegs = renamdayinstance.AllPhotos
         self.Selected = renamdayinstance.selected
+
+    def importImages(self, *args):
+        """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
+        self.settitle()
+        importFilerInstance = WarningSc(config.WebRepository, window="dialog-import")
+        dirForImport = importFilerInstance.getDirectory()
+
 
     def DefMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""

@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--*- mode: xml -*-->
+<?xml version="1.0"?>
 <glade-interface>
+  <!-- interface-requires gtk+ 2.6 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkFileChooserDialog" id="filer">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">dépot Imagizer</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+    <property name="title" translatable="yes">d&#xE9;pot Imagizer</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">dialog</property>
+    <property name="action">select-folder</property>
     <signal name="destroy" handler="on_filer_destroy"/>
     <signal name="selection_changed" handler="on_filer_selection_changed"/>
     <child internal-child="vbox">
@@ -17,37 +17,47 @@
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <property name="layout_style">end</property>
             <child>
               <widget class="GtkButton" id="Cancel">
+                <property name="label">gtk-cancel</property>
+                <property name="response_id">-6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">-6</property>
                 <signal name="clicked" handler="on_Cancel_clicked"/>
               </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkButton" id="Open">
+                <property name="label">gtk-open</property>
+                <property name="response_id">-5</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
-                <property name="label">gtk-open</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">-5</property>
                 <signal name="clicked" handler="on_Open_clicked"/>
               </widget>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </widget>
@@ -55,10 +65,10 @@
   </widget>
   <widget class="GtkWindow" id="Principale">
     <property name="visible">True</property>
-    <property name="extension_events">GDK_EXTENSION_EVENTS_ALL</property>
+    <property name="extension_events">all</property>
     <property name="title" translatable="yes">Selector</property>
-    <property name="window_position">GTK_WIN_POS_MOUSE</property>
-    <property name="gravity">GDK_GRAVITY_CENTER</property>
+    <property name="window_position">mouse</property>
+    <property name="gravity">center</property>
     <signal name="destroy" handler="on_Principale_destroy"/>
     <child>
       <widget class="GtkHBox" id="hbox1">
@@ -81,106 +91,83 @@
                           <widget class="GtkMenu" id="menuitem1_menu">
                             <child>
                               <widget class="GtkImageMenuItem" id="About">
+                                <property name="label">&#xC0; Propos</property>
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">À Propos</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_About_activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1048">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-dialog-info</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur14">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur14">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkMenuItem" id="lance_diaporama">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Passe en mode plein écran et lance le diaporama</property>
+                                <property name="tooltip" translatable="yes">Passe en mode plein &#xE9;cran et lance le diaporama</property>
                                 <property name="label" translatable="yes">Diaporama</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_lance_diaporama_activate"/>
-                                <accelerator key="d" modifiers="GDK_CONTROL_MASK" signal="activate"/>
+                                <accelerator key="d" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="fullscreen">
+                                <property name="label">Plein &#xC9;cran</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Passe en mode plein écran</property>
-                                <property name="label" translatable="yes">Plein Écran</property>
+                                <property name="tooltip" translatable="yes">Passe en mode plein &#xE9;cran</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_fullscreen_activate"/>
-                                <accelerator key="F" modifiers="GDK_CONTROL_MASK" signal="activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1049">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-fullscreen</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
+                                <accelerator key="F" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur15">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur15">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="poubelle">
+                                <property name="label">Poubelle</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Déplace l'image dans la corbeille</property>
-                                <property name="label" translatable="yes">Poubelle</property>
+                                <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_poubelle_activate"/>
-                                <accelerator key="Delete" modifiers="GDK_CONTROL_MASK" signal="activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1050">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-delete</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
+                                <accelerator key="Delete" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur2">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur2">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="nommer1">
+                                <property name="label">Nommer journ&#xE9;e</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Propose de renommer le répertoire courant</property>
-                                <property name="label" translatable="yes">Nommer journée</property>
+                                <property name="tooltip" translatable="yes">Propose de renommer le r&#xE9;pertoire courant</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_nommer1_activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1051">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-directory</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="executer1">
+                                <property name="label">Executer</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Lance le redimentionnement des images selectionnées</property>
-                                <property name="label" translatable="yes">Executer</property>
+                                <property name="tooltip" translatable="yes">Lance le redimentionnement des images selectionn&#xE9;es</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <child>
                                   <widget class="GtkMenu" id="executer1_menu">
                                     <child>
                                       <widget class="GtkMenuItem" id="Synchronize">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Syncronise les image avec un autre dépot</property>
+                                        <property name="tooltip" translatable="yes">Syncronise les image avec un autre d&#xE9;pot</property>
                                         <property name="label" translatable="yes">Synchronise</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_Synchronize_activate"/>
@@ -194,7 +181,7 @@
                                     <child>
                                       <widget class="GtkMenuItem" id="copie">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Copie tous les fichiers selectionnés dans «Selected»</property>
+                                        <property name="tooltip" translatable="yes">Copie tous les fichiers selectionn&#xE9;s dans &#xAB;Selected&#xBB;</property>
                                         <property name="label" translatable="yes">Copie seulement</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_copie1_activate"/>
@@ -203,7 +190,7 @@
                                     <child>
                                       <widget class="GtkMenuItem" id="copie_et_grave1">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Copie toutes les images sélectionnées et les graves sur CD/DVD</property>
+                                        <property name="tooltip" translatable="yes">Copie toutes les images s&#xE9;lectionn&#xE9;es et les graves sur CD/DVD</property>
                                         <property name="label" translatable="yes">Copie et grave</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_copie_et_grave1_activate"/>
@@ -212,7 +199,7 @@
                                     <child>
                                       <widget class="GtkMenuItem" id="vers_page_web1">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Copie les images sélectionnées, les redimentionne et  ajoute un filigrane (optionnel) </property>
+                                        <property name="tooltip" translatable="yes">Copie les images s&#xE9;lectionn&#xE9;es, les redimentionne et  ajoute un filigrane (optionnel) </property>
                                         <property name="label" translatable="yes">Copie et redimmentionne</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_executer1_activate"/>
@@ -227,34 +214,30 @@
                                       </widget>
                                     </child>
                                     <child>
-                                      <widget class="GtkSeparatorMenuItem" id="séparateur13">
+                                      <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur13">
                                         <property name="visible">True</property>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="vide_selection1">
+                                        <property name="label">Vide Selection</property>
                                         <property name="visible">True</property>
-                                        <property name="label" translatable="yes">Vide Selection</property>
                                         <property name="use_underline">True</property>
+                                        <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_vide_selection1_activate"/>
-                                        <child internal-child="image">
-                                          <widget class="GtkImage" id="image1053">
-                                            <property name="visible">True</property>
-                                            <property name="stock">gtk-delete</property>
-                                            <property name="icon_size">1</property>
-                                          </widget>
-                                        </child>
                                       </widget>
                                     </child>
                                   </widget>
                                 </child>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1052">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-execute</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkMenuItem" id="importer1">
+                                <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">Permet d'importer des fichiers Raw ou JPEG</property>
+                                <property name="label" translatable="yes">Importer images</property>
+                                <property name="use_underline">True</property>
+                                <signal name="activate" handler="on_importer1_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -264,25 +247,19 @@
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="arreter1">
+                                <property name="label">Arreter</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Quitte immédiatement sans sauvegarder</property>
-                                <property name="label" translatable="yes">Arreter</property>
+                                <property name="tooltip" translatable="yes">Quitte imm&#xE9;diatement sans sauvegarder</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_arreter1_activate"/>
-                                <accelerator key="e" modifiers="GDK_CONTROL_MASK" signal="activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1054">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-stop</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
+                                <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="quitter1">
-                                <property name="visible">True</property>
                                 <property name="label">gtk-quit</property>
+                                <property name="visible">True</property>
                                 <property name="use_underline">True</property>
                                 <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_quitter1_activate"/>
@@ -293,32 +270,26 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkMenuItem" id="préférences1">
+                      <widget class="GtkMenuItem" id="pr&#xE9;f&#xE9;rences1">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Préférences</property>
+                        <property name="label" translatable="yes">Pr&#xE9;f&#xE9;rences</property>
                         <property name="use_underline">True</property>
                         <child>
-                          <widget class="GtkMenu" id="préférences1_menu">
+                          <widget class="GtkMenu" id="pr&#xE9;f&#xE9;rences1_menu">
                             <child>
                               <widget class="GtkImageMenuItem" id="enregistrerP">
+                                <property name="label">Sauve</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Enregister les préférences</property>
-                                <property name="label" translatable="yes">Sauve</property>
+                                <property name="tooltip" translatable="yes">Enregister les pr&#xE9;f&#xE9;rences</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_enregistrerP_activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1055">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-floppy</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkMenuItem" id="taille_media">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet de spécifier la taille des media d'archivage CD / DVD</property>
+                                <property name="tooltip" translatable="yes">Permet de sp&#xE9;cifier la taille des media d'archivage CD / DVD</property>
                                 <property name="label" translatable="yes">Taille de CD/DVD</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_taille_media_activate"/>
@@ -341,15 +312,16 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur11">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur11">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="taille">
+                                <property name="label">Taille de l'affichage</property>
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Taille de l'affichage</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <child>
                                   <widget class="GtkMenu" id="taille_menu">
                                     <child>
@@ -393,17 +365,10 @@
                                     </child>
                                   </widget>
                                 </child>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1056">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-zoom-100</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur1">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur1">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -418,7 +383,7 @@
                                       <widget class="GtkRadioMenuItem" id="VLowQ">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Interpollation au plus proche</property>
-                                        <property name="label" translatable="yes">Très rapide</property>
+                                        <property name="label" translatable="yes">Tr&#xE8;s rapide</property>
                                         <property name="use_underline">True</property>
                                         <property name="active">True</property>
                                         <signal name="activate" handler="on_VLowQ_activate"/>
@@ -438,7 +403,7 @@
                                     <child>
                                       <widget class="GtkRadioMenuItem" id="HiQ">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Interpollation Billinéaire</property>
+                                        <property name="tooltip" translatable="yes">Interpollation Billin&#xE9;aire</property>
                                         <property name="label" translatable="yes">Bon</property>
                                         <property name="use_underline">True</property>
                                         <property name="active">True</property>
@@ -450,7 +415,7 @@
                                       <widget class="GtkRadioMenuItem" id="VHiQ">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Interpollation Hyperbolique </property>
-                                        <property name="label" translatable="yes">Très Bon</property>
+                                        <property name="label" translatable="yes">Tr&#xE8;s Bon</property>
                                         <property name="use_underline">True</property>
                                         <property name="active">True</property>
                                         <property name="group">VLowQ</property>
@@ -462,7 +427,7 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur10">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur10">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -537,14 +502,14 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur16">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur16">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkMenuItem" id="configurer_dioporama">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet de configurer les paramètres du diaporama</property>
+                                <property name="tooltip" translatable="yes">Permet de configurer les param&#xE8;tres du diaporama</property>
                                 <property name="label" translatable="yes">Configurer Diaporama</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_configurer_dioporama_activate"/>
@@ -564,71 +529,47 @@
                           <widget class="GtkMenu" id="selection_menu">
                             <child>
                               <widget class="GtkImageMenuItem" id="chargerS">
+                                <property name="label">Charger</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Charge la précédente selection</property>
-                                <property name="label" translatable="yes">Charger</property>
+                                <property name="tooltip" translatable="yes">Charge la pr&#xE9;c&#xE9;dente selection</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_chargerS_activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1057">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-open</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="enregistrerS">
+                                <property name="label">Sauve</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Enregistre la sélection</property>
-                                <property name="label" translatable="yes">Sauve</property>
+                                <property name="tooltip" translatable="yes">Enregistre la s&#xE9;lection</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_enregistrerS_activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1058">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-save</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur4">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur4">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="selectionner">
+                                <property name="label">D&#xE9; / S&#xE9;l&#xE9;ctionner</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet de sélectionner ou de déselectionner une image</property>
-                                <property name="label" translatable="yes">Dé / Séléctionner</property>
+                                <property name="tooltip" translatable="yes">Permet de s&#xE9;lectionner ou de d&#xE9;selectionner une image</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_selectionner_activate"/>
-                                <accelerator key="S" modifiers="GDK_CONTROL_MASK" signal="activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1059">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-apply</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
+                                <accelerator key="S" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="inverserS">
+                                <property name="label">Inverser</property>
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Inverser</property>
                                 <property name="use_underline">True</property>
+                                <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_inverserS_activate"/>
-                                <child internal-child="image">
-                                  <widget class="GtkImage" id="image1060">
-                                    <property name="visible">True</property>
-                                    <property name="stock">gtk-refresh</property>
-                                    <property name="icon_size">1</property>
-                                  </widget>
-                                </child>
                               </widget>
                             </child>
                             <child>
@@ -648,7 +589,7 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur12">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur12">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -664,7 +605,7 @@
                             <child>
                               <widget class="GtkMenuItem" id="media_avant">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Sélection pour  remplir CD/DVD  avec des images plus anciennes que la courante.</property>
+                                <property name="tooltip" translatable="yes">S&#xE9;lection pour  remplir CD/DVD  avec des images plus anciennes que la courante.</property>
                                 <property name="label" translatable="yes">CD/DVD + ancien</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_media_avant_activate"/>
@@ -673,8 +614,8 @@
                             <child>
                               <widget class="GtkMenuItem" id="media_apres">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Sélection pour  remplir CD/DVD  avec des images plus récentes que la courante.</property>
-                                <property name="label" translatable="yes">CD/DVD + récent</property>
+                                <property name="tooltip" translatable="yes">S&#xE9;lection pour  remplir CD/DVD  avec des images plus r&#xE9;centes que la courante.</property>
+                                <property name="label" translatable="yes">CD/DVD + r&#xE9;cent</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_media_apres_activate"/>
                               </widget>
@@ -701,8 +642,8 @@
                                   <widget class="GtkMenu" id="image62_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierI">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-first</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierI_activate"/>
@@ -710,23 +651,17 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="moins_10">
+                                        <property name="label">Moins 10</property>
                                         <property name="visible">True</property>
-                                        <property name="label" translatable="yes">Moins 10</property>
                                         <property name="use_underline">True</property>
+                                        <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_moins_10_activate"/>
-                                        <child internal-child="image">
-                                          <widget class="GtkImage" id="image1061">
-                                            <property name="visible">True</property>
-                                            <property name="stock">gtk-undo</property>
-                                            <property name="icon_size">1</property>
-                                          </widget>
-                                        </child>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="precedentI">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-back</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentI_activate"/>
@@ -734,8 +669,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="suivantI">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-forward</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantI_activate"/>
@@ -743,23 +678,17 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="plus_10">
+                                        <property name="label">Plus 10</property>
                                         <property name="visible">True</property>
-                                        <property name="label" translatable="yes">Plus 10</property>
                                         <property name="use_underline">True</property>
+                                        <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_plus_10_activate"/>
-                                        <child internal-child="image">
-                                          <widget class="GtkImage" id="image1062">
-                                            <property name="visible">True</property>
-                                            <property name="stock">gtk-redo</property>
-                                            <property name="icon_size">1</property>
-                                          </widget>
-                                        </child>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="dernierI">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-last</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierI_activate"/>
@@ -780,8 +709,8 @@
                                   <widget class="GtkMenu" id="jour1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="indexJ">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-index</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_indexJ_activate"/>
@@ -789,8 +718,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierJ">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-first</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierJ_activate"/>
@@ -798,28 +727,28 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="precedentJ">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-back</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentJ_activate"/>
-                                        <accelerator key="Page_Up" modifiers="" signal="activate"/>
+                                        <accelerator key="Page_Up" signal="activate"/>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="suivantJ">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-forward</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantJ_activate"/>
-                                        <accelerator key="Page_Down" modifiers="" signal="activate"/>
+                                        <accelerator key="Page_Down" signal="activate"/>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="dernierJ">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-last</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierJ_activate"/>
@@ -830,60 +759,60 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur5">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur5">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="selectionné1">
+                              <widget class="GtkMenuItem" id="selectionn&#xE9;1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Selectionné</property>
+                                <property name="label" translatable="yes">Selectionn&#xE9;</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_selectionné1_activate"/>
+                                <signal name="activate" handler="on_selectionn&#xE9;1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="selectionné1_menu">
+                                  <widget class="GtkMenu" id="selectionn&#xE9;1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierS">
-                                        <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Première photo sélectionnée</property>
                                         <property name="label">gtk-goto-first</property>
+                                        <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Premi&#xE8;re photo s&#xE9;lectionn&#xE9;e</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierS_activate"/>
-                                        <accelerator key="Left" modifiers="GDK_MOD1_MASK" signal="activate"/>
+                                        <accelerator key="Left" signal="activate" modifiers="GDK_MOD1_MASK"/>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="precedentS">
-                                        <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Précédente photo sélectiononnée </property>
                                         <property name="label">gtk-go-back</property>
+                                        <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Pr&#xE9;c&#xE9;dente photo s&#xE9;lectiononn&#xE9;e </property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentS_activate"/>
-                                        <accelerator key="Up" modifiers="GDK_MOD1_MASK" signal="activate"/>
+                                        <accelerator key="Up" signal="activate" modifiers="GDK_MOD1_MASK"/>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="suivantS">
-                                        <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Prochaine photo sélectionnée</property>
                                         <property name="label">gtk-go-forward</property>
+                                        <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Prochaine photo s&#xE9;lectionn&#xE9;e</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantS_activate"/>
-                                        <accelerator key="Down" modifiers="GDK_MOD1_MASK" signal="activate"/>
+                                        <accelerator key="Down" signal="activate" modifiers="GDK_MOD1_MASK"/>
                                       </widget>
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="dernierS">
-                                        <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Dernière image sélectionnée</property>
                                         <property name="label">gtk-goto-last</property>
+                                        <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Derni&#xE8;re image s&#xE9;lectionn&#xE9;e</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierS_activate"/>
-                                        <accelerator key="Right" modifiers="GDK_MOD1_MASK" signal="activate"/>
+                                        <accelerator key="Right" signal="activate" modifiers="GDK_MOD1_MASK"/>
                                       </widget>
                                     </child>
                                   </widget>
@@ -891,17 +820,17 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="non_sélectionné1">
+                              <widget class="GtkMenuItem" id="non_s&#xE9;lectionn&#xE9;1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Non Sélectionné</property>
+                                <property name="label" translatable="yes">Non S&#xE9;lectionn&#xE9;</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_non_sélectionné1_activate"/>
+                                <signal name="activate" handler="on_non_s&#xE9;lectionn&#xE9;1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="non_sélectionné1_menu">
+                                  <widget class="GtkMenu" id="non_s&#xE9;lectionn&#xE9;1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierNS">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-first</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierNS_activate"/>
@@ -909,8 +838,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="precedentNS">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-back</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentNS_activate"/>
@@ -918,8 +847,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="suivantNS">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-forward</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantNS_activate"/>
@@ -927,8 +856,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="dernierNS">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-last</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierNS_activate"/>
@@ -939,22 +868,22 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="séparateur6">
+                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur6">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="titré1">
+                              <widget class="GtkMenuItem" id="titr&#xE9;1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Titré</property>
+                                <property name="label" translatable="yes">Titr&#xE9;</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_titré1_activate"/>
+                                <signal name="activate" handler="on_titr&#xE9;1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="titré1_menu">
+                                  <widget class="GtkMenu" id="titr&#xE9;1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-first</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierT_activate"/>
@@ -962,8 +891,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="precedentT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-back</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentT_activate"/>
@@ -971,8 +900,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="suivantT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-forward</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantT_activate"/>
@@ -980,8 +909,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="dernierT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-last</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierT_activate"/>
@@ -992,17 +921,17 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="non_titré1">
+                              <widget class="GtkMenuItem" id="non_titr&#xE9;1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Non Titré</property>
+                                <property name="label" translatable="yes">Non Titr&#xE9;</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_non_titré1_activate"/>
+                                <signal name="activate" handler="on_non_titr&#xE9;1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="non_titré1_menu">
+                                  <widget class="GtkMenu" id="non_titr&#xE9;1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierNT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-first</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierNT_activate"/>
@@ -1010,8 +939,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="precedentNT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-back</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentNT_activate"/>
@@ -1019,8 +948,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="suivantNT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-go-forward</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantNT_activate"/>
@@ -1028,8 +957,8 @@
                                     </child>
                                     <child>
                                       <widget class="GtkImageMenuItem" id="dernierNT">
-                                        <property name="visible">True</property>
                                         <property name="label">gtk-goto-last</property>
+                                        <property name="visible">True</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierNT_activate"/>
@@ -1049,6 +978,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -1061,6 +991,9 @@
                     <property name="xalign">0</property>
                     <property name="pixbuf">logo.png</property>
                   </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <widget class="GtkVBox" id="vbox2">
@@ -1075,8 +1008,8 @@
                               <widget class="GtkButton" id="Gimp">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip" translatable="yes">Éditer l'image avec le GIMP</property>
-                                <property name="response_id">0</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip" translatable="yes">&#xC9;diter l'image avec le GIMP</property>
                                 <signal name="clicked" handler="on_Gimp_clicked"/>
                                 <child>
                                   <widget class="GtkAlignment" id="alignment12">
@@ -1095,12 +1028,13 @@
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
+                                            <property name="position">0</property>
                                           </packing>
                                         </child>
                                         <child>
                                           <widget class="GtkLabel" id="label28">
                                             <property name="visible">True</property>
-                                            <property name="label" translatable="yes">Éditer</property>
+                                            <property name="label" translatable="yes">&#xC9;diter</property>
                                             <property name="use_underline">True</property>
                                           </widget>
                                           <packing>
@@ -1117,14 +1051,15 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
                               <widget class="GtkButton" id="button3">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip" translatable="yes">Filtrer à l'aide du masque de contraste</property>
-                                <property name="response_id">0</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip" translatable="yes">Filtrer &#xE0; l'aide du masque de contraste</property>
                                 <signal name="clicked" handler="on_Filter_clicked"/>
                                 <child>
                                   <widget class="GtkAlignment" id="alignment13">
@@ -1143,6 +1078,7 @@
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
+                                            <property name="position">0</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1172,14 +1108,15 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <widget class="GtkButton" id="Poubelle">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">Déplace l'image dans la corbeille</property>
-                            <property name="response_id">0</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
                             <signal name="clicked" handler="on_Poubelle_clicked"/>
                             <child>
                               <widget class="GtkAlignment" id="alignment11">
@@ -1198,6 +1135,7 @@
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
+                                        <property name="position">0</property>
                                       </packing>
                                     </child>
                                     <child>
@@ -1227,14 +1165,15 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="padding">1</property>
-                    <property name="pack_type">GTK_PACK_END</property>
+                    <property name="pack_type">end</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -1266,7 +1205,6 @@
                   <widget class="GtkEntry" id="Bias">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1280,9 +1218,9 @@
                   <widget class="GtkCheckButton" id="Selection">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip" translatable="yes">Si l'image est séłectionnée, elle sera copiée</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip" translatable="yes">Si l'image est s&#xE9;&#x142;ectionn&#xE9;e, elle sera copi&#xE9;e</property>
                     <property name="use_underline">True</property>
-                    <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <signal name="toggled" handler="on_Selection_toggled"/>
@@ -1301,7 +1239,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1341,7 +1278,6 @@
                   <widget class="GtkEntry" id="Iso">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1368,7 +1304,6 @@
                   <widget class="GtkEntry" id="Titre">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1396,7 +1331,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1411,7 +1345,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1426,7 +1359,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1441,7 +1373,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1521,7 +1452,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1536,7 +1466,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1551,7 +1480,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1566,7 +1494,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
-                    <property name="invisible_char">*</property>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1578,7 +1505,7 @@
                   <widget class="GtkLabel" id="label4">
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
-                    <property name="label" translatable="yes">Résolution</property>
+                    <property name="label" translatable="yes">R&#xE9;solution</property>
                   </widget>
                   <packing>
                     <property name="top_attach">2</property>
@@ -1591,7 +1518,7 @@
                   <widget class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
-                    <property name="label" translatable="yes">Modèle</property>
+                    <property name="label" translatable="yes">Mod&#xE8;le</property>
                   </widget>
                   <packing>
                     <property name="top_attach">1</property>
@@ -1626,10 +1553,10 @@
                   <widget class="GtkButton" id="gauche">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip" translatable="yes">Tourne l'image de 90° dans le sens trigonometrique (Ctrl-Left)</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip" translatable="yes">Tourne l'image de 90&#xB0; dans le sens trigonometrique (Ctrl-Left)</property>
                     <signal name="clicked" handler="on_gauche_clicked"/>
-                    <accelerator key="Left" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
+                    <accelerator key="Left" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
                       <widget class="GtkAlignment" id="alignment7">
                         <property name="visible">True</property>
@@ -1647,15 +1574,16 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label18">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Rotation
-à gauche</property>
+&#xE0; gauche</property>
                                 <property name="use_underline">True</property>
-                                <property name="justify">GTK_JUSTIFY_CENTER</property>
+                                <property name="justify">center</property>
                                 <property name="wrap">True</property>
                               </widget>
                               <packing>
@@ -1680,10 +1608,10 @@
                   <widget class="GtkButton" id="droite">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip" translatable="yes">Tourne l'image de 90° dans le sens horaire (Ctrl-Right)</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip" translatable="yes">Tourne l'image de 90&#xB0; dans le sens horaire (Ctrl-Right)</property>
                     <signal name="clicked" handler="on_droite_clicked"/>
-                    <accelerator key="Right" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
+                    <accelerator key="Right" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
                       <widget class="GtkAlignment" id="alignment8">
                         <property name="visible">True</property>
@@ -1697,13 +1625,14 @@
                               <widget class="GtkLabel" id="label19">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Rotation
-à droite</property>
+&#xE0; droite</property>
                                 <property name="use_underline">True</property>
-                                <property name="justify">GTK_JUSTIFY_CENTER</property>
+                                <property name="justify">center</property>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
@@ -1733,10 +1662,10 @@
                   <widget class="GtkButton" id="precedant">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip" translatable="yes">Image précédente (Ctrl-Up)</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip" translatable="yes">Image pr&#xE9;c&#xE9;dente (Ctrl-Up)</property>
                     <signal name="clicked" handler="on_precedant_clicked"/>
-                    <accelerator key="Up" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
+                    <accelerator key="Up" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
                       <widget class="GtkAlignment" id="alignment10">
                         <property name="visible">True</property>
@@ -1754,12 +1683,13 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
                               <widget class="GtkLabel" id="label21">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Précédente</property>
+                                <property name="label" translatable="yes">Pr&#xE9;c&#xE9;dente</property>
                                 <property name="use_underline">True</property>
                               </widget>
                               <packing>
@@ -1782,10 +1712,10 @@
                   <widget class="GtkButton" id="suivant">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="tooltip" translatable="yes">Image suivant (Ctrl-Down)</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="on_suivant_clicked"/>
-                    <accelerator key="Down" modifiers="GDK_CONTROL_MASK" signal="clicked"/>
+                    <accelerator key="Down" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
                       <widget class="GtkAlignment" id="alignment9">
                         <property name="visible">True</property>
@@ -1804,6 +1734,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
@@ -1833,6 +1764,9 @@
               </packing>
             </child>
           </widget>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkVSeparator" id="vseparator1">
@@ -1847,9 +1781,9 @@
           <widget class="GtkImage" id="photo">
             <property name="visible">True</property>
             <property name="stock">gtk-missing-image</property>
-            <property name="icon_size">6</property>
             <signal name="client_event" handler="on_photo_client_event"/>
             <signal name="scroll_event" handler="on_photo_client_event"/>
+            <property name="icon-size">6</property>
           </widget>
           <packing>
             <property name="position">2</property>
@@ -1861,9 +1795,9 @@
   <widget class="GtkWindow" id="splash">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Initialisation</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
+    <property name="window_position">center-always</property>
     <property name="skip_taskbar_hint">True</property>
-    <property name="gravity">GDK_GRAVITY_CENTER</property>
+    <property name="gravity">center</property>
     <child>
       <widget class="GtkVBox" id="vbox4">
         <property name="visible">True</property>
@@ -1872,6 +1806,9 @@
             <property name="visible">True</property>
             <property name="stock">gtk-missing-image</property>
           </widget>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkProgressBar" id="progress">
@@ -1890,10 +1827,10 @@
   <widget class="GtkDialog" id="dialog-warning">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Attention </property>
-    <property name="window_position">GTK_WIN_POS_CENTER</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <signal name="close" handler="on_dialog_warning_close"/>
+    <property name="window_position">center</property>
+    <property name="type_hint">dialog</property>
     <signal name="destroy" handler="on_dialog_warning_destroy"/>
+    <signal name="close" handler="on_dialog_warning_close"/>
     <signal name="response" handler="on_dialog_warning_response"/>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox2">
@@ -1909,14 +1846,17 @@
                     <property name="visible">True</property>
                     <property name="stock">gtk-dialog-warning</property>
                   </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <widget class="GtkLabel" id="label1">
                     <property name="visible">True</property>
                     <property name="xpad">10</property>
                     <property name="ypad">6</property>
-                    <property name="label" translatable="yes">Selector travaille sur toutes les photos du répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger !!!</property>
-                    <property name="justify">GTK_JUSTIFY_FILL</property>
+                    <property name="label" translatable="yes">Selector travaille sur toutes les photos du r&#xE9;pertoire de d&#xE9;part. Dans un premier temps, les photos sont renomm&#xE9;es en fonction de leur date et de l'appareil d'origine, ce qui va les m&#xE9;langer !!!</property>
+                    <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
                   <packing>
@@ -1938,6 +1878,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -1947,13 +1888,14 @@
                 <child>
                   <widget class="GtkLabel" id="label6">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Vous avez lancé selector sur un repertoire ne ressemblant pas à une archive selector :</property>
-                    <property name="justify">GTK_JUSTIFY_FILL</property>
+                    <property name="label" translatable="yes">Vous avez lanc&#xE9; selector sur un repertoire ne ressemblant pas &#xE0; une archive selector :</property>
+                    <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -1963,15 +1905,17 @@
                       <widget class="GtkEntry" id="dirname">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                         <signal name="editing_done" handler="on_dirname_editing_done"/>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkButton" id="Select">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <signal name="clicked" handler="on_Select_clicked"/>
                         <child>
                           <widget class="GtkAlignment" id="alignment1">
@@ -1979,7 +1923,7 @@
                             <property name="xscale">0</property>
                             <property name="yscale">0</property>
                             <child>
-                              <widget class="GtkHBox" id="hbox3">
+                              <widget class="GtkHBox" id="hbox1">
                                 <property name="visible">True</property>
                                 <property name="spacing">2</property>
                                 <child>
@@ -1990,12 +1934,13 @@
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <widget class="GtkLabel" id="label5">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Sélectionner</property>
+                                    <property name="label" translatable="yes">S&#xE9;lectionner</property>
                                     <property name="use_underline">True</property>
                                   </widget>
                                   <packing>
@@ -2023,7 +1968,7 @@
                 <child>
                   <widget class="GtkLabel" id="label7">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Êtes vous sur de vouloir continuer ?</property>
+                    <property name="label" translatable="yes">&#xCA;tes vous sur de vouloir continuer ?</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -2045,36 +1990,46 @@
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area2">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <property name="layout_style">end</property>
             <child>
               <widget class="GtkButton" id="cancel">
+                <property name="label">gtk-cancel</property>
+                <property name="response_id">-6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">-6</property>
                 <signal name="clicked" handler="on_cancel_clicked"/>
               </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkButton" id="ok">
+                <property name="label">gtk-ok</property>
+                <property name="response_id">-5</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
-                <property name="label">gtk-ok</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">-5</property>
                 <signal name="clicked" handler="on_ok_clicked"/>
               </widget>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </widget>
@@ -2083,10 +2038,10 @@
   <widget class="GtkDialog" id="WWW-root">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Attention </property>
-    <property name="window_position">GTK_WIN_POS_CENTER</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <signal name="close" handler="on_dialog_warning_close"/>
+    <property name="window_position">center</property>
+    <property name="type_hint">dialog</property>
     <signal name="destroy" handler="on_dialog_warning_destroy"/>
+    <signal name="close" handler="on_dialog_warning_close"/>
     <signal name="response" handler="on_dialog_warning_response"/>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox3">
@@ -2102,6 +2057,9 @@
                     <property name="visible">True</property>
                     <property name="stock">gtk-dialog-warning</property>
                   </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <widget class="GtkLabel" id="label38">
@@ -2128,6 +2086,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -2138,12 +2097,13 @@
                   <widget class="GtkLabel" id="label14">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">Indiquez ici le chemin de ce repertoire ou clickez sur Selectionner.</property>
-                    <property name="justify">GTK_JUSTIFY_FILL</property>
+                    <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -2153,15 +2113,17 @@
                       <widget class="GtkEntry" id="dirname">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">*</property>
                         <signal name="editing_done" handler="on_dirname_editing_done"/>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkButton" id="Select1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <signal name="clicked" handler="on_Select_clicked"/>
                         <child>
                           <widget class="GtkAlignment" id="alignment2">
@@ -2180,12 +2142,13 @@
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                                 <child>
                                   <widget class="GtkLabel" id="label16">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Sélectionner</property>
+                                    <property name="label" translatable="yes">S&#xE9;lectionner</property>
                                     <property name="use_underline">True</property>
                                   </widget>
                                   <packing>
@@ -2235,36 +2198,46 @@
         <child internal-child="action_area">
           <widget class="GtkHButtonBox" id="dialog-action_area3">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <property name="layout_style">end</property>
             <child>
               <widget class="GtkButton" id="cancel1">
+                <property name="label">gtk-cancel</property>
+                <property name="response_id">-6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">-6</property>
                 <signal name="clicked" handler="on_cancel_clicked"/>
               </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkButton" id="ok1">
+                <property name="label">gtk-ok</property>
+                <property name="response_id">-5</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
-                <property name="label">gtk-ok</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">-5</property>
                 <signal name="clicked" handler="on_ok_clicked"/>
               </widget>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </widget>
@@ -2280,11 +2253,12 @@
         <child>
           <widget class="GtkLabel" id="label30">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Vous pouvez ajouter un commentaire pour la journée</property>
+            <property name="label" translatable="yes">Vous pouvez ajouter un commentaire pour la journ&#xE9;e</property>
           </widget>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -2292,9 +2266,6 @@
             <property name="visible">True</property>
             <property name="n_rows">3</property>
             <property name="n_columns">2</property>
-            <child>
-              <placeholder/>
-            </child>
             <child>
               <widget class="GtkLabel" id="label36">
                 <property name="visible">True</property>
@@ -2336,7 +2307,6 @@
               <widget class="GtkEntry" id="Commentaire">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">*</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
@@ -2351,13 +2321,15 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
-                <property name="invisible_char">*</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
                 <property name="y_options"></property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </widget>
           <packing>
@@ -2370,7 +2342,7 @@
           <widget class="GtkScrolledWindow" id="scrolledwindow1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="shadow_type">GTK_SHADOW_IN</property>
+            <property name="shadow_type">in</property>
             <child>
               <widget class="GtkTextView" id="Description">
                 <property name="visible">True</property>
@@ -2387,25 +2359,26 @@
             <property name="visible">True</property>
             <child>
               <widget class="GtkButton" id="cancel2">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_cancel_clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="ok2">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-ok</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_ok_clicked"/>
               </widget>
               <packing>
@@ -2426,7 +2399,7 @@
   </widget>
   <widget class="GtkWindow" id="TailleCD">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Taille média</property>
+    <property name="title" translatable="yes">Taille m&#xE9;dia</property>
     <signal name="destroy" handler="on_TailleCD_destroy"/>
     <child>
       <widget class="GtkVBox" id="vbox10">
@@ -2434,24 +2407,24 @@
         <child>
           <widget class="GtkLabel" id="label33">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Veuillez préciser la taille des média 
+            <property name="label" translatable="yes">Veuillez pr&#xE9;ciser la taille des m&#xE9;dia 
 que vous utilisez pour archiver vos images</property>
           </widget>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
           <widget class="GtkTable" id="table6">
             <property name="visible">True</property>
-            <property name="n_rows">1</property>
             <property name="n_columns">2</property>
             <child>
               <widget class="GtkLabel" id="label35">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">MégaOctets</property>
+                <property name="label" translatable="yes">M&#xE9;gaOctets</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
@@ -2464,7 +2437,6 @@ que vous utilisez pour archiver vos images</property>
               <widget class="GtkEntry" id="TailleMo">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">*</property>
               </widget>
               <packing>
                 <property name="y_options"></property>
@@ -2482,25 +2454,26 @@ que vous utilisez pour archiver vos images</property>
             <property name="visible">True</property>
             <child>
               <widget class="GtkButton" id="button4">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_cancel_clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="button5">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-ok</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_ok_clicked"/>
               </widget>
               <packing>
@@ -2521,11 +2494,11 @@ que vous utilisez pour archiver vos images</property>
   </widget>
   <widget class="GtkWindow" id="FullScreen">
     <property name="visible">True</property>
-    <property name="extension_events">GDK_EXTENSION_EVENTS_ALL</property>
-    <property name="tooltip" translatable="yes">Fenetre de Selector plein écran</property>
+    <property name="extension_events">all</property>
+    <property name="tooltip" translatable="yes">Fenetre de Selector plein &#xE9;cran</property>
     <property name="title" translatable="yes">Selector</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
-    <property name="gravity">GDK_GRAVITY_CENTER</property>
+    <property name="window_position">center-always</property>
+    <property name="gravity">center</property>
     <signal name="destroy" handler="on_FullScreen_destroy"/>
     <child>
       <widget class="GtkImage" id="image793">
@@ -2546,11 +2519,12 @@ que vous utilisez pour archiver vos images</property>
         <child>
           <widget class="GtkLabel" id="label39">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Délai entre les images</property>
+            <property name="label" translatable="yes">D&#xE9;lai entre les images</property>
           </widget>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -2576,7 +2550,7 @@ que vous utilisez pour archiver vos images</property>
         <child>
           <widget class="GtkLabel" id="label40">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Orde de défilement des images</property>
+            <property name="label" translatable="yes">Orde de d&#xE9;filement des images</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -2586,11 +2560,11 @@ que vous utilisez pour archiver vos images</property>
         </child>
         <child>
           <widget class="GtkRadioButton" id="radio-chrono">
+            <property name="label" translatable="yes">Chronologique</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="label" translatable="yes">Chronologique</property>
+            <property name="receives_default">False</property>
             <property name="use_underline">True</property>
-            <property name="response_id">0</property>
             <property name="draw_indicator">True</property>
             <signal name="toggled" handler="on_radio_chrono_toggled"/>
             <signal name="group_changed" handler="on_radio_chrono_group_changed"/>
@@ -2603,11 +2577,11 @@ que vous utilisez pour archiver vos images</property>
         </child>
         <child>
           <widget class="GtkRadioButton" id="radio-random">
+            <property name="label" translatable="yes">Al&#xE9;atoire</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="label" translatable="yes">Aléatoire</property>
+            <property name="receives_default">False</property>
             <property name="use_underline">True</property>
-            <property name="response_id">0</property>
             <property name="draw_indicator">True</property>
             <property name="group">radio-chrono</property>
             <signal name="toggled" handler="on_radio_random_toggled"/>
@@ -2621,11 +2595,11 @@ que vous utilisez pour archiver vos images</property>
         </child>
         <child>
           <widget class="GtkRadioButton" id="radio-antichrono">
+            <property name="label" translatable="yes">Anti-chronologique</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="label" translatable="yes">Anti-chronologique</property>
+            <property name="receives_default">False</property>
             <property name="use_underline">True</property>
-            <property name="response_id">0</property>
             <property name="draw_indicator">True</property>
             <property name="group">radio-chrono</property>
             <signal name="toggled" handler="on_radio_antichrono_toggled"/>
@@ -2653,7 +2627,7 @@ que vous utilisez pour archiver vos images</property>
               <widget class="GtkButton" id="Lauch">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="response_id">0</property>
+                <property name="receives_default">False</property>
                 <signal name="clicked" handler="on_Lauch_clicked"/>
                 <child>
                   <widget class="GtkAlignment" id="alignment15">
@@ -2672,6 +2646,7 @@ que vous utilisez pour archiver vos images</property>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -2694,15 +2669,16 @@ que vous utilisez pour archiver vos images</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="apply">
+                <property name="label">gtk-apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-apply</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_apply_clicked"/>
               </widget>
               <packing>
@@ -2713,11 +2689,11 @@ que vous utilisez pour archiver vos images</property>
             </child>
             <child>
               <widget class="GtkButton" id="cancel3">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_cancel_clicked"/>
               </widget>
               <packing>
@@ -2746,11 +2722,10 @@ que vous utilisez pour archiver vos images</property>
             <property name="width_request">400</property>
             <property name="visible">True</property>
             <property name="items" translatable="yes"></property>
-            <child internal-child="entry">
-              <widget class="GtkEntry" id="comboboxentry-entry1">
-              </widget>
-            </child>
           </widget>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkHBox" id="hbox7">
@@ -2760,11 +2735,11 @@ que vous utilisez pour archiver vos images</property>
             </child>
             <child>
               <widget class="GtkButton" id="Ouvrir">
+                <property name="label">gtk-open</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-open</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_Ouvrir_clicked"/>
               </widget>
               <packing>
@@ -2775,11 +2750,11 @@ que vous utilisez pour archiver vos images</property>
             </child>
             <child>
               <widget class="GtkButton" id="annuler">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_annuler_clicked"/>
               </widget>
               <packing>
@@ -2811,6 +2786,9 @@ que vous utilisez pour archiver vos images</property>
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Commande de synchronisation</property>
               </widget>
+              <packing>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkEntry" id="SyncCommand">
@@ -2822,6 +2800,9 @@ que vous utilisez pour archiver vos images</property>
               </packing>
             </child>
           </widget>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkVBox" id="vbox14">
@@ -2831,27 +2812,33 @@ que vous utilisez pour archiver vos images</property>
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Quelles images ?</property>
               </widget>
+              <packing>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkVBox" id="vbox15">
                 <property name="visible">True</property>
                 <child>
                   <widget class="GtkRadioButton" id="SyncAll">
+                    <property name="label" translatable="yes">Toutes</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Toutes</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <signal name="toggled" handler="on_SyncAll_toggled"/>
                   </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <widget class="GtkRadioButton" id="SyncSelected">
+                    <property name="label" translatable="yes">S&#xE9;lectionn&#xE9;es</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Sélectionnées</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">SyncAll</property>
@@ -2863,10 +2850,10 @@ que vous utilisez pour archiver vos images</property>
                 </child>
                 <child>
                   <widget class="GtkRadioButton" id="SyncNewer">
+                    <property name="label" translatable="yes">Plus r&#xE9;centes que la courante</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Plus récentes que la courante</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">SyncAll</property>
@@ -2878,10 +2865,10 @@ que vous utilisez pour archiver vos images</property>
                 </child>
                 <child>
                   <widget class="GtkRadioButton" id="SyncOlder">
+                    <property name="label" translatable="yes">Plus anciennes que la courante</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Plus anciennes que la courante</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">SyncAll</property>
@@ -2906,25 +2893,26 @@ que vous utilisez pour archiver vos images</property>
             <property name="visible">True</property>
             <child>
               <widget class="GtkButton" id="ok4">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-ok</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_ok4_clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
               <widget class="GtkButton" id="apply4">
+                <property name="label">gtk-apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-apply</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_apply4_clicked"/>
               </widget>
               <packing>
@@ -2935,11 +2923,11 @@ que vous utilisez pour archiver vos images</property>
             </child>
             <child>
               <widget class="GtkButton" id="cancel4">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="label">gtk-cancel</property>
+                <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_cancel4_clicked"/>
               </widget>
               <packing>
@@ -2951,6 +2939,206 @@ que vous utilisez pour archiver vos images</property>
           </widget>
           <packing>
             <property name="position">2</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkDialog" id="dialog-import">
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">Attention </property>
+    <property name="window_position">center</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <widget class="GtkVBox" id="dialog-vbox6">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkVBox" id="vbox5">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <widget class="GtkHBox" id="hbox2">
+                <property name="visible">True</property>
+                <child>
+                  <widget class="GtkImage" id="W">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-dialog-warning</property>
+                  </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="xpad">10</property>
+                    <property name="ypad">6</property>
+                    <property name="label" translatable="yes">Import de fichiers d'images</property>
+                    <property name="justify">fill</property>
+                    <property name="wrap">True</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkImage" id="image2">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-dialog-warning</property>
+                  </widget>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVBox" id="vbox6">
+                <property name="visible">True</property>
+                <property name="border_width">2</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <widget class="GtkLabel" id="label6">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Les images peuvent &#xEA;tre au format:
+- JPEG: elle seront copi&#xE9;s dans l'arborescence selector (et non d&#xE9;plac&#xE9;es)
+- RAW: une vignette JPEG sera alors extraite et plac&#xE9;e dans l'arborescence. 
+
+Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e dans les ent&#xEA;tes Exif.</property>
+                    <property name="justify">fill</property>
+                    <property name="wrap">True</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkHBox" id="hbox3">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkEntry" id="dirname">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x2022;</property>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="Select">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <child>
+                          <widget class="GtkAlignment" id="alignment1">
+                            <property name="visible">True</property>
+                            <property name="xscale">0</property>
+                            <property name="yscale">0</property>
+                            <child>
+                              <widget class="GtkHBox" id="hbox1">
+                                <property name="visible">True</property>
+                                <property name="spacing">2</property>
+                                <child>
+                                  <widget class="GtkImage" id="image3">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-jump-to</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label5">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Changer de Repertoire</property>
+                                    <property name="use_underline">True</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="padding">5</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <widget class="GtkHButtonBox" id="dialog-action_area6">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <widget class="GtkButton" id="cancel">
+                <property name="label">gtk-cancel</property>
+                <property name="response_id">-6</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="ok">
+                <property name="label">gtk-ok</property>
+                <property name="response_id">-5</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </widget>

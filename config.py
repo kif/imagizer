@@ -62,6 +62,7 @@ class Config:
         self.SelectedDirectory = "Selected"
         self.Selected_save = ".selected-photos"
         self.Extensions = [".jpg", ".jpeg", ".jpe", ".jfif"]
+        self.RawExtensions = [".cr2", ".arw", ".mrw"]
         self.AutoRotate = False
         self.DefaultMode = "664"
         self.DefaultRepository = os.getcwd()
@@ -149,7 +150,9 @@ class Config:
             elif j == "DefaultFileMode".lower():
                 self.DefaultFileMode = int(i[1], 8)
                 self.DefaultDirMode = self.DefaultFileMode + 3145 #73 = +111 en octal ... 3145 +s mode octal    
+            elif j == "RawExtensions".lower():   self.RawExtensions = i[1].split()
             elif j == "Extensions".lower():      self.Extensions = i[1].split()
+
             elif j == "DefaultRepository".lower():self.DefaultRepository = i[1]
             elif j == "MediaSize".lower():       self.MediaSize = float(i[1])
             elif j == "Burn".lower():            self.Burn = i[1]
@@ -213,9 +216,8 @@ class Config:
         txt += "#File containing the list of selected but unprocessed images\nSelected_save: %s \n\n" % self.Selected_save
         txt += "#Use Exif data for auto-rotation of the images (canon cameras mainly)\nAutoRotate: %s\n\n" % self.AutoRotate
         txt += "#Default mode for files (in octal)\nDefaultFileMode: %o\n\n" % self.DefaultFileMode
-        txt += "#Default JPEG extensions\nExtensions: "
-        for i in self.Extensions: txt += i + " "
-        txt += "\n\n"
+        txt += "#Default JPEG extensions\nExtensions: " + " ".join(self.Extensions) + "\n\n"
+        txt += "#Default Raw images extensions\nRawExtensions: " + " ".join(self.RawExtensions) + "\n\n"
         txt += "#Default photo repository\nDefaultRepository: %s \n\n" % self.DefaultRepository
         txt += "#Size of the backup media (in MegaByte)\nMediaSize:    %s \n\n" % self.MediaSize
         txt += "#Add signature to web published images\nFiligrane: %s \n\n" % self.Filigrane
