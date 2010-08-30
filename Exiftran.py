@@ -39,12 +39,15 @@
 exiftran.py a wrapper for the original exiftran fprovided by Gerd Korn
 http://linux.bytesex.org/fbida/
 
+Needs libexif-dev, libjepg-dev and python-dev to be installed on the system.
+
 """
 __author__ = "Jerome Kieffer"
 __licence__ = "GPLv2"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
 import os, threading
+#import sys
 
 installdir = os.path.dirname(__file__)
 
@@ -84,7 +87,9 @@ class Exiftran(object):
         @type filename: string
         """
         if exiftranExe is None:
+#            print("Before: action ref=%i, filename ref=%i" % (sys.getrefcount(action), sys.getrefcount(filename)))
             libexiftran.run(action, filename)
+#            print("After: action ref=%i, filename ref=%i" % (sys.getrefcount(action), sys.getrefcount(filename)))
         else:
             if action == 0:action = "a"
             os.system('%s -ip -%s "%s" ' % (exiftranExe, action, filename))
