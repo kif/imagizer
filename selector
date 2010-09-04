@@ -63,7 +63,7 @@ elif os.name == 'posix':
 #    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
 
 
-from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, unicode_to_ascii, mkdir, RangeTout, installdir
+from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, unicode_to_ascii, mkdir, RangeTout, installdir, RawImage, findFiles
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
 
@@ -104,7 +104,7 @@ class FullScreenInterface:
         self.image = None
         self.AllJpegs = AllJpegs
         self.Selected = []
-        self.CurIm = first
+        self.iCurrentImg = first
         for i in selected:
             if i in self.AllJpegs:
                 self.Selected.append(i)
@@ -130,11 +130,11 @@ class FullScreenInterface:
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         try:
-            self.image = imageCache[self.AllJpegs[self.CurIm]]
+            self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
         except:
-            self.image = photo(self.AllJpegs[self.CurIm])
+            self.image = photo(self.AllJpegs[self.iCurrentImg])
             if imageCache is not None:
-                imageCache[self.AllJpegs[self.CurIm]] = self.image
+                imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
 
         X, Y = self.xml.get_widget("FullScreen").get_size()
         if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
@@ -142,11 +142,11 @@ class FullScreenInterface:
         self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
-        if self.AllJpegs[self.CurIm] in self.Selected:
+        if self.AllJpegs[self.iCurrentImg] in self.Selected:
             sel = "[Selected]"
         else:
             sel = ""
-        self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.CurIm], sel))
+        self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
 
     def keypressed(self, widget, event, *args):
         """keylogger"""
@@ -203,40 +203,40 @@ class FullScreenInterface:
         gtk.main_quit()
     def next(self, *args):
         """Switch to the next image"""
-        self.CurIm = (self.CurIm + 1) % len(self.AllJpegs)
+        self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
         self.ShowImage()
     def previous(self, *args):
         """Switch to the previous image"""
-        self.CurIm = (self.CurIm - 1) % len(self.AllJpegs)
+        self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
         self.ShowImage()
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
-        jour = os.path.dirname(self.AllJpegs[self.CurIm])
-        for i in range(self.CurIm, len(self.AllJpegs)):
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        for i in range(self.iCurrentImg, len(self.AllJpegs)):
             jc = os.path.dirname(self.AllJpegs[i])
             if jc > jour: break
-        self.CurIm = i
+        self.iCurrentImg = i
         self.ShowImage()
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
-        if self.CurIm == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.CurIm])
-        for i in range(self.CurIm - 1, -1, -1):
+        if self.iCurrentImg == 0: return
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        for i in range(self.iCurrentImg - 1, -1, -1):
             jc = os.path.dirname(self.AllJpegs[i])
             jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
-        self.CurIm = i
+        self.iCurrentImg = i
         self.ShowImage()
     def select_Shortcut(self, *args):
         """Select or unselect the image"""
-        if self.AllJpegs[self.CurIm] not in self.Selected:
-            self.Selected.append(self.AllJpegs[self.CurIm])
+        if self.AllJpegs[self.iCurrentImg] not in self.Selected:
+            self.Selected.append(self.AllJpegs[self.iCurrentImg])
             sel = "[Selected]"
         else:
-            self.Selected.remove(self.AllJpegs[self.CurIm])
+            self.Selected.remove(self.AllJpegs[self.iCurrentImg])
             sel = ""
         self.Selected.sort()
-        self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.CurIm], sel))
+        self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
     def SlideShow(self):
         """Starts the slide show"""
         self.QuitSlideShow = False
@@ -244,14 +244,14 @@ class FullScreenInterface:
         while not self.QuitSlideShow:
 #            print "Delai= %s; type = %s"%(config.SlideShowDelay,config.SlideShowType)
             if config.SlideShowType == "chronological":
-                self.CurIm = (self.CurIm + 1) % len(self.AllJpegs)
+                self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
             elif config.SlideShowType == "antichronological":
-                self.CurIm = (self.CurIm - 1) % len(self.AllJpegs)
+                self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
             elif config.SlideShowType == "random":
                 if len(self.RandomList) == 0:
                     self.RandomList = range(len(self.AllJpegs))
                     random.shuffle(self.RandomList)
-                self.CurIm = self.RandomList.pop()
+                self.iCurrentImg = self.RandomList.pop()
             self.ShowImage()
             self.flush_event_queue()
             time.sleep(config.SlideShowDelay)
@@ -269,7 +269,7 @@ class interface:
         for i in selected:
             if i in self.AllJpegs:
                 self.Selected.append(i)
-        self.CurIm = first
+        self.iCurrentImg = first
         self.Xmin = 350
         self.image = None
         self.strCurrentTitle = ""
@@ -439,11 +439,11 @@ class interface:
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         try:
-            self.image = imageCache[self.AllJpegs[self.CurIm]]
+            self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
         except:
-            self.image = photo(self.AllJpegs[self.CurIm])
+            self.image = photo(self.AllJpegs[self.iCurrentImg])
             if imageCache is not None:
-                imageCache[self.AllJpegs[self.CurIm]] = self.image
+                imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
         X, Y = self.xml.get_widget("Principale").get_size()
         if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
@@ -456,46 +456,46 @@ class interface:
 #        if data.has_key("Orientation"): data.pop("Orientation")
         for i in data:
             self.xml.get_widget(i).set_text(data[i])
-        self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.CurIm])
-        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+        self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.iCurrentImg])
+        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         self.strCurrentTitle = data["Titre"]
 
 
     def next(self, *args):
         """Switch to the next image"""
         self.settitle()
-        self.CurIm = (self.CurIm + 1) % len(self.AllJpegs)
+        self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
         self.ShowImage()
 
     def next10(self, *args):
         """Switch forward of 10 images """
         self.settitle()
-        self.CurIm = self.CurIm + 10
-        if self.CurIm > len(self.AllJpegs):self.CurIm = len(self.AllJpegs) - 1
+        self.iCurrentImg = self.iCurrentImg + 10
+        if self.iCurrentImg > len(self.AllJpegs):self.iCurrentImg = len(self.AllJpegs) - 1
         self.ShowImage()
 
     def previous(self, *args):
         """Switch to the previous image"""
         self.settitle()
-        self.CurIm = (self.CurIm - 1) % len(self.AllJpegs)
+        self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
         self.ShowImage()
 
     def previous10(self, *args):
         """Switch 10 images backward"""
         self.settitle()
-        self.CurIm = self.CurIm - 10
-        if self.CurIm < 0: self.CurIm = 0
+        self.iCurrentImg = self.iCurrentImg - 10
+        if self.iCurrentImg < 0: self.iCurrentImg = 0
         self.ShowImage()
 
     def first(self, *args):
         """switch to the first image"""
         self.settitle()
-        self.CurIm = 0
+        self.iCurrentImg = 0
         self.ShowImage()
     def last(self, *args):
         """switch to the last image"""
         self.settitle()
-        self.CurIm = len(self.AllJpegs) - 1
+        self.iCurrentImg = len(self.AllJpegs) - 1
         self.ShowImage()
     def droite(self, *args):
         """rotate the current image clockwise"""
@@ -512,22 +512,22 @@ class interface:
     def poubelle(self, *args):
         """Send the current file to the trash"""
         self.settitle()
-        if self.AllJpegs[self.CurIm] in  self.Selected:self.Selected.remove(self.AllJpegs[self.CurIm])
-        self.AllJpegs.remove(self.AllJpegs[self.CurIm])
+        if self.AllJpegs[self.iCurrentImg] in  self.Selected:self.Selected.remove(self.AllJpegs[self.iCurrentImg])
+        self.AllJpegs.remove(self.AllJpegs[self.iCurrentImg])
         self.image.Trash()
-        self.CurIm = self.CurIm % len(self.AllJpegs)
+        self.iCurrentImg = self.iCurrentImg % len(self.AllJpegs)
         self.ShowImage()
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
         self.settitle()
-        filename = self.AllJpegs[self.CurIm]
+        filename = self.AllJpegs[self.iCurrentImg]
         base, ext = os.path.splitext(filename)
         newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.CurIm = self.AllJpegs.index(newname)
+        self.iCurrentImg = self.AllJpegs.index(newname)
         newnamefull = os.path.join(config.DefaultRepository, newname)
         shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
@@ -538,13 +538,13 @@ class interface:
     def filter(self, *args):
         """Filter the current image with a contrast mask"""
         self.settitle()
-        filename = self.AllJpegs[self.CurIm]
+        filename = self.AllJpegs[self.iCurrentImg]
         base, ext = os.path.splitext(filename)
         newname = base + "-Filtered" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.CurIm = self.AllJpegs.index(newname)
+        self.iCurrentImg = self.AllJpegs.index(newname)
         try:
             myPhoto = imageCache[filename]
         except:
@@ -558,8 +558,8 @@ class interface:
         """Select or unselect the image"""
         self.settitle()
         etat = not(self.xml.get_widget("Selection").get_active())
-        if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
-        if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
+        if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
+        if not etat and (self.AllJpegs[self.iCurrentImg] in self.Selected): self.Selected.remove(self.AllJpegs[self.iCurrentImg])
         self.Selected.sort()
         self.xml.get_widget("Selection").set_active(etat)
 
@@ -567,8 +567,8 @@ class interface:
         """Select or unselect the image"""
         self.settitle()
         etat = self.xml.get_widget("Selection").get_active()
-        if etat and (self.AllJpegs[self.CurIm] not in self.Selected): self.Selected.append(self.AllJpegs[self.CurIm])
-        if not etat and (self.AllJpegs[self.CurIm] in self.Selected): self.Selected.remove(self.AllJpegs[self.CurIm])
+        if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
+        if not etat and (self.AllJpegs[self.iCurrentImg] in self.Selected): self.Selected.remove(self.AllJpegs[self.iCurrentImg])
         self.Selected.sort()
 
     def destroy(self, *args):
@@ -596,7 +596,7 @@ class interface:
         self.settitle()
         ProcessSelected(self.Selected)
         self.Selected = []
-        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         print "Done"
 
     def ToWeb(self, *args):
@@ -604,7 +604,7 @@ class interface:
         self.settitle()
         ProcessSelected(self.Selected)
         self.Selected = []
-        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
@@ -626,7 +626,7 @@ class interface:
         self.settitle()
         CopySelected(self.Selected)
         self.Selected = []
-        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         print "Done"
 
     def Burn(self, *args):
@@ -634,7 +634,7 @@ class interface:
         self.settitle()
         CopySelected(self.Selected)
         self.Selected = []
-        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
+        self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
@@ -665,7 +665,7 @@ class interface:
         for i in self.Selected:
             if not(i in self.AllJpegs):
                 self.Selected.remove(i)
-        self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.Selected)
+        self.xml.get_widget("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.Selected)
 
 
 
@@ -689,7 +689,7 @@ class interface:
         for i in self.Selected:
             temp.remove(i)
         self.Selected = temp
-        self.xml.get_widget("Selection").set_active(self.AllJpegs[self.CurIm] in  self.Selected)
+        self.xml.get_widget("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.Selected)
 
 
     def about(self, *args):
@@ -701,29 +701,29 @@ class interface:
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
         self.settitle()
-        jour = os.path.dirname(self.AllJpegs[self.CurIm])
-        for i in range(self.CurIm, len(self.AllJpegs)):
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        for i in range(self.iCurrentImg, len(self.AllJpegs)):
             jc = os.path.dirname(self.AllJpegs[i])
             if jc > jour: break
-        self.CurIm = i
+        self.iCurrentImg = i
         self.ShowImage()
 
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
         self.settitle()
-        if self.CurIm == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.CurIm])
-        for i in range(self.CurIm - 1, -1, -1):
+        if self.iCurrentImg == 0: return
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        for i in range(self.iCurrentImg - 1, -1, -1):
             jc = os.path.dirname(self.AllJpegs[i])
             jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
-        self.CurIm = i
+        self.iCurrentImg = i
         self.ShowImage()
 
     def firstJ(self, *args):
         """switch to the first image of the first day"""
         self.settitle()
-        self.CurIm = 0
+        self.iCurrentImg = 0
         self.ShowImage()
 
     def lastJ(self, *args):
@@ -734,30 +734,30 @@ class interface:
             jc = os.path.dirname(self.AllJpegs[i])
             jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc == lastday) and (jd < jc): break
-        self.CurIm = i
+        self.iCurrentImg = i
         self.ShowImage()
 
     def firstS(self, *args):
         """switch to the first image selected"""
         self.settitle()
         if len(self.Selected) == 0:return
-        self.CurIm = self.AllJpegs.index(self.Selected[0])
+        self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
         self.ShowImage()
 
     def lastS(self, *args):
         """switch to the last image selected"""
         self.settitle()
         if len(self.Selected) == 0:return
-        self.CurIm = self.AllJpegs.index(self.Selected[-1])
+        self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
         self.ShowImage()
 
     def nextS(self, *args):
         """switch to the next image selected"""
         self.settitle()
         if len(self.Selected) == 0:return
-        for i in self.AllJpegs[self.CurIm + 1:]:
+        for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i in self.Selected:
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -765,11 +765,11 @@ class interface:
         """switch to the previous image selected"""
         self.settitle()
         if len(self.Selected) == 0:return
-        temp = self.AllJpegs[:self.CurIm]
+        temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
             if i in self.Selected:
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -778,7 +778,7 @@ class interface:
         self.settitle()
         for i in self.AllJpegs:
             if i not in self.Selected:
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -789,27 +789,27 @@ class interface:
         temp.reverse()
         for i in temp:
             if i not in self.Selected:
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
     def nextNS(self, *args):
         """switch to the next image NOT selected"""
         self.settitle()
-        for i in self.AllJpegs[self.CurIm + 1:]:
+        for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i not in self.Selected:
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
     def previousNS(self, *args):
         """switch to the previous image NOT selected"""
         self.settitle()
-        temp = self.AllJpegs[:self.CurIm]
+        temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
             if i not in self.Selected:
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -824,14 +824,14 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
     def    previousT(self, *args):
         """switch to the previous titeled image"""
         self.settitle()
-        temp = self.AllJpegs[:self.CurIm]
+        temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
             try:
@@ -841,14 +841,14 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
     def nextT(self, *args):
         """switch to the next titeled image"""
         self.settitle()
-        for i in self.AllJpegs[self.CurIm + 1:]:
+        for i in self.AllJpegs[self.iCurrentImg + 1:]:
             try:
                 myPhoto = imageCache[i]
             except:
@@ -856,7 +856,7 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -873,7 +873,7 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -888,14 +888,14 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
     def previousNT(self, *args):
         """switch to the previous non-titeled image"""
         self.settitle()
-        temp = self.AllJpegs[:self.CurIm]
+        temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
             try:
@@ -905,14 +905,14 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
     def nextNT(self, *args):
         """switch to the next non-titeled image"""
         self.settitle()
-        for i in self.AllJpegs[self.CurIm + 1:]:
+        for i in self.AllJpegs[self.iCurrentImg + 1:]:
             try:
                 myPhoto = imageCache[i]
             except:
@@ -920,7 +920,7 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -937,7 +937,7 @@ class interface:
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
-                self.CurIm = self.AllJpegs.index(i)
+                self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
                 return
 
@@ -1021,7 +1021,7 @@ class interface:
     def renommer(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
         self.settitle()
-        renamdayinstance = RenameDay(self.AllJpegs[self.CurIm], self.AllJpegs, self.Selected)
+        renamdayinstance = RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected)
         self.AllJpegs = renamdayinstance.AllPhotos
         self.Selected = renamdayinstance.selected
 
@@ -1048,6 +1048,19 @@ class interface:
         """This is the call back method for launching the import of new images"""
         self.settitle()
         print("I got a callBack with dirname= %s" % path)
+        listNew = []
+        for oneRaw in findFiles(path, lstExtentions=config.RawExtensions, bFromRoot=True):
+            print oneRaw
+            raw = RawImage(oneRaw)
+            raw.extractJPEG()
+            listNew.append(raw.getJpegPath())
+        if len(listNew) > 0:
+            listNew.sort()
+            first = listNew[0]
+            self.AllJpegs += listNew
+            self.AllJpegs.sort()
+            self.iCurrentImg = self.AllJpegs.index(first)
+            self.ShowImage()
 
 
     def defineMediaSize(self, *args):
@@ -1071,7 +1084,7 @@ class interface:
     def synchronize(self, *args):
         """lauch the synchronization window"""
         self.settitle()
-        Synchronize(self.CurIm, self.AllJpegs, self.Selected)
+        Synchronize(self.iCurrentImg, self.AllJpegs, self.Selected)
 
 
     def SelectNewerMedia(self, *args):
@@ -1082,7 +1095,7 @@ class interface:
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
         init = len(self.Selected)
-        for i in self.AllJpegs[self.CurIm:]:
+        for i in self.AllJpegs[self.iCurrentImg:]:
             if i in self.Selected:
                 continue
             size += os.path.getsize(os.path.join(config.DefaultRepository, i))
@@ -1093,7 +1106,7 @@ class interface:
                 self.Selected.append(i)
         self.Selected.sort()
         if len(self.Selected) == 0:return
-        self.CurIm = self.AllJpegs.index(self.Selected[-1])
+        self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
         self.ShowImage()
         t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
@@ -1112,7 +1125,7 @@ class interface:
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
         init = len(self.Selected)
-        tmplist = self.AllJpegs[:self.CurIm]
+        tmplist = self.AllJpegs[:self.iCurrentImg]
         tmplist.reverse()
         for i in tmplist:
             if i in self.Selected:
@@ -1125,7 +1138,7 @@ class interface:
                 self.Selected.append(i)
         self.Selected.sort()
         if len(self.Selected) == 0:return
-        self.CurIm = self.AllJpegs.index(self.Selected[0])
+        self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
         self.ShowImage()
         t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t

@@ -982,6 +982,44 @@ class signature:
         k = ImageChops.difference(self.img, self.bigsig)
         return k
 
+class RawImage:
+    """ class for handling raw images
+    - extract thumbnails
+    - copy them in the repository
+    """
+    def __init__(self, strRawFile):
+        """
+        contructor of the class
+        @param strRawFile path to the RawImage 
+        @type strRawFile: string
+        """
+        self.strRawFile = strRawFile
+        self.exif = None
+        self.strJepgFile = None
+
+    def getJpegPath(self):
+        if self.exif is None:
+            self.exif = pyexiv2.Image(self.strRawFile)
+            self.exif.readMetadata()
+        if self.strJepgFile is None:
+            self.strJepgFile = unicode_to_ascii("%s-%s.jpg" % (
+                    self.exif.interpretedExifValue("Exif.Photo.DateTimeOriginal").replace(" ", os.sep).replace(":", "-", 2).replace(":", "h", 1).replace(":", "m", 1),
+                    self.exif.interpretedExifValue("Exif.Image.Model").strip().split(",")[-1].replace("/", "").replace(" ", "_")
+                    ))
+        dirname = os.path.dirname(os.path.join(config.DefaultRepository, self.strJepgFile))
+        if not os.path.isdir(dirname):
+            makedir(dirname)
+        return self.strJepgFile
+
+    def extractJPEG(self):
+        """
+        extract the raw image to its right place
+        """
+        jpegData = os.popen("dcraw -c -e %s" % self.strRawFile).read()
+        open(os.path.join(config.DefaultRepository, self.getJpegPath()), "wb").write(jpegData)
+        #exifJpeg = pyexiv2.Image(self.strJepgFile))
+        #exifJpeg.readMetadata()
+        #self.exif.copyMetadataTo(self.strJepgFile)
 
 
 ############################################################################################################
@@ -1004,7 +1042,7 @@ def mkdir(filename):
     except OSError:
         print("Warning: unable to chmod %s" % filename)
 
-def findFiles(strRootDir, lstExtentions=config.Extensions):
+def findFiles(strRootDir, lstExtentions=config.Extensions, bFromRoot=False):
     """
     Equivalent to:
     files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
@@ -1012,7 +1050,8 @@ def findFiles(strRootDir, lstExtentions=config.Extensions):
     @param strRootDir: path of the root of the search
     @type strRoooDir: string
     @param lstExtentions: list of string representing interesting extensions
-    @return: the list of the files with the given suffix in the given dir, not starting by / but relative to strRootDir
+    @param bFromRoot: start the return path from / instead of the strRootDir
+    @return: the list of the files with the given suffix in the given dir
     @rtype: list of strings 
     """
     listFiles = []
@@ -1024,8 +1063,11 @@ def findFiles(strRootDir, lstExtentions=config.Extensions):
         for oneFile in  files:
             if os.path.splitext(oneFile)[1].lower() in lstExtentions:
                 fullPath = os.path.join(root, oneFile)
-                assert len(fullPath) > lenRoot
-                listFiles.append(fullPath[lenRoot:])
+                if bFromRoot:
+                    listFiles.append(fullPath)
+                else:
+                    assert len(fullPath) > lenRoot
+                    listFiles.append(fullPath[lenRoot:])
     return listFiles
 
 

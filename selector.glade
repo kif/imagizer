@@ -4,7 +4,7 @@
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkFileChooserDialog" id="filer">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">d&#xE9;pot Imagizer</property>
+    <property name="title" translatable="yes">Selectionner r&#xE9;pertoire</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <property name="action">select-folder</property>
