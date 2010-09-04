@@ -91,7 +91,7 @@
                           <widget class="GtkMenu" id="menuitem1_menu">
                             <child>
                               <widget class="GtkImageMenuItem" id="About">
-                                <property name="label">&#xC0; Propos</property>
+                                <property name="label">gtk-about</property>
                                 <property name="visible">True</property>
                                 <property name="use_underline">True</property>
                                 <property name="use_stock">True</property>
@@ -115,7 +115,7 @@
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="fullscreen">
-                                <property name="label">Plein &#xC9;cran</property>
+                                <property name="label">gtk-fullscreen</property>
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Passe en mode plein &#xE9;cran</property>
                                 <property name="use_underline">True</property>
@@ -134,10 +134,15 @@
                                 <property name="label">Poubelle</property>
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
-                                <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="use_stock">False</property>
                                 <signal name="activate" handler="on_poubelle_activate"/>
                                 <accelerator key="Delete" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                                <child internal-child="image">
+                                  <widget class="GtkImage" id="image1">
+                                    <property name="visible">True</property>
+                                    <property name="icon_name">user-trash-full</property>
+                                  </widget>
+                                </child>
                               </widget>
                             </child>
                             <child>
@@ -150,14 +155,38 @@
                                 <property name="label">Nommer journ&#xE9;e</property>
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Propose de renommer le r&#xE9;pertoire courant</property>
-                                <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="use_stock">False</property>
                                 <signal name="activate" handler="on_nommer1_activate"/>
+                                <child internal-child="image">
+                                  <widget class="GtkImage" id="image3">
+                                    <property name="visible">True</property>
+                                    <property name="icon_name">edit-find-replace</property>
+                                  </widget>
+                                </child>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkImageMenuItem" id="importer1">
+                                <property name="label" translatable="yes">Importer images</property>
+                                <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">Les images peuvent &#xEA;tre au format:
+- JPEG: elle seront copi&#xE9;s dans l'arborescence selector (et non d&#xE9;plac&#xE9;es)
+- RAW: une vignette JPEG sera alors extraite et plac&#xE9;e dans l'arborescence. 
+
+Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e dans les ent&#xEA;tes Exif.</property>
+                                <property name="use_stock">False</property>
+                                <signal name="activate" handler="on_importer1_activate" after="yes"/>
+                                <child internal-child="image">
+                                  <widget class="GtkImage" id="image4">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-jump-to</property>
+                                  </widget>
+                                </child>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="executer1">
-                                <property name="label">Executer</property>
+                                <property name="label">gtk-execute</property>
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Lance le redimentionnement des images selectionn&#xE9;es</property>
                                 <property name="use_underline">True</property>
@@ -165,24 +194,10 @@
                                 <child>
                                   <widget class="GtkMenu" id="executer1_menu">
                                     <child>
-                                      <widget class="GtkMenuItem" id="Synchronize">
-                                        <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Syncronise les image avec un autre d&#xE9;pot</property>
-                                        <property name="label" translatable="yes">Synchronise</property>
-                                        <property name="use_underline">True</property>
-                                        <signal name="activate" handler="on_Synchronize_activate"/>
-                                      </widget>
-                                    </child>
-                                    <child>
-                                      <widget class="GtkSeparatorMenuItem" id="separatormenuitem3">
-                                        <property name="visible">True</property>
-                                      </widget>
-                                    </child>
-                                    <child>
                                       <widget class="GtkMenuItem" id="copie">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Copie tous les fichiers selectionn&#xE9;s dans &#xAB;Selected&#xBB;</property>
-                                        <property name="label" translatable="yes">Copie seulement</property>
+                                        <property name="label" translatable="yes">Copier seulement</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_copie1_activate"/>
                                       </widget>
@@ -191,7 +206,7 @@
                                       <widget class="GtkMenuItem" id="copie_et_grave1">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Copie toutes les images s&#xE9;lectionn&#xE9;es et les graves sur CD/DVD</property>
-                                        <property name="label" translatable="yes">Copie et grave</property>
+                                        <property name="label" translatable="yes">Copier et graver</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_copie_et_grave1_activate"/>
                                       </widget>
@@ -200,7 +215,7 @@
                                       <widget class="GtkMenuItem" id="vers_page_web1">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Copie les images s&#xE9;lectionn&#xE9;es, les redimentionne et  ajoute un filigrane (optionnel) </property>
-                                        <property name="label" translatable="yes">Copie et redimmentionne</property>
+                                        <property name="label" translatable="yes">Copier et redimmentionner</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_executer1_activate"/>
                                       </widget>
@@ -213,31 +228,36 @@
                                         <signal name="activate" handler="on_vers_page_web2_activate"/>
                                       </widget>
                                     </child>
-                                    <child>
-                                      <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur13">
-                                        <property name="visible">True</property>
-                                      </widget>
-                                    </child>
-                                    <child>
-                                      <widget class="GtkImageMenuItem" id="vide_selection1">
-                                        <property name="label">Vide Selection</property>
-                                        <property name="visible">True</property>
-                                        <property name="use_underline">True</property>
-                                        <property name="use_stock">True</property>
-                                        <signal name="activate" handler="on_vide_selection1_activate"/>
-                                      </widget>
-                                    </child>
                                   </widget>
                                 </child>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="importer1">
+                              <widget class="GtkImageMenuItem" id="Synchronize">
+                                <property name="label" translatable="yes">Synchronizer</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet d'importer des fichiers Raw ou JPEG</property>
-                                <property name="label" translatable="yes">Importer images</property>
-                                <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_importer1_activate"/>
+                                <property name="tooltip" translatable="yes">Syncronise les image avec un autre d&#xE9;pot</property>
+                                <property name="use_stock">False</property>
+                                <child internal-child="image">
+                                  <widget class="GtkImage" id="image5">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-refresh</property>
+                                  </widget>
+                                </child>
+                              </widget>
+                            </child>
+                            <child>
+                              <widget class="GtkImageMenuItem" id="vide_selection1">
+                                <property name="label">Vide Tampon</property>
+                                <property name="visible">True</property>
+                                <property name="use_stock">False</property>
+                                <signal name="activate" handler="on_vide_selection1_activate"/>
+                                <child internal-child="image">
+                                  <widget class="GtkImage" id="image2">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-clear</property>
+                                  </widget>
+                                </child>
                               </widget>
                             </child>
                             <child>
@@ -2946,7 +2966,7 @@ que vous utilisez pour archiver vos images</property>
   </widget>
   <widget class="GtkDialog" id="dialog-import">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Attention </property>
+    <property name="title" translatable="yes">Import d'Images</property>
     <property name="window_position">center</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
@@ -2962,7 +2982,7 @@ que vous utilisez pour archiver vos images</property>
                 <child>
                   <widget class="GtkImage" id="W">
                     <property name="visible">True</property>
-                    <property name="stock">gtk-dialog-warning</property>
+                    <property name="stock">gtk-redo</property>
                   </widget>
                   <packing>
                     <property name="position">0</property>
@@ -2973,7 +2993,7 @@ que vous utilisez pour archiver vos images</property>
                     <property name="visible">True</property>
                     <property name="xpad">10</property>
                     <property name="ypad">6</property>
-                    <property name="label" translatable="yes">Import de fichiers d'images</property>
+                    <property name="label" translatable="yes">Importer des fichiers Raw/Jpeg</property>
                     <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
@@ -2986,7 +3006,7 @@ que vous utilisez pour archiver vos images</property>
                 <child>
                   <widget class="GtkImage" id="image2">
                     <property name="visible">True</property>
-                    <property name="stock">gtk-dialog-warning</property>
+                    <property name="stock">gtk-undo</property>
                   </widget>
                   <packing>
                     <property name="position">2</property>
@@ -3029,6 +3049,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x2022;</property>
+                        <signal name="editing_done" handler="on_dirname_editing_done"/>
                       </widget>
                       <packing>
                         <property name="position">0</property>
@@ -3127,6 +3148,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="ok_clicked_cb"/>
               </widget>
               <packing>
                 <property name="expand">False</property>

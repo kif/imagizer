@@ -104,6 +104,9 @@ ImageWidth:1024
 #Height of the last image displayed ... should not be modified
 ImageHeight:600
 
+#Gnu Image Manipulation Program (GIMP) path to executable
+Gimp: gimp
+
 [ScaledImages]
 #ScaledImages size
 Size: 800 

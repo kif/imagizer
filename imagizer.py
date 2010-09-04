@@ -356,7 +356,7 @@ class ModelRangeTout:
         """ Lance les calculs
         """
         config.DefaultRepository = RootDir
-        AllJpegs = FindFile(RootDir)
+        AllJpegs = findFiles(RootDir)
         AllFilesToProcess = []
         AllreadyDone = []
         NewFiles = []
@@ -539,6 +539,7 @@ class ViewX:
         self.xml.get_widget("splash").show()
         while gtk.events_pending():gtk.main_iteration()
         self.__nbVal = nbVal
+
     def ProgressBarMax(self, nbVal):
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
@@ -640,7 +641,7 @@ class photo:
             self.LoadPIL()
             self.pixelsX, self.pixelsY = self.pil.size
 
-    def SaveThumb(self, Thumbname, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
+    def SaveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
         """save a thumbnail of the given name, with the given size and the interpolation methode (quality) 
         resampling filters :
         NONE = 0
@@ -649,31 +650,38 @@ class photo:
         LINEAR = BILINEAR = 2
         CUBIC = BICUBIC = 3
         """
-        if  os.path.isfile(Thumbname):
-            print "sorry, file %s exists" % Thumbname
+        if  os.path.isfile(strThumbFile):
+            print "sorry, file %s exists" % strThumbFile
         else:
             if self.exif is None:
                 self.exif = pyexiv2.Image(self.fn)
                 self.exif.readMetadata()
             extract = False
-            print "process file %s exists" % Thumbname
+            print "process file %s exists" % strThumbFile
             if ExifExtraction:
                 try:
-                    self.exif.dumpThumbnailToFile(Thumbname[:-4])
+                    self.exif.dumpThumbnailToFile(strThumbFile[:-4])
                     extract = True
                 except (OSError, IOError):
                     extract = False
+                #Check if the thumbnail is correctly oriented
+                if os.path.isfile(strThumbFile):
+                    thumbImag = photo(strThumbFile)
+                    if self.larg()*thumbImag.larg() < 0:
+                        print("Warning: thumbnail was not with the same orientation as original: %s" % self.filename)
+                        os.remove(strThumbFile)
+                        extract = False
             if not extract:
 #                print "on essaie avec PIL"
                 if self.pil is None:
                     self.LoadPIL()
                 copyOfImage = self.pil.copy()
                 copyOfImage.thumbnail((Size, Size), Interpolation)
-                copyOfImage.save(Thumbname, quality=Quality, progressive=Progressive, optimize=Optimize)
+                copyOfImage.save(strThumbFile, quality=Quality, progressive=Progressive, optimize=Optimize)
             try:
-                os.chmod(Thumbname, config.DefaultFileMode)
+                os.chmod(strThumbFile, config.DefaultFileMode)
             except OSError:
-                print("Warning: unable to chmod %s" % Thumbname)
+                print("Warning: unable to chmod %s" % strThumbFile)
 
 
     def Rotate(self, angle=0):
@@ -996,19 +1004,31 @@ def mkdir(filename):
     except OSError:
         print("Warning: unable to chmod %s" % filename)
 
-def FindFile(RootDir):
-    """returns a list of the files with the given suffix in the given dir
-    files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
+def findFiles(strRootDir, lstExtentions=config.Extensions):
     """
-    files = []
-#    config=Config()
-    for i in config.Extensions:
-        files += parser().FindExts(RootDir, i)
-    good = []
-    l = len(RootDir) + 1
-    for i in files: good.append(i.strip()[l:])
-    good.sort()
-    return good
+    Equivalent to:
+    files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
+    
+    @param strRootDir: path of the root of the search
+    @type strRoooDir: string
+    @param lstExtentions: list of string representing interesting extensions
+    @return: the list of the files with the given suffix in the given dir, not starting by / but relative to strRootDir
+    @rtype: list of strings 
+    """
+    listFiles = []
+    if strRootDir.endswith("os.sep"):
+        lenRoot = len(strRootDir)
+    else:
+        lenRoot = len(strRootDir) + 1
+    for root, dirs, files in os.walk(strRootDir):
+        for oneFile in  files:
+            if os.path.splitext(oneFile)[1].lower() in lstExtentions:
+                fullPath = os.path.join(root, oneFile)
+                assert len(fullPath) > lenRoot
+                listFiles.append(fullPath[lenRoot:])
+    return listFiles
+
+
 
 
 #######################################################################################
@@ -1023,11 +1043,11 @@ def ScaleImage(filename, filigrane=None):
     Img = photo(filename)
     Param = config.ScaledImages.copy()
     Param.pop("Suffix")
-    Param["Thumbname"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
+    Param["strThumbFile"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
     Img.SaveThumb(**Param)
     Param = config.Thumbnails.copy()
     Param.pop("Suffix")
-    Param["Thumbname"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
+    Param["strThumbFile"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
     Img.SaveThumb(**Param)
     if filigrane:
         filigrane.substract(Img.f).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
@@ -1103,45 +1123,20 @@ def SmartSize(size):
     return fsize, unit
 
 
-################################################################################
-# We should refactorize this with os.walk !!!
-################################################################################
-class parser:
-    """this class searches all the jpeg files"""
-    def __init__(self):
-        self.imagelist = []
-        self.root = None
-        self.suffix = None
-
-    def OneDir(self, curent):
-        """ append all the imagesfiles to the list, then goes recursively to the subdirectories"""
-        ls = os.listdir(curent)
-        for i in ls:
-            a = os.path.join(curent, i)
-            if    os.path.isdir(a):
-                self.OneDir(a)
-            if  os.path.isfile(a):
-                if i[(-len(self.suffix)):].lower() == self.suffix:
-                    self.imagelist.append(os.path.join(curent, i))
-    def FindExts(self, root, suffix):
-        self.root = root
-        self.suffix = suffix
-        self.OneDir(self.root)
-        return self.imagelist
-
-
-def recursive_delete(dirname):
-    files = os.listdir(dirname)
-    for filename in files:
-        path = os.path.join (dirname, filename)
-        if os.path.isdir(path):
-            recursive_delete(path)
-        else:
-            print 'Removing file: "%s"' % path
-            os.remove(path)
-
-    print 'Removing directory:', dirname
-    os.rmdir(dirname)
+def recursive_delete(strDirname):
+    """
+    Delete everything reachable from the directory named in "top",
+    assuming there are no symbolic links.
+    CAUTION:  This is dangerous!  For example, if top == '/', it
+    could delete all your disk files.
+    @param strDirname
+    """
+    for root, dirs, files in os.walk(strDirname, topdown=False):
+        for name in files:
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+    os.rmdir(strDirname)
 
 
 

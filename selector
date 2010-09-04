@@ -272,6 +272,7 @@ class interface:
         self.CurIm = first
         self.Xmin = 350
         self.image = None
+        self.strCurrentTitle = ""
 
 
         if config.DEBUG: print("Initialization of the graphical interface ...")
@@ -326,94 +327,98 @@ class interface:
         self.ShowImage()
         self.flush_event_queue()
 
-        self.xml.signal_connect('on_Principale_destroy', self.destroy)
-        self.xml.signal_connect('on_arreter1_activate', self.destroy)
-        self.xml.signal_connect('on_suivant_clicked', self.next)
-        self.xml.signal_connect('on_precedant_clicked', self.previous)
-        self.xml.signal_connect('on_droite_clicked', self.droite)
-        self.xml.signal_connect('on_gauche_clicked', self.gauche)
-        self.xml.signal_connect('on_Selection_toggled', self.select)
-        self.xml.signal_connect('on_selectionner_activate', self.select_Shortcut)
-        self.xml.signal_connect('on_photo_client_event', self.next)
+        dictHandlers = {
+        'on_Principale_destroy': self.destroy,
+        'on_arreter1_activate': self.destroy,
+        'on_suivant_clicked': self.next,
+        'on_precedant_clicked': self.previous,
+        'on_droite_clicked': self.droite,
+        'on_gauche_clicked': self.gauche,
+        'on_Selection_toggled': self.select,
+        'on_selectionner_activate': self.select_Shortcut,
+        'on_photo_client_event': self.next,
 
-        self.xml.signal_connect('on_About_activate', self.about)
-        self.xml.signal_connect('on_quitter1_activate', self.die)
-        self.xml.signal_connect('on_nommer1_activate', self.renommer)
-        self.xml.signal_connect('on_executer1_activate', self.run)
-        self.xml.signal_connect('on_Synchronize_activate', self.synchronize)
-        self.xml.signal_connect('on_copie_et_grave1_activate', self.Burn)
-        self.xml.signal_connect('on_vers_page_web2_activate', self.ToWeb)
-        self.xml.signal_connect('on_vide_selection1_activate', self.EmptySelected)
-        self.xml.signal_connect('on_copie1_activate', self.copy)
-        self.xml.signal_connect('on_importer1_activate', self.importImages)
-        self.xml.signal_connect('on_poubelle_activate', self.poubelle)
-        self.xml.signal_connect('on_Poubelle_clicked', self.poubelle)
-        self.xml.signal_connect('on_Gimp_clicked', self.gimp)
-        self.xml.signal_connect('on_Filter_clicked', self.filter)
+        'on_About_activate': self.about,
+        'on_quitter1_activate': self.die,
+        'on_nommer1_activate': self.renommer,
+        'on_executer1_activate': self.run,
+        'on_Synchronize_activate': self.synchronize,
+        'on_copie_et_grave1_activate': self.Burn,
+        'on_vers_page_web2_activate': self.ToWeb,
+        'on_vide_selection1_activate': self.EmptySelected,
+        'on_copie1_activate': self.copy,
+        'on_importer1_activate': self.importImages,
+        'on_poubelle_activate': self.poubelle,
+        'on_Poubelle_clicked': self.poubelle,
+        'on_Gimp_clicked': self.gimp,
+        'on_Filter_clicked': self.filter,
 
-        self.xml.signal_connect('on_enregistrerP_activate', self.SavePref)
-        self.xml.signal_connect('on_Autorotate_activate', self.DefAutoRotate)
-        self.xml.signal_connect('on_Filigrane_activate', self.DefFiligrane)
-        self.xml.signal_connect('on_taille_media_activate', self.DefMediaSize)
-        self.xml.signal_connect('on_tauto_activate', self.SizeCurrent)
-        self.xml.signal_connect('on_t300_activate', self.Size300)
-        self.xml.signal_connect('on_t600_activate', self.Size600)
-        self.xml.signal_connect('on_t900_activate', self.Size900)
-        self.xml.signal_connect('on_VLowQ_activate', self.SetInterpol0)
-        self.xml.signal_connect('on_LowQ_activate', self.SetInterpol1)
-        self.xml.signal_connect('on_HiQ_activate', self.SetInterpol2)
-        self.xml.signal_connect('on_VHiQ_activate', self.SetInterpol3)
-        self.xml.signal_connect('on_9PerPage_activate', self.Set9PerPage)
-        self.xml.signal_connect('on_12PerPage_activate', self.Set12PerPage)
-        self.xml.signal_connect('on_16PerPage_activate', self.Set16PerPage)
-        self.xml.signal_connect('on_20PerPage_activate', self.Set20PerPage)
-        self.xml.signal_connect('on_25PerPage_activate', self.Set25PerPage)
-        self.xml.signal_connect('on_30PerPage_activate', self.Set30PerPage)
-        self.xml.signal_connect('on_configurer_dioporama_activate', self.SlideShowSetup)
+        'on_enregistrerP_activate': self.SavePref,
+        'on_Autorotate_activate': self.DefAutoRotate,
+        'on_Filigrane_activate': self.DefFiligrane,
+        'on_taille_media_activate': self.defineMediaSize,
+        'on_tauto_activate': self.SizeCurrent,
+        'on_t300_activate': self.Size300,
+        'on_t600_activate': self.Size600,
+        'on_t900_activate': self.Size900,
+        'on_VLowQ_activate': self.SetInterpol0,
+        'on_LowQ_activate': self.SetInterpol1,
+        'on_HiQ_activate': self.SetInterpol2,
+        'on_VHiQ_activate': self.SetInterpol3,
+        'on_9PerPage_activate': self.Set9PerPage,
+        'on_12PerPage_activate': self.Set12PerPage,
+        'on_16PerPage_activate': self.Set16PerPage,
+        'on_20PerPage_activate': self.Set20PerPage,
+        'on_25PerPage_activate': self.Set25PerPage,
+        'on_30PerPage_activate': self.Set30PerPage,
+        'on_configurer_dioporama_activate': self.slideShowSetup,
 
-        self.xml.signal_connect('on_enregistrerS_activate', self.SaveSelection)
-        self.xml.signal_connect('on_chargerS_activate', self.LoadSelection)
-        self.xml.signal_connect('on_inverserS_activate', self.InvertSelection)
-        self.xml.signal_connect('on_aucun1_activate', self.SelectNone)
-        self.xml.signal_connect('on_TouS_activate', self.SelectAll)
-        self.xml.signal_connect('on_taille_selection_activate', self.CalculateSize)
-        self.xml.signal_connect('on_media_apres_activate', self.SelectNewerMedia)
-        self.xml.signal_connect('on_media_avant_activate', self.SelectOlderMedia)
+        'on_enregistrerS_activate': self.SaveSelection,
+        'on_chargerS_activate': self.LoadSelection,
+        'on_inverserS_activate': self.InvertSelection,
+        'on_aucun1_activate': self.SelectNone,
+        'on_TouS_activate': self.SelectAll,
+        'on_taille_selection_activate': self.CalculateSize,
+        'on_media_apres_activate': self.SelectNewerMedia,
+        'on_media_avant_activate': self.SelectOlderMedia,
 
-        self.xml.signal_connect('on_precedentI_activate', self.previous)
-        self.xml.signal_connect('on_suivantI_activate', self.next)
-        self.xml.signal_connect('on_premierI_activate', self.first)
-        self.xml.signal_connect('on_dernierI_activate', self.last)
-        self.xml.signal_connect('on_plus_10_activate', self.next10)
-        self.xml.signal_connect('on_moins_10_activate', self.previous10)
+        'on_precedentI_activate': self.previous,
+        'on_suivantI_activate': self.next,
+        'on_premierI_activate': self.first,
+        'on_dernierI_activate': self.last,
+        'on_plus_10_activate': self.next10,
+        'on_moins_10_activate': self.previous10,
 
-        self.xml.signal_connect('on_indexJ_activate', self.indexJ)
-        self.xml.signal_connect('on_precedentJ_activate', self.previousJ)
-        self.xml.signal_connect('on_suivantJ_activate', self.nextJ)
-        self.xml.signal_connect('on_premierJ_activate', self.firstJ)
-        self.xml.signal_connect('on_dernierJ_activate', self.lastJ)
+        'on_indexJ_activate': self.indexJ,
+        'on_precedentJ_activate': self.previousJ,
+        'on_suivantJ_activate': self.nextJ,
+        'on_premierJ_activate': self.firstJ,
+        'on_dernierJ_activate': self.lastJ,
 
-        self.xml.signal_connect('on_precedentS_activate', self.previousS)
-        self.xml.signal_connect('on_suivantS_activate', self.nextS)
-        self.xml.signal_connect('on_premierS_activate', self.firstS)
-        self.xml.signal_connect('on_dernierS_activate', self.lastS)
+        'on_precedentS_activate': self.previousS,
+        'on_suivantS_activate': self.nextS,
+        'on_premierS_activate': self.firstS,
+        'on_dernierS_activate': self.lastS,
 
-        self.xml.signal_connect('on_precedentNS_activate', self.previousNS)
-        self.xml.signal_connect('on_suivantNS_activate', self.nextNS)
-        self.xml.signal_connect('on_premierNS_activate', self.firstNS)
-        self.xml.signal_connect('on_dernierNS_activate', self.lastNS)
+        'on_precedentNS_activate': self.previousNS,
+        'on_suivantNS_activate': self.nextNS,
+        'on_premierNS_activate': self.firstNS,
+        'on_dernierNS_activate': self.lastNS,
 
-        self.xml.signal_connect('on_premierT_activate', self.firstT)
-        self.xml.signal_connect('on_precedentT_activate', self.previousT)
-        self.xml.signal_connect('on_suivantT_activate', self.nextT)
-        self.xml.signal_connect('on_dernierT_activate', self.lastT)
-        self.xml.signal_connect('on_premierNT_activate', self.firstNT)
-        self.xml.signal_connect('on_precedentNT_activate', self.previousNT)
-        self.xml.signal_connect('on_suivantNT_activate', self.nextNT)
-        self.xml.signal_connect('on_dernierNT_activate', self.lastNT)
+        'on_premierT_activate': self.firstT,
+        'on_precedentT_activate': self.previousT,
+        'on_suivantT_activate': self.nextT,
+        'on_dernierT_activate': self.lastT,
+        'on_premierNT_activate': self.firstNT,
+        'on_precedentNT_activate': self.previousNT,
+        'on_suivantNT_activate': self.nextNT,
+        'on_dernierNT_activate': self.lastNT,
 
-        self.xml.signal_connect('on_fullscreen_activate', self.FullScreen)
-        self.xml.signal_connect('on_lance_diaporama_activate', self.SlideShow)
+        'on_fullscreen_activate': self.FullScreen,
+        'on_lance_diaporama_activate': self.SlideShow,
+        }
+
+        self.xml.signal_autoconnect(dictHandlers)
         self.ShowImage()
         self.flush_event_queue()
         gtk.main()
@@ -427,7 +432,7 @@ class interface:
     def settitle(self):
         """Set the new title of the image"""
         newtitle = self.xml.get_widget("Titre").get_text()
-        if newtitle != self.oldtitle:
+        if newtitle != self.strCurrentTitle:
             self.image.name(newtitle)
 
 
@@ -453,7 +458,7 @@ class interface:
             self.xml.get_widget(i).set_text(data[i])
         self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.CurIm])
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.CurIm] in self.Selected))
-        self.oldtitle = data["Titre"]
+        self.strCurrentTitle = data["Titre"]
 
 
     def next(self, *args):
@@ -690,7 +695,7 @@ class interface:
     def about(self, *args):
         """display a copyright message"""
         self.settitle()
-        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion $\Id$".decode("UTF8"), Message=gtk.MESSAGE_INFO)
+        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion $Id$".decode("UTF8"), Message=gtk.MESSAGE_INFO)
 
 
     def nextJ(self, *args):
@@ -1023,19 +1028,37 @@ class interface:
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         self.settitle()
-        importFilerInstance = WarningSc(config.WebRepository, window="dialog-import")
-        dirForImport = importFilerInstance.getDirectory()
+        self.guiFiler = gtk.glade.XML(unifiedglade, root="filer")
+        self.guiFiler.get_widget("filer").set_current_folder(config.DefaultRepository)
+        self.guiFiler.signal_connect('on_Open_clicked', self.filerSelect)
+        self.guiFiler.signal_connect('on_Cancel_clicked', self.filerDestroy)
+
+    def filerSelect(self, *args):
+        """Close the filer GUI and update the data"""
+        print ("dirchooser.filerSelect called")
+        self.importImageCallBack(self.guiFiler.get_widget("filer").get_current_folder())
+        self.guiFiler.get_widget("filer").destroy()
+
+    def filerDestroy(self, *args):
+        """Close the filer GUI"""
+        print ("dirchooser.filerDestroy called")
+        self.guiFiler.get_widget("filer").destroy()
+
+    def importImageCallBack(self, path):
+        """This is the call back method for launching the import of new images"""
+        self.settitle()
+        print("I got a callBack with dirname= %s" % path)
 
 
-    def DefMediaSize(self, *args):
+    def defineMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
         self.settitle()
         AskMediaSize()
 
-    def SlideShowSetup(self, *args):
+    def slideShowSetup(self, *args):
         """lauch a new window for seting up the slideshow"""
         self.settitle()
-        AskSlideShowSetup(self)
+        askSlideShowSetup = AskSlideShowSetup(self)
         if config.GraphicMode == "SlideShow":
             self.xml.get_widget("Principale").destroy()
             gtk.main_quit()
