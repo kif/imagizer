@@ -266,13 +266,11 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkImageMenuItem" id="arreter1">
-                                <property name="label">Arreter</property>
+                              <widget class="GtkMenuItem" id="arreter1">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Quitte imm&#xE9;diatement sans sauvegarder</property>
+                                <property name="label" translatable="yes">Arreter</property>
                                 <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
-                                <signal name="activate" handler="on_arreter1_activate"/>
                                 <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
@@ -297,13 +295,11 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                         <child>
                           <widget class="GtkMenu" id="pr&#xE9;f&#xE9;rences1_menu">
                             <child>
-                              <widget class="GtkImageMenuItem" id="enregistrerP">
-                                <property name="label">Sauve</property>
+                              <widget class="GtkMenuItem" id="enregistrerP">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Enregister les pr&#xE9;f&#xE9;rences</property>
+                                <property name="label" translatable="yes">Sauve</property>
                                 <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
-                                <signal name="activate" handler="on_enregistrerP_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -338,10 +334,9 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="taille">
-                                <property name="label">Taille de l'affichage</property>
+                                <property name="label" translatable="yes">Taille de l'affichage</property>
                                 <property name="visible">True</property>
-                                <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
+                                <property name="use_stock">False</property>
                                 <child>
                                   <widget class="GtkMenu" id="taille_menu">
                                     <child>
@@ -383,6 +378,12 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                         <signal name="activate" handler="on_tauto_activate"/>
                                       </widget>
                                     </child>
+                                  </widget>
+                                </child>
+                                <child internal-child="image">
+                                  <widget class="GtkImage" id="image6">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-fullscreen</property>
                                   </widget>
                                 </child>
                               </widget>
@@ -548,23 +549,19 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                         <child>
                           <widget class="GtkMenu" id="selection_menu">
                             <child>
-                              <widget class="GtkImageMenuItem" id="chargerS">
-                                <property name="label">Charger</property>
+                              <widget class="GtkMenuItem" id="chargerS">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Charge la pr&#xE9;c&#xE9;dente selection</property>
+                                <property name="label" translatable="yes">Charger</property>
                                 <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
-                                <signal name="activate" handler="on_chargerS_activate"/>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkImageMenuItem" id="enregistrerS">
-                                <property name="label">Sauve</property>
+                              <widget class="GtkMenuItem" id="enregistrerS">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Enregistre la s&#xE9;lection</property>
+                                <property name="label" translatable="yes">Sauve</property>
                                 <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
-                                <signal name="activate" handler="on_enregistrerS_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -573,23 +570,18 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkImageMenuItem" id="selectionner">
-                                <property name="label">D&#xE9; / S&#xE9;l&#xE9;ctionner</property>
+                              <widget class="GtkMenuItem" id="selectionner">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Permet de s&#xE9;lectionner ou de d&#xE9;selectionner une image</property>
-                                <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
-                                <signal name="activate" handler="on_selectionner_activate"/>
+                                <property name="label" translatable="yes">D&#xE9; / S&#xE9;l&#xE9;ctionner</property>
                                 <accelerator key="S" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkImageMenuItem" id="inverserS">
-                                <property name="label">Inverser</property>
+                              <widget class="GtkMenuItem" id="inverserS">
                                 <property name="visible">True</property>
+                                <property name="label" translatable="yes">Inverser</property>
                                 <property name="use_underline">True</property>
-                                <property name="use_stock">True</property>
-                                <signal name="activate" handler="on_inverserS_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -673,9 +665,14 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="moins_10">
                                         <property name="label">Moins 10</property>
                                         <property name="visible">True</property>
-                                        <property name="use_underline">True</property>
-                                        <property name="use_stock">True</property>
+                                        <property name="use_stock">False</property>
                                         <signal name="activate" handler="on_moins_10_activate"/>
+                                        <child internal-child="image">
+                                          <widget class="GtkImage" id="image9">
+                                            <property name="visible">True</property>
+                                            <property name="stock">gtk-undo</property>
+                                          </widget>
+                                        </child>
                                       </widget>
                                     </child>
                                     <child>
@@ -700,9 +697,14 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="plus_10">
                                         <property name="label">Plus 10</property>
                                         <property name="visible">True</property>
-                                        <property name="use_underline">True</property>
-                                        <property name="use_stock">True</property>
+                                        <property name="use_stock">False</property>
                                         <signal name="activate" handler="on_plus_10_activate"/>
+                                        <child internal-child="image">
+                                          <widget class="GtkImage" id="image10">
+                                            <property name="visible">True</property>
+                                            <property name="stock">gtk-redo</property>
+                                          </widget>
+                                        </child>
                                       </widget>
                                     </child>
                                     <child>

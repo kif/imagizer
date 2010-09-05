@@ -1049,7 +1049,7 @@ class interface:
         self.settitle()
         print("I got a callBack with dirname= %s" % path)
         listNew = []
-        for oneRaw in findFiles(path, lstExtentions=config.RawExtensions, bFromRoot=True):
+        for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
             print oneRaw
             raw = RawImage(oneRaw)
             raw.extractJPEG()
@@ -1512,7 +1512,7 @@ class SelectDay:
         for i in range(len(self.upperIface.AllJpegs)):
             if os.path.split(self.upperIface.AllJpegs[i])[0] == day:
                 break
-        self.upperIface.CurIm = i
+        self.upperIface.iCurrentImg = i
         self.upperIface.ShowImage()
         self.xml.get_widget("ChangeDir").destroy()
 
@@ -1564,7 +1564,7 @@ if __name__ == '__main__':
     while config.GraphicMode != "Quit":
         if config.GraphicMode == "Normal":
             ifc = interface(*values)
-            values = (ifc.AllJpegs, ifc.CurIm, ifc.Selected, config.GraphicMode)
+            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
             del ifc
             gc.collect()
         elif config.GraphicMode in ["FullScreen", "SlideShow"]:

@@ -998,6 +998,7 @@ class RawImage:
         self.strJepgFile = None
 
     def getJpegPath(self):
+
         if self.exif is None:
             self.exif = pyexiv2.Image(self.strRawFile)
             self.exif.readMetadata()
@@ -1006,20 +1007,56 @@ class RawImage:
                     self.exif.interpretedExifValue("Exif.Photo.DateTimeOriginal").replace(" ", os.sep).replace(":", "-", 2).replace(":", "h", 1).replace(":", "m", 1),
                     self.exif.interpretedExifValue("Exif.Image.Model").strip().split(",")[-1].replace("/", "").replace(" ", "_")
                     ))
+            while os.path.isfile(os.path.join(config.DefaultRepository, self.strJepgFile)):
+                number = ""
+                idx = None
+                listChar = list(self.strJepgFile[:-4])
+                listChar.reverse()
+                for val in listChar:
+                    if val.isdigit():
+                        number = val + number
+                    elif val == "-":
+                        idx = int(number)
+                        break
+                    else:
+                        break
+                if idx is None:
+                    self.strJepgFile = self.strJepgFile[:-4] + "-1.jpg"
+                else:
+                    self.strJepgFile = self.strJepgFile[:-5 - len(number)] + "-%i.jpg" % (idx + 1)
         dirname = os.path.dirname(os.path.join(config.DefaultRepository, self.strJepgFile))
         if not os.path.isdir(dirname):
             makedir(dirname)
+
         return self.strJepgFile
 
     def extractJPEG(self):
         """
         extract the raw image to its right place
         """
-        jpegData = os.popen("dcraw -c -e %s" % self.strRawFile).read()
-        open(os.path.join(config.DefaultRepository, self.getJpegPath()), "wb").write(jpegData)
-        #exifJpeg = pyexiv2.Image(self.strJepgFile))
-        #exifJpeg.readMetadata()
+        extension = os.path.splitext(self.strRawFile)[1].lower()
+        if extension in config.RawExtensions:
+            jpegData = os.popen("dcraw -c -e %s" % self.strRawFile).read()
+        else: #in config.Extensions
+            jpegData = open(self.strRawFile, "rb").read()
+        strJpegFullPath = os.path.join(config.DefaultRepository, self.getJpegPath())
+        open(strJpegFullPath, "wb").write(jpegData)
+        #Copy all metadata useful for us.
+        exifJpeg = pyexiv2.Image(strJpegFullPath)
+        exifJpeg.readMetadata()
+        exifJpeg["Exif.Photo.UserComment"] = self.strRawFile
+        if extension in config.RawExtensions:
+            for metadata in ['Exif.Image.Orientation', 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal', 'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue', 'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings']:
+                try:
+                    exifJpeg[metadata] = self.exif[metadata]
+                except:
+                    print("error in copying metadata $s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
         #self.exif.copyMetadataTo(self.strJepgFile)
+        exifJpeg.writeMetadata()
+        os.chmod(strJpegFullPath, config.DefaultFileMode)
+        if self.exif["Exif.Image.Orientation"] != 1:
+            Exiftran.autorotate(strJpegFullPath)
+
 
 
 ############################################################################################################
