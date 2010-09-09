@@ -378,6 +378,7 @@ class interface:
         'on_inverserS_activate': self.InvertSelection,
         'on_aucun1_activate': self.SelectNone,
         'on_TouS_activate': self.SelectAll,
+        'on_selectionner_activate': self.select,
         'on_taille_selection_activate': self.CalculateSize,
         'on_media_apres_activate': self.SelectNewerMedia,
         'on_media_avant_activate': self.SelectOlderMedia,
@@ -945,6 +946,7 @@ class interface:
 
     def SavePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
+        if config.DEBUG:print("SavePref clicked")
         config.SaveConfig(ConfFile[-1])
 
     def DefAutoRotate(self, *args):
@@ -1035,7 +1037,8 @@ class interface:
 
     def filerSelect(self, *args):
         """Close the filer GUI and update the data"""
-        print ("dirchooser.filerSelect called")
+        if config.DEBUG:
+            print ("dirchooser.filerSelect called")
         self.importImageCallBack(self.guiFiler.get_widget("filer").get_current_folder())
         self.guiFiler.get_widget("filer").destroy()
 
@@ -1047,10 +1050,11 @@ class interface:
     def importImageCallBack(self, path):
         """This is the call back method for launching the import of new images"""
         self.settitle()
-        print("I got a callBack with dirname= %s" % path)
+        if config.DEBUG:
+            print("I got a callBack with dirname= %s" % path)
         listNew = []
         for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
-            print oneRaw
+            if config.DEBUG:print oneRaw
             raw = RawImage(oneRaw)
             raw.extractJPEG()
             listNew.append(raw.getJpegPath())
@@ -1500,7 +1504,7 @@ class SelectDay:
             if day != self.days[-1]:
                 self.days.append(day)
                 self.combobox.append_text(day)
-        self.curday = self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.CurIm])[0])
+        self.curday = self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.iCurrentImg])[0])
         self.combobox.set_active(self.curday)
 
 
@@ -1569,7 +1573,7 @@ if __name__ == '__main__':
             gc.collect()
         elif config.GraphicMode in ["FullScreen", "SlideShow"]:
             ifc = FullScreenInterface(*values)
-            values = (ifc.AllJpegs, ifc.CurIm, ifc.Selected, config.GraphicMode)
+            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
             del ifc
             gc.collect()
         if config.DEBUG: print "Switching to mode %s" % config.GraphicMode

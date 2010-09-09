@@ -62,7 +62,7 @@ class Config:
         self.SelectedDirectory = "Selected"
         self.Selected_save = ".selected-photos"
         self.Extensions = [".jpg", ".jpeg", ".jpe", ".jfif"]
-        self.RawExtensions = [".cr2", ".arw", ".mrw"]
+        self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng"]
         self.AutoRotate = False
         self.DefaultMode = "664"
         self.DefaultRepository = os.getcwd()
@@ -94,6 +94,7 @@ class Config:
         self.ImageHeight = None
         self.DEBUG = None
         self.Gimp = "gimp"
+        self.Dcraw = "dcraw -w -c"
         self.Thumbnails = {
             "Size":160,
             "Suffix": "thumb",
@@ -170,6 +171,7 @@ class Config:
             elif j == "ImageWidth".lower():      self.ImageWidth = int(i[1])
             elif j == "ImageHeight".lower():     self.ImageHeight = int(i[1])
             elif j == "gimp".lower():            self.Gimp = i[1]
+            elif j == "dcraw".lower():           self.Dcraw = i[1]
             else: print "unknown key " + j
 
 
@@ -241,6 +243,7 @@ class Config:
         txt += "#Synchronization type, acceptable values are Newer, Older, Selected and All\nSynchronizeType: %s\n\n" % self.SynchronizeType
         txt += "#Allow the creation of a Cache of images with the given size in number of images\nImageCache: %s\n\n" % self.ImageCache
         txt += "#Gnu Image Manipulation Program (GIMP) path to executable\nGimp: %s\n\n" % self.Gimp
+        txt += "#Digital Camera Raw (dcraw) extraction program and option (-w -c is  suggested)\nDcraw: %s\n\n" % self.Dcraw
         if self.ImageWidth is not None:
             txt += "#Width of the last image displayed ... should not be modified\nImageWidth:%s\n\n" % self.ImageWidth
         if self.ImageHeight is not None:
@@ -260,4 +263,7 @@ class Config:
         w = open(filename, "w")
         w.write(txt)
         w.close()
+        if self.DEBUG:
+            print("Configuration saved to file %s" % filename)
+
 

@@ -996,6 +996,8 @@ class RawImage:
         self.strRawFile = strRawFile
         self.exif = None
         self.strJepgFile = None
+#        if config.DEBUG:
+        print("Importing [Raw|Jpeg] image %s" % strRawFile)
 
     def getJpegPath(self):
 
@@ -1035,27 +1037,40 @@ class RawImage:
         extract the raw image to its right place
         """
         extension = os.path.splitext(self.strRawFile)[1].lower()
-        if extension in config.RawExtensions:
-            jpegData = os.popen("dcraw -c -e %s" % self.strRawFile).read()
-        else: #in config.Extensions
-            jpegData = open(self.strRawFile, "rb").read()
         strJpegFullPath = os.path.join(config.DefaultRepository, self.getJpegPath())
-        open(strJpegFullPath, "wb").write(jpegData)
-        #Copy all metadata useful for us.
-        exifJpeg = pyexiv2.Image(strJpegFullPath)
-        exifJpeg.readMetadata()
-        exifJpeg["Exif.Photo.UserComment"] = self.strRawFile
         if extension in config.RawExtensions:
-            for metadata in ['Exif.Image.Orientation', 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal', 'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue', 'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings']:
+            data = os.popen("%s %s" % (config.Dcraw, self.strRawFile)).readlines()
+            img = Image.fromstring("RGB", tuple([int(i) for i in data[1].split()]), "".join(tuple(data[3:])))
+################################################################################
+# Raw images are already rotated bu DCRaw
+################################################################################
+#            if self.exif["Exif.Image.Orientation"] == 8:
+#                img = img.rotate(270)
+#            if self.exif["Exif.Image.Orientation"] == 6:
+#                img = img.rotate(90)
+#            if self.exif["Exif.Image.Orientation"] == 3:
+#                img = img.rotate(180)
+            img.save(strJpegFullPath, format='JPEG')
+            #Copy all metadata useful for us.
+            exifJpeg = pyexiv2.Image(strJpegFullPath)
+            exifJpeg.readMetadata()
+            exifJpeg['Exif.Image.Orientation'] = 1
+            exifJpeg["Exif.Photo.UserComment"] = self.strRawFile
+            for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal', 'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue', 'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings']:
                 try:
                     exifJpeg[metadata] = self.exif[metadata]
                 except:
                     print("error in copying metadata $s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
-        #self.exif.copyMetadataTo(self.strJepgFile)
-        exifJpeg.writeMetadata()
-        os.chmod(strJpegFullPath, config.DefaultFileMode)
-        if self.exif["Exif.Image.Orientation"] != 1:
+            #self.exif.copyMetadataTo(self.strJepgFile)
+            exifJpeg.writeMetadata()
+
+        else: #in config.Extensions, i.e. a JPEG file
+            shutil.copy(self.strRawFile, strJpegFullPath)
             Exiftran.autorotate(strJpegFullPath)
+
+        os.chmod(strJpegFullPath, config.DefaultFileMode)
+
+
 
 
 
