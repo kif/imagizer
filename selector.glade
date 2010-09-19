@@ -300,6 +300,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="tooltip" translatable="yes">Enregister les pr&#xE9;f&#xE9;rences</property>
                                 <property name="label" translatable="yes">Sauve</property>
                                 <property name="use_underline">True</property>
+                                <signal name="activate" handler="on_enregistrerP_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -554,6 +555,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="tooltip" translatable="yes">Charge la pr&#xE9;c&#xE9;dente selection</property>
                                 <property name="label" translatable="yes">Charger</property>
                                 <property name="use_underline">True</property>
+                                <signal name="activate" handler="on_chargerS_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -562,6 +564,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="tooltip" translatable="yes">Enregistre la s&#xE9;lection</property>
                                 <property name="label" translatable="yes">Sauve</property>
                                 <property name="use_underline">True</property>
+                                <signal name="activate" handler="on_enregistrerS_activate"/>
                               </widget>
                             </child>
                             <child>
@@ -574,6 +577,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Permet de s&#xE9;lectionner ou de d&#xE9;selectionner une image</property>
                                 <property name="label" translatable="yes">D&#xE9; / S&#xE9;l&#xE9;ctionner</property>
+                                <signal name="activate" handler="on_selectionner_activate"/>
                                 <accelerator key="S" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
@@ -582,6 +586,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Inverser</property>
                                 <property name="use_underline">True</property>
+                                <signal name="activate" handler="on_inverserS_activate"/>
                               </widget>
                             </child>
                             <child>
