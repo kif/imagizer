@@ -612,6 +612,8 @@ def CopySelected(SelectedFiles):
 ##########################################################
 class photo:
     """class photo that does all the operations available on photos"""
+    GaussianKernel=None
+    
     def __init__(self, filename):
         self.filename = filename
         self.fn = os.path.join(config.DefaultRepository, self.filename)
@@ -896,8 +898,17 @@ class photo:
         necessite numpy et PIL."""
         try:
             import numpy
+            import scipy
+            import scipy.signal as signal
         except:
             raise ImportError("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
+
+        if photo.GaussianKernel is None:
+            size = 15
+            x, y = numpy.mgrid[-size:size+1, -size:size+1]
+            g = numpy.exp(-(x**2/float(size)+y**2/float(size)))
+            photo.GaussianKernel =  g / g.sum()
+
         self.LoadPIL()
         x, y = self.pil.size
         ImageFile.MAXBLOCK = x * y
@@ -906,7 +917,9 @@ class photo:
         red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
         desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2
         inv_desat = 255 - desat_array
-        k = Image.fromarray(inv_desat, "L").convert("RGB")
+        blured_inv_desat = signal.convolve(inv_desat,photo.GaussianKernel, mode='valid')
+        
+        k = Image.fromarray(blured_inv_desat, "L").convert("RGB")
         S = ImageChops.screen(self.pil, k)
         M = ImageChops.multiply(self.pil, k)
         F = ImageChops.add(ImageChops.multiply(self.pil, S), ImageChops.multiply(ImageChops.invert(self.pil), M))
@@ -1041,15 +1054,6 @@ class RawImage:
         if extension in config.RawExtensions:
             data = os.popen("%s %s" % (config.Dcraw, self.strRawFile)).readlines()
             img = Image.fromstring("RGB", tuple([int(i) for i in data[1].split()]), "".join(tuple(data[3:])))
-################################################################################
-# Raw images are already rotated bu DCRaw
-################################################################################
-#            if self.exif["Exif.Image.Orientation"] == 8:
-#                img = img.rotate(270)
-#            if self.exif["Exif.Image.Orientation"] == 6:
-#                img = img.rotate(90)
-#            if self.exif["Exif.Image.Orientation"] == 3:
-#                img = img.rotate(180)
             img.save(strJpegFullPath, format='JPEG')
             #Copy all metadata useful for us.
             exifJpeg = pyexiv2.Image(strJpegFullPath)
