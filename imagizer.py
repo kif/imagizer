@@ -1064,7 +1064,7 @@ class RawImage:
                 try:
                     exifJpeg[metadata] = self.exif[metadata]
                 except:
-                    print("error in copying metadata $s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
+                    print("error in copying metadata %s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
             #self.exif.copyMetadataTo(self.strJepgFile)
             exifJpeg.writeMetadata()
 
