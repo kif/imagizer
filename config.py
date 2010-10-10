@@ -62,7 +62,7 @@ class Config:
         self.SelectedDirectory = "Selected"
         self.Selected_save = ".selected-photos"
         self.Extensions = [".jpg", ".jpeg", ".jpe", ".jfif"]
-        self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng"]
+        self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng", ".pef", ".nef"]
         self.AutoRotate = False
         self.DefaultMode = "664"
         self.DefaultRepository = os.getcwd()
