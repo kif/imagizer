@@ -1,10 +1,10 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <glade-interface>
   <!-- interface-requires gtk+ 2.6 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkFileChooserDialog" id="filer">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Selectionner r&#xE9;pertoire</property>
+    <property name="title" translatable="yes">Selectionner répertoire</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
     <property name="action">select-folder</property>
@@ -99,14 +99,14 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur14">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur14">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkMenuItem" id="lance_diaporama">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Passe en mode plein &#xE9;cran et lance le diaporama</property>
+                                <property name="tooltip" translatable="yes">Passe en mode plein écran et lance le diaporama</property>
                                 <property name="label" translatable="yes">Diaporama</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_lance_diaporama_activate"/>
@@ -117,7 +117,7 @@
                               <widget class="GtkImageMenuItem" id="fullscreen">
                                 <property name="label">gtk-fullscreen</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Passe en mode plein &#xE9;cran</property>
+                                <property name="tooltip" translatable="yes">Passe en mode plein écran</property>
                                 <property name="use_underline">True</property>
                                 <property name="use_stock">True</property>
                                 <signal name="activate" handler="on_fullscreen_activate"/>
@@ -125,7 +125,7 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur15">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur15">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -133,7 +133,7 @@
                               <widget class="GtkImageMenuItem" id="poubelle">
                                 <property name="label">Poubelle</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
+                                <property name="tooltip" translatable="yes">Déplace l'image dans la corbeille</property>
                                 <property name="use_stock">False</property>
                                 <signal name="activate" handler="on_poubelle_activate"/>
                                 <accelerator key="Delete" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -146,15 +146,15 @@
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur2">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur2">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkImageMenuItem" id="nommer1">
-                                <property name="label">Nommer journ&#xE9;e</property>
+                                <property name="label">Nommer journée</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Propose de renommer le r&#xE9;pertoire courant</property>
+                                <property name="tooltip" translatable="yes">Propose de renommer le répertoire courant</property>
                                 <property name="use_stock">False</property>
                                 <signal name="activate" handler="on_nommer1_activate"/>
                                 <child internal-child="image">
@@ -169,11 +169,11 @@
                               <widget class="GtkImageMenuItem" id="importer1">
                                 <property name="label" translatable="yes">Importer images</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Les images peuvent &#xEA;tre au format:
-- JPEG: elle seront copi&#xE9;s dans l'arborescence selector (et non d&#xE9;plac&#xE9;es)
-- RAW: une vignette JPEG sera alors extraite et plac&#xE9;e dans l'arborescence. 
+                                <property name="tooltip" translatable="yes">Les images peuvent être au format:
+- JPEG: elle seront copiés dans l'arborescence selector (et non déplacées)
+- RAW: une vignette JPEG sera alors extraite et placée dans l'arborescence. 
 
-Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e dans les ent&#xEA;tes Exif.</property>
+Dans tous les cas, la référence du fichier originale est notée dans les entêtes Exif.</property>
                                 <property name="use_stock">False</property>
                                 <signal name="activate" handler="on_importer1_activate" after="yes"/>
                                 <child internal-child="image">
@@ -188,7 +188,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               <widget class="GtkImageMenuItem" id="executer1">
                                 <property name="label">gtk-execute</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Lance le redimentionnement des images selectionn&#xE9;es</property>
+                                <property name="tooltip" translatable="yes">Lance le redimentionnement des images selectionnées</property>
                                 <property name="use_underline">True</property>
                                 <property name="use_stock">True</property>
                                 <child>
@@ -196,7 +196,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                     <child>
                                       <widget class="GtkMenuItem" id="copie">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Copie tous les fichiers selectionn&#xE9;s dans &#xAB;Selected&#xBB;</property>
+                                        <property name="tooltip" translatable="yes">Copie tous les fichiers selectionnés dans «Selected»</property>
                                         <property name="label" translatable="yes">Copier seulement</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_copie1_activate"/>
@@ -205,7 +205,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                     <child>
                                       <widget class="GtkMenuItem" id="copie_et_grave1">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Copie toutes les images s&#xE9;lectionn&#xE9;es et les graves sur CD/DVD</property>
+                                        <property name="tooltip" translatable="yes">Copie toutes les images sélectionnées et les graves sur CD/DVD</property>
                                         <property name="label" translatable="yes">Copier et graver</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_copie_et_grave1_activate"/>
@@ -214,7 +214,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                     <child>
                                       <widget class="GtkMenuItem" id="vers_page_web1">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Copie les images s&#xE9;lectionn&#xE9;es, les redimentionne et  ajoute un filigrane (optionnel) </property>
+                                        <property name="tooltip" translatable="yes">Copie les images sélectionnées, les redimentionne et  ajoute un filigrane (optionnel) </property>
                                         <property name="label" translatable="yes">Copier et redimmentionner</property>
                                         <property name="use_underline">True</property>
                                         <signal name="activate" handler="on_executer1_activate"/>
@@ -236,8 +236,9 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               <widget class="GtkImageMenuItem" id="Synchronize">
                                 <property name="label" translatable="yes">Synchronizer</property>
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Syncronise les image avec un autre d&#xE9;pot</property>
+                                <property name="tooltip" translatable="yes">Syncronise les image avec un autre dépot</property>
                                 <property name="use_stock">False</property>
+                                <signal name="activate" handler="on_Synchronize_activate"/>
                                 <child internal-child="image">
                                   <widget class="GtkImage" id="image5">
                                     <property name="visible">True</property>
@@ -268,7 +269,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkMenuItem" id="arreter1">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Quitte imm&#xE9;diatement sans sauvegarder</property>
+                                <property name="tooltip" translatable="yes">Quitte immédiatement sans sauvegarder</property>
                                 <property name="label" translatable="yes">Arreter</property>
                                 <property name="use_underline">True</property>
                                 <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
@@ -288,16 +289,16 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkMenuItem" id="pr&#xE9;f&#xE9;rences1">
+                      <widget class="GtkMenuItem" id="préférences1">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Pr&#xE9;f&#xE9;rences</property>
+                        <property name="label" translatable="yes">Préférences</property>
                         <property name="use_underline">True</property>
                         <child>
-                          <widget class="GtkMenu" id="pr&#xE9;f&#xE9;rences1_menu">
+                          <widget class="GtkMenu" id="préférences1_menu">
                             <child>
                               <widget class="GtkMenuItem" id="enregistrerP">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Enregister les pr&#xE9;f&#xE9;rences</property>
+                                <property name="tooltip" translatable="yes">Enregister les préférences</property>
                                 <property name="label" translatable="yes">Sauve</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_enregistrerP_activate"/>
@@ -306,7 +307,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkMenuItem" id="taille_media">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet de sp&#xE9;cifier la taille des media d'archivage CD / DVD</property>
+                                <property name="tooltip" translatable="yes">Permet de spécifier la taille des media d'archivage CD / DVD</property>
                                 <property name="label" translatable="yes">Taille de CD/DVD</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_taille_media_activate"/>
@@ -329,7 +330,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur11">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur11">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -390,7 +391,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur1">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur1">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -405,7 +406,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkRadioMenuItem" id="VLowQ">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Interpollation au plus proche</property>
-                                        <property name="label" translatable="yes">Tr&#xE8;s rapide</property>
+                                        <property name="label" translatable="yes">Très rapide</property>
                                         <property name="use_underline">True</property>
                                         <property name="active">True</property>
                                         <signal name="activate" handler="on_VLowQ_activate"/>
@@ -425,7 +426,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                     <child>
                                       <widget class="GtkRadioMenuItem" id="HiQ">
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Interpollation Billin&#xE9;aire</property>
+                                        <property name="tooltip" translatable="yes">Interpollation Billinéaire</property>
                                         <property name="label" translatable="yes">Bon</property>
                                         <property name="use_underline">True</property>
                                         <property name="active">True</property>
@@ -437,7 +438,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkRadioMenuItem" id="VHiQ">
                                         <property name="visible">True</property>
                                         <property name="tooltip" translatable="yes">Interpollation Hyperbolique </property>
-                                        <property name="label" translatable="yes">Tr&#xE8;s Bon</property>
+                                        <property name="label" translatable="yes">Très Bon</property>
                                         <property name="use_underline">True</property>
                                         <property name="active">True</property>
                                         <property name="group">VLowQ</property>
@@ -449,7 +450,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur10">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur10">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -524,14 +525,14 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur16">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur16">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkMenuItem" id="configurer_dioporama">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet de configurer les param&#xE8;tres du diaporama</property>
+                                <property name="tooltip" translatable="yes">Permet de configurer les paramètres du diaporama</property>
                                 <property name="label" translatable="yes">Configurer Diaporama</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_configurer_dioporama_activate"/>
@@ -552,7 +553,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkMenuItem" id="chargerS">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Charge la pr&#xE9;c&#xE9;dente selection</property>
+                                <property name="tooltip" translatable="yes">Charge la précédente selection</property>
                                 <property name="label" translatable="yes">Charger</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_chargerS_activate"/>
@@ -561,22 +562,22 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkMenuItem" id="enregistrerS">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Enregistre la s&#xE9;lection</property>
+                                <property name="tooltip" translatable="yes">Enregistre la sélection</property>
                                 <property name="label" translatable="yes">Sauve</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_enregistrerS_activate"/>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur4">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur4">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
                               <widget class="GtkMenuItem" id="selectionner">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Permet de s&#xE9;lectionner ou de d&#xE9;selectionner une image</property>
-                                <property name="label" translatable="yes">D&#xE9; / S&#xE9;l&#xE9;ctionner</property>
+                                <property name="tooltip" translatable="yes">Permet de sélectionner ou de déselectionner une image</property>
+                                <property name="label" translatable="yes">Dé / Séléctionner</property>
                                 <signal name="activate" handler="on_selectionner_activate"/>
                                 <accelerator key="S" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
@@ -606,7 +607,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur12">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur12">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
@@ -622,7 +623,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkMenuItem" id="media_avant">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">S&#xE9;lection pour  remplir CD/DVD  avec des images plus anciennes que la courante.</property>
+                                <property name="tooltip" translatable="yes">Sélection pour  remplir CD/DVD  avec des images plus anciennes que la courante.</property>
                                 <property name="label" translatable="yes">CD/DVD + ancien</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_media_avant_activate"/>
@@ -631,8 +632,8 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkMenuItem" id="media_apres">
                                 <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">S&#xE9;lection pour  remplir CD/DVD  avec des images plus r&#xE9;centes que la courante.</property>
-                                <property name="label" translatable="yes">CD/DVD + r&#xE9;cent</property>
+                                <property name="tooltip" translatable="yes">Sélection pour  remplir CD/DVD  avec des images plus récentes que la courante.</property>
+                                <property name="label" translatable="yes">CD/DVD + récent</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_media_apres_activate"/>
                               </widget>
@@ -786,23 +787,23 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur5">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur5">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="selectionn&#xE9;1">
+                              <widget class="GtkMenuItem" id="selectionné1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Selectionn&#xE9;</property>
+                                <property name="label" translatable="yes">Selectionné</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_selectionn&#xE9;1_activate"/>
+                                <signal name="activate" handler="on_selectionné1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="selectionn&#xE9;1_menu">
+                                  <widget class="GtkMenu" id="selectionné1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierS">
                                         <property name="label">gtk-goto-first</property>
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Premi&#xE8;re photo s&#xE9;lectionn&#xE9;e</property>
+                                        <property name="tooltip" translatable="yes">Première photo sélectionnée</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierS_activate"/>
@@ -813,7 +814,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="precedentS">
                                         <property name="label">gtk-go-back</property>
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Pr&#xE9;c&#xE9;dente photo s&#xE9;lectiononn&#xE9;e </property>
+                                        <property name="tooltip" translatable="yes">Précédente photo sélectiononnée </property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentS_activate"/>
@@ -824,7 +825,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="suivantS">
                                         <property name="label">gtk-go-forward</property>
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Prochaine photo s&#xE9;lectionn&#xE9;e</property>
+                                        <property name="tooltip" translatable="yes">Prochaine photo sélectionnée</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantS_activate"/>
@@ -835,7 +836,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="dernierS">
                                         <property name="label">gtk-goto-last</property>
                                         <property name="visible">True</property>
-                                        <property name="tooltip" translatable="yes">Derni&#xE8;re image s&#xE9;lectionn&#xE9;e</property>
+                                        <property name="tooltip" translatable="yes">Dernière image sélectionnée</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierS_activate"/>
@@ -847,13 +848,13 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="non_s&#xE9;lectionn&#xE9;1">
+                              <widget class="GtkMenuItem" id="non_sélectionné1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Non S&#xE9;lectionn&#xE9;</property>
+                                <property name="label" translatable="yes">Non Sélectionné</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_non_s&#xE9;lectionn&#xE9;1_activate"/>
+                                <signal name="activate" handler="on_non_sélectionné1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="non_s&#xE9;lectionn&#xE9;1_menu">
+                                  <widget class="GtkMenu" id="non_sélectionné1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierNS">
                                         <property name="label">gtk-goto-first</property>
@@ -895,18 +896,18 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkSeparatorMenuItem" id="s&#xE9;parateur6">
+                              <widget class="GtkSeparatorMenuItem" id="séparateur6">
                                 <property name="visible">True</property>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="titr&#xE9;1">
+                              <widget class="GtkMenuItem" id="titré1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Titr&#xE9;</property>
+                                <property name="label" translatable="yes">Titré</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_titr&#xE9;1_activate"/>
+                                <signal name="activate" handler="on_titré1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="titr&#xE9;1_menu">
+                                  <widget class="GtkMenu" id="titré1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierT">
                                         <property name="label">gtk-goto-first</property>
@@ -948,13 +949,13 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkMenuItem" id="non_titr&#xE9;1">
+                              <widget class="GtkMenuItem" id="non_titré1">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Non Titr&#xE9;</property>
+                                <property name="label" translatable="yes">Non Titré</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_non_titr&#xE9;1_activate"/>
+                                <signal name="activate" handler="on_non_titré1_activate"/>
                                 <child>
-                                  <widget class="GtkMenu" id="non_titr&#xE9;1_menu">
+                                  <widget class="GtkMenu" id="non_titré1_menu">
                                     <child>
                                       <widget class="GtkImageMenuItem" id="premierNT">
                                         <property name="label">gtk-goto-first</property>
@@ -1036,7 +1037,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip" translatable="yes">&#xC9;diter l'image avec le GIMP</property>
+                                <property name="tooltip" translatable="yes">Éditer l'image avec le GIMP</property>
                                 <signal name="clicked" handler="on_Gimp_clicked"/>
                                 <child>
                                   <widget class="GtkAlignment" id="alignment12">
@@ -1061,7 +1062,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                         <child>
                                           <widget class="GtkLabel" id="label28">
                                             <property name="visible">True</property>
-                                            <property name="label" translatable="yes">&#xC9;diter</property>
+                                            <property name="label" translatable="yes">Éditer</property>
                                             <property name="use_underline">True</property>
                                           </widget>
                                           <packing>
@@ -1086,7 +1087,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip" translatable="yes">Filtrer &#xE0; l'aide du masque de contraste</property>
+                                <property name="tooltip" translatable="yes">Filtrer à l'aide du masque de contraste</property>
                                 <signal name="clicked" handler="on_Filter_clicked"/>
                                 <child>
                                   <widget class="GtkAlignment" id="alignment13">
@@ -1143,7 +1144,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
+                            <property name="tooltip" translatable="yes">Déplace l'image dans la corbeille</property>
                             <signal name="clicked" handler="on_Poubelle_clicked"/>
                             <child>
                               <widget class="GtkAlignment" id="alignment11">
@@ -1246,7 +1247,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip" translatable="yes">Si l'image est s&#xE9;&#x142;ectionn&#xE9;e, elle sera copi&#xE9;e</property>
+                    <property name="tooltip" translatable="yes">Si l'image est séłectionnée, elle sera copiée</property>
                     <property name="use_underline">True</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
@@ -1532,7 +1533,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                   <widget class="GtkLabel" id="label4">
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
-                    <property name="label" translatable="yes">R&#xE9;solution</property>
+                    <property name="label" translatable="yes">Résolution</property>
                   </widget>
                   <packing>
                     <property name="top_attach">2</property>
@@ -1545,7 +1546,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                   <widget class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="xalign">0</property>
-                    <property name="label" translatable="yes">Mod&#xE8;le</property>
+                    <property name="label" translatable="yes">Modèle</property>
                   </widget>
                   <packing>
                     <property name="top_attach">1</property>
@@ -1581,7 +1582,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip" translatable="yes">Tourne l'image de 90&#xB0; dans le sens trigonometrique (Ctrl-Left)</property>
+                    <property name="tooltip" translatable="yes">Tourne l'image de 90° dans le sens trigonometrique (Ctrl-Left)</property>
                     <signal name="clicked" handler="on_gauche_clicked"/>
                     <accelerator key="Left" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
@@ -1608,7 +1609,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               <widget class="GtkLabel" id="label18">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Rotation
-&#xE0; gauche</property>
+à gauche</property>
                                 <property name="use_underline">True</property>
                                 <property name="justify">center</property>
                                 <property name="wrap">True</property>
@@ -1636,7 +1637,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip" translatable="yes">Tourne l'image de 90&#xB0; dans le sens horaire (Ctrl-Right)</property>
+                    <property name="tooltip" translatable="yes">Tourne l'image de 90° dans le sens horaire (Ctrl-Right)</property>
                     <signal name="clicked" handler="on_droite_clicked"/>
                     <accelerator key="Right" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
@@ -1652,7 +1653,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                               <widget class="GtkLabel" id="label19">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Rotation
-&#xE0; droite</property>
+à droite</property>
                                 <property name="use_underline">True</property>
                                 <property name="justify">center</property>
                               </widget>
@@ -1690,7 +1691,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip" translatable="yes">Image pr&#xE9;c&#xE9;dente (Ctrl-Up)</property>
+                    <property name="tooltip" translatable="yes">Image précédente (Ctrl-Up)</property>
                     <signal name="clicked" handler="on_precedant_clicked"/>
                     <accelerator key="Up" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                     <child>
@@ -1716,7 +1717,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                             <child>
                               <widget class="GtkLabel" id="label21">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Pr&#xE9;c&#xE9;dente</property>
+                                <property name="label" translatable="yes">Précédente</property>
                                 <property name="use_underline">True</property>
                               </widget>
                               <packing>
@@ -1882,7 +1883,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                     <property name="visible">True</property>
                     <property name="xpad">10</property>
                     <property name="ypad">6</property>
-                    <property name="label" translatable="yes">Selector travaille sur toutes les photos du r&#xE9;pertoire de d&#xE9;part. Dans un premier temps, les photos sont renomm&#xE9;es en fonction de leur date et de l'appareil d'origine, ce qui va les m&#xE9;langer !!!</property>
+                    <property name="label" translatable="yes">Selector travaille sur toutes les photos du répertoire de départ. Dans un premier temps, les photos sont renommées en fonction de leur date et de l'appareil d'origine, ce qui va les mélanger !!!</property>
                     <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
@@ -1915,7 +1916,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                 <child>
                   <widget class="GtkLabel" id="label6">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Vous avez lanc&#xE9; selector sur un repertoire ne ressemblant pas &#xE0; une archive selector :</property>
+                    <property name="label" translatable="yes">Vous avez lancé selector sur un repertoire ne ressemblant pas à une archive selector :</property>
                     <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
@@ -1967,7 +1968,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <child>
                                   <widget class="GtkLabel" id="label5">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">S&#xE9;lectionner</property>
+                                    <property name="label" translatable="yes">Sélectionner</property>
                                     <property name="use_underline">True</property>
                                   </widget>
                                   <packing>
@@ -1995,7 +1996,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                 <child>
                   <widget class="GtkLabel" id="label7">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">&#xCA;tes vous sur de vouloir continuer ?</property>
+                    <property name="label" translatable="yes">Êtes vous sur de vouloir continuer ?</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
@@ -2175,7 +2176,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <child>
                                   <widget class="GtkLabel" id="label16">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">S&#xE9;lectionner</property>
+                                    <property name="label" translatable="yes">Sélectionner</property>
                                     <property name="use_underline">True</property>
                                   </widget>
                                   <packing>
@@ -2280,7 +2281,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
         <child>
           <widget class="GtkLabel" id="label30">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Vous pouvez ajouter un commentaire pour la journ&#xE9;e</property>
+            <property name="label" translatable="yes">Vous pouvez ajouter un commentaire pour la journée</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -2426,7 +2427,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
   </widget>
   <widget class="GtkWindow" id="TailleCD">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Taille m&#xE9;dia</property>
+    <property name="title" translatable="yes">Taille média</property>
     <signal name="destroy" handler="on_TailleCD_destroy"/>
     <child>
       <widget class="GtkVBox" id="vbox10">
@@ -2434,7 +2435,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
         <child>
           <widget class="GtkLabel" id="label33">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Veuillez pr&#xE9;ciser la taille des m&#xE9;dia 
+            <property name="label" translatable="yes">Veuillez préciser la taille des média 
 que vous utilisez pour archiver vos images</property>
           </widget>
           <packing>
@@ -2451,7 +2452,7 @@ que vous utilisez pour archiver vos images</property>
               <widget class="GtkLabel" id="label35">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">M&#xE9;gaOctets</property>
+                <property name="label" translatable="yes">MégaOctets</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
@@ -2522,7 +2523,7 @@ que vous utilisez pour archiver vos images</property>
   <widget class="GtkWindow" id="FullScreen">
     <property name="visible">True</property>
     <property name="extension_events">all</property>
-    <property name="tooltip" translatable="yes">Fenetre de Selector plein &#xE9;cran</property>
+    <property name="tooltip" translatable="yes">Fenetre de Selector plein écran</property>
     <property name="title" translatable="yes">Selector</property>
     <property name="window_position">center-always</property>
     <property name="gravity">center</property>
@@ -2546,7 +2547,7 @@ que vous utilisez pour archiver vos images</property>
         <child>
           <widget class="GtkLabel" id="label39">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">D&#xE9;lai entre les images</property>
+            <property name="label" translatable="yes">Délai entre les images</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -2577,7 +2578,7 @@ que vous utilisez pour archiver vos images</property>
         <child>
           <widget class="GtkLabel" id="label40">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Orde de d&#xE9;filement des images</property>
+            <property name="label" translatable="yes">Orde de défilement des images</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -2604,7 +2605,7 @@ que vous utilisez pour archiver vos images</property>
         </child>
         <child>
           <widget class="GtkRadioButton" id="radio-random">
-            <property name="label" translatable="yes">Al&#xE9;atoire</property>
+            <property name="label" translatable="yes">Aléatoire</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
@@ -2862,7 +2863,7 @@ que vous utilisez pour archiver vos images</property>
                 </child>
                 <child>
                   <widget class="GtkRadioButton" id="SyncSelected">
-                    <property name="label" translatable="yes">S&#xE9;lectionn&#xE9;es</property>
+                    <property name="label" translatable="yes">Sélectionnées</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -2877,7 +2878,7 @@ que vous utilisez pour archiver vos images</property>
                 </child>
                 <child>
                   <widget class="GtkRadioButton" id="SyncNewer">
-                    <property name="label" translatable="yes">Plus r&#xE9;centes que la courante</property>
+                    <property name="label" translatable="yes">Plus récentes que la courante</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -2982,7 +2983,6 @@ que vous utilisez pour archiver vos images</property>
         <child>
           <widget class="GtkVBox" id="vbox5">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkHBox" id="hbox2">
                 <property name="visible">True</property>
@@ -3030,15 +3030,14 @@ que vous utilisez pour archiver vos images</property>
               <widget class="GtkVBox" id="vbox6">
                 <property name="visible">True</property>
                 <property name="border_width">2</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <widget class="GtkLabel" id="label6">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Les images peuvent &#xEA;tre au format:
-- JPEG: elle seront copi&#xE9;s dans l'arborescence selector (et non d&#xE9;plac&#xE9;es)
-- RAW: une vignette JPEG sera alors extraite et plac&#xE9;e dans l'arborescence. 
+                    <property name="label" translatable="yes">Les images peuvent être au format:
+- JPEG: elle seront copiés dans l'arborescence selector (et non déplacées)
+- RAW: une vignette JPEG sera alors extraite et placée dans l'arborescence. 
 
-Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e dans les ent&#xEA;tes Exif.</property>
+Dans tous les cas, la référence du fichier originale est notée dans les entêtes Exif.</property>
                     <property name="justify">fill</property>
                     <property name="wrap">True</property>
                   </widget>
@@ -3055,7 +3054,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                       <widget class="GtkEntry" id="dirname">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x2022;</property>
+                        <property name="invisible_char">•</property>
                         <signal name="editing_done" handler="on_dirname_editing_done"/>
                       </widget>
                       <packing>
