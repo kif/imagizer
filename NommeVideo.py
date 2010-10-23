@@ -18,7 +18,7 @@ fileEncoding = "UTF8"
 
 VBitrate = 600
 ABitRate = 64
-x264opts = "subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:b_pyramid:bframes=3:frameref=5 -ofps 24"
+x264opts = "subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:bframes=3:frameref=5 -ofps 24"
 mplayer = "/usr/bin/mplayer"
 mencoder = "/usr/bin/mencoder"
 sox = "/usr/bin/sox"
@@ -327,7 +327,7 @@ class Video:
         else:
             Resize = " "
         if DoVideo:
-            pbsfile.write(mencoder + rotate + Resize + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:turbo=1:%s -o %s "%s" \n' % (VBitrate, x264opts, tmpavi, self.FullPath))
+            pbsfile.write(mencoder + rotate + Resize + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -o %s "%s" \n' % (VBitrate, x264opts, tmpavi, self.FullPath))
             pbsfile.write("rm %s \n" % tmpavi)
             pbsfile.write(mencoder + rotate + Resize + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VBitrate, x264opts, tmpavi, self.FullPath))
             pbsfile.write("rm %s \n" % tmpavi)
