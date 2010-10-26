@@ -568,16 +568,25 @@ class ViewX:
         gc.collect()
 
 
-def RangeTout(repository):
+def RangeTout(repository, bUseX=True):
     """moves all the JPEG files to a directory named from their day and with the 
     name according to the time
-    This is a MVC implementation"""
+    This is a MVC implementation
+    
+    @param repository: the name of the starting repository
+    @type repository: string
+    @param bUseX: set to False to disable the use of the graphical splash screen
+    @type bUseX: boolean
+    """
     model = ModelRangeTout()
     view = View()
     Controler(model, view)
-    viewx = ViewX()
-    ControlerX(model, viewx)
+    if bUseX:
+        viewx = ViewX()
+        ControlerX(model, viewx)
     return model.start(repository)
+
+
 
 def ProcessSelected(SelectedFiles):
     """This procedure uses the MVC implementation of processSelected
