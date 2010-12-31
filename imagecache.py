@@ -28,6 +28,7 @@
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
+import os
 from config import Config
 config = Config()
 ################################################################################################
@@ -95,6 +96,15 @@ class ImageCache(dict):
             return
         self.ordered[index] = newKey
         myData = self.imageDict.pop(oldKey)
+        try:
+            from imagizer import photo
+        except:
+            print "Unable to: from imagizer import photo"
+            from imagizer.imagizer import photo
+
+        if isinstance(myData, photo):
+            myData.filename = newKey
+            myData.fn = os.path.join(config.DefaultRepository, newKey)
         self.imageDict[newKey] = myData
 
 

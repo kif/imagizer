@@ -619,7 +619,7 @@ def CopySelected(SelectedFiles):
 ##########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
 ##########################################################
-class photo:
+class photo(object):
     """class photo that does all the operations available on photos"""
     GaussianKernel = None
 
