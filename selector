@@ -1023,9 +1023,13 @@ class interface:
     def renommer(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
         self.settitle()
-        renamdayinstance = RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected)
+        renamdayinstance = RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected, self.renommerCallback)
+
+    def renommerCallback(self, renamdayinstance):
         self.AllJpegs = renamdayinstance.AllPhotos
         self.Selected = renamdayinstance.selected
+        self.iCurrentImg = self.AllJpegs.index(renamdayinstance.newFilename)
+        self.ShowImage()
 
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
@@ -1204,10 +1208,19 @@ def MessageError(text, Message=gtk.MESSAGE_ERROR):
     dialog.destroy()
 
 
-class RenameDay:
+class RenameDay(object):
     """prompt a windows and asks for a name for the day"""
-    def __init__(self, filename, AllPhotos, selected):
+    def __init__(self, filename, AllPhotos, selected, callback=None):
+        """
+        @param filename: name of the currenty displayed image
+        @param AllPhotos: list of all photos filenames
+        @param selected: list of selected photos.
+        """
+        self.initialFilename = filename
+        self.newFilename = self.initialFilename
         self.dayname = os.path.dirname(filename)
+        self.callback = callback
+
         self.commentfile = os.path.join(config.DefaultRepository, self.dayname, config.CommentFile)
         self.comment = AttrFile(self.commentfile)
         if os.path.isfile(self.commentfile):
@@ -1256,6 +1269,8 @@ class RenameDay:
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
         else:
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode_to_ascii(self.newname.encode("latin1")).replace(" ", "_",)
+        self.newFilename = os.path.join(self.newdayname, os.path.basename(self.initialFilename))
+
         self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
         if not os.path.isdir(os.path.join(config.DefaultRepository, self.newdayname)):
             mkdir(os.path.join(config.DefaultRepository, self.newdayname))
@@ -1292,6 +1307,8 @@ class RenameDay:
             if len(os.listdir(os.path.join(config.DefaultRepository, self.dayname))) == 0:
                 os.rmdir(os.path.join(config.DefaultRepository, self.dayname))
         self.xml.get_widget("Renommer").destroy()
+        if self.callback is not None:
+            self.callback(self)
 
     def destroy(self, *args):
         """destroy clicked by user -> quit the program"""
@@ -1300,6 +1317,7 @@ class RenameDay:
         except:
             pass
         while gtk.events_pending():gtk.main_iteration()
+
 
 class AskSlideShowSetup:
     """pop up a windows and asks for the setup of the SlideShow"""
