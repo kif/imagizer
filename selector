@@ -1291,11 +1291,14 @@ class RenameDay(object):
                             if i.find(base) == 0:count += 1
                         newphotofile = os.path.splitext(newphotofile) + "-%i.jpg" % count
                     print "%s -> %s" % (photofile, newphotofile)
-                    if (imageCache is not None):
-                        imageCache.rename(photofile, newphotofile)
+                    if (imageCache is not None) and photofile in imageCache:
+                        myPhoto = imageCache[photofile]
+                    else:
+                        myPhoto = photo(photofile)
+                    myPhoto.renameFile(newphotofile)
                     self.AllPhotos[idx] = newphotofile
 
-                    os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
+#                    os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
                     if photofile in self.selected:
                         self.selected[self.selected.index(photofile)] = newphotofile
                 idx += 1

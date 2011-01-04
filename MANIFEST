@@ -1,0 +1,15 @@
+ConvertIndex.descLatin1ToUTF8.py
+NommeVideo.py
+README.txt
+__init__.py
+config.py
+dirchooser.py
+faces.py
+generator
+imagecache.py
+imagizer.py
+parser.py
+selector
+setup.py
+signals.py
+winpath.py

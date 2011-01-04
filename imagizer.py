@@ -633,7 +633,7 @@ class photo(object):
         self.exif = None
         if not os.path.isfile(self.fn):
             print "Erreur, le fichier %s n'existe pas" % self.fn
-        self.bImageCache = (imageCache is not None)
+#        self.bImageCache = (imageCache is not None)
         self.scaledPixbuffer = None
         self.orientation = 1
 
@@ -863,6 +863,7 @@ class photo(object):
             scaled_buf = self.scaledPixbuffer.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
         return scaled_buf
 
+
     def name(self, titre):
         """write the title of the photo inside the description field, in the JPEG header"""
         if os.name == 'nt' and self.pil != None:
@@ -870,6 +871,28 @@ class photo(object):
         self.metadata["Titre"] = titre
         self.exif.setComment(titre)
         self.exif.writeMetadata()
+
+
+    def renameFile(self, newname):
+        """
+        rename the current instance of photo:
+        -Move the file
+        -update the cache
+        -change the name and other attributes of the instance 
+        -change the exif metadata. 
+        """
+        oldname = self.filename
+        newfn = os.path.join(config.DefaultRepository, newname)
+        os.rename(self.fn, newfn)
+        self.filename = newname
+        self.fn = newfn
+        self.exif = newfn
+        if self.exif is not None:
+            self.exif = pyexiv2.Image(self.fn)
+            self.exif.readMetadata()
+        if (imageCache is not None) and oldname in imageCache:
+            imageCache.rename(oldname, newname)
+
 
     def storeOriginalName(self, originalName):
         """
@@ -883,6 +906,7 @@ class photo(object):
             self.readExif()
         self.exif["Exif.Photo.UserComment"] = originalName
         self.exif.writeMetadata()
+
 
     def autorotate(self):
         """does autorotate the image according to the EXIF tag"""

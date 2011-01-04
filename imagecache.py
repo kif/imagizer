@@ -28,10 +28,10 @@
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
-import os
-import pyexiv2
 from config import Config
 config = Config()
+
+
 ################################################################################################
 ###############  Class ImageCache for storing the bitmaps in a Borg ############################
 ################################################################################################
@@ -41,14 +41,16 @@ class ImageCache(dict):
     """
     __shared_state = {}
     __data_initialized = False
+
     def __init__(self, maxSize=100):
         self.__dict__ = self.__shared_state
-        if  not ImageCache.__data_initialized :
+        if  ImageCache.__data_initialized is False:
             ImageCache.__data_initialized = True
             self.ordered = []
             self.imageDict = {}
             self.maxSize = maxSize
             self.size = 0
+
     def __setitem__(self, key, value):
         """x.__setitem__(i, y) <==> x[i]=y"""
         self.imageDict[ key ] = value
@@ -91,25 +93,10 @@ class ImageCache(dict):
         """change the name of a key without affecting anything else
         If the name is not present: do nothing.
         """
-        try:
-            index = self.ordered.index(oldKey)
-        except:
+        if oldKey not in self.ordered:
             return
+        index = self.ordered.index(oldKey)
         self.ordered[index] = newKey
         myData = self.imageDict.pop(oldKey)
-
-        try:
-            from imagizer import photo
-        except:
-            print "Unable to: from imagizer import photo"
-            from imagizer.imagizer import photo
-
-        if isinstance(myData, photo):
-            myData.filename = newKey
-            myData.fn = os.path.join(config.DefaultRepository, newKey)
-            myData.exif = pyexiv2.Image(myData.fn)
-            myData.exif.readMetadata()
         self.imageDict[newKey] = myData
-
-
 
