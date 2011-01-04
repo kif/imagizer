@@ -19,7 +19,10 @@ libexiftran_run(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "is", &action, &filename))
         return NULL;
 //    printf("Got action=%i for filename %s\n",action,filename);
+    Py_BEGIN_ALLOW_THREADS;
     rc = pylib(action, filename);
+    Py_END_ALLOW_THREADS;
+
     if (rc!=0) printf("Error during libexiftran.run(%i,%s)",action,filename);
 //    printf("Recived code %i",rc);
     return Py_BuildValue("i", rc);
