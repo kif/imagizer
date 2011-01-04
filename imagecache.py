@@ -29,6 +29,7 @@ ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
 import os
+import pyexiv2
 from config import Config
 config = Config()
 ################################################################################################
@@ -96,6 +97,7 @@ class ImageCache(dict):
             return
         self.ordered[index] = newKey
         myData = self.imageDict.pop(oldKey)
+
         try:
             from imagizer import photo
         except:
@@ -105,6 +107,8 @@ class ImageCache(dict):
         if isinstance(myData, photo):
             myData.filename = newKey
             myData.fn = os.path.join(config.DefaultRepository, newKey)
+            myData.exif = pyexiv2.Image(myData.fn)
+            myData.exif.readMetadata()
         self.imageDict[newKey] = myData
 
 
