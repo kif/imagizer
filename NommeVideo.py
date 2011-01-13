@@ -48,7 +48,6 @@ class Video:
         self.height = 0
         self.rotation = None
         self.duration = 0
-        self.camera = "Imagizer"
         self.root = None
         self.suffix = None
         self.metadata = None
@@ -66,24 +65,31 @@ class Video:
         self.destinationFile = None
         self.thumbName = None
         self.thumb = None
-        self.deinterleave = True
+
 
         self.timeStamp = datetime.datetime.fromtimestamp(OP.getmtime(self.fullPath))
+        if self.videoFile.lower().startswith("dscf")  :
+            self.camera = "Fuji"
+            self.deinterleave = False
+        elif self.videoFile.lower().startswith("mvi_"):
+            self.camera = "Canon"
+            self.deinterleave = False
+        elif self.videoFile.lower().startswith("mov") :
+            self.camera = "Sony"
+            self.deinterleave = False
+        elif self.videoFile.lower().startswith("sdc") :
+            self.camera = "Samsung"
+            self.deinterleave = False
+        elif self.videoFile.lower().startswith("m2u") :
+            self.camera = "Sony"
+            self.deinterleave = True
+        elif self.videoFile.lower().startswith("p") :
+            self.camera = "Panasonic"
+            self.deinterleave = False
+        else:
+            self.camera = "Imagizer"
+            self.deinterleave = True
         self.loadMetadata()
-        if self.camera.lower().strip() in ["mencoder", "transcode", "imagizer"]:
-            if self.videoFile.lower().startswith("dscf")  :
-                self.camera = "Fuji"
-            elif self.videoFile.lower().startswith("mvi_"):
-                self.camera = "Canon"
-            elif self.videoFile.lower().startswith("mov") :
-                self.camera = "Sony"
-            elif self.videoFile.lower().startswith("sdc") :
-                self.camera = "Samsung"
-            elif self.videoFile.lower().startswith("m2u") :
-                self.camera = "Sony"
-            elif self.videoFile.lower().startswith("p") :
-                self.camera = "Panasonic"
-            logging.debug(str("%s %s" % (self.videoFile.lower(), self.camera)))
         dirname = OP.split(self.videoPath)[1]
         dirdate = None
         if len(dirname) >= 10:
