@@ -186,22 +186,20 @@ class Video:
                 self.metadata.iterGroups()
             except:
                 bDoMplayer = True
-#            if bDoMplayer:
-#                self.MplayerMetadata()
-#            else:
-            for n in self.metadata.iterGroups():
-                if n.header.find("Video stream") == 0:
-                    self.videoCodec = n.get("compression")
-                    self.videoBpP = n.get("bits_per_pixel")
-                elif n.header.find("Audio stream") == 0:
-                    self.audioCodec = n.get("compression")
-                    self.audioBitRate = n.get("bit_rate")
-                    self.videoBitRate = self.bitRate - self.audioBitRate
-                    self.audioSampleRate = n.get("sample_rate")
-                    try:
-                        self.audioBits = n.get("bits_per_sample")
-                    except:
-                        self.audioBits = None
+            if not bDoMplayer:
+                for n in self.metadata.iterGroups():
+                    if n.header.find("Video stream") == 0:
+                        self.videoCodec = n.get("compression")
+                        self.videoBpP = n.get("bits_per_pixel")
+                    elif n.header.find("Audio stream") == 0:
+                        self.audioCodec = n.get("compression")
+                        self.audioBitRate = n.get("bit_rate")
+                        self.videoBitRate = self.bitRate - self.audioBitRate
+                        self.audioSampleRate = n.get("sample_rate")
+                        try:
+                            self.audioBits = n.get("bits_per_sample")
+                        except:
+                            self.audioBits = None
             if bDoMplayer is True or \
                     (self.audioCodec is None) or \
                     (self.audioBitRate is None) or \
@@ -352,30 +350,37 @@ class Video:
         pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".pbs"
         pbsfile = open(pbsFilename, "w")
         pbsfile.write("#!/bin/bash\n#PBS -d/scratch\nif  [ -d /scratch/$PBS_JOBID ] ; then cd /scratch/$PBS_JOBID ;else cd /tmp; fi\n")
+
+        bDoResize = (self.width > 640)
+
         videoFilters = " -vf"
         if self.deinterleave is True:
             videoFilters += " yadif=0"
+
+        if bDoResize:
+            if len(videoFilters) < 5:
+                videoFilters += " "
+            else:
+                videoFilters += ","
+            videoFilters += "scale=640:%i" % (self.height * 640 / self.width)
 
         if self.rotation:
             if len(videoFilters) < 5:
                 videoFilters += " "
             else:
-                videoFilters += ":"
+                videoFilters += ","
             if self.rotation == u"Rotated 90 clock-wise":
-                videoFilters += "rotate=1"
+                videoFilters += "rotate=1 "
             elif self.rotation == u"Rotated 90 counter clock-wise":
-                videoFilters = "rotate=2"
+                videoFilters = "rotate=2 "
         if len(videoFilters) < 6:
             videoFilters = " "
         else:
             videoFilters = videoFilters[:-1]
-
+# last line of video filters
         videoFilters += " "
 
-        Resize = False
         bDoAudio = (self.audioCodec.lower().find("pcm") >= 0)
-#        bDoResize = (self.width == 1280) and (self.height == 720)
-        bDoResize = (self.width > 640)
         bDoAudio = bDoAudio or bDoResize
         bDoVideo = bDoResize or not (self.videoFile.lower().endswith(".avi"))
         bDoVideo = bDoVideo or not (self.videoCodec.lower().find("h264") >= 0 or self.videoCodec.lower().find("avc1") >= 0)
@@ -397,25 +402,19 @@ class Video:
                 pbsfile.write("rm %s \n" % rawaudio)
 
         tmpavi = "temporary.avi"
-        if bDoResize:
-            #Resize = " -vf scale=736:416 "
-            Resize = " -vf scale=640:%i " % (self.height * 640 / self.width)
-            #Resize = " "
-        else:
-            Resize = " "
         if bDoVideo:
-            pbsfile.write(mencoder + videoFilters + Resize + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+            pbsfile.write(mencoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
-            pbsfile.write(mencoder + videoFilters + Resize + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+            pbsfile.write(mencoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
             if bDoAudio:
                 if self.audioChannel < 2:
-                    pbsfile.write(mencoder + videoFilters + Resize + ' -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+                    pbsfile.write(mencoder + videoFilters + ' -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
                 else:
-                    pbsfile.write(mencoder + videoFilters + Resize + ' -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (2 * AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+                    pbsfile.write(mencoder + videoFilters + ' -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (2 * AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
                 pbsfile.write("rm %s \n" % wavaudio)
             else:
-                pbsfile.write(mencoder + videoFilters + Resize + '-oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+                pbsfile.write(mencoder + videoFilters + '-oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
             pbsfile.write("if [ -f divx2pass.log ]; then rm divx2pass.log ; fi\n")
             pbsfile.write("if [ -f divx2pass.log.temp ]; then rm divx2pass.log.temp ; fi\n")
         else:
