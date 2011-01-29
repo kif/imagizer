@@ -359,32 +359,23 @@ class Video:
 
         bDoResize = (self.width > 640)
 
-        videoFilters = " -vf"
+        listVideoFilters = []
         if self.deinterleave is True:
-            videoFilters += " yadif=0"
+            listVideoFilters.append("yadif=0")
 
         if bDoResize:
-            if len(videoFilters) < 5:
-                videoFilters += " "
-            else:
-                videoFilters += ","
-            videoFilters += "scale=640:%i" % (self.height * 640 / self.width)
+            listVideoFilters.append("scale=640:%i" % (self.height * 640 / self.width))
 
         if self.rotation:
-            if len(videoFilters) < 5:
-                videoFilters += " "
-            else:
-                videoFilters += ","
             if self.rotation == u"Rotated 90 clock-wise":
-                videoFilters += "rotate=1 "
+                listVideoFilters.append("rotate=1 ")
             elif self.rotation == u"Rotated 90 counter clock-wise":
-                videoFilters = "rotate=2 "
-        if len(videoFilters) < 6:
-            videoFilters = " "
+                listVideoFilters.append("rotate=2")
+
+        if len(listVideoFilters) > 0:
+            videoFilters = " -vf " + ",".join(listVideoFilters) + " "
         else:
-            videoFilters = videoFilters[:-1]
-# last line of video filters
-        videoFilters += " "
+            videoFilters = " "
 
         bDoAudio = (self.audioCodec.lower().find("pcm") >= 0)
         bDoAudio = bDoAudio or bDoResize
