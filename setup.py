@@ -75,16 +75,17 @@ setup(name='Imagizer',
     scripts=scripts,
     data_files=[
         (installdir, ["selector.glade", execexiftran] +
-        glob.glob(os.path.join("pixmaps", "*.png")) +
-        glob.glob(os.path.join("pixmaps", "*.ico"))),
+        [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
         (os.path.split(ConfFile[0])[0], ['imagizer.conf'])
     ],
     packages=['imagizer'],
-    package_dir={'imagizer': ''},
+    package_dir={'imagizer': 'imagizer'},
+    ext_package="imagizer",
     ext_modules=[
          Extension(
              name='libexiftran',
-             sources=glob.glob(os.path.join("libexiftran", "*.c")),
+             sources=[os.path.join("libexiftran", i) for i in os.listdir("libexiftran") if i.endswith(".c")],
+#             glob.glob(os.path.join("libexiftran", "*.c")),
              define_macros=[],
              libraries=["jpeg", "exif", "m"],
     #               include_dirs=["/usr/include/libexif"]

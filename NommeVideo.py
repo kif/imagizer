@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-#Written by Jerome Kieffer 20100420 Licence GPLv3+
+#Written by Jerome Kieffer 20110214 Licence GPLv3+
 #Find all the videos and renames them, compress then .... and write an html file to set online
 
 import logging
@@ -16,7 +16,7 @@ from hachoir_metadata import extractMetadata
 #from hachoir_core.i18n import getTerminalCharset
 
 local = locale.getdefaultlocale()[1]
-webEncoding = "latin1"
+webEncoding = "UTF8"
 fileEncoding = "UTF8"
 
 VIDEO_BIT_RATE = 600
@@ -157,12 +157,15 @@ class Video:
                 except:
                     hour = datetime.time(0, 0, 0)
                 self.timeStamp = datetime.datetime.combine(self.timeStamp, hour)
-            self.duration = self.metadata.get("duration")
+            try:
+                self.duration = self.metadata.get("duration").seconds
+            except:
+                bDoMplayer = True
             self.width = self.metadata.get("width")
             try:
                 self.title = self.metadata.get("title")
             except:
-                self.title = ""
+                self.title = u""
 #            convertLatin1ToUTF8 = False
 #            for i in self.title:
 #                logging.debug("%s %s" % (i, ord(i)))
@@ -481,23 +484,23 @@ class parser:
 
 class HTML(object):
 
-    def __init__(self, title="Test", enc="latin1", favicon=None):
+    def __init__(self, title="Test", enc="utf8", favicon=None):
         self.txt = u""
         self.enc = enc
         self.header(title, enc, favicon)
 
 
     def header(self, title, enc, favicon):
-        self.txt += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">\n<html>\n<head>\n'
+        self.txt += u'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">\n<html>\n<head>\n'
         if favicon:
-            self.txt += '<link rel="icon" type="image/%s" href="%s" />\n' % (OP.splitext(favicon)[1][1:], favicon)
-        if enc:self.txt += '<content="text/html; charset=%s">\n' % enc
-        self.txt += "<title>%s</title>\n" % title
-        self.txt += "</head>\n"
+            self.txt += u'<link rel="icon" type="image/%s" href="%s" />\n' % (OP.splitext(favicon)[1][1:], favicon)
+        if enc:self.txt += u'<content="text/html; charset=%s">\n' % enc
+        self.txt += u"<title>%s</title>\n" % title
+        self.txt += u"</head>\n"
 
 
     def footer(self):
-        self.txt += "</html>\n"
+        self.txt += u"</html>\n"
 
 
     def write(self, filename):
@@ -508,23 +511,24 @@ class HTML(object):
 
 
     def start(self, tag, dico=None):
-        self.txt += "<%s" % tag
+        self.txt += u"<%s" % tag
         if isinstance(dico, dict):
             for i in dico:
-                self.txt += ' %s="%s" ' % (i, dico[i])
-        self.txt += " >\n"
+                self.txt += u' %s="%s" ' % (i, dico[i])
+        self.txt += u" >\n"
 
 
     def stop(self, tag):
-        self.txt += "</%s>\n" % tag
+        self.txt += u"</%s>\n" % tag
 
 
     def data(self, donnee, cod=""):
-        if cod:
+        if cod and isinstance(donnee, str):
             d = donnee.decode(cod)
         else:
             d = donnee
         self.txt += d.replace(u"&", u"&amp;").replace(u"<", u"&lt;").replace(u">", u"&gt;").replace(u'\xb0', u"&deg;").replace(u"\xb9", u"&sup1;").replace(u"\xb2", u"&sup2;").replace(u"\xb3", u"&sup3;").replace(u"\xb5", u"&micro;")
+#        print type(self.txt)
 #    s = replace(s, "", "&Aring;")
 #    s = replace(s, "", "&szlig;")
 
@@ -618,8 +622,9 @@ if __name__ == "__main__":
                 html.data(onevideo.timeStamp.time().strftime("%Hh%Mm%Ss").decode(local))
                 html.start("br")
                 logging.debug(str("duration: %s" % onevideo.duration))
-                html.data(u"Dur\xe9e %is" % onevideo.duration.seconds)
+                html.data(u"Dur\xe9e %is" % onevideo.duration)
                 html.stop("td")
+                print(onevideo.title, type(onevideo.title))
                 html.element("td", onevideo.title)
                 html.stop("tr")
             html.stop("table")

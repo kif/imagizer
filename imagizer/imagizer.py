@@ -31,7 +31,7 @@ It handles images, progress bars and configuration file.
 
 import os, sys, shutil, time, re, gc
 
-from Exiftran import Exiftran
+from exiftran import Exiftran
 
 try:
     import Image, ImageStat, ImageChops, ImageFile
