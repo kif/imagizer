@@ -46,8 +46,7 @@ __author__ = "Jerome Kieffer"
 __licence__ = "GPLv2"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
-import os, threading
-#import sys
+import os, threading, logging
 
 installdir = os.path.dirname(__file__)
 
@@ -77,6 +76,7 @@ class Exiftran(object):
     """
     semaphore = threading.Semaphore()
 
+
     @staticmethod
     def _exiftranThread(action, filename):
         """
@@ -86,14 +86,14 @@ class Exiftran(object):
         @param filename: name of the jpeg file to process
         @type filename: string
         """
+        logging.debug("Exiftran._exiftranThread %s %s" % (action, filename))
         if exiftranExe is None:
-#            print("Before: action ref=%i, filename ref=%i" % (sys.getrefcount(action), sys.getrefcount(filename)))
             libexiftran.run(action, filename)
-#            print("After: action ref=%i, filename ref=%i" % (sys.getrefcount(action), sys.getrefcount(filename)))
         else:
             if action == 0:action = "a"
             os.system('%s -ip -%s "%s" ' % (exiftranExe, action, filename))
         Exiftran.semaphore.release()
+
 
     @staticmethod
     def rotate90(filename):
@@ -102,9 +102,11 @@ class Exiftran(object):
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """
+        logging.debug("Exiftran.rotate90 %s" % (filename))
         Exiftran.semaphore.acquire()
         myThread = threading.Thread(target=Exiftran._exiftranThread, args=(9, filename))
         myThread.start()
+
 
     @staticmethod
     def rotate180(filename):
@@ -113,9 +115,11 @@ class Exiftran(object):
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """
+        logging.debug("Exiftran.rotate180 %s" % (filename))
         Exiftran.semaphore.acquire()
         myThread = threading.Thread(target=Exiftran._exiftranThread, args=(1, filename))
         myThread.start()
+
 
     @staticmethod
     def rotate270(filename):
@@ -124,6 +128,7 @@ class Exiftran(object):
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """
+        logging.debug("Exiftran.rotate270 %s" % (filename))
         Exiftran.semaphore.acquire()
         myThread = threading.Thread(target=Exiftran._exiftranThread, args=(2, filename))
         myThread.start()
@@ -136,6 +141,7 @@ class Exiftran(object):
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """
+        logging.debug("Exiftran.autorotate %s" % (filename))
         Exiftran.semaphore.acquire()
         myThread = threading.Thread(target=Exiftran._exiftranThread, args=(0, filename))
         myThread.start()
