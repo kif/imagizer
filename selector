@@ -46,7 +46,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 
 
-import os, locale, random, gc, time, shutil, sys
+import os, locale, random, gc, time, shutil, sys, logging
 
 try:
     import ImageFile
@@ -947,7 +947,7 @@ class interface:
     def SavePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
         if config.DEBUG:print("SavePref clicked")
-        config.SaveConfig(ConfFile[-1])
+        config.saveConfig(ConfFile[-1])
 
     def DefAutoRotate(self, *args):
         """Set the autorotate flag"""
@@ -1560,9 +1560,10 @@ if __name__ == '__main__':
         for arg in sys.argv[1:]:
             if arg[0] == "-":
                 if arg[1].lower() == "h":
-                    print "Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n".decode("UTF8")
+                    logging.info("Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n")
                     sys.exit(0)
                 elif arg.lower().find("-debug") >= 0:
+                    logging.basicConfig(level=logging.DEBUG)
                     config.DEBUG = True
                 elif arg.lower().find("-noautorotate") >= 0:
                     config.AutoRotate = False
@@ -1570,8 +1571,9 @@ if __name__ == '__main__':
                     printWarning = False
             elif os.path.isdir(arg):
                 config.DefaultRepository = os.path.abspath(arg)
-
-    config.PrintConfig()
+    if not config.DEBUG:
+        logging.basicConfig(level=logging.INFO)
+    config.printConfig()
     Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
     if (printWarning == True) and (not os.path.isfile(Selected_file)):
         W = WarningSc(config.DefaultRepository)

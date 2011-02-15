@@ -66,7 +66,7 @@ if len(sys.argv) == 1:
 
 
 setup(name='Imagizer',
-    version='1.0',
+    version='1.1.0',
     author='Jerome Kieffer',
     author_email='Jerome.Kieffer@terre-adelie.org',
     url='http://wiki.terre-adelie.org/Imagizer',
@@ -122,8 +122,8 @@ if not configured:
     LANG = os.getenv("LANG")
     if LANG:
         config.Locale = LANG
-    config.PrintConfig()
-    config.SaveConfig("/etc/imagizer.conf")
+    config.printConfig()
+    config.saveConfig("/etc/imagizer.conf")
     print "Configuration finished .... Saving it\nYou can modify it in /etc/imagizer.conf"
 
     try:

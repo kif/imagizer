@@ -31,7 +31,7 @@ It handles images, progress bars and configuration file.
 """
 
 __author__ = "Jérôme Kieffer: jerome.kieffer@terre-adelie.org"
-__version__ = "2011-02-12"
+__version__ = "1.1.0"
 from imagizer import * #I know this is ugly !
 from config import Config
 from exiftran import Exiftran
