@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -54,7 +57,7 @@
 <h1 class="epydoc">Source Code for <a href="imagizer.winpath-module.html">Module imagizer.winpath</a></h1>
 <pre class="py-src">
 <a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment"># winpaths.py</tt> </tt>
-<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"> </tt>
 <a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-docstring">"""Functions for getting system/language/user dependent paths on windows.</tt> </tt>
 <a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
 <a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-docstring">All path names returned by the functions of this module are unicode strings.</tt> </tt>
@@ -83,7 +86,7 @@ imagizer.winpath.__revision__" class="py-name" href="#" onclick="return doclink(
 <a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-name">__copyright__</tt> <tt class="py-op">=</tt> <tt class="py-string">"Python license"</tt> </tt>
 <a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"> </tt>
 <a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-comment"># standard library modules</tt> </tt>
-<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment"></tt><tt class="py-keyword">import</tt> <tt class="py-name">_winreg</tt><tt class="py-op">,</tt> <tt class="py-name">os</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">_winreg</tt><tt class="py-op">,</tt> <tt class="py-name">os</tt> </tt>
 <a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"> </tt>
 <a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt id="link-2" class="py-name" targets="Variable imagizer.winpath.SHELL_FOLDERS=imagizer.winpath-module.html#SHELL_FOLDERS"><a title="imagizer.winpath.SHELL_FOLDERS" class="py-name" href="#" onclick="return doclink('link-2', 'SHELL_FOLDERS', 'link-2');">SHELL_FOLDERS</a></tt> <tt class="py-op">=</tt> \ </tt>
 <a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line">  <tt class="py-string">r'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'</tt> </tt>
@@ -93,7 +96,7 @@ imagizer.winpath.__revision__" class="py-name" href="#" onclick="return doclink(
 <a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt id="link-5" class="py-name" targets="Variable imagizer.winpath.HKLM=imagizer.winpath-module.html#HKLM"><a title="imagizer.winpath.HKLM" class="py-name" href="#" onclick="return doclink('link-5', 'HKLM', 'link-5');">HKLM</a></tt> <tt class="py-op">=</tt> <tt class="py-name">_winreg</tt><tt class="py-op">.</tt><tt class="py-name">HKEY_LOCAL_MACHINE</tt> </tt>
 <a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"> </tt>
 <a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-comment"># helper functions</tt> </tt>
-<a name="_substenv"></a><div id="_substenv-def"><a name="L40"></a><tt class="py-lineno"> 40</tt> <a class="py-toggle" href="#" id="_substenv-toggle" onclick="return toggle('_substenv');">-</a><tt class="py-line"><tt class="py-comment"></tt><tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.winpath-module.html#_substenv">_substenv</a><tt class="py-op">(</tt><tt class="py-param">m</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="_substenv"></a><div id="_substenv-def"><a name="L40"></a><tt class="py-lineno"> 40</tt> <a class="py-toggle" href="#" id="_substenv-toggle" onclick="return toggle('_substenv');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.winpath-module.html#_substenv">_substenv</a><tt class="py-op">(</tt><tt class="py-param">m</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="_substenv-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="_substenv-expanded"><a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">environ</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method imagizer.parser.AttrFile.get()=imagizer.parser.AttrFile-class.html#get"><a title="imagizer.parser.AttrFile.get" class="py-name" href="#" onclick="return doclink('link-6', 'get', 'link-6');">get</a></tt><tt class="py-op">(</tt><tt class="py-name">m</tt><tt class="py-op">.</tt><tt class="py-name">group</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">m</tt><tt class="py-op">.</tt><tt class="py-name">group</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
 </div><a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"> </tt>
 <a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"><tt id="link-7" class="py-name" targets="Variable imagizer.winpath._env_rx=imagizer.winpath-module.html#_env_rx"><a title="imagizer.winpath._env_rx" class="py-name" href="#" onclick="return doclink('link-7', '_env_rx', 'link-7');">_env_rx</a></tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
@@ -142,7 +145,7 @@ imagizer.winpath.__revision__" class="py-name" href="#" onclick="return doclink(
 <a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-18" class="py-name"><a title="imagizer.winpath._get_reg_value" class="py-name" href="#" onclick="return doclink('link-18', '_get_reg_value', 'link-15');">_get_reg_value</a></tt><tt class="py-op">(</tt><tt id="link-19" class="py-name"><a title="imagizer.winpath.HKLM" class="py-name" href="#" onclick="return doclink('link-19', 'HKLM', 'link-5');">HKLM</a></tt><tt class="py-op">,</tt> <tt class="py-name">key</tt><tt class="py-op">,</tt> <tt id="link-20" class="py-name"><a title="imagizer.imagizer.photo.name" class="py-name" href="#" onclick="return doclink('link-20', 'name', 'link-13');">name</a></tt><tt class="py-op">)</tt> </tt>
 </div><a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"> </tt>
 <a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"><tt class="py-comment"># public functions</tt> </tt>
-<a name="get_appdata"></a><div id="get_appdata-def"><a name="L89"></a><tt class="py-lineno"> 89</tt> <a class="py-toggle" href="#" id="get_appdata-toggle" onclick="return toggle('get_appdata');">-</a><tt class="py-line"><tt class="py-comment"></tt><tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.winpath-module.html#get_appdata">get_appdata</a><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="get_appdata"></a><div id="get_appdata-def"><a name="L89"></a><tt class="py-lineno"> 89</tt> <a class="py-toggle" href="#" id="get_appdata-toggle" onclick="return toggle('get_appdata');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.winpath-module.html#get_appdata">get_appdata</a><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="get_appdata-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="get_appdata-expanded"><a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">    <tt class="py-docstring">"""Return path of directory where apps should store user specific data."""</tt> </tt>
 <a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"> </tt>
 <a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-21" class="py-name" targets="Function imagizer.winpath._get_reg_user_value()=imagizer.winpath-module.html#_get_reg_user_value"><a title="imagizer.winpath._get_reg_user_value" class="py-name" href="#" onclick="return doclink('link-21', '_get_reg_user_value', 'link-21');">_get_reg_user_value</a></tt><tt class="py-op">(</tt><tt id="link-22" class="py-name"><a title="imagizer.winpath.SHELL_FOLDERS" class="py-name" href="#" onclick="return doclink('link-22', 'SHELL_FOLDERS', 'link-2');">SHELL_FOLDERS</a></tt><tt class="py-op">,</tt> <tt class="py-string">'AppData'</tt><tt class="py-op">)</tt> </tt>
@@ -215,6 +218,9 @@ expandto(location.href);
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -234,7 +240,7 @@ expandto(location.href);
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:51 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

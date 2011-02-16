@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -54,7 +57,7 @@
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h1 class="epydoc">Class WarningSc</h1><p class="nomargin-top"><span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc">source&nbsp;code</a></span></p>
-<p>print a warning before starting the program and allows to chang the 
+<p>Print a warning before starting the program and allows to change the 
   working directory</p>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
@@ -80,9 +83,12 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
+          <td><span class="summary-sig"><a href="imagizer.dirchooser.WarningSc-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">directory</span>,
-        <span class="summary-sig-arg">window</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">dialog-warning</code><code class="variable-quote">'</code></span>)</span></td>
+        <span class="summary-sig-arg">window</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">dialog-warning</code><code class="variable-quote">'</code></span>,
+        <span class="summary-sig-arg">manageGTK</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">callBack</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Print a small dialog screen</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.__init__">source&nbsp;code</a></span>
             
@@ -100,7 +106,7 @@
         <tr>
           <td><span class="summary-sig"><a name="continu"></a><span class="summary-sig-name">continu</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">*args</span>)</span><br />
-      just destroy the window and goes on ....</td>
+      Just destroy the window and goes on ....</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.continu">source&nbsp;code</a></span>
             
@@ -118,7 +124,7 @@
         <tr>
           <td><span class="summary-sig"><a name="destroy"></a><span class="summary-sig-name">destroy</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">*args</span>)</span><br />
-      destroy clicked by user -&gt; quit the program</td>
+      Destroy clicked by user -&gt; quit the program</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.destroy">source&nbsp;code</a></span>
             
@@ -152,11 +158,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="filerselect"></a><span class="summary-sig-name">filerselect</span>(<span class="summary-sig-arg">self</span>,
+          <td><span class="summary-sig"><a name="filerSelect"></a><span class="summary-sig-name">filerSelect</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">*args</span>)</span><br />
       Close the filer GUI and update the data</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.filerselect">source&nbsp;code</a></span>
+            <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.filerSelect">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -170,11 +176,28 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="filerdestroy"></a><span class="summary-sig-name">filerdestroy</span>(<span class="summary-sig-arg">self</span>,
+          <td><span class="summary-sig"><a name="filerDestroy"></a><span class="summary-sig-name">filerDestroy</span>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">*args</span>)</span><br />
       Close the filer GUI</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.filerdestroy">source&nbsp;code</a></span>
+            <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.filerDestroy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getDirectory"></a><span class="summary-sig-name">getDirectory</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return the directory chosen</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.getDirectory">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -183,10 +206,60 @@
     </td>
   </tr>
 </table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">directory</span>,
+        <span class="sig-arg">window</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string">dialog-warning</code><code class="variable-quote">'</code></span>,
+        <span class="sig-arg">manageGTK</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">callBack</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.dirchooser-pysrc.html#WarningSc.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Print a small dialog screen</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>callBack</code></strong> (method or function) - method to be called with the directory chosen</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -206,7 +279,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:51 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

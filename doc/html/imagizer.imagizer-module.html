@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -150,8 +153,8 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="imagizer.imagizer.parser-class.html" class="summary-name">parser</a><br />
-      this class searches all the jpeg files
+        <a href="imagizer.imagizer.RawImage-class.html" class="summary-name">RawImage</a><br />
+      class for handling raw images
     </td>
   </tr>
 </table>
@@ -178,7 +181,8 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="RangeTout"></a><span class="summary-sig-name">RangeTout</span>(<span class="summary-sig-arg">repository</span>)</span><br />
+          <td><span class="summary-sig"><a href="imagizer.imagizer-module.html#RangeTout" class="summary-sig-name">RangeTout</a>(<span class="summary-sig-arg">repository</span>,
+        <span class="summary-sig-arg">bUseX</span>=<span class="summary-sig-default">True</span>)</span><br />
       moves all the JPEG files to a directory named from their day and with
       the name according to the time This is a MVC implementation</td>
           <td align="right" valign="top">
@@ -263,16 +267,17 @@
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
+      <span class="summary-type">list of strings</span>
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="FindFile"></a><span class="summary-sig-name">FindFile</span>(<span class="summary-sig-arg">RootDir</span>)</span><br />
-      returns a list of the files with the given suffix in the given dir 
-      files=os.system('find &quot;%s&quot;  -iname 
+          <td><span class="summary-sig"><a href="imagizer.imagizer-module.html#findFiles" class="summary-sig-name">findFiles</a>(<span class="summary-sig-arg">strRootDir</span>,
+        <span class="summary-sig-arg">lstExtentions</span>=<span class="summary-sig-default"><code class="variable-group">[</code><code class="variable-quote">'</code><code class="variable-string">.jpg</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">.jpeg</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">.jpe</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">.jfif</code><code class="variable-quote">'</code><code class="variable-group">]</code></span>,
+        <span class="summary-sig-arg">bFromRoot</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Equivalent to: files=os.system('find &quot;%s&quot;  -iname 
       &quot;*.%s&quot;'%(RootDir,suffix)).readlines()</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#FindFile">source&nbsp;code</a></span>
+            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#findFiles">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -305,11 +310,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="imagizer.imagizer-module.html#latin1_to_ascii" class="summary-sig-name">latin1_to_ascii</a>(<span class="summary-sig-arg">unicrap</span>)</span><br />
-      This takes a UNICODE string and replaces Latin-1 characters with 
+          <td><span class="summary-sig"><a href="imagizer.imagizer-module.html#unicode_to_ascii" class="summary-sig-name">unicode_to_ascii</a>(<span class="summary-sig-arg">unicrap</span>)</span><br />
+      This takes a UNICODE string and replaces unicode characters with 
       something equivalent in 7-bit ASCII.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#latin1_to_ascii">source&nbsp;code</a></span>
+            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#unicode_to_ascii">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -340,7 +345,9 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="recursive_delete"></a><span class="summary-sig-name">recursive_delete</span>(<span class="summary-sig-arg">dirname</span>)</span></td>
+          <td><span class="summary-sig"><a href="imagizer.imagizer-module.html#recursive_delete" class="summary-sig-name">recursive_delete</a>(<span class="summary-sig-arg">strDirname</span>)</span><br />
+      Delete everything reachable from the directory named in 
+      &quot;top&quot;, assuming there are no symbolic links.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="imagizer.imagizer-pysrc.html#recursive_delete">source&nbsp;code</a></span>
             
@@ -382,28 +389,7 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="installdir"></a><span class="summary-name">installdir</span> = <code title="'/usr/lib/python2.5/site-packages/imagizer'"><code class="variable-quote">'</code><code class="variable-string">/usr/lib/python2.5/site-packages/imagizer</code><code class="variable-quote">'</code></code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="MaxJPEGMem"></a><span class="summary-name">MaxJPEGMem</span> = <code title="100000">100000</code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="imagizer.imagizer-module.html#exiftran" class="summary-name">exiftran</a> = <code title="'JPEGMEM=100000 /usr/lib/python2.5/site-packages/imagizer/exiftran  '"><code class="variable-quote">'</code><code class="variable-string">JPEGMEM=100000 /usr/lib/python2.5/site-packages/im</code><code class="variable-ellipsis">...</code></code>
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="gimpexe"></a><span class="summary-name">gimpexe</span> = <code title="'gimp-remote '"><code class="variable-quote">'</code><code class="variable-string">gimp-remote </code><code class="variable-quote">'</code></code>
+        <a name="installdir"></a><span class="summary-name">installdir</span> = <code title="'/home/jerome/workspace/imagizer/imagizer'"><code class="variable-quote">'</code><code class="variable-string">/home/jerome/workspace/imagizer/imagizer</code><code class="variable-quote">'</code></code>
     </td>
   </tr>
 <tr>
@@ -417,14 +403,22 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="imagizer.imagizer-module.html#unifiedglade" class="summary-name">unifiedglade</a> = <code title="'/usr/lib/python2.5/site-packages/imagizer/selector.glade'"><code class="variable-quote">'</code><code class="variable-string">/usr/lib/python2.5/site-packages/imagizer/sele</code><code class="variable-ellipsis">...</code></code>
+        <a href="imagizer.imagizer-module.html#unifiedglade" class="summary-name">unifiedglade</a> = <code title="'/home/jerome/workspace/imagizer/imagizer/selector.glade'"><code class="variable-quote">'</code><code class="variable-string">/home/jerome/workspace/imagizer/imagizer/selec</code><code class="variable-ellipsis">...</code></code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="config"></a><span class="summary-name">config</span> = <code title="Config()">Config()</code>
+        <a href="imagizer.imagizer-module.html#config" class="summary-name">config</a> = <code title="
+Size on the images on the Screen: 600 pixels in the largest dimension
+Page prefix:			  page
+Number of images per page:	  20
+Use Exif for Auto-Rotate:	  True
+Default mode for files (octal):	  664
+JPEG extensions:		 ['.jpg', '.jpeg', '.jpe', '.jfif']
+Default photo repository:	  /home/photo
+..."><code class="variable-ellipsis">...</code></code>
     </td>
   </tr>
 <tr>
@@ -432,6 +426,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="imageCache"></a><span class="summary-name">imageCache</span> = <code title="{}">{}</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="__package__"></a><span class="summary-name">__package__</span> = <code title="'imagizer'"><code class="variable-quote">'</code><code class="variable-string">imagizer</code><code class="variable-quote">'</code></code>
     </td>
   </tr>
 </table>
@@ -453,29 +454,111 @@
   </td>
 </tr>
 </table>
-<a name="latin1_to_ascii"></a>
+<a name="RangeTout"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">latin1_to_ascii</span>(<span class="sig-arg">unicrap</span>)</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">RangeTout</span>(<span class="sig-arg">repository</span>,
+        <span class="sig-arg">bUseX</span>=<span class="sig-default">True</span>)</span>
   </h3>
   </td><td align="right" valign="top"
-    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#latin1_to_ascii">source&nbsp;code</a></span>&nbsp;
+    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#RangeTout">source&nbsp;code</a></span>&nbsp;
     </td>
   </tr></table>
   
-  <p>This takes a UNICODE string and replaces Latin-1 characters with 
+  <p>moves all the JPEG files to a directory named from their day and with 
+  the name according to the time This is a MVC implementation</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>repository</code></strong> (string) - the name of the starting repository</li>
+        <li><strong class="pname"><code>bUseX</code></strong> (boolean) - set to False to disable the use of the graphical splash screen</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="findFiles"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">findFiles</span>(<span class="sig-arg">strRootDir</span>,
+        <span class="sig-arg">lstExtentions</span>=<span class="sig-default"><code class="variable-group">[</code><code class="variable-quote">'</code><code class="variable-string">.jpg</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">.jpeg</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">.jpe</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">.jfif</code><code class="variable-quote">'</code><code class="variable-group">]</code></span>,
+        <span class="sig-arg">bFromRoot</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#findFiles">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Equivalent to: files=os.system('find &quot;%s&quot;  -iname 
+  &quot;*.%s&quot;'%(RootDir,suffix)).readlines()</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>strRootDir</code></strong> (string) - path of the root of the search</li>
+        <li><strong class="pname"><code>lstExtentions</code></strong> - list of string representing interesting extensions</li>
+        <li><strong class="pname"><code>bFromRoot</code></strong> - start the return path from / instead of the strRootDir</li>
+    </ul></dd>
+    <dt>Returns: list of strings</dt>
+        <dd>the list of the files with the given suffix in the given dir</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="unicode_to_ascii"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">unicode_to_ascii</span>(<span class="sig-arg">unicrap</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#unicode_to_ascii">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>This takes a UNICODE string and replaces unicode characters with 
   something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
-  This function makes a best effort to convert Latin-1 characters into 
+  This function makes a best effort to convert unicode characters into 
   ASCII equivalents. It does not just strip out the Latin-1 characters. All
   characters in the standard 7-bit ASCII range are preserved. In the 8th 
   bit range all the Latin-1 accented letters are converted to unaccented 
   equivalents. Most symbol characters are converted to something 
   meaningful. Anything not converted is deleted.</p>
   <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="recursive_delete"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">recursive_delete</span>(<span class="sig-arg">strDirname</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#recursive_delete">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Delete everything reachable from the directory named in 
+  &quot;top&quot;, assuming there are no symbolic links. CAUTION:  This is 
+  dangerous!  For example, if top == '/', it could delete all your disk 
+  files.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>strDirname</code></strong> (string) - top directory to delete</li>
+    </ul></dd>
   </dl>
 </td></tr></table>
 </div>
@@ -519,24 +602,6 @@
   </dl>
 </td></tr></table>
 </div>
-<a name="exiftran"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <h3 class="epydoc">exiftran</h3>
-  
-  <dl class="fields">
-  </dl>
-  <dl class="fields">
-    <dt>Value:</dt>
-      <dd><table><tr><td><pre class="variable">
-<code class="variable-quote">'</code><code class="variable-string">JPEGMEM=100000 /usr/lib/python2.5/site-packages/imagizer/exiftran  </code><code class="variable-quote">'</code>
-</pre></td></tr></table>
-</dd>
-  </dl>
-</td></tr></table>
-</div>
 <a name="ConfFile"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -567,7 +632,33 @@
   <dl class="fields">
     <dt>Value:</dt>
       <dd><table><tr><td><pre class="variable">
-<code class="variable-quote">'</code><code class="variable-string">/usr/lib/python2.5/site-packages/imagizer/selector.glade</code><code class="variable-quote">'</code>
+<code class="variable-quote">'</code><code class="variable-string">/home/jerome/workspace/imagizer/imagizer/selector.glade</code><code class="variable-quote">'</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="config"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">config</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+
+Size on the images on the Screen: 600 pixels in the largest dimension
+Page prefix:			  page
+Number of images per page:	  20
+Use Exif for Auto-Rotate:	  True
+Default mode for files (octal):	  664
+JPEG extensions:		 ['.jpg', '.jpeg', '.jpe', '.jfif']
+Default photo repository:	  /home/photo
+<code class="variable-ellipsis">...</code>
 </pre></td></tr></table>
 </dd>
   </dl>
@@ -578,6 +669,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -597,7 +691,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:50 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

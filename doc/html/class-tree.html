@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th bgcolor="#70b0f0" class="navbar-select"
@@ -52,16 +55,10 @@
 </b></center><br />
 <h1 class="epydoc">Class Hierarchy</h1>
 <ul class="nomargin-top">
-    <li> <strong class="uidlink"><a href="script-selector.AskMediaSize-class.html">selector.AskMediaSize (script)</a></strong>:
-      <em class="summary">prompt a windows and asks for the size of the backup media</em>
-    </li>
-    <li> <strong class="uidlink"><a href="script-selector.AskSlideShowSetup-class.html">selector.AskSlideShowSetup (script)</a></strong>:
-      <em class="summary">pop up a windows and asks for the setup of the SlideShow</em>
-    </li>
     <li> <strong class="uidlink"><a href="imagizer.parser.AttrFile-class.html">imagizer.parser.AttrFile</a></strong>:
       <em class="summary">Attributes file representation and trivial parser.</em>
     </li>
-    <li> <strong class="uidlink"><a href="imagizer.config.Config-class.html">imagizer.config.Config</a></strong>:
+    <li> <strong class="uidlink"><a href="imagizer.config%27.Config-class.html">imagizer.config'.Config</a></strong>:
       <em class="summary">this class is a Borg : always returns the same values regardless to
         the instance of the object</em>
     </li>
@@ -70,20 +67,6 @@
     </li>
     <li> <strong class="uidlink"><a href="imagizer.imagizer.ControlerX-class.html">imagizer.imagizer.ControlerX</a></strong>:
       <em class="summary">Impl&#233;mentation du contr&#244;leur.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="script-generator.Dir-class.html">generator.Dir (script)</a></strong>:
-      <em class="summary">Directory class.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="script-generator.Entry-class.html">generator.Entry (script)</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="script-generator.FCache-class.html">generator.FCache (script)</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="script-selector.FullScreenInterface-class.html">selector.FullScreenInterface (script)</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="imagizer.NommeVideo.HTML-class.html">imagizer.NommeVideo.HTML</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="script-generator.Image-class.html">generator.Image (script)</a></strong>:
-      <em class="summary">Image specific processing and storage.</em>
     </li>
     <li> <strong class="uidlink"><a href="imagizer.imagizer.ModelCopySelected-class.html">imagizer.imagizer.ModelCopySelected</a></strong>:
       <em class="summary">Implemantation MVC de la procedure CopySelected</em>
@@ -96,20 +79,8 @@
         files to a directory named from their day and with the name 
         according to the time</em>
     </li>
-    <li> <strong class="uidlink"><a href="script-selector.RenameDay-class.html">selector.RenameDay (script)</a></strong>:
-      <em class="summary">prompt a windows and asks for a name for the day</em>
-    </li>
-    <li> <strong class="uidlink"><a href="script-selector.SelectDay-class.html">selector.SelectDay (script)</a></strong>
-    </li>
-    <li> <strong class="uidlink"><a href="script-generator.StringStream-class.html">generator.StringStream (script)</a></strong>:
-      <em class="summary">Simple string stream with a write() method, for replacing stdout 
-        when running in script environment.</em>
-    </li>
-    <li> <strong class="uidlink"><a href="script-selector.Synchronize-class.html">selector.Synchronize (script)</a></strong>:
-      <em class="summary">Class for file synchronization between different repositories</em>
-    </li>
-    <li> <strong class="uidlink"><a href="imagizer.NommeVideo.Video-class.html">imagizer.NommeVideo.Video</a></strong>:
-      <em class="summary">main Video class</em>
+    <li> <strong class="uidlink"><a href="imagizer.imagizer.RawImage-class.html">imagizer.imagizer.RawImage</a></strong>:
+      <em class="summary">class for handling raw images</em>
     </li>
     <li> <strong class="uidlink"><a href="imagizer.imagizer.View-class.html">imagizer.imagizer.View</a></strong>:
       <em class="summary">Impl&#233;mentation de la vue.</em>
@@ -118,43 +89,46 @@
       <em class="summary">Implementation of the view as a splashscren</em>
     </li>
     <li> <strong class="uidlink"><a href="imagizer.dirchooser.WarningSc-class.html">imagizer.dirchooser.WarningSc</a></strong>:
-      <em class="summary">print a warning before starting the program and allows to chang the
-        working directory</em>
+      <em class="summary">Print a warning before starting the program and allows to change 
+        the working directory</em>
     </li>
     <li> <strong class="uidlink"><a href="imagizer.signals.WeakMethod-class.html">imagizer.signals.WeakMethod</a></strong>:
       <em class="summary">This class was generously donated by a poster on ASPN</em>
     </li>
     <li> <strong class="uidlink"><a href="imagizer.signals._WeakMethod_FuncHost-class.html" onclick="show_private();">imagizer.signals._WeakMethod_FuncHost</a></strong>
     </li>
-    <li> <strong class="uidlink"><a href="script-selector.interface-class.html">selector.interface (script)</a></strong>:
-      <em class="summary">class interface that manages the GUI using Glade-2</em>
-    </li>
     <li> <strong class="uidlink">object</strong>:
       <em class="summary">The most base type</em>
     <ul>
+    <li> <strong class="uidlink"><a href="imagizer.exiftran.Exiftran-class.html">imagizer.exiftran.Exiftran</a></strong>:
+      <em class="summary">This is static class implementing libexiftran in a more pythonic 
+        way</em>
+    </li>
     <li> <strong class="uidlink"><a href="imagizer.signals.Signal-class.html">imagizer.signals.Signal</a></strong>:
       <em class="summary">class Signal.</em>
     </li>
     <li> <strong class="uidlink">dict</strong>:
-      <em class="summary">dict() -&gt; new empty dictionary.</em>
+      <em class="summary">dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object's
+    (key, value) pairs
+dict(iterable) -&gt; new dictionary initialized as if via:
+    d = {}
+    for k, v in iterable:
+        d[k] = v
+dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
+    in the keyword argument list.</em>
     <ul>
     <li> <strong class="uidlink"><a href="imagizer.imagecache.ImageCache-class.html">imagizer.imagecache.ImageCache</a></strong>:
       <em class="summary">this class is a Borg : always returns the same values regardless to
-        the instance of the object it is used as data storage for bitmaps 
+        the instance of the object it is used as data storage for images 
         ...</em>
     </li>
     </ul>
     </li>
-    </ul>
-    </li>
-    <li> <strong class="uidlink"><a href="imagizer.NommeVideo.parser-class.html">imagizer.NommeVideo.parser</a></strong>:
-      <em class="summary">this class searches all the jpeg files</em>
-    </li>
-    <li> <strong class="uidlink"><a href="imagizer.imagizer.parser-class.html">imagizer.imagizer.parser</a></strong>:
-      <em class="summary">this class searches all the jpeg files</em>
-    </li>
     <li> <strong class="uidlink"><a href="imagizer.imagizer.photo-class.html">imagizer.imagizer.photo</a></strong>:
       <em class="summary">class photo that does all the operations available on photos</em>
+    </li>
+    </ul>
     </li>
     <li> <strong class="uidlink"><a href="imagizer.imagizer.signature-class.html">imagizer.imagizer.signature</a></strong>
     </li>
@@ -163,6 +137,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th bgcolor="#70b0f0" class="navbar-select"
@@ -182,7 +159,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:50 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

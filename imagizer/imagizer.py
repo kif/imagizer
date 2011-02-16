@@ -538,16 +538,21 @@ class ViewX:
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
 
+
     def updateProgressBar(self, h, filename):
-        """ Mise à jour de la progressbar
-        Dans le cas d'un toolkit, c'est ici qu'il faudra appeler le traitement
-        des évènements.
-        set the progress-bar to the given value with the given name
+        """ 
+        Update the progress-bar to the given value with the given filename writen on it
+
+        fr: Mise à jour de la progressbar
+        fr: Dans le cas d'un toolkit, c'est ici qu'il faudra appeler le traitement
+        fr:des évènements.
+        
         @param h: current number of the file
-        @type val: integer or float
-        @param name: name of the current element
-        @type name: string 
-        @return: None"""
+        @type h: integer or float
+        @param filename: name of the current element
+        @type filename: string 
+        @return: None
+        """
         if h < self.__nbVal:
             self.pb.set_fraction(float(h + 1) / self.__nbVal)
         else:
@@ -1029,8 +1034,9 @@ class RawImage:
     """
     def __init__(self, strRawFile):
         """
-        contructor of the class
-        @param strRawFile path to the RawImage 
+        Contructor of the class
+        
+        @param strRawFile: path to the RawImage 
         @type strRawFile: string
         """
         self.strRawFile = strRawFile
@@ -1131,7 +1137,7 @@ def findFiles(strRootDir, lstExtentions=config.Extensions, bFromRoot=False):
     files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
     
     @param strRootDir: path of the root of the search
-    @type strRoooDir: string
+    @type strRootDir: string
     @param lstExtentions: list of string representing interesting extensions
     @param bFromRoot: start the return path from / instead of the strRootDir
     @return: the list of the files with the given suffix in the given dir
@@ -1254,7 +1260,8 @@ def recursive_delete(strDirname):
     assuming there are no symbolic links.
     CAUTION:  This is dangerous!  For example, if top == '/', it
     could delete all your disk files.
-    @param strDirname
+    @param strDirname: top directory to delete
+    @type strDirname: string 
     """
     for root, dirs, files in os.walk(strDirname, topdown=False):
         for name in files:

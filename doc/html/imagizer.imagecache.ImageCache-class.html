@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -64,8 +67,8 @@ object --+
 
 <hr />
 <p>this class is a Borg : always returns the same values regardless to 
-  the instance of the object it is used as data storage for bitmaps ... 
-  with a limit of max_len</p>
+  the instance of the object it is used as data storage for images ... with
+  a limit on the number of images to keep in memory.</p>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
 <a name="section-InstanceMethods"></a>
@@ -94,8 +97,8 @@ new empty dictionary
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="imagizer.imagecache.ImageCache-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">maxSize</span>=<span class="summary-sig-default">1000000</span>)</span><br />
-      x.__init__(...) initializes x; see x.__class__.__doc__ for signature</td>
+        <span class="summary-sig-arg">maxSize</span>=<span class="summary-sig-default">100</span>)</span><br />
+      Constructor of ImageCache</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="imagizer.imagecache-pysrc.html#ImageCache.__init__">source&nbsp;code</a></span>
             
@@ -142,6 +145,61 @@ new empty dictionary
       
     </td>
   </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list of D's keys</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="imagizer.imagecache.ImageCache-class.html#keys" class="summary-sig-name">keys</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns the list of keys, ordered</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="imagizer.imagecache-pysrc.html#ImageCache.keys">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">v, remove specified key and return the corresponding value</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="imagizer.imagecache.ImageCache-class.html#pop" class="summary-sig-name">pop</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">key</span>)</span><br />
+      Remove a key for the dictionary and return it's value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="imagizer.imagecache-pysrc.html#ImageCache.pop">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="rename"></a><span class="summary-sig-name">rename</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">oldKey</span>,
+        <span class="summary-sig-arg">newKey</span>)</span><br />
+      Change the name of a key without affecting anything else If the name 
+      is not present: do nothing.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="imagizer.imagecache-pysrc.html#ImageCache.rename">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
   <tr>
     <td colspan="2" class="summary">
     <p class="indent-wrapped-lines"><b>Inherited from <code>dict</code></b>:
@@ -152,7 +210,6 @@ new empty dictionary
       <code>__ge__</code>,
       <code>__getattribute__</code>,
       <code>__gt__</code>,
-      <code>__hash__</code>,
       <code>__iter__</code>,
       <code>__le__</code>,
       <code>__len__</code>,
@@ -160,6 +217,7 @@ new empty dictionary
       <code>__ne__</code>,
       <code>__new__</code>,
       <code>__repr__</code>,
+      <code>__sizeof__</code>,
       <code>clear</code>,
       <code>copy</code>,
       <code>fromkeys</code>,
@@ -169,8 +227,6 @@ new empty dictionary
       <code>iteritems</code>,
       <code>iterkeys</code>,
       <code>itervalues</code>,
-      <code>keys</code>,
-      <code>pop</code>,
       <code>popitem</code>,
       <code>setdefault</code>,
       <code>update</code>,
@@ -178,10 +234,12 @@ new empty dictionary
       </p>
     <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
       <code>__delattr__</code>,
+      <code>__format__</code>,
       <code>__reduce__</code>,
       <code>__reduce_ex__</code>,
       <code>__setattr__</code>,
-      <code>__str__</code>
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
       </p>
     </td>
   </tr>
@@ -207,7 +265,7 @@ new empty dictionary
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a href="imagizer.imagecache.ImageCache-class.html#__shared_state" class="summary-name" onclick="show_private();">__shared_state</a> = <code title="{'imageDict': {}, 'maxSize': 500000000, 'ordered': [], 'size': 0}"><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">imageDict</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">{</code><code class="variable-group">}</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">maxSize</code><code class="variable-quote">'</code><code class="variable-op">: </code>500000000<code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">orde</code><code class="variable-ellipsis">...</code></code>
+        <a href="imagizer.imagecache.ImageCache-class.html#__shared_state" class="summary-name" onclick="show_private();">__shared_state</a> = <code title="{'imageDict': {}, 'maxSize': 500, 'ordered': [], 'size': 0}"><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">imageDict</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">{</code><code class="variable-group">}</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">maxSize</code><code class="variable-quote">'</code><code class="variable-op">: </code>500<code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">ordered</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-ellipsis">...</code></code>
     </td>
   </tr>
 <tr class="private">
@@ -215,6 +273,13 @@ new empty dictionary
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="__data_initialized"></a><span class="summary-name">__data_initialized</span> = <code title="True">True</code>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>dict</code></b>:
+      <code>__hash__</code>
+      </p>
     </td>
   </tr>
 </table>
@@ -269,7 +334,7 @@ new empty dictionary
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">maxSize</span>=<span class="sig-default">1000000</span>)</span>
+        <span class="sig-arg">maxSize</span>=<span class="sig-default">100</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
@@ -277,16 +342,18 @@ new empty dictionary
     </td>
   </tr></table>
   
-  <p>x.__init__(...) initializes x; see x.__class__.__doc__ for 
-  signature</p>
+  <p>Constructor of ImageCache</p>
   <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>maxSize</code></strong> - number of element to keep in memory</li>
+    </ul></dd>
     <dt>Returns: <pre class="literalblock">
 new empty dictionary
 
 </pre></dt>
     <dt>Overrides:
         object.__init__
-        <dd><em class="note">(inherited documentation)</em></dd>
     </dt>
   </dl>
 </td></tr></table>
@@ -340,6 +407,53 @@ new empty dictionary
   </dl>
 </td></tr></table>
 </div>
+<a name="keys"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">keys</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagecache-pysrc.html#ImageCache.keys">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns the list of keys, ordered</p>
+  <dl class="fields">
+    <dt>Returns: list of D's keys</dt>
+    <dt>Overrides:
+        dict.keys
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="pop"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">pop</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">key</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagecache-pysrc.html#ImageCache.pop">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Remove a key for the dictionary and return it's value</p>
+  <dl class="fields">
+    <dt>Returns: v, remove specified key and return the corresponding value</dt>
+    <dt>Overrides:
+        dict.pop
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
 <br />
 <!-- ==================== CLASS VARIABLE DETAILS ==================== -->
 <a name="section-ClassVariableDetails"></a>
@@ -371,7 +485,7 @@ new empty dictionary
   <dl class="fields">
     <dt>Value:</dt>
       <dd><table><tr><td><pre class="variable">
-<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">imageDict</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">{</code><code class="variable-group">}</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">maxSize</code><code class="variable-quote">'</code><code class="variable-op">: </code>500000000<code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">ordered</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">[</code><code class="variable-group">]</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">size</code><code class="variable-quote">'</code><code class="variable-op">: </code>0<code class="variable-group">}</code>
+<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">imageDict</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">{</code><code class="variable-group">}</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">maxSize</code><code class="variable-quote">'</code><code class="variable-op">: </code>500<code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">ordered</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">[</code><code class="variable-group">]</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">size</code><code class="variable-quote">'</code><code class="variable-op">: </code>0<code class="variable-group">}</code>
 </pre></td></tr></table>
 </dd>
   </dl>
@@ -382,6 +496,9 @@ new empty dictionary
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -401,7 +518,7 @@ new empty dictionary
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:51 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

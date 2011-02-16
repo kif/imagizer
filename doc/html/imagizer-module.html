@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th bgcolor="#70b0f0" class="navbar-select"
+          >&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -52,7 +55,20 @@
 </table>
 <!-- ==================== PACKAGE DESCRIPTION ==================== -->
 <h1 class="epydoc">Package imagizer</h1><p class="nomargin-top"><span class="codelink"><a href="imagizer-pysrc.html">source&nbsp;code</a></span></p>
-<!-- ==================== SUBMODULES ==================== -->
+<p>General library used by selector and generator. It handles images, 
+  progress bars and configuration file.</p>
+
+<hr />
+<div class="fields">      <p><strong>Version:</strong>
+        1.1.0
+      </p>
+      <p><strong>Author:</strong>
+        J\xc3\xa9r\xc3\xb4me Kieffer
+      </p>
+      <p><strong>Contact:</strong>
+        jerome.kieffer@terre-adelie.org
+      </p>
+</div><!-- ==================== SUBMODULES ==================== -->
 <a name="section-Submodules"></a>
 <table class="summary" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
@@ -71,17 +87,16 @@
 </tr>
   <tr><td class="summary">
   <ul class="nomargin">
-    <li> <strong class="uidlink"><a href="imagizer.NommeVideo-module.html">imagizer.NommeVideo</a></strong>    </li>
-    <li> <strong class="uidlink"><a href="imagizer.config-module.html">imagizer.config</a></strong>: <em class="summary">Config is a class containing all the configuration of the imagizer 
+    <li> <strong class="uidlink">imagizer.config</strong>    </li>
+    <li> <strong class="uidlink"><a href="imagizer.config%27-module.html">imagizer.config'</a></strong>: <em class="summary">Config is a class containing all the configuration of the imagizer 
         suite.</em>    </li>
     <li> <strong class="uidlink"><a href="imagizer.dirchooser-module.html">imagizer.dirchooser</a></strong>: <em class="summary">Library used by selector and the installer to select the working 
         directories.</em>    </li>
-    <li> <strong class="uidlink"><a href="imagizer.faces-module.html">imagizer.faces</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="imagizer.exiftran-module.html">imagizer.exiftran</a></strong>: <em class="summary">exiftran.py a wrapper for the original exiftran fprovided by Gerd 
+        Korn http://linux.bytesex.org/fbida/</em>    </li>
     <li> <strong class="uidlink"><a href="imagizer.imagecache-module.html">imagizer.imagecache</a></strong>: <em class="summary">ImageCache is a class containing a copy of the bitmap of images .</em>    </li>
     <li> <strong class="uidlink"><a href="imagizer.imagizer-module.html">imagizer.imagizer</a></strong>: <em class="summary">General library used by selector and generator.</em>    </li>
     <li> <strong class="uidlink"><a href="imagizer.parser-module.html">imagizer.parser</a></strong>: <em class="summary">CLASS AttrFile Attributes file representation and trivial parser.</em>    </li>
-    <li> <strong class="uidlink"><a href="imagizer.setup-module.html">imagizer.setup</a></strong>: <em class="summary">The setup.py script allows to install Imagizer regardless to the 
-        operating system</em>    </li>
     <li> <strong class="uidlink"><a href="imagizer.signals-module.html">imagizer.signals</a></strong>: <em class="summary">Provide Signal class.</em>    </li>
     <li> <strong class="uidlink"><a href="imagizer.winpath-module.html">imagizer.winpath</a></strong>: <em class="summary">Functions for getting system/language/user dependent paths on 
         windows.</em>    </li>
@@ -89,10 +104,38 @@
 </table>
 
 <br />
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Variables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="__package__"></a><span class="summary-name">__package__</span> = <code title="'imagizer'"><code class="variable-quote">'</code><code class="variable-string">imagizer</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+</table>
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th bgcolor="#70b0f0" class="navbar-select"
+          >&nbsp;&nbsp;&nbsp;Home&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -112,7 +155,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:50 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

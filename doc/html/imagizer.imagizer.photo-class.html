@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -54,6 +57,13 @@
 </table>
 <!-- ==================== CLASS DESCRIPTION ==================== -->
 <h1 class="epydoc">Class photo</h1><p class="nomargin-top"><span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">photo</strong>
+</pre>
+
+<hr />
 <p>class photo that does all the operations available on photos</p>
 
 <!-- ==================== INSTANCE METHODS ==================== -->
@@ -79,8 +89,9 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">filename</span>)</span></td>
+          <td><span class="summary-sig"><a href="imagizer.imagizer.photo-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">filename</span>)</span><br />
+      x.__init__(...) initializes x; see x.__class__.__doc__ for signature</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.__init__">source&nbsp;code</a></span>
             
@@ -148,7 +159,7 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a name="SaveThumb"></a><span class="summary-sig-name">SaveThumb</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">Thumbname</span>,
+        <span class="summary-sig-arg">strThumbFile</span>,
         <span class="summary-sig-arg">Size</span>=<span class="summary-sig-default">160</span>,
         <span class="summary-sig-arg">Interpolation</span>=<span class="summary-sig-default">1</span>,
         <span class="summary-sig-arg">Quality</span>=<span class="summary-sig-default">75</span>,
@@ -226,10 +237,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="exif"></a><span class="summary-sig-name">exif</span>(<span class="summary-sig-arg">self</span>)</span><br />
+          <td><span class="summary-sig"><a name="readExif"></a><span class="summary-sig-name">readExif</span>(<span class="summary-sig-arg">self</span>)</span><br />
       return exif data + title from the photo</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.exif">source&nbsp;code</a></span>
+            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.readExif">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -298,6 +309,45 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
+          <td><span class="summary-sig"><a name="renameFile"></a><span class="summary-sig-name">renameFile</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">newname</span>)</span><br />
+      rename the current instance of photo: -Move the file -update the 
+      cache -change the name and other attributes of the instance -change 
+      the exif metadata.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.renameFile">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="imagizer.imagizer.photo-class.html#storeOriginalName" class="summary-sig-name">storeOriginalName</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">originalName</span>)</span><br />
+      Save the original name of the file into the Exif.Photo.UserComment 
+      tag.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.storeOriginalName">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
           <td><span class="summary-sig"><a name="autorotate"></a><span class="summary-sig-name">autorotate</span>(<span class="summary-sig-arg">self</span>)</span><br />
       does autorotate the image according to the EXIF tag</td>
           <td align="right" valign="top">
@@ -329,6 +379,75 @@
       
     </td>
   </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="GaussianKernel"></a><span class="summary-name">GaussianKernel</span> = <code title="None">None</code><br />
+      hash(x)
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
 </table>
 <!-- ==================== METHOD DETAILS ==================== -->
 <a name="section-MethodDetails"></a>
@@ -348,6 +467,32 @@
   </td>
 </tr>
 </table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">filename</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>x.__init__(...) initializes x; see x.__class__.__doc__ for 
+  signature</p>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__init__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
 <a name="RemoveFromCache"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -364,6 +509,32 @@
   
   <p>remove the curent image from the Cache .... for various reasons</p>
   <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="storeOriginalName"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">storeOriginalName</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">originalName</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="imagizer.imagizer-pysrc.html#photo.storeOriginalName">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Save the original name of the file into the Exif.Photo.UserComment 
+  tag. This tag is usually not used, people prefer the JPEG tag for 
+  entiteling images.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>originalName</code></strong> (python string) - name of the file before it was processed by selector</li>
+    </ul></dd>
   </dl>
 </td></tr></table>
 </div>
@@ -396,6 +567,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -415,7 +589,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:51 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

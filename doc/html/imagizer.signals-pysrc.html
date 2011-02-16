@@ -14,6 +14,9 @@
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -134,30 +137,30 @@ imagizer.winpath.__revision__" class="py-name" href="#" onclick="return doclink(
 <a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line"> </tt>
 <a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">weakref</tt> </tt>
 <a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">inspect</tt> </tt>
-<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">sets</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line"> </tt>
 <a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line"> </tt>
-<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line"> </tt>
-<a name="Signal"></a><div id="Signal-def"><a name="L84"></a><tt class="py-lineno"> 84</tt> <a class="py-toggle" href="#" id="Signal-toggle" onclick="return toggle('Signal');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html">Signal</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
-</div><div id="Signal-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Signal-expanded"><a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">    <tt class="py-docstring">""" class Signal.</tt> </tt>
-<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
-<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"><tt class="py-docstring">    A simple implementation of the Signal/Slot pattern. To use, simply </tt> </tt>
-<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"><tt class="py-docstring">    create a Signal instance. The instance may be a member of a class, </tt> </tt>
-<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line"><tt class="py-docstring">    a global, or a local; it makes no difference what scope it resides </tt> </tt>
-<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line"><tt class="py-docstring">    within. Connect slots to the signal using the "connect()" method. </tt> </tt>
-<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"><tt class="py-docstring">    The slot may be a member of a class or a simple function. If the </tt> </tt>
-<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"><tt class="py-docstring">    slot is a member of a class, Signal will automatically detect when</tt> </tt>
-<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-docstring">    the method's class instance has been deleted and remove it from </tt> </tt>
-<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"><tt class="py-docstring">    its list of connected slots.</tt> </tt>
-<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
-<a name="Signal.__init__"></a><div id="Signal.__init__-def"><a name="L96"></a><tt class="py-lineno"> 96</tt> <a class="py-toggle" href="#" id="Signal.__init__-toggle" onclick="return toggle('Signal.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
-</div><div id="Signal.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Signal.__init__-expanded"><a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">        <tt class="py-docstring">""" Init the Signal object.</tt> </tt>
+<a name="Signal"></a><div id="Signal-def"><a name="L83"></a><tt class="py-lineno"> 83</tt> <a class="py-toggle" href="#" id="Signal-toggle" onclick="return toggle('Signal');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html">Signal</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Signal-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Signal-expanded"><a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">    <tt class="py-docstring">""" class Signal.</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line"><tt class="py-docstring">    A simple implementation of the Signal/Slot pattern. To use, simply </tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"><tt class="py-docstring">    create a Signal instance. The instance may be a member of a class, </tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"><tt class="py-docstring">    a global, or a local; it makes no difference what scope it resides </tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line"><tt class="py-docstring">    within. Connect slots to the signal using the "connect()" method. </tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line"><tt class="py-docstring">    The slot may be a member of a class or a simple function. If the </tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"><tt class="py-docstring">    slot is a member of a class, Signal will automatically detect when</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"><tt class="py-docstring">    the method's class instance has been deleted and remove it from </tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-docstring">    its list of connected slots.</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="Signal.__init__"></a><div id="Signal.__init__-def"><a name="L95"></a><tt class="py-lineno"> 95</tt> <a class="py-toggle" href="#" id="Signal.__init__-toggle" onclick="return toggle('Signal.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Signal.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Signal.__init__-expanded"><a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-docstring">""" </tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"><tt class="py-docstring">        Init the Signal object.</tt> </tt>
 <a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
 <a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__slots</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
 <a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line"> </tt>
 <a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-comment"># for keeping references to _WeakMethod_FuncHost objects.</tt> </tt>
-<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line"><tt class="py-comment"></tt>        <tt class="py-comment"># If we didn't, then the weak references would die for</tt> </tt>
-<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"><tt class="py-comment"></tt>        <tt class="py-comment"># non-method slots that we've created.</tt> </tt>
-<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"><tt class="py-comment"></tt>        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__funchost</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">        <tt class="py-comment"># If we didn't, then the weak references would die for</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">        <tt class="py-comment"># non-method slots that we've created.</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__funchost</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
 </div><a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line"> </tt>
 <a name="Signal.__call__"></a><div id="Signal.__call__-def"><a name="L106"></a><tt class="py-lineno">106</tt> <a class="py-toggle" href="#" id="Signal.__call__-toggle" onclick="return toggle('Signal.__call__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html#__call__">__call__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="Signal.__call__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Signal.__call__-expanded"><a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
@@ -168,7 +171,7 @@ imagizer.winpath.__revision__" class="py-name" href="#" onclick="return doclink(
 <a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">                <tt class="py-name">slot</tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
 <a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
 <a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line">                <tt class="py-keyword">del</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__slots</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt> </tt>
-</div><a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">                 </tt>
+</div><a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line"> </tt>
 <a name="Signal.emit"></a><div id="Signal.emit-def"><a name="L116"></a><tt class="py-lineno">116</tt> <a class="py-toggle" href="#" id="Signal.emit-toggle" onclick="return toggle('Signal.emit');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html#emit">emit</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="Signal.emit-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Signal.emit-expanded"><a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
 <a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
@@ -181,15 +184,15 @@ imagizer.signals.WeakMethod.__call__" class="py-name" href="#" onclick="return d
 <a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Method imagizer.signals.Signal.disconnect()=imagizer.signals.Signal-class.html#disconnect"><a title="imagizer.signals.Signal.disconnect" class="py-name" href="#" onclick="return doclink('link-2', 'disconnect', 'link-2');">disconnect</a></tt><tt class="py-op">(</tt><tt class="py-name">slot</tt><tt class="py-op">)</tt> </tt>
 <a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">inspect</tt><tt class="py-op">.</tt><tt class="py-name">ismethod</tt><tt class="py-op">(</tt><tt class="py-name">slot</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 <a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">            <tt class="py-comment">#if keepRef:</tt> </tt>
-<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line"><tt class="py-comment"></tt>                <tt class="py-comment">#self.__slots.append(slot)</tt> </tt>
-<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line"><tt class="py-comment"></tt>            <tt class="py-comment">#else:</tt> </tt>
-<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line"><tt class="py-comment"></tt>            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__slots</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt id="link-3" class="py-name" targets="Class imagizer.signals.WeakMethod=imagizer.signals.WeakMethod-class.html"><a title="imagizer.signals.WeakMethod" class="py-name" href="#" onclick="return doclink('link-3', 'WeakMethod', 'link-3');">WeakMethod</a></tt><tt class="py-op">(</tt><tt class="py-name">slot</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">                <tt class="py-comment">#self.__slots.append(slot)</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">            <tt class="py-comment">#else:</tt> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__slots</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt id="link-3" class="py-name" targets="Class imagizer.signals.WeakMethod=imagizer.signals.WeakMethod-class.html"><a title="imagizer.signals.WeakMethod" class="py-name" href="#" onclick="return doclink('link-3', 'WeakMethod', 'link-3');">WeakMethod</a></tt><tt class="py-op">(</tt><tt class="py-name">slot</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
 <a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
 <a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">            <tt class="py-name">o</tt> <tt class="py-op">=</tt> <tt id="link-4" class="py-name" targets="Class imagizer.signals._WeakMethod_FuncHost=imagizer.signals._WeakMethod_FuncHost-class.html"><a title="imagizer.signals._WeakMethod_FuncHost" class="py-name" href="#" onclick="return doclink('link-4', '_WeakMethod_FuncHost', 'link-4');">_WeakMethod_FuncHost</a></tt><tt class="py-op">(</tt><tt class="py-name">slot</tt><tt class="py-op">)</tt> </tt>
 <a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__slots</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt id="link-5" class="py-name"><a title="imagizer.signals.WeakMethod" class="py-name" href="#" onclick="return doclink('link-5', 'WeakMethod', 'link-3');">WeakMethod</a></tt><tt class="py-op">(</tt><tt class="py-name">o</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Method imagizer.signals._WeakMethod_FuncHost.func()=imagizer.signals._WeakMethod_FuncHost-class.html#func"><a title="imagizer.signals._WeakMethod_FuncHost.func" class="py-name" href="#" onclick="return doclink('link-6', 'func', 'link-6');">func</a></tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
-<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">             </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line"> </tt>
 <a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">            <tt class="py-comment"># we stick a copy in here just to keep the instance alive</tt> </tt>
-<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line"><tt class="py-comment"></tt>            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__funchost</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt class="py-name">o</tt><tt class="py-op">)</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">            <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__funchost</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt class="py-name">o</tt><tt class="py-op">)</tt> </tt>
 </div><a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line"> </tt>
 <a name="Signal.disconnect"></a><div id="Signal.disconnect-def"><a name="L137"></a><tt class="py-lineno">137</tt> <a class="py-toggle" href="#" id="Signal.disconnect-toggle" onclick="return toggle('Signal.disconnect');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.Signal-class.html#disconnect">disconnect</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">slot</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="Signal.disconnect-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Signal.disconnect-expanded"><a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
@@ -217,14 +220,14 @@ imagizer.signals.WeakMethod.__call__" class="py-name" href="#" onclick="return d
 <a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__slots</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
 <a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__funchost</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
 <a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__methodhost</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
-</div></div><a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line">         </tt>
+</div></div><a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line"> </tt>
 <a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line"> </tt>
 <a name="_WeakMethod_FuncHost"></a><div id="_WeakMethod_FuncHost-def"><a name="L165"></a><tt class="py-lineno">165</tt> <a class="py-toggle" href="#" id="_WeakMethod_FuncHost-toggle" onclick="return toggle('_WeakMethod_FuncHost');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="imagizer.signals._WeakMethod_FuncHost-class.html">_WeakMethod_FuncHost</a><tt class="py-op">:</tt> </tt>
 </div><div id="_WeakMethod_FuncHost-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="_WeakMethod_FuncHost-expanded"><a name="L166"></a><tt class="py-lineno">166</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
 <a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
 <a name="_WeakMethod_FuncHost.__init__"></a><div id="_WeakMethod_FuncHost.__init__-def"><a name="L168"></a><tt class="py-lineno">168</tt> <a class="py-toggle" href="#" id="_WeakMethod_FuncHost.__init__-toggle" onclick="return toggle('_WeakMethod_FuncHost.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals._WeakMethod_FuncHost-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">func</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="_WeakMethod_FuncHost.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="_WeakMethod_FuncHost.__init__-expanded"><a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">hostedFunction</tt> <tt class="py-op">=</tt> <tt id="link-7" class="py-name"><a title="imagizer.signals._WeakMethod_FuncHost.func" class="py-name" href="#" onclick="return doclink('link-7', 'func', 'link-6');">func</a></tt> </tt>
-</div><a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line">         </tt>
+</div><a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line"> </tt>
 <a name="_WeakMethod_FuncHost.func"></a><div id="_WeakMethod_FuncHost.func-def"><a name="L171"></a><tt class="py-lineno">171</tt> <a class="py-toggle" href="#" id="_WeakMethod_FuncHost.func-toggle" onclick="return toggle('_WeakMethod_FuncHost.func');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals._WeakMethod_FuncHost-class.html#func">func</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="_WeakMethod_FuncHost.func-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="_WeakMethod_FuncHost.func-expanded"><a name="L172"></a><tt class="py-lineno">172</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">hostedFunction</tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-name">kwargs</tt><tt class="py-op">)</tt> </tt>
 </div></div><a name="L173"></a><tt class="py-lineno">173</tt>  <tt class="py-line"> </tt>
@@ -237,7 +240,7 @@ imagizer.signals.WeakMethod.__call__" class="py-name" href="#" onclick="return d
 <a name="WeakMethod.__init__"></a><div id="WeakMethod.__init__-def"><a name="L180"></a><tt class="py-lineno">180</tt> <a class="py-toggle" href="#" id="WeakMethod.__init__-toggle" onclick="return toggle('WeakMethod.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.WeakMethod-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">f</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="WeakMethod.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WeakMethod.__init__-expanded"><a name="L181"></a><tt class="py-lineno">181</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">f</tt> <tt class="py-op">=</tt> <tt class="py-name">f</tt><tt class="py-op">.</tt><tt class="py-name">im_func</tt> </tt>
 <a name="L182"></a><tt class="py-lineno">182</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">c</tt> <tt class="py-op">=</tt> <tt class="py-name">weakref</tt><tt class="py-op">.</tt><tt class="py-name">ref</tt><tt class="py-op">(</tt><tt class="py-name">f</tt><tt class="py-op">.</tt><tt class="py-name">im_self</tt><tt class="py-op">)</tt> </tt>
-</div><a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line">         </tt>
+</div><a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line"> </tt>
 <a name="WeakMethod.__call__"></a><div id="WeakMethod.__call__-def"><a name="L184"></a><tt class="py-lineno">184</tt> <a class="py-toggle" href="#" id="WeakMethod.__call__-toggle" onclick="return toggle('WeakMethod.__call__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.signals.WeakMethod-class.html#__call__">__call__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">,</tt> <tt class="py-op">**</tt><tt class="py-param">kwargs</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="WeakMethod.__call__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="WeakMethod.__call__-expanded"><a name="L185"></a><tt class="py-lineno">185</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">c</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
 <a name="L186"></a><tt class="py-lineno">186</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> </tt>
@@ -253,6 +256,9 @@ expandto(location.href);
 <table class="navbar" border="0" width="100%" cellpadding="0"
        bgcolor="#a0c0ff" cellspacing="0">
   <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
 
   <!-- Tree link -->
       <th>&nbsp;&nbsp;&nbsp;<a
@@ -272,7 +278,7 @@ expandto(location.href);
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Wed Apr 28 21:40:51 2010
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
