@@ -93,7 +93,8 @@ class Signal(object):
     its list of connected slots.
     """
     def __init__(self):
-        """ Init the Signal object.
+        """ 
+        Init the Signal object.
         """
         self.__slots = []
 

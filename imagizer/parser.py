@@ -23,67 +23,53 @@
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
 
-import re, os, sys
+import re, os, sys, logging
 import config
 config = config.Config()
 
 class AttrFile:
-
     """Attributes file representation and trivial parser."""
 
-    #---------------------------------------------------------------------------
-    #
+
     def __init__(self, path):
-
         """Constructor."""
-
         self._path = path
         self._attrmap = {}
-        self._dirty = 0
+        self._dirty = False
         self._attrmap["coding"] = config.Coding
 
-    #---------------------------------------------------------------------------
-    #
+
     def read(self):
-
         """Read the file and parse it."""
-
+        logging.debug("AttrFile.read file %s" % self._path)
         try:
-            f = open(self._path, "r")
+            f = open(self._path, "rb")
             self._lines = f.read()
             f.close()
         except IOError, e:
-            print >> sys.stderr, \
-                  "Error: cannot open attributes file", self._path
+            logging.error("Cannot open attributes file %s" % self._path)
             self._lines = ''
 
         self.parse(self._lines)
-        self._dirty = 0
+        self._dirty = False
 
-    #---------------------------------------------------------------------------
-    #
+
     def resetDirty(self):
-
         """Resets the dirty flag. Why would you want to do this?"""
+        self._dirty = False
 
-        self._dirty = 0
 
-    #---------------------------------------------------------------------------
-    #
     def write(self):
-
         """Write the file to disk, if dirty."""
-
+        logging.debug("AttrFile.write file %s" % self._path)
         # If not dirty, don't write anything.
-        if self._dirty == 0:
+        if not self._dirty:
             return
-
         try:
             coding = self._attrmap["coding"]
         except:
             coding = config.Coding
 
-#        print "Coding= %s"%coding
         try:
             # if there are no field, delete the file.
             if len(self._attrmap) == 0:
@@ -94,7 +80,6 @@ class AttrFile:
             for k in self._attrmap.keys():
                 f.write(k)
                 f.write(": ")
-#                print self._attrmap[k]
                 f.write(self._attrmap[k].encode(coding))
                 f.write("\n\n")
             f.close()
@@ -105,13 +90,14 @@ class AttrFile:
         try:
             os.chmod(self._path, config.DefaultFileMode)
         except:
-            pass
-    #---------------------------------------------------------------------------
-    #
+            logging.warning("Unable to chmod %s" % self._path)
+
+
     def parse(self, lines):
-
-        """Parse attributes file lines into a map."""
-
+        """
+        Parse attributes file lines into a map.
+        """
+        logging.debug("AttrFile.parse")
         mre1 = re.compile("^([^:\n]+)\s*:", re.M)
         mre2 = re.compile("^\s*$", re.M)
 
@@ -147,47 +133,49 @@ class AttrFile:
             except:
                 self._attrmap[ key ] = txt
 
-    #---------------------------------------------------------------------------
-    #
+
     def get(self, field):
-
-        """Returns an attribute field content extracted from this attributes
-        file."""
-
-        if self._attrmap.has_key(field):
+        """
+        Returns an attribute field content extracted from this attributes
+        file.
+        """
+        logging.debug("AttrFile.get(%s)" % field)
+        if field in self._attrmap:
             return self._attrmap[ field ]
         else:
-            raise KeyError()
+            logging.error("AttrFile.get(%s): No such field in %s" % (field, self._path))
+            raise KeyError("AttrFile.get(%s): No such field in %s" % (field, self._path))
 
-    #---------------------------------------------------------------------------
-    #
+
     def get_def(self, field, default=None):
-
-        """Returns an attribute field content extracted from this attributes
-        file."""
-
-        if self._attrmap.has_key(field):
+        """
+        Returns an attribute field content extracted from this attributes
+        file.
+        """
+        logging.debug("AttrFile.get_def(%s)" % field)
+        if field in self._attrmap:
             return self._attrmap[ field ]
         else:
+            logging.debug("AttrFile.get_def(%s), returned default:%s" % (field, default))
             return default
 
-    #---------------------------------------------------------------------------
-    #
+
     def set(self, field, value):
-
-        """Sets a field of the description file. Returns true if the value has
-        changed.  Set a field value to None to remove the field."""
-
+        """
+        Sets a field of the description file. Returns true if the value has
+        changed.  
+        Set a field value to None to remove the field.
+        """
+        logging.debug("AttrFile.set(%s,value: %s)" % field, type(value))
         if value == None:
-            if self._attrmap.has_key(field):
-                del self._attrmap[ field ]
-                self._dirty = 1
+            if field in self._attrmap:
+                self._attrmap.pop(field)
+                self._dirty = True
                 return 1
             else:
                 return 0
 
         # remove stupid dos chars (\r) added by a web browser
-        value = value.replace('\r', '')
         value = value.strip()
 
         # remove blank lines from the field value
@@ -206,52 +194,40 @@ class AttrFile:
         if '\n' in value:
             value = '\n' + value
 
-        if self._attrmap.has_key(field):
-#            print "field %s: %s"%(type(field),field)
-#            print "attrmap[field] %s: %s"%(type(self._attrmap[ field ]), self._attrmap[ field ])
-#            print "value %s: %s"%(type(value),value)
-#            
+        if field in self._attrmap:
             if self._attrmap[ field ] == value:
                 return 0
 
         self._attrmap[ field ] = value
-        self._dirty = 1
+        self._dirty = True
         return 1
 
-    #---------------------------------------------------------------------------
-    #
+
     def __getitem__(self, key):
         return self.get(key)
 
-    #---------------------------------------------------------------------------
-    #
+
     def __setitem__(self, key, value):
         return self.set(key, value)
 
 
-
-    #---------------------------------------------------------------------------
-    #
     def keys(self):
         return self._attrmap.keys()
 
-    #---------------------------------------------------------------------------
-    #
+
     def has_key(self, key):
         return self._attrmap.has_key(key)
 
-    #---------------------------------------------------------------------------
-    #
+
     def __len__(self):
         return len(self._attrmap)
 
-    #---------------------------------------------------------------------------
-    #
+
     def __repr__(self):
-
-        """Returns contents to a string for debugging purposes."""
-
-        txt = ""
-        for a in self._attrmap.keys():
-            txt += a + ":\n" + self._attrmap[a] + "\n\n"
-        return txt
+        """
+        Returns contents to a string for debugging purposes.
+        """
+        lsttxt = ["AttrFile for %s" % self._path]
+        for a in self._attrmap:
+            lsttxt += [a + ":", self._attrmap[a], ""]
+        return os.linesep.join(lsttxt)

@@ -28,6 +28,7 @@
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
+import logging
 from config import Config
 config = Config()
 
@@ -36,23 +37,34 @@ config = Config()
 ###############  Class ImageCache for storing the bitmaps in a Borg ############################
 ################################################################################################
 class ImageCache(dict):
-    """this class is a Borg : always returns the same values regardless to the instance of the object
+    """
+    this class is a Borg : always returns the same values regardless to the instance of the object
     it is used as data storage for images ... with a limit on the number of images to keep in memory.
     """
     __shared_state = {}
     __data_initialized = False
 
+
     def __init__(self, maxSize=100):
+        """
+        Constructor of ImageCache
+        @param maxSize: number of element to keep in memory
+        """
         self.__dict__ = self.__shared_state
         if  ImageCache.__data_initialized is False:
             ImageCache.__data_initialized = True
+            logging.debug("ImageCache.__init__: initalization of the Borg")
             self.ordered = []
             self.imageDict = {}
             self.maxSize = maxSize
             self.size = 0
 
+
     def __setitem__(self, key, value):
-        """x.__setitem__(i, y) <==> x[i]=y"""
+        """
+        x.__setitem__(i, y) <==> x[i]=y
+        """
+        logging.debug("ImageCache.__setitem__: %s" % key)
         self.imageDict[ key ] = value
         if key in self.ordered:
             index = self.ordered.index(key)
@@ -68,19 +80,31 @@ class ImageCache(dict):
             self.ordered = self.ordered[1:]
         self.ordered.append(key)
 
+
     def __getitem__(self, key):
-        """x.__getitem__(y) <==> x[y]"""
+        """
+        x.__getitem__(y) <==> x[y]
+        """
+        logging.debug("ImageCache.__setitem__: %s" % key)
         index = self.ordered.index(key)
         self.ordered.pop(index)
         self.ordered.append(key)
         return self.imageDict[ key ]
 
+
     def keys(self):
-        """ returns the list of keys, ordered"""
+        """ 
+        Returns the list of keys, ordered
+        """
+        logging.debug("ImageCache.keys")
         return self.ordered[:]
 
+
     def pop(self, key):
-        """remove a key for the dictionary and return it's value"""
+        """
+        Remove a key for the dictionary and return it's value
+        """
+        logging.debug("ImageCache.pop %s" % key)
         try:
             index = self.ordered.index(key)
         except:
@@ -90,9 +114,11 @@ class ImageCache(dict):
         return myData
 
     def rename(self, oldKey, newKey):
-        """change the name of a key without affecting anything else
+        """
+        Change the name of a key without affecting anything else
         If the name is not present: do nothing.
         """
+        logging.debug("ImageCache.rename %s->%s" % (oldKey, newKey))
         if oldKey not in self.ordered:
             return
         index = self.ordered.index(oldKey)
