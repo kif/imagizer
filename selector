@@ -110,7 +110,7 @@ class FullScreenInterface:
         for i in selected:
             if i in self.AllJpegs:
                 self.Selected.append(i)
-        print "Initialisation de l'interface graphique ..."
+        logger.info("Initialization of the fullscreen GUI")
         self.xml = GTKglade.XML(unifiedglade, root="FullScreen")
         self.ShowImage()
         self.flush_event_queue()
@@ -263,8 +263,10 @@ class FullScreenInterface:
 # ##### Normal Interface #####
 ################################################################################
 
-class interface:
-    """class interface that manages the GUI using Glade-2"""
+class Interface:
+    """
+    class interface that manages the GUI using Glade-2
+    """
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default"):
         self.AllJpegs = AllJpegs
         self.Selected = []
@@ -277,7 +279,7 @@ class interface:
         self.strCurrentTitle = ""
 
 
-        logger.debug("Initialization of the graphical interface ...")
+        logger.info("Initialization of the windowed graphical interface ...")
         self.xml = GTKglade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
@@ -297,35 +299,88 @@ class interface:
 
         if config.ScreenSize == 300:
             self.xml.get_widget("t300").set_active(1)
+            self.xml.get_widget("t600").set_active(0)
+            self.xml.get_widget("t900").set_active(0)
+            self.xml.get_widget("tauto").set_active(0)
         elif config.ScreenSize == 600:
+            self.xml.get_widget("t300").set_active(0)
             self.xml.get_widget("t600").set_active(1)
+            self.xml.get_widget("t900").set_active(0)
+            self.xml.get_widget("tauto").set_active(0)
         elif config.ScreenSize == 900:
+            self.xml.get_widget("t300").set_active(0)
+            self.xml.get_widget("t600").set_active(0)
             self.xml.get_widget("t900").set_active(1)
+            self.xml.get_widget("tauto").set_active(0)
         else:
+            self.xml.get_widget("t300").set_active(0)
+            self.xml.get_widget("t600").set_active(0)
+            self.xml.get_widget("t900").set_active(0)
             self.xml.get_widget("tauto").set_active(1)
 
         if config.NbrPerPage == 9:
             self.xml.get_widget("9PerPage").set_active(1)
+            self.xml.get_widget("12PerPage").set_active(0)
+            self.xml.get_widget("16PerPage").set_active(0)
+            self.xml.get_widget("20PerPage").set_active(0)
+            self.xml.get_widget("25PerPage").set_active(0)
+            self.xml.get_widget("30PerPage").set_active(0)
         elif config.NbrPerPage == 12:
+            self.xml.get_widget("9PerPage").set_active(0)
             self.xml.get_widget("12PerPage").set_active(1)
+            self.xml.get_widget("16PerPage").set_active(0)
+            self.xml.get_widget("20PerPage").set_active(0)
+            self.xml.get_widget("25PerPage").set_active(0)
+            self.xml.get_widget("30PerPage").set_active(0)
         elif config.NbrPerPage == 16:
+            self.xml.get_widget("9PerPage").set_active(0)
+            self.xml.get_widget("12PerPage").set_active(0)
             self.xml.get_widget("16PerPage").set_active(1)
+            self.xml.get_widget("20PerPage").set_active(0)
+            self.xml.get_widget("25PerPage").set_active(0)
+            self.xml.get_widget("30PerPage").set_active(0)
         elif config.NbrPerPage == 20:
+            self.xml.get_widget("9PerPage").set_active(0)
+            self.xml.get_widget("12PerPage").set_active(0)
+            self.xml.get_widget("16PerPage").set_active(0)
             self.xml.get_widget("20PerPage").set_active(1)
+            self.xml.get_widget("25PerPage").set_active(0)
+            self.xml.get_widget("30PerPage").set_active(0)
         elif config.NbrPerPage == 25:
+            self.xml.get_widget("9PerPage").set_active(0)
+            self.xml.get_widget("12PerPage").set_active(0)
+            self.xml.get_widget("16PerPage").set_active(0)
+            self.xml.get_widget("20PerPage").set_active(0)
             self.xml.get_widget("25PerPage").set_active(1)
+            self.xml.get_widget("30PerPage").set_active(0)
         elif config.NbrPerPage == 30:
+            self.xml.get_widget("9PerPage").set_active(0)
+            self.xml.get_widget("12PerPage").set_active(0)
+            self.xml.get_widget("16PerPage").set_active(0)
+            self.xml.get_widget("20PerPage").set_active(0)
+            self.xml.get_widget("25PerPage").set_active(0)
             self.xml.get_widget("30PerPage").set_active(1)
 
         if config.Interpolation == 0:
             self.xml.get_widget("VLowQ").set_active(1)
+            self.xml.get_widget("LowQ").set_active(0)
+            self.xml.get_widget("HiQ").set_active(0)
+            self.xml.get_widget("VHiQ").set_active(0)
         elif config.Interpolation == 1:
+            self.xml.get_widget("VLowQ").set_active(0)
             self.xml.get_widget("LowQ").set_active(1)
+            self.xml.get_widget("HiQ").set_active(0)
+            self.xml.get_widget("VHiQ").set_active(0)
         elif config.Interpolation == 2:
+            self.xml.get_widget("VLowQ").set_active(0)
+            self.xml.get_widget("LowQ").set_active(0)
             self.xml.get_widget("HiQ").set_active(1)
+            self.xml.get_widget("VHiQ").set_active(0)
         elif config.Interpolation == 3:
+            self.xml.get_widget("VLowQ").set_active(0)
+            self.xml.get_widget("LowQ").set_active(0)
+            self.xml.get_widget("HiQ").set_active(0)
             self.xml.get_widget("VHiQ").set_active(1)
-
         self.ShowImage()
         self.flush_event_queue()
 
@@ -342,7 +397,7 @@ class interface:
 
         'on_About_activate': self.about,
         'on_quitter1_activate': self.die,
-        'on_nommer1_activate': self.renommer,
+        'on_nommer1_activate': self.renameDay,
         'on_executer1_activate': self.copyAndResize,
         'on_Synchronize_activate': self.synchronize,
         'on_copie_et_grave1_activate': self.burn,
@@ -359,20 +414,20 @@ class interface:
         'on_Autorotate_activate': self.setAutoRotate,
         'on_Filigrane_activate': self.setFiligrane,
         'on_taille_media_activate': self.defineMediaSize,
-        'on_tauto_activate': self.SizeCurrent,
-        'on_t300_activate': self.Size300,
-        'on_t600_activate': self.Size600,
-        'on_t900_activate': self.Size900,
-        'on_VLowQ_activate': self.SetInterpol0,
-        'on_LowQ_activate': self.SetInterpol1,
-        'on_HiQ_activate': self.SetInterpol2,
-        'on_VHiQ_activate': self.SetInterpol3,
-        'on_9PerPage_activate': self.Set9PerPage,
-        'on_12PerPage_activate': self.Set12PerPage,
-        'on_16PerPage_activate': self.Set16PerPage,
-        'on_20PerPage_activate': self.Set20PerPage,
-        'on_25PerPage_activate': self.Set25PerPage,
-        'on_30PerPage_activate': self.Set30PerPage,
+        'on_tauto_activate': self.sizeCurrent,
+        'on_t300_activate': self.setSize300,
+        'on_t600_activate': self.setSize600,
+        'on_t900_activate': self.setSize900,
+        'on_VLowQ_activate': self.setInterpolNearest,
+        'on_LowQ_activate': self.setInterpolTiles,
+        'on_HiQ_activate': self.setInterpolBilin,
+        'on_VHiQ_activate': self.setInterpolHyperbol,
+        'on_9PerPage_activate': self.set9PerPage,
+        'on_12PerPage_activate': self.set12PerPage,
+        'on_16PerPage_activate': self.set16PerPage,
+        'on_20PerPage_activate': self.set20PerPage,
+        'on_25PerPage_activate': self.set25PerPage,
+        'on_30PerPage_activate': self.set30PerPage,
         'on_configurer_dioporama_activate': self.slideShowSetup,
 
         'on_enregistrerS_activate': self.saveSelection,
@@ -381,8 +436,8 @@ class interface:
         'on_aucun1_activate': self.selectNone,
         'on_TouS_activate': self.selectAll,
         'on_selectionner_activate': self.select,
-        'on_taille_selection_activate': self.CalculateSize,
-        'on_media_apres_activate': self.SelectNewerMedia,
+        'on_taille_selection_activate': self.calculateSize,
+        'on_media_apres_activate': self.selectNewerMedia,
         'on_media_avant_activate': self.SelectOlderMedia,
 
         'on_precedentI_activate': self.previous,
@@ -658,7 +713,7 @@ class interface:
 
     def burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
-        logger.debug("interface.burn")
+        logger.debug("Interface.burn")
         self.settitle()
         CopySelected(self.Selected)
         self.Selected = []
@@ -667,7 +722,7 @@ class interface:
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
-        logger.info("interface.burn: Done")
+        logger.info("Interface.burn: Done")
 
     def die(self, *args):
         """you wanna leave the program ??"""
@@ -727,14 +782,15 @@ class interface:
 
     def about(self, *args):
         """display a copyright message"""
-        logger.debug("Interface.about")
+        logger.debug("Interface.about clicked")
         self.settitle()
-        MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion $Id$".decode("UTF8"), Message=gtk.MESSAGE_INFO)
+        msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (imagizer.__author__, imagizer.__contact__, imagizer.__version__)
+        MessageError(msg.decode("UTF8"), Message=gtk.MESSAGE_INFO)
 
 
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
-        logger.debug("Interface.nextJ")
+        logger.debug("Interface.nextJ clicked")
         self.settitle()
         jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg, len(self.AllJpegs)):
@@ -745,7 +801,7 @@ class interface:
 
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
-        logger.debug("Interface.previousJ")
+        logger.debug("Interface.previousJ clicked")
         self.settitle()
         if self.iCurrentImg == 0: return
         jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
@@ -758,14 +814,14 @@ class interface:
 
     def firstJ(self, *args):
         """switch to the first image of the first day"""
-        logger.debug("Interface.firstJ")
+        logger.debug("Interface.firstJ clicked")
         self.settitle()
         self.iCurrentImg = 0
         self.ShowImage()
 
     def lastJ(self, *args):
         """switch to the first image of the last day"""
-        logger.debug("Interface.lastJ")
+        logger.debug("Interface.lastJ clicked")
         self.settitle()
         lastday = os.path.dirname(self.AllJpegs[-1])
         for i in range(len(self.AllJpegs) - 1, -1, -1):
@@ -777,7 +833,7 @@ class interface:
 
     def firstS(self, *args):
         """switch to the first image selected"""
-        logger.debug("Interface.firstS")
+        logger.debug("Interface.firstS clicked")
         self.settitle()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
@@ -785,7 +841,7 @@ class interface:
 
     def lastS(self, *args):
         """switch to the last image selected"""
-        logger.debug("Interface.lastS")
+        logger.debug("Interface.lastS clicked")
         self.settitle()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
@@ -793,7 +849,7 @@ class interface:
 
     def nextS(self, *args):
         """switch to the next image selected"""
-        logger.debug("Interface.nextS")
+        logger.debug("Interface.nextS clicked")
         self.settitle()
         if len(self.Selected) == 0:return
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
@@ -804,7 +860,7 @@ class interface:
 
     def previousS(self, *args):
         """switch to the previous image selected"""
-        logger.debug("Interface.previousS")
+        logger.debug("Interface.previousS clicked")
         self.settitle()
         if len(self.Selected) == 0:return
         temp = self.AllJpegs[:self.iCurrentImg]
@@ -817,7 +873,7 @@ class interface:
 
     def firstNS(self, *args):
         """switch to the first image NOT selected"""
-        logger.debug("Interface.firstNS")
+        logger.debug("Interface.firstNS clicked")
         self.settitle()
         for i in self.AllJpegs:
             if i not in self.Selected:
@@ -827,7 +883,7 @@ class interface:
 
     def lastNS(self, *args):
         """switch to the last image NOT selected"""
-        logger.debug("Interface.lastNS")
+        logger.debug("Interface.lastNS clicked")
         self.settitle()
         temp = self.AllJpegs[:]
         temp.reverse()
@@ -839,7 +895,7 @@ class interface:
 
     def nextNS(self, *args):
         """switch to the next image NOT selected"""
-        logger.debug("Interface.nextNS")
+        logger.debug("Interface.nextNS clicked")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i not in self.Selected:
@@ -849,7 +905,7 @@ class interface:
 
     def previousNS(self, *args):
         """switch to the previous image NOT selected"""
-        logger.debug("Interface.previousNS")
+        logger.debug("Interface.previousNS clicked")
         self.settitle()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -861,7 +917,7 @@ class interface:
 
     def firstT(self, *args):
         """switch to the first entiteled image"""
-        logger.debug("Interface.firstT")
+        logger.debug("Interface.firstT clicked")
         self.settitle()
         for i in self.AllJpegs:
             try:
@@ -877,7 +933,7 @@ class interface:
 
     def    previousT(self, *args):
         """switch to the previous titeled image"""
-        logger.debug("Interface.previousT")
+        logger.debug("Interface.previousT clicked")
         self.settitle()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -911,7 +967,7 @@ class interface:
 
     def lastT(self, *args):
         """switch to the last titeled image"""
-        logger.debug("Interface.lastT")
+        logger.debug("Interface.lastT clicked")
         self.settitle()
         temp = self.AllJpegs[:]
         temp.reverse()
@@ -929,7 +985,7 @@ class interface:
 
     def firstNT(self, *args):
         """switch to the first non-titeled image"""
-        logger.debug("Interface.firstNT")
+        logger.debug("Interface.firstNT clicked")
         self.settitle()
         for i in self.AllJpegs:
             try:
@@ -945,7 +1001,7 @@ class interface:
 
     def previousNT(self, *args):
         """switch to the previous non-titeled image"""
-        logger.debug("Interface.previousNT")
+        logger.debug("Interface.previousNT clicked")
         self.settitle()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -963,7 +1019,7 @@ class interface:
 
     def nextNT(self, *args):
         """switch to the next non-titeled image"""
-        logger.debug("Interface.nextNT")
+        logger.debug("Interface.nextNT clicked")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             try:
@@ -979,7 +1035,7 @@ class interface:
 
     def lastNT(self, *args):
         """switch to the last non-titeled image"""
-        logger.debug("Interface.lastNT")
+        logger.debug("Interface.lastNT clicked")
         self.settitle()
         temp = self.AllJpegs[:]
         temp.reverse()
@@ -1012,75 +1068,88 @@ class interface:
         logger.debug("Interface.setFiligrane clicked")
         config.Filigrane = self.xml.get_widget("Filigrane").get_active()
 
-    def SizeCurrent(self, *args):
+    def sizeCurrent(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
+        logger.debug("Interface.sizeCurrent clicked")
         X, Y = self.xml.get_widget("Principale").get_size()
         config.ScreenSize = max(X - self.Xmin, Y)
 
-    def Size300(self, *args):
+    def setSize300(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
-#        X, Y = self.xml.get_widget("Principale").get_size()
+        logger.debug("Interface.setSize300 clicked")
         config.ScreenSize = 300
         self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
-    def Size600(self, *args):
+    def setSize600(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
-#        X, Y = self.xml.get_widget("Principale").get_size()
+        logger.debug("Interface.setSize600 clicked")
         config.ScreenSize = 600
         self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
-    def Size900(self, *args):
+    def setSize900(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
-#        X, Y = self.xml.get_widget("Principale").get_size()
+        logger.debug("Interface.setSize900 clicked")
         config.ScreenSize = 900
         self.xml.get_widget("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
 
-    def    SetInterpol0(self, *args):
+    def setInterpolNearest(self, *args):
         """set interpolation level to nearest"""
+        logger.debug("Interface.setInterpolNearest clicked (nearest)")
         config.Interpolation = 0
 
-    def    SetInterpol1(self, *args):
+    def setInterpolTiles(self, *args):
         """set interpolation level to tiles"""
+        logger.debug("Interface.setInterpolTiles clicked (tiles)")
         config.Interpolation = 1
 
-    def    SetInterpol2(self, *args):
+    def setInterpolBilin(self, *args):
         """set interpolation level to bilinear"""
+        logger.debug("Interface.setInterpolBilin clicked (bilinear)")
         config.Interpolation = 2
 
-    def    SetInterpol3(self, *args):
+    def setInterpolHyperbol(self, *args):
         """set interpolation level to hyperbolic"""
+        logger.debug("Interface.setInterpolHyperbol clicked (hyperbolic)")
         config.Interpolation = 3
 
-    def Set30PerPage(self, *args):
+    def set30PerPage(self, *args):
         """set 30 images per web-page"""
+        logger.debug("Interface.set30PerPage clicked")
         config.NbrPerPage = 30
 
-    def Set25PerPage(self, *args):
+    def set25PerPage(self, *args):
         """set 25 images per web-page"""
+        logger.debug("Interface.set25PerPage clicked")
         config.NbrPerPage = 25
 
-    def Set20PerPage(self, *args):
+    def set20PerPage(self, *args):
         """set 20 images per web-page"""
+        logger.debug("Interface.set20PerPage clicked")
         config.NbrPerPage = 20
 
-    def Set16PerPage(self, *args):
+    def set16PerPage(self, *args):
         """set 16 images per web-page"""
+        logger.debug("Interface.set16PerPage clicked")
         config.NbrPerPage = 16
 
-    def Set12PerPage(self, *args):
+    def set12PerPage(self, *args):
         """set 12 images per web-page"""
+        logger.debug("Interface.set12PerPage clicked")
         config.NbrPerPage = 12
 
-    def Set9PerPage(self, *args):
+    def set9PerPage(self, *args):
         """set  9 images per web-page"""
+        logger.debug("Interface.set9PerPage clicked")
         config.NbrPerPage = 9
 
-    def renommer(self, *args):
+    def renameDay(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
+        logger.debug("Interface.renameDay clicked")
         self.settitle()
-        renamdayinstance = RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected, self.renommerCallback)
+        renamdayinstance = RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected, self.renameDayCallback)
 
-    def renommerCallback(self, renamdayinstance):
+    def renameDayCallback(self, renamdayinstance):
+        logger.debug("Interface.renameDayCallback")
         self.AllJpegs = renamdayinstance.AllPhotos
         self.Selected = renamdayinstance.selected
         self.iCurrentImg = self.AllJpegs.index(renamdayinstance.newFilename)
@@ -1088,6 +1157,7 @@ class interface:
 
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
+        logger.debug("Interface.importImages called")
         self.settitle()
         self.guiFiler = gtk.glade.XML(unifiedglade, root="filer")
         self.guiFiler.get_widget("filer").set_current_folder(config.DefaultRepository)
@@ -1102,14 +1172,15 @@ class interface:
 
     def filerDestroy(self, *args):
         """Close the filer GUI"""
-        print ("dirchooser.filerDestroy called")
+        logger.debug("dirchooser.filerDestroy called")
         self.guiFiler.get_widget("filer").destroy()
 
     def importImageCallBack(self, path):
         """This is the call back method for launching the import of new images"""
+        logger.debug("Interface.importImageCallBack with dirname= %s" % path)
         self.settitle()
-        logger.debug("I got a callBack with dirname= %s" % path)
         listNew = []
+        #TODO Use MVC here ...
         for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
             logger.debug("Importing: %s" % oneRaw)
             raw = RawImage(oneRaw)
@@ -1126,11 +1197,13 @@ class interface:
 
     def defineMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
+        logger.debug("Interface.defineMediaSize clicked")
         self.settitle()
         AskMediaSize()
 
     def slideShowSetup(self, *args):
         """lauch a new window for seting up the slideshow"""
+        logger.debug("Interface.slideShowSetup clicked")
         self.settitle()
         askSlideShowSetup = AskSlideShowSetup(self)
         if config.GraphicMode == "SlideShow":
@@ -1139,18 +1212,21 @@ class interface:
 
     def indexJ(self, *args):
         """lauch a new window for selecting the day of interest"""
+        logger.debug("Interface.indexJ clicked")
         self.settitle()
         SelectDay(self)
 
     def synchronize(self, *args):
         """lauch the synchronization window"""
+        logger.debug("Interface.synchronize clicked")
         self.settitle()
         Synchronize(self.iCurrentImg, self.AllJpegs, self.Selected)
 
 
-    def SelectNewerMedia(self, *args):
+    def selectNewerMedia(self, *args):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
         Finally the last selected image is shown and the total size is printed"""
+        logger.debug("Interface.selectNewerMedia clicked")
         self.settitle()
         size = SelectedSize(self.Selected)
         initsize = size
@@ -1181,6 +1257,7 @@ class interface:
     def SelectOlderMedia(self, *args):
         """Calculate the size of the selected images then add older images to complete the media (CD or DVD). 
         Finally the first selected image is shown and the total size is printed"""
+        logger.debug("Interface.SelectOlderMedia clicked")
         self.settitle()
         size = SelectedSize(self.Selected)
         initsize = size
@@ -1208,8 +1285,9 @@ class interface:
         dialog.destroy()
 
 
-    def CalculateSize(self, *args):
+    def calculateSize(self, *args):
         """Calculate the size of the selection and print it"""
+        logger.debug("Interface.calculateSize clicked")
         self.settitle()
         size = SelectedSize(self.Selected)
         t = SmartSize(size) + (len(self.Selected),)
@@ -1668,7 +1746,7 @@ if __name__ == '__main__':
     values = (AF, first, LoadSelected(), config.GraphicMode)
     while config.GraphicMode != "Quit":
         if config.GraphicMode == "Normal":
-            ifc = interface(*values)
+            ifc = Interface(*values)
             values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
             del ifc
             gc.collect()
