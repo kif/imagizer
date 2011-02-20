@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006-2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006-2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -48,6 +48,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 
 import os, locale, random, gc, time, shutil, sys, logging
 
+
 try:
     import ImageFile
 except:
@@ -62,7 +63,8 @@ elif os.name == 'posix':
 #else:
 #    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
 
-
+import imagizer
+logger = logging.getLogger("imagizer.selector")
 from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, unicode_to_ascii, mkdir, RangeTout, installdir, RawImage, findFiles
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
@@ -137,7 +139,7 @@ class FullScreenInterface:
                 imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
 
         X, Y = self.xml.get_widget("FullScreen").get_size()
-        if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
+        logger.debug("Size of image on screen: %sx%s" % (X, Y))
         pixbuf = self.image.show(X, Y)
         self.xml.get_widget("image793").set_from_pixbuf(pixbuf)
         del pixbuf
@@ -163,9 +165,9 @@ class FullScreenInterface:
             self.destroy()
 
         elif key == "Right":
-            self.droite()
+            self.turnRight()
         elif key == "Left":
-            self.gauche()
+            self.turnLeft()
         elif key == "f":
             self.NormalScreen()
         elif key == "Down":
@@ -183,11 +185,11 @@ class FullScreenInterface:
             if config.SlideShowDelay < 0:config.SlideShowDelay = 0
 
 
-    def droite(self, *args):
+    def turnRight(self, *args):
         """rotate the current image clockwise"""
         self.image.Rotate(90)
         self.ShowImage()
-    def gauche(self, *args):
+    def turnLeft(self, *args):
         """rotate the current image clockwise"""
         self.image.Rotate(270)
         self.ShowImage()
@@ -275,7 +277,7 @@ class interface:
         self.strCurrentTitle = ""
 
 
-        if config.DEBUG: print("Initialization of the graphical interface ...")
+        logger.debug("Initialization of the graphical interface ...")
         self.xml = GTKglade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
@@ -332,8 +334,8 @@ class interface:
         'on_arreter1_activate': self.destroy,
         'on_suivant_clicked': self.next,
         'on_precedant_clicked': self.previous,
-        'on_droite_clicked': self.droite,
-        'on_gauche_clicked': self.gauche,
+        'on_droite_clicked': self.turnRight,
+        'on_gauche_clicked': self.turnLeft,
         'on_Selection_toggled': self.select,
         'on_selectionner_activate': self.select_Shortcut,
         'on_photo_client_event': self.next,
@@ -341,21 +343,21 @@ class interface:
         'on_About_activate': self.about,
         'on_quitter1_activate': self.die,
         'on_nommer1_activate': self.renommer,
-        'on_executer1_activate': self.run,
+        'on_executer1_activate': self.copyAndResize,
         'on_Synchronize_activate': self.synchronize,
-        'on_copie_et_grave1_activate': self.Burn,
-        'on_vers_page_web2_activate': self.ToWeb,
-        'on_vide_selection1_activate': self.EmptySelected,
+        'on_copie_et_grave1_activate': self.burn,
+        'on_vers_page_web2_activate': self.toWeb,
+        'on_vide_selection1_activate': self.emptySelected,
         'on_copie1_activate': self.copy,
         'on_importer1_activate': self.importImages,
-        'on_poubelle_activate': self.poubelle,
-        'on_Poubelle_clicked': self.poubelle,
+        'on_poubelle_activate': self.trash,
+        'on_Poubelle_clicked': self.trash,
         'on_Gimp_clicked': self.gimp,
         'on_Filter_clicked': self.filter,
 
-        'on_enregistrerP_activate': self.SavePref,
-        'on_Autorotate_activate': self.DefAutoRotate,
-        'on_Filigrane_activate': self.DefFiligrane,
+        'on_enregistrerP_activate': self.savePref,
+        'on_Autorotate_activate': self.setAutoRotate,
+        'on_Filigrane_activate': self.setFiligrane,
         'on_taille_media_activate': self.defineMediaSize,
         'on_tauto_activate': self.SizeCurrent,
         'on_t300_activate': self.Size300,
@@ -373,11 +375,11 @@ class interface:
         'on_30PerPage_activate': self.Set30PerPage,
         'on_configurer_dioporama_activate': self.slideShowSetup,
 
-        'on_enregistrerS_activate': self.SaveSelection,
-        'on_chargerS_activate': self.LoadSelection,
-        'on_inverserS_activate': self.InvertSelection,
-        'on_aucun1_activate': self.SelectNone,
-        'on_TouS_activate': self.SelectAll,
+        'on_enregistrerS_activate': self.saveSelection,
+        'on_chargerS_activate': self.loadSelection,
+        'on_inverserS_activate': self.invertSelection,
+        'on_aucun1_activate': self.selectNone,
+        'on_TouS_activate': self.selectAll,
         'on_selectionner_activate': self.select,
         'on_taille_selection_activate': self.CalculateSize,
         'on_media_apres_activate': self.SelectNewerMedia,
@@ -432,6 +434,7 @@ class interface:
 
     def settitle(self):
         """Set the new title of the image"""
+        logger.debug("Interface.settitle")
         newtitle = self.xml.get_widget("Titre").get_text()
         if newtitle != self.strCurrentTitle:
             self.image.name(newtitle)
@@ -439,6 +442,7 @@ class interface:
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+        logger.debug("Interface.showImage")
         try:
             self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
         except:
@@ -446,7 +450,7 @@ class interface:
             if imageCache is not None:
                 imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
         X, Y = self.xml.get_widget("Principale").get_size()
-        if config.DEBUG: print("Taille fenetre %sx%s" % (X, Y))
+        logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
         pixbuf = self.image.show(X - self.Xmin, Y)
 
@@ -464,12 +468,14 @@ class interface:
 
     def next(self, *args):
         """Switch to the next image"""
+        logger.debug("Interface.next")
         self.settitle()
         self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
         self.ShowImage()
 
     def next10(self, *args):
         """Switch forward of 10 images """
+        logger.debug("Interface.next10")
         self.settitle()
         self.iCurrentImg = self.iCurrentImg + 10
         if self.iCurrentImg > len(self.AllJpegs):self.iCurrentImg = len(self.AllJpegs) - 1
@@ -477,12 +483,14 @@ class interface:
 
     def previous(self, *args):
         """Switch to the previous image"""
+        logger.debug("Interface.previous")
         self.settitle()
         self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
         self.ShowImage()
 
     def previous10(self, *args):
         """Switch 10 images backward"""
+        logger.debug("Interface.previous10")
         self.settitle()
         self.iCurrentImg = self.iCurrentImg - 10
         if self.iCurrentImg < 0: self.iCurrentImg = 0
@@ -490,28 +498,35 @@ class interface:
 
     def first(self, *args):
         """switch to the first image"""
+        logger.debug("Interface.first")
         self.settitle()
         self.iCurrentImg = 0
         self.ShowImage()
+
     def last(self, *args):
         """switch to the last image"""
+        logger.debug("Interface.last")
         self.settitle()
         self.iCurrentImg = len(self.AllJpegs) - 1
         self.ShowImage()
-    def droite(self, *args):
+
+    def turnRight(self, *args):
         """rotate the current image clockwise"""
+        logger.debug("Interface.turnRight")
         self.settitle()
         self.image.Rotate(90)
         self.ShowImage()
 
-    def gauche(self, *args):
+    def turnLeft(self, *args):
         """rotate the current image counterclockwise"""
+        logger.debug("Interface.turnLeft")
         self.settitle()
         self.image.Rotate(270)
         self.ShowImage()
 
-    def poubelle(self, *args):
+    def trash(self, *args):
         """Send the current file to the trash"""
+        logger.debug("Interface.trash")
         self.settitle()
         if self.AllJpegs[self.iCurrentImg] in  self.Selected:self.Selected.remove(self.AllJpegs[self.iCurrentImg])
         self.AllJpegs.remove(self.AllJpegs[self.iCurrentImg])
@@ -521,6 +536,7 @@ class interface:
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
+        logger.debug("Interface.gimp")
         self.settitle()
         filename = self.AllJpegs[self.iCurrentImg]
         base, ext = os.path.splitext(filename)
@@ -538,6 +554,7 @@ class interface:
 
     def filter(self, *args):
         """Filter the current image with a contrast mask"""
+        logger.debug("Interface.filter")
         self.settitle()
         filename = self.AllJpegs[self.iCurrentImg]
         base, ext = os.path.splitext(filename)
@@ -557,6 +574,7 @@ class interface:
 
     def select_Shortcut(self, *args):
         """Select or unselect the image"""
+        logger.debug("Interface.select/unselect clicked")
         self.settitle()
         etat = not(self.xml.get_widget("Selection").get_active())
         if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
@@ -566,6 +584,7 @@ class interface:
 
     def select(self, *args):
         """Select or unselect the image"""
+        logger.debug("Interface.select")
         self.settitle()
         etat = self.xml.get_widget("Selection").get_active()
         if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
@@ -574,12 +593,14 @@ class interface:
 
     def destroy(self, *args):
         """destroy clicked by user"""
+        logger.debug("Interface.destroy")
         self.settitle()
         gtk.main_quit()
         config.GraphicMode = "Quit"
 
     def FullScreen(self, *args):
         """Switch to fullscreen mode"""
+        logger.debug("Interface.fullscreen")
         self.settitle()
         self.xml.get_widget("Principale").destroy()
         config.GraphicMode = "FullScreen"
@@ -587,21 +608,25 @@ class interface:
 
     def SlideShow(self, *args):
         """Switch to fullscreen mode and starts the SlideShow"""
+        logger.debug("Interface.slideshow")
         self.settitle()
         self.xml.get_widget("Principale").destroy()
         config.GraphicMode = "SlideShow"
         gtk.main_quit()
 
-    def run(self, *args):
+    def copyAndResize(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
+        logger.debug("Interface.copyAndResize")
         self.settitle()
+        #TODO: go through MVC
         ProcessSelected(self.Selected)
         self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
-        print "Done"
+        logger.info("Interface.copyAndResize: Done")
 
-    def ToWeb(self, *args):
+    def toWeb(self, *args):
         """lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
+        logger.debug("Interface.toWeb")
         self.settitle()
         ProcessSelected(self.Selected)
         self.Selected = []
@@ -609,10 +634,11 @@ class interface:
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
-        print "Done"
+        logger.info("Interface.toWeb: Done")
 
-    def EmptySelected(self, *args):
+    def emptySelected(self, *args):
         """remove all the files in the "Selected" folder"""
+
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         for dirs in os.listdir(SelectedDir):
             curfile = os.path.join(SelectedDir, dirs)
@@ -630,21 +656,22 @@ class interface:
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         print "Done"
 
-    def Burn(self, *args):
+    def burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
+        logger.debug("interface.burn")
         self.settitle()
         CopySelected(self.Selected)
         self.Selected = []
+        #TODO : MVC
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
-        print "Done"
-
-
+        logger.info("interface.burn: Done")
 
     def die(self, *args):
         """you wanna leave the program ??"""
+        logger.debug("Interface.die")
         self.settitle()
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Voulez vous vraiment quitter ce programme ?")
         result = dialog.run()
@@ -654,13 +681,17 @@ class interface:
             gtk.main_quit()
             config.GraphicMode = "Quit"
 
-    def SaveSelection(self, *args):
+
+    def saveSelection(self, *args):
         """Saves all the selection of photos """
+        logger.debug("Interface.saveSelection")
         self.settitle()
         SaveSelected(self.Selected)
 
-    def LoadSelection(self, *args):
+
+    def loadSelection(self, *args):
         """Load a previously saved  selection of photos """
+        logger.debug("Interface.loadSelection")
         self.settitle()
         self.Selected = LoadSelected()
         for i in self.Selected:
@@ -669,22 +700,23 @@ class interface:
         self.xml.get_widget("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.Selected)
 
 
-
-
-    def SelectAll(self, *args):
+    def selectAll(self, *args):
         """Select all photos for processing"""
+        logger.debug("Interface.selectAll")
         self.settitle()
         self.Selected = self.AllJpegs
         self.xml.get_widget("Selection").set_active(True)
 
-    def SelectNone(self, *args):
+    def selectNone(self, *args):
         """Select NO photos and empty selection"""
+        logger.debug("Interface.selectNone")
         self.settitle()
         self.Selected = []
         self.xml.get_widget("Selection").set_active(False)
 
-    def InvertSelection(self, *args):
+    def invertSelection(self, *args):
         """Invert the selection of photos """
+        logger.debug("Interface.invertSelection")
         self.settitle()
         temp = self.AllJpegs[:]
         for i in self.Selected:
@@ -695,12 +727,14 @@ class interface:
 
     def about(self, *args):
         """display a copyright message"""
+        logger.debug("Interface.about")
         self.settitle()
         MessageError("Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par Jérôme Kieffer <kieffer@terre-adelie.org>\nVersion $Id$".decode("UTF8"), Message=gtk.MESSAGE_INFO)
 
 
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
+        logger.debug("Interface.nextJ")
         self.settitle()
         jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg, len(self.AllJpegs)):
@@ -711,6 +745,7 @@ class interface:
 
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
+        logger.debug("Interface.previousJ")
         self.settitle()
         if self.iCurrentImg == 0: return
         jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
@@ -723,12 +758,14 @@ class interface:
 
     def firstJ(self, *args):
         """switch to the first image of the first day"""
+        logger.debug("Interface.firstJ")
         self.settitle()
         self.iCurrentImg = 0
         self.ShowImage()
 
     def lastJ(self, *args):
         """switch to the first image of the last day"""
+        logger.debug("Interface.lastJ")
         self.settitle()
         lastday = os.path.dirname(self.AllJpegs[-1])
         for i in range(len(self.AllJpegs) - 1, -1, -1):
@@ -740,6 +777,7 @@ class interface:
 
     def firstS(self, *args):
         """switch to the first image selected"""
+        logger.debug("Interface.firstS")
         self.settitle()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
@@ -747,6 +785,7 @@ class interface:
 
     def lastS(self, *args):
         """switch to the last image selected"""
+        logger.debug("Interface.lastS")
         self.settitle()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
@@ -754,6 +793,7 @@ class interface:
 
     def nextS(self, *args):
         """switch to the next image selected"""
+        logger.debug("Interface.nextS")
         self.settitle()
         if len(self.Selected) == 0:return
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
@@ -764,6 +804,7 @@ class interface:
 
     def previousS(self, *args):
         """switch to the previous image selected"""
+        logger.debug("Interface.previousS")
         self.settitle()
         if len(self.Selected) == 0:return
         temp = self.AllJpegs[:self.iCurrentImg]
@@ -776,6 +817,7 @@ class interface:
 
     def firstNS(self, *args):
         """switch to the first image NOT selected"""
+        logger.debug("Interface.firstNS")
         self.settitle()
         for i in self.AllJpegs:
             if i not in self.Selected:
@@ -785,6 +827,7 @@ class interface:
 
     def lastNS(self, *args):
         """switch to the last image NOT selected"""
+        logger.debug("Interface.lastNS")
         self.settitle()
         temp = self.AllJpegs[:]
         temp.reverse()
@@ -796,6 +839,7 @@ class interface:
 
     def nextNS(self, *args):
         """switch to the next image NOT selected"""
+        logger.debug("Interface.nextNS")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i not in self.Selected:
@@ -805,6 +849,7 @@ class interface:
 
     def previousNS(self, *args):
         """switch to the previous image NOT selected"""
+        logger.debug("Interface.previousNS")
         self.settitle()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -815,7 +860,8 @@ class interface:
                 return
 
     def firstT(self, *args):
-        """switch to the first titeled image"""
+        """switch to the first entiteled image"""
+        logger.debug("Interface.firstT")
         self.settitle()
         for i in self.AllJpegs:
             try:
@@ -831,6 +877,7 @@ class interface:
 
     def    previousT(self, *args):
         """switch to the previous titeled image"""
+        logger.debug("Interface.previousT")
         self.settitle()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -848,6 +895,7 @@ class interface:
 
     def nextT(self, *args):
         """switch to the next titeled image"""
+        logger.debug("Interface.nextT")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             try:
@@ -863,6 +911,7 @@ class interface:
 
     def lastT(self, *args):
         """switch to the last titeled image"""
+        logger.debug("Interface.lastT")
         self.settitle()
         temp = self.AllJpegs[:]
         temp.reverse()
@@ -880,6 +929,7 @@ class interface:
 
     def firstNT(self, *args):
         """switch to the first non-titeled image"""
+        logger.debug("Interface.firstNT")
         self.settitle()
         for i in self.AllJpegs:
             try:
@@ -895,6 +945,7 @@ class interface:
 
     def previousNT(self, *args):
         """switch to the previous non-titeled image"""
+        logger.debug("Interface.previousNT")
         self.settitle()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -912,6 +963,7 @@ class interface:
 
     def nextNT(self, *args):
         """switch to the next non-titeled image"""
+        logger.debug("Interface.nextNT")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             try:
@@ -927,6 +979,7 @@ class interface:
 
     def lastNT(self, *args):
         """switch to the last non-titeled image"""
+        logger.debug("Interface.lastNT")
         self.settitle()
         temp = self.AllJpegs[:]
         temp.reverse()
@@ -944,17 +997,19 @@ class interface:
 
 
 
-    def SavePref(self, *args):
+    def savePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
-        if config.DEBUG:print("SavePref clicked")
+        logger.debug("Interface.savePref clicked")
         config.saveConfig(ConfFile[-1])
 
-    def DefAutoRotate(self, *args):
+    def setAutoRotate(self, *args):
         """Set the autorotate flag"""
+        logger.debug("Interface.setAutoRotate clicked")
         config.AutoRotate = self.xml.get_widget("Autorotate").get_active()
 
-    def DefFiligrane(self, *args):
+    def setFiligrane(self, *args):
         """Set the Signature/Filigrane flag"""
+        logger.debug("Interface.setFiligrane clicked")
         config.Filigrane = self.xml.get_widget("Filigrane").get_active()
 
     def SizeCurrent(self, *args):
@@ -1041,8 +1096,7 @@ class interface:
 
     def filerSelect(self, *args):
         """Close the filer GUI and update the data"""
-        if config.DEBUG:
-            print ("dirchooser.filerSelect called")
+        logger.debug("dirchooser.filerSelect called")
         self.importImageCallBack(self.guiFiler.get_widget("filer").get_current_folder())
         self.guiFiler.get_widget("filer").destroy()
 
@@ -1054,11 +1108,10 @@ class interface:
     def importImageCallBack(self, path):
         """This is the call back method for launching the import of new images"""
         self.settitle()
-        if config.DEBUG:
-            print("I got a callBack with dirname= %s" % path)
+        logger.debug("I got a callBack with dirname= %s" % path)
         listNew = []
         for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
-            if config.DEBUG:print oneRaw
+            logger.debug("Importing: %s" % oneRaw)
             raw = RawImage(oneRaw)
             raw.extractJPEG()
             listNew.append(raw.getJpegPath())
@@ -1181,7 +1234,7 @@ def SelectedSize(List):
 
 def SaveSelected(List):
     """save the list of selected files"""
-    if config.DEBUG: print "Sauving selection into file"
+    logger.debug("Saving selection into file %s" % Selected_file)
     os.remove(Selected_file)
     f = open(Selected_file, "w")
     for ligne in List: f.write(ligne + "\n")
@@ -1190,7 +1243,7 @@ def SaveSelected(List):
 
 def LoadSelected():
     """Load the list of selected files"""
-    if config.DEBUG: print "Loading selection from file"
+    logger.debug("Loading selection from file %s" % Selected_file)
     try:
         lignes = open(Selected_file, "r").readlines()
         select = []
@@ -1198,6 +1251,7 @@ def LoadSelected():
             select.append(ligne.strip())
         return select
     except:
+        logger.warning("Failed to load selection from file %s" % Selected_file)
         return []
 
 
@@ -1325,31 +1379,30 @@ class RenameDay(object):
 class AskSlideShowSetup:
     """pop up a windows and asks for the setup of the SlideShow"""
     def __init__(self, upperIface):
-        self.config = Config()
         self.upperIface = upperIface
         self.xml = GTKglade.XML(unifiedglade, root="Diaporama")
         self.xml.signal_connect('on_Diaporama_destroy', self.destroy)
         self.xml.signal_connect('on_cancel_clicked', self.destroy)
         self.xml.signal_connect('on_apply_clicked', self.continu)
         self.xml.signal_connect('on_Lauch_clicked', self.LauchSlideShow)
-        self.xml.get_widget("delai").set_value(self.config.SlideShowDelay)
-        if   self.config.SlideShowType.find("chrono") == 0:
+        self.xml.get_widget("delai").set_value(config.SlideShowDelay)
+        if   config.SlideShowType.find("chrono") == 0:
             self.xml.get_widget("radio-chrono").set_active(1)
-        elif self.config.SlideShowType.find("anti") == 0:
+        elif config.SlideShowType.find("anti") == 0:
             self.xml.get_widget("radio-antichrono").set_active(1)
         else:
             self.xml.get_widget("radio-random").set_active(1)
 
     def LauchSlideShow(self, *args):
         """retrieves the data, destroy the window and lauch the slideshow"""
-        self.config.SlideShowDelay = self.xml.get_widget("delai").get_value()
+        config.SlideShowDelay = self.xml.get_widget("delai").get_value()
         if self.xml.get_widget("radio-antichrono").get_active():
-            self.config.SlideShowType = "antichronological"
+            config.SlideShowType = "antichronological"
         elif self.xml.get_widget("radio-chrono").get_active():
-            self.config.SlideShowType = "chronological"
+            config.SlideShowType = "chronological"
         else:
-            self.config.SlideShowType = "random"
-        self.config.GraphicMode = "SlideShow"
+            config.SlideShowType = "random"
+        config.GraphicMode = "SlideShow"
         self.xml.get_widget("Diaporama").destroy()
         self.upperIface.xml.get_widget("lance_diaporama").activate()
 #        self.xml.signal_connect('on_lance_diaporama_activate'
@@ -1358,13 +1411,13 @@ class AskSlideShowSetup:
 
     def continu(self, *args):
         """retrieves the data, destroy the window and goes on ...."""
-        self.config.SlideShowDelay = self.xml.get_widget("delai").get_value()
+        config.SlideShowDelay = self.xml.get_widget("delai").get_value()
         if self.xml.get_widget("radio-antichrono").get_active():
-            self.config.SlideShowType = "antichronological"
+            config.SlideShowType = "antichronological"
         elif self.xml.get_widget("radio-chrono").get_active():
-            self.config.SlideShowType = "chronological"
+            config.SlideShowType = "chronological"
         else:
-            self.config.SlideShowType = "random"
+            config.SlideShowType = "random"
         self.xml.get_widget("Diaporama").destroy()
 
     def destroy(self, *args):
@@ -1379,18 +1432,17 @@ class AskSlideShowSetup:
 class AskMediaSize:
     """prompt a windows and asks for the size of the backup media"""
     def __init__(self):
-        self.config = Config()
         self.xml = GTKglade.XML(unifiedglade, root="TailleCD")
         self.xml.signal_connect('on_TailleCD_destroy', self.destroy)
         self.xml.signal_connect('on_cancel_clicked', self.destroy)
         self.xml.signal_connect('on_ok_clicked', self.continu)
-        self.xml.get_widget("TailleMo").set_text(str(self.config.MediaSize))
+        self.xml.get_widget("TailleMo").set_text(str(config.MediaSize))
 
     def continu(self, *args):
         """just distroy the window and goes on ...."""
         txt = self.xml.get_widget("TailleMo").get_text().strip().decode("UTF-8").encode(config.Coding)
         try:
-            self.config.MediaSize = abs(float(txt))
+            config.MediaSize = abs(float(txt))
         except:
             print "%s does not seem to be the size of a media" % txt
         self.xml.get_widget("TailleCD").destroy()
@@ -1404,38 +1456,41 @@ class AskMediaSize:
         while gtk.events_pending():gtk.main_iteration()
 
 class Synchronize:
-    """Class for file synchronization between different repositories"""
+    """
+    Class for file synchronization between different repositories
+    """
     def __init__(self, current, AllPhotos, selected):
-        self.config = Config()
-        if self.config.DEBUG:
-            print("Entering in Synchronize class with arguments %i,%i,%i" % (current, len(AllPhotos), len(selected)))
-            print("Recorded Synchronize type: %s" % self.config.SynchronizeType)
+        """
+        
+        """
+        logger.debug("Synchronize.init(%i,%i,%i)" % (current, len(AllPhotos), len(selected)))
+        logger.debug("Recorded Synchronize type: %s" % config.SynchronizeType)
         self.current = current
         self.AllPhotos = AllPhotos
         self.Selected = selected
-        self.initST = self.config.SynchronizeType
+        self.initST = config.SynchronizeType
         self.xml = GTKglade.XML(unifiedglade, root="Synchroniser")
         self.xml.signal_connect('on_Synchroniser_destroy', self.destroy)
         self.xml.signal_connect('on_cancel4_clicked', self.destroy)
         self.xml.signal_connect('on_ok4_clicked', self.synchronize)
         self.xml.signal_connect('on_apply4_clicked', self.apply)
-        self.xml.get_widget("SyncCommand").set_text(self.config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
-        if self.config.SynchronizeType.lower() == "newer":
+        self.xml.get_widget("SyncCommand").set_text(config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
+        if config.SynchronizeType.lower() == "newer":
             self.xml.get_widget("SyncOlder").set_active(0)
             self.xml.get_widget("SyncAll").set_active(0)
             self.xml.get_widget("SyncSelected").set_active(0)
             self.xml.get_widget("SyncNewer").set_active(1)
-        elif self.config.SynchronizeType.lower() == "older" :
+        elif config.SynchronizeType.lower() == "older" :
             self.xml.get_widget("SyncNewer").set_active(0)
             self.xml.get_widget("SyncAll").set_active(0)
             self.xml.get_widget("SyncSelected").set_active(0)
             self.xml.get_widget("SyncOlder").set_active(1)
-        elif self.config.SynchronizeType.lower() == "all":
+        elif config.SynchronizeType.lower() == "all":
             self.xml.get_widget("SyncSelected").set_active(0)
             self.xml.get_widget("SyncOlder").set_active(0)
             self.xml.get_widget("SyncNewer").set_active(0)
             self.xml.get_widget("SyncAll").set_active(1)
-        elif self.config.SynchronizeType.lower() == "selected":
+        elif config.SynchronizeType.lower() == "selected":
             self.xml.get_widget("SyncOlder").set_active(0)
             self.xml.get_widget("SyncAll").set_active(0)
             self.xml.get_widget("SyncNewer").set_active(0)
@@ -1451,57 +1506,76 @@ class Synchronize:
         self.xml.signal_connect('on_SyncSelected_toggled', self.SetSyncSelected)
         while gtk.events_pending():gtk.main_iteration()
 
+
     def SetSyncAll(self, *args):
-        if self.config.DEBUG: print("SetSyncAll activated")
-        self.config.SynchronizeType = "All"
+        logger.debug("Synchronize.SetSyncAll activated")
+        config.SynchronizeType = "All"
+
+
     def SetSyncOlder(self, *args):
-        if self.config.DEBUG: print ("SetSyncOld activated")
-        self.config.SynchronizeType = "Older"
+        logger.debug("Synchronize.SetSyncOld activated")
+        config.SynchronizeType = "Older"
+
+
     def SetSyncNewer(self, *args):
-        if self.config.DEBUG: print ("SetSyncNew activated")
-        self.config.SynchronizeType = "Newer"
+        logger.debug("Synchronize.SetSyncNew activated")
+        config.SynchronizeType = "Newer"
+
+
     def SetSyncSelected(self, *args):
-        if self.config.DEBUG: print ("SetSyncSel activated")
-        self.config.SynchronizeType = "Selected"
+        logger.debug("Synchronize.SetSyncSel activated")
+        config.SynchronizeType = "Selected"
+
+
     def Read(self):
         """read config from GUI"""
-        self.config.SynchronizeRep = self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
-        self.initST = self.config.SynchronizeType
+        logger.debug("Synchronize.Read activated")
+        config.SynchronizeRep = self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
+        self.initST = config.SynchronizeType
+
+
     def apply(self, *args):
         self.Read()
         self.destroy()
+
+
     def synchronize(self, *args):
         self.Read()
-        if self.config.DEBUG: print ("entering Synchronize with mode %s" % self.config.SynchronizeType)
-        synchrofile = os.path.join(self.config.DefaultRepository, ".synchro")
+        logger.debug("Synchronize.synchronize with mode %s" % config.SynchronizeType)
+        synchrofile = os.path.join(config.DefaultRepository, ".synchro")
         synchro = []
-        if self.config.SynchronizeType.lower() == "selected":
-            if self.config.DEBUG: print ("exec selected")
+        if config.SynchronizeType.lower() == "selected":
+            logger.debug("Synchronize.synchronize: exec selected")
             synchro = self.Selected
-        elif self.config.SynchronizeType.lower() == "newer":
-            if self.config.DEBUG: print ("exec newer")
+        elif config.SynchronizeType.lower() == "newer":
+            logger.debug("Synchronize.synchronize: exec newer")
             synchro = self.AllPhotos[self.current:]
-        elif self.config.SynchronizeType.lower() == "older":
-            if self.config.DEBUG: print ("exec older")
+        elif config.SynchronizeType.lower() == "older":
+            logger.debug("Synchronize.synchronize: exec older")
             synchro = self.AllPhotos[:self.current + 1]
         else:
-            if self.config.DEBUG: print ("exec all")
+            logger.debug("Synchronize.synchronize: exec all")
             synchro = self.AllPhotos
-        synchro.append(self.config.Selected_save)
+        synchro.append(config.Selected_save)
         days = []
         for photo in synchro:
             day = os.path.split(photo)[0]
             if not day in days:
                 days.append(day)
-                if os.path.isfile(os.path.join(self.config.DefaultRepository, day, self.config.CommentFile)):synchro.append(os.path.join(day, self.config.CommentFile))
+                if os.path.isfile(os.path.join(config.DefaultRepository, day, config.CommentFile)):synchro.append(os.path.join(day, config.CommentFile))
         f = open(synchrofile, "w")
         for i in synchro: f.write(i + "\n")
         f.close()
-        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, self.config.DefaultRepository, self.config.SynchronizeRep))
+        #TODO: MVC
+        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, config.DefaultRepository, config.SynchronizeRep))
         self.destroy()
+
+
     def destroy(self, *args):
-        """destroy clicked by user -> quit the program"""
-        self.config.SynchronizeType = self.initST
+        """
+        destroy clicked by user -> quit the program
+        """
+        config.SynchronizeType = self.initST
         try:
             self.xml.get_widget("Synchroniser").destroy()
         except:
@@ -1560,19 +1634,23 @@ if __name__ == '__main__':
         for arg in sys.argv[1:]:
             if arg[0] == "-":
                 if arg[1].lower() == "h":
-                    logging.info("Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n")
+                    print("Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n")
                     sys.exit(0)
                 elif arg.lower().find("-debug") >= 0:
-                    logging.basicConfig(level=logging.DEBUG)
+#                    logger.setLevel(logging.DEBUG)
+                    loggerImagizer = logging.getLogger("imagizer")
+                    loggerImagizer.setLevel(logging.DEBUG)
+                    logger.debug("We are in debug mode ...First Debug message")
                     config.DEBUG = True
                 elif arg.lower().find("-noautorotate") >= 0:
+                    logger.debug("Autorotate is disabled")
                     config.AutoRotate = False
                 elif arg.lower().find("-nowarning") >= 0:
+                    logger.debug("Initial warning about file renaming is disabled")
                     printWarning = False
             elif os.path.isdir(arg):
                 config.DefaultRepository = os.path.abspath(arg)
-    if not config.DEBUG:
-        logging.basicConfig(level=logging.INFO)
+
     config.printConfig()
     Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
     if (printWarning == True) and (not os.path.isfile(Selected_file)):

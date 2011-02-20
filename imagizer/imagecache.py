@@ -29,6 +29,7 @@ ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
 import logging
+logger = logging.getLogger("imagizer.imagecache")
 from config import Config
 config = Config()
 
@@ -73,8 +74,7 @@ class ImageCache(dict):
         self.size += 1
         if self.size > self.maxSize:
             firstKey = self.ordered[ 0 ]
-            if config.DEBUG:
-                print("Removing file %s from cache" % firstKey)
+            logger.debug("Removing from cache: %s" % firstKey)
             self.imageDict.pop(firstKey)
             self.size -= 1
             self.ordered = self.ordered[1:]

@@ -1,4 +1,4 @@
-#
+# coding: utf8
 #
 #
 #******************************************************************************\
@@ -30,13 +30,23 @@ General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 
-__author__ = "Jérôme Kieffer: jerome.kieffer@terre-adelie.org"
+__author__ = "Jérôme Kieffer"
+__contact__ = "jerome.kieffer@terre-adelie.org"
 __version__ = "1.1.0"
+
+import logging, sys
+logger = logging.Logger("imagizer", logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+#formatter = logging.Formatter("%(name)s/%(levelname)s: %(message)s")
+#ch.setFormatter(formatter)
+logger.addHandler(ch)
+
+
 from imagizer import * #I know this is ugly !
 from config import Config
 from exiftran import Exiftran
 from imagecache import ImageCache
 from parser import AttrFile
 from signals import Signal
-#from dirchooser import 
 

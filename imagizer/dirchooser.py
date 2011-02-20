@@ -28,7 +28,7 @@ Library used by selector and the installer to select the working directories.
 """
 
 import os, sys, logging
-
+logger = logging.getLogger("imagizer.dirchooser")
 try:
     import pygtk ; pygtk.require('2.0')
     import gtk, gtk.glade
@@ -51,7 +51,7 @@ class WarningSc:
         @param callBack: method to be called with the directory chosen 
         @type callBack: method or function
         """
-        logging.debug("WarningSc.init")
+        logger.debug("WarningSc.init")
         self.directory = directory
         self.window = window
         self.manageGTK = manageGTK
@@ -76,7 +76,7 @@ class WarningSc:
         """
         Just destroy the window and goes on ....
         """
-        logging.debug("WarningSc.continue")
+        logger.debug("WarningSc.continue")
         self.directory = self.gui.get_widget("dirname").get_text().strip()
         if self.manageGTK:
             gtk.main_quit()
@@ -91,7 +91,7 @@ class WarningSc:
         """
         Destroy clicked by user -> quit the program
         """
-        logging.debug("WarningSc.destroy called")
+        logger.debug("WarningSc.destroy called")
         if self.manageGTK:
             if self.quit:
                 sys.exit(0)
@@ -105,7 +105,7 @@ class WarningSc:
         """
         Launch the filer GUI to choose the root directory
         """
-        logging.debug("WarningSc.dirchooser.filer called")
+        logger.debug("WarningSc.dirchooser.filer called")
         self.guiFiler = gtk.glade.XML(unifiedglade, root="filer")
         self.guiFiler.get_widget("filer").set_current_folder(self.directory)
         self.guiFiler.signal_connect('on_Open_clicked', self.filerSelect)
@@ -116,7 +116,7 @@ class WarningSc:
         """
         Close the filer GUI and update the data
         """
-        logging.debug("WarningSc.filerSelect called")
+        logger.debug("WarningSc.filerSelect called")
         self.directory = self.guiFiler.get_widget("filer").get_current_folder()
         self.gui.get_widget("dirname").set_text(self.directory)
         self.guiFiler.get_widget("filer").destroy()
@@ -125,13 +125,13 @@ class WarningSc:
         """
         Close the filer GUI
         """
-        logging.debug("WarningSc.filerDestroy called")
+        logger.debug("WarningSc.filerDestroy called")
         self.guiFiler.get_widget("filer").destroy()
 
     def getDirectory(self):
         """
         Return the directory chosen
         """
-        logging.debug("WarningSc.getDirectory")
+        logger.debug("WarningSc.getDirectory")
         self.directory = self.gui.get_widget("dirname").get_text().strip()
         return self.directory

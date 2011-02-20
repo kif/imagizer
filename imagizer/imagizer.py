@@ -29,7 +29,9 @@ General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 
-import os, sys, shutil, time, re, gc
+import os, sys, shutil, time, re, gc, logging
+logger = logging.getLogger("imagizer.imagizer")
+
 
 from exiftran import Exiftran
 
@@ -701,8 +703,7 @@ class photo(object):
         self.taille()
         x = self.pixelsX
         y = self.pixelsY
-        if config.DEBUG:
-            print("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+        logger.debug("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
 
         if angle == 90:
             if imageCache is not None:
@@ -744,8 +745,7 @@ class photo(object):
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
         if imageCache is not None:
             self.scaledPixbuffer = newPixbuffer
-        if config.DEBUG:
-            print("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, self.pixelsX, self.pixelsY, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+        logger.debug("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, self.pixelsX, self.pixelsY, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
 
 
     def RemoveFromCache(self):
@@ -768,7 +768,9 @@ class photo(object):
 
 
     def readExif(self):
-        """return exif data + title from the photo"""
+        """
+        return exif data + title from the photo
+        """
         clef = {'Exif.Image.Make':'Marque',
  'Exif.Image.Model':'Modele',
  'Exif.Photo.DateTimeOriginal':'Heure',
@@ -808,7 +810,9 @@ class photo(object):
 
 
     def has_title(self):
-        """return true if the image is entitled"""
+        """
+        return true if the image is entitled
+        """
         if self.metadata == None:
             self.readExif()
         if  self.metadata["Titre"]:
@@ -818,7 +822,10 @@ class photo(object):
 
 
     def show(self, Xsize=600, Ysize=600):
-        """return a pixbuf to shows the image in a Gtk window"""
+        """
+        return a pixbuf to shows the image in a Gtk window
+        """
+
         scaled_buf = None
         if Xsize > config.ImageWidth :
             config.ImageWidth = Xsize
@@ -850,15 +857,12 @@ class photo(object):
                 self.scaledPixbuffer = pixbuf.scale_simple(nxBig, nyBig, gtkInterpolation[config.Interpolation])
             else :
                 self.scaledPixbuffer = pixbuf
-            if config.DEBUG:
-                    print("Sucessfully cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
+            logger.debug("To Cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
         if (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
             scaled_buf = self.scaledPixbuffer
-            if config.DEBUG:
-                print("Sucessfully fetched %s from cache, directly with the right size." % (self.filename))
+            logger.debug("In cache No resize %s" % self.filename)
         else:
-            if config.DEBUG:
-                print("%s pixmap in buffer but not with the right shape: nx=%i,\tny=%i,\tw=%i,h=%i" % (self.filename, nx, ny, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+            logger.debug("In cache To resize %s" % self.filename)
             scaled_buf = self.scaledPixbuffer.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
         return scaled_buf
 
@@ -1042,8 +1046,7 @@ class RawImage:
         self.strRawFile = strRawFile
         self.exif = None
         self.strJepgFile = None
-#        if config.DEBUG:
-        print("Importing [Raw|Jpeg] image %s" % strRawFile)
+        logger.info("Importing [Raw|Jpeg] image %s" % strRawFile)
 
     def getJpegPath(self):
 

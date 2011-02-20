@@ -24,6 +24,7 @@
 """CLASS AttrFile Attributes file representation and trivial parser."""
 
 import re, os, sys, logging
+logger = logging.getLogger("imagizer.parser")
 import config
 config = config.Config()
 
@@ -41,13 +42,13 @@ class AttrFile:
 
     def read(self):
         """Read the file and parse it."""
-        logging.debug("AttrFile.read file %s" % self._path)
+        logger.debug("AttrFile.read file %s" % self._path)
         try:
             f = open(self._path, "rb")
             self._lines = f.read()
             f.close()
         except IOError, e:
-            logging.error("Cannot open attributes file %s" % self._path)
+            logger.error("Cannot open attributes file %s" % self._path)
             self._lines = ''
 
         self.parse(self._lines)
@@ -61,7 +62,7 @@ class AttrFile:
 
     def write(self):
         """Write the file to disk, if dirty."""
-        logging.debug("AttrFile.write file %s" % self._path)
+        logger.debug("AttrFile.write file %s" % self._path)
         # If not dirty, don't write anything.
         if not self._dirty:
             return
@@ -90,14 +91,14 @@ class AttrFile:
         try:
             os.chmod(self._path, config.DefaultFileMode)
         except:
-            logging.warning("Unable to chmod %s" % self._path)
+            logger.warning("Unable to chmod %s" % self._path)
 
 
     def parse(self, lines):
         """
         Parse attributes file lines into a map.
         """
-        logging.debug("AttrFile.parse")
+        logger.debug("AttrFile.parse")
         mre1 = re.compile("^([^:\n]+)\s*:", re.M)
         mre2 = re.compile("^\s*$", re.M)
 
@@ -139,11 +140,11 @@ class AttrFile:
         Returns an attribute field content extracted from this attributes
         file.
         """
-        logging.debug("AttrFile.get(%s)" % field)
+        logger.debug("AttrFile.get(%s)" % field)
         if field in self._attrmap:
             return self._attrmap[ field ]
         else:
-            logging.error("AttrFile.get(%s): No such field in %s" % (field, self._path))
+            logger.error("AttrFile.get(%s): No such field in %s" % (field, self._path))
             raise KeyError("AttrFile.get(%s): No such field in %s" % (field, self._path))
 
 
@@ -152,11 +153,11 @@ class AttrFile:
         Returns an attribute field content extracted from this attributes
         file.
         """
-        logging.debug("AttrFile.get_def(%s)" % field)
+        logger.debug("AttrFile.get_def(%s)" % field)
         if field in self._attrmap:
             return self._attrmap[ field ]
         else:
-            logging.debug("AttrFile.get_def(%s), returned default:%s" % (field, default))
+            logger.debug("AttrFile.get_def(%s), returned default:%s" % (field, default))
             return default
 
 
@@ -166,7 +167,7 @@ class AttrFile:
         changed.  
         Set a field value to None to remove the field.
         """
-        logging.debug("AttrFile.set(%s,value: %s)" % field, type(value))
+        logger.debug("AttrFile.set(%s,value: %s)" % (field, type(value)))
         if value == None:
             if field in self._attrmap:
                 self._attrmap.pop(field)
