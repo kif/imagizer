@@ -1,19 +1,47 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-#Written by Jerome Kieffer 20110214 Licence GPLv3+
+#!/usr/bin/env python 
+# -*- coding: UTF8 -*-
+#******************************************************************************\
+#* $Source$
+#* $Id$
+#*
+#* Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+#* Licence GPL v2
+#*
+#* This program is free software; you can redistribute it and/or modify
+#* it under the terms of the GNU General Public License as published by
+#* the Free Software Foundation; either version 2 of the License, or
+#* (at your option) any later version.
+#*
+#* This program is distributed in the hope that it will be useful,
+#* but WITHOUT ANY WARRANTY; without even the implied warranty of
+#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#* GNU General Public License for more details.
+#*
+#* You should have received a copy of the GNU General Public License
+#* along with this program; if not, write to the Free Software
+#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+#*****************************************************************************/
+from Image import Image
+__author__ = "Jérôme Kieffer"
+__date__ = "23 Feb 2011"
+__copyright__ = "Jerome Kieffer"
+__license__ = "GPLv3+"
+__contact__ = "Jerome.Kieffer@terre-adelie.org"
+
 #Find all the videos and renames them, compress then .... and write an html file to set online
 
 import logging
-
+import Image
 import os.path as OP
 import os, sys, tempfile, shutil, datetime, time, locale
 import subprocess
+from imagizer import unicode2html, Html
 from hachoir_core.error import HachoirError
 from hachoir_core.cmd_line import unicodeFilename
 from hachoir_parser import createParser
-#from hachoir_core.tools import makePrintable
 from hachoir_metadata import extractMetadata
-#from hachoir_core.i18n import getTerminalCharset
 
 local = locale.getdefaultlocale()[1]
 webEncoding = "UTF8"
@@ -163,7 +191,7 @@ class Video:
                 bDoMplayer = True
             self.width = self.metadata.get("width")
             try:
-                self.title = self.metadata.get("title")
+                self.title = self.metadata.get("title").encode("latin1").decode("utf8")
             except:
                 self.title = u""
 #            convertLatin1ToUTF8 = False
@@ -428,12 +456,20 @@ class Video:
 
     def GenThumb(self, size=160):
         """Generate a thumbnail for the image"""
-        Thumbdir = tempfile.mkdtemp()
-        os.system("%s %s -vo jpeg:outdir=%s -ao null -frames 1 " % (mplayer, self.fullPath, Thumbdir))
+        tempdir = tempfile.mkdtemp()
+        sub = subprocess.Popen([mplayer, self.fullPath, "-vo", "jpeg:outdir=%s" % tempdir, "-ao", "null", "-frames", "1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        sub.wait()
+        listThumb = [os.path.join(tempdir, i) for i in os.listdir(tempdir)]
+        if len(listThumb) != 1:
+            print ("Unexpected result ... have a look at %s ther should only be one jpeg image" % tempdir)
         self.thumbName = OP.splitext(self.fullPath)[0] + "--Thumb.jpg"
-        os.system("%s -geometry %ix%i %s/*.jpg %s" % (convert, size, size, Thumbdir, self.thumbName))
-        for i in os.listdir(Thumbdir):os.remove(OP.join(Thumbdir, i))
-        os.rmdir(Thumbdir)
+        img = Image.open(listThumb[0])
+        img.thumbnail((size, size))
+        img.save(self.thumbName)
+#        sub = subprocess.Popen(["%s -geometry %ix%i %s/*.jpg %s" % (convert, size, size, tempdir, self.thumbName))
+        for i in listThumb:
+            os.remove(i)
+        os.rmdir(tempdir)
 
 ################################################################################
 # END of the class VIDEO
@@ -481,61 +517,6 @@ class parser:
         return self.imagelist
 
 
-
-class HTML(object):
-
-    def __init__(self, title="Test", enc="utf8", favicon=None):
-        self.txt = u""
-        self.enc = enc
-        self.header(title, enc, favicon)
-
-
-    def header(self, title, enc, favicon):
-        self.txt += u'<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">\n<html>\n<head>\n'
-        if favicon:
-            self.txt += u'<link rel="icon" type="image/%s" href="%s" />\n' % (OP.splitext(favicon)[1][1:], favicon)
-        if enc:self.txt += u'<content="text/html; charset=%s">\n' % enc
-        self.txt += u"<title>%s</title>\n" % title
-        self.txt += u"</head>\n"
-
-
-    def footer(self):
-        self.txt += u"</html>\n"
-
-
-    def write(self, filename):
-        self.footer()
-        f = open(filename, "w")
-        f.write(self.txt.encode(self.enc))
-        f.close()
-
-
-    def start(self, tag, dico=None):
-        self.txt += u"<%s" % tag
-        if isinstance(dico, dict):
-            for i in dico:
-                self.txt += u' %s="%s" ' % (i, dico[i])
-        self.txt += u" >\n"
-
-
-    def stop(self, tag):
-        self.txt += u"</%s>\n" % tag
-
-
-    def data(self, donnee, cod=""):
-        if cod and isinstance(donnee, str):
-            d = donnee.decode(cod)
-        else:
-            d = donnee
-        self.txt += d.replace(u"&", u"&amp;").replace(u"<", u"&lt;").replace(u">", u"&gt;").replace(u'\xb0', u"&deg;").replace(u"\xb9", u"&sup1;").replace(u"\xb2", u"&sup2;").replace(u"\xb3", u"&sup3;").replace(u"\xb5", u"&micro;")
-#        print type(self.txt)
-#    s = replace(s, "", "&Aring;")
-#    s = replace(s, "", "&szlig;")
-
-    def element(self, tag, data="", cod=""):
-        self.start(tag)
-        self.data(data, cod)
-        self.stop(tag)
 
 
 
@@ -600,8 +581,7 @@ if __name__ == "__main__":
         date = videos.keys()
         date.sort()
         print date
-        html = HTML("Videos", enc=webEncoding)
-        html.start("body")
+        html = Html("Videos", enc=webEncoding)
         html.element("a name='begin'")
 
         for onedate in date:
@@ -624,16 +604,13 @@ if __name__ == "__main__":
                 logging.debug(str("duration: %s" % onevideo.duration))
                 html.data(u"Dur\xe9e %is" % onevideo.duration)
                 html.stop("td")
-                print(onevideo.title, type(onevideo.title))
+#                print(onevideo.title, type(onevideo.title))
                 html.element("td", onevideo.title)
                 html.stop("tr")
             html.stop("table")
             html.start("hr/")
         html.element("a name='end'")
-        html.stop("body")
         html.write("index.html")
-#        for onevideo in videos[onedate]:
-#            logging.info(onevideo.timeStamp)
 
     else:
         videos = {}

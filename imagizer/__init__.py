@@ -49,4 +49,6 @@ from exiftran import Exiftran
 from imagecache import ImageCache
 from parser import AttrFile
 from signals import Signal
+from encoding import unicode2html, unicode2ascii
+from html import Html
 

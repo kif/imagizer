@@ -65,7 +65,8 @@ elif os.name == 'posix':
 
 import imagizer
 logger = logging.getLogger("imagizer.selector")
-from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, unicode_to_ascii, mkdir, RangeTout, installdir, RawImage, findFiles
+from imagizer.encoding import  unicode2ascii
+from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, mkdir, RangeTout, installdir, RawImage, findFiles
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
 
@@ -1400,7 +1401,7 @@ class RenameDay(object):
         if self.newname == "":
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
         else:
-            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode_to_ascii(self.newname.encode("latin1")).replace(" ", "_",)
+            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode2ascii(self.newname.encode("latin1")).replace(" ", "_",)
         self.newFilename = os.path.join(self.newdayname, os.path.basename(self.initialFilename))
 
         self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
