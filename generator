@@ -198,6 +198,8 @@ import sys, logging
 import imagizer
 logger = logging.getLogger("imagizer.generator")
 
+from imagizer.encoding import unicode2html
+
 if int(sys.version[0]) != 2:
     logger.error("You need Python version 2 to run generator.")
     sys.exit(1)
@@ -1860,7 +1862,7 @@ def dirnav(cd, dir, rootname="(root)", dirsep=dirnavsep):
         if d._parent == None:
             name = rootname
         elif d._attrfile and d._attrfile.get_def("title"):
-            name = d._attrfile.get_def("title")
+            name = unicode2html(d._attrfile.get_def("title"))
         else:
             name = d._basename
 
@@ -1955,7 +1957,7 @@ def sous_titre(i):
   if i._attr:
     description = i._attr.get_def('description')
   elif i._comment:
-    description = i._comment
+    description = unicode2html(i._comment)
   if description:
     s_titre += '<br>\n' + description
   return s_titre
@@ -1977,19 +1979,9 @@ def exif(filename):
  'Exif.Photo.ISOSpeedRatings'
 ]
     data = {}
-#    RawExif,comment=EXIF.process_file(open(filename,'rb'),0)
-#    if comment:
-#        try:
-#            comment =  comment.encode(config.Coding)
-#        except:
-#            sys.stderr.write("The title of %s is not encodable in latin-1\n"%filename)
-#            comment = ""#  os.path.splitext( os.path.basename(filename) )[0]
-#    else:
-#        comment=""
     image_exif = pyexiv2.Image(filename)
     image_exif.readMetadata()
-    comment = image_exif.getComment().decode("utf-8").encode(config.Coding)
-#    print comment, comment.decode("utf-8")
+    comment = image_exif.getComment().decode("utf-8")
 
     for i in clef:
         try:
@@ -2022,7 +2014,7 @@ html_preamble = \
 html_postamble = """
 <!--tagcode:
 if 'footer' in globals():
-    print footer
+    print(footer)
 -->
 <a name='end'>
 </body>
@@ -2106,7 +2098,7 @@ HR.sephr { background-color: black; height: 1px; width: 90%; }
 """
 
 fallbackTemplates[ 'template-image' ] = \
-(html_preamble % 'Image: <!--tag:image._title.encode(config.Coding)-->') + \
+(html_preamble % 'Image: <!--tag:unicode2html(image._title)-->') + \
 """
 
 <!-- quick navigator at the top -->
@@ -2115,14 +2107,14 @@ fallbackTemplates[ 'template-image' ] = \
 <!--tagcode:
 pi = prev(image, allimages)
 if pi:
-    print '<a class="arrow" href="%s">&lt;&lt;&lt;</a>' %         rel(pi._pagefn, cd)
+    print('<a class="arrow" href="%s">&lt;&lt;&lt;</a>'%rel(pi._pagefn, cd))
 -->
 
 </td><td width="50%" align="right">
 <!--tagcode:
 ni = next(image, allimages)
 if ni:
-    print '<a class="arrow" href="%s">&gt;&gt;&gt;</a>' %         rel(ni._pagefn, cd)
+    print('<a class="arrow" href="%s">&gt;&gt;&gt;</a>'%rel(ni._pagefn, cd))
 -->
 </td></tr></table>
 
@@ -2138,7 +2130,7 @@ if image._pagefn:
         w4 = w / 4
         ht = h / 10
 
-        print '<map name="navmap">'
+        print('<map name="navmap">')
         s = 0
         e = w
         pi = prev(image, allimages)
@@ -2161,7 +2153,7 @@ if image._pagefn:
     xtra = 'class="image"'
     if use_map:
         xtra += '  usemap="#%s"' % 'navmap'
-    print scaledImage(cd, image, xtra) 
+    print(scaledImage(cd, image, xtra))
 -->
 </center>
 
@@ -2175,9 +2167,9 @@ if image._attr:
     if not settings:
         settings = image._attr.get_def('info')
 
-    print '<table class="desctable">'
-    print '<tr>'
-    print '<td class="titlecell">'
+    print('<table class="desctable">')
+    print('<tr>')
+    print('<td class="titlecell">')
 
 -->
 
@@ -2189,7 +2181,7 @@ if image._attr:
 if image._attr:
     location = image._attr.get_def('location')
     if location:
-        print '<span class="location">%s</span><br>' % location
+        print('<span class="location">%s</span><br>' % location)
 -->
 <p>
 
@@ -2202,10 +2194,9 @@ elif image._comment:
     description = image._comment
 
 if description:
-    print '<p class="description">'
-    # FIXME don't we have to convert accents?
-    print description
-    print '</p>'
+    print('<p class="description">')
+    print(unicode2html(description))
+    print('</p>')
 
 -->
 
@@ -2221,13 +2212,13 @@ exif_key={'Marque' : 'Exif.Image.Make' , 'Modele' : 'Exif.Image.Model' , \
           'Iso' : 'Exif.Photo.ISOSpeedRatings' , 'Flash' : 'Exif.Photo.Flash' }
 
 if image._exif:
-    print '<tr>'
-    print '<td class="settingscell" >'
-    print '<span class="settingstitle">PARAMETRES PHOTO:</span></td></tr>'
+    print('<tr>')
+    print('<td class="settingscell" >')
+    print('<span class="settingstitle">PARAMETRES PHOTO:</span></td></tr>')
     for s in exif_tag:
         if exif_key[s] in image._exif:
-            print '<tr><td class="settings">%s:</td> \
-            <td class="settings"> %s </td></tr>' % (s,image._exif[exif_key[s]])
+            print('<tr><td class="settings">%s:</td> \
+            <td class="settings"> %s </td></tr>' % (s,image._exif[exif_key[s]]))
 -->
 
 </table>
@@ -2250,9 +2241,9 @@ if pi and pi._thumbsize:
 else:
     pw = opts.thumb_size
 
-print '<td width="%d">' % pw
+print('<td width="%d">' % pw)
 if pi:
-    print thumbImage(cd, pi, 'align="left"')
+    print(thumbImage(cd, pi, 'align="left"'))
 -->
 
 </td><td align="center" CELLPADDING="5">
@@ -2261,7 +2252,7 @@ if pi:
     between the floating thumbs-->
 
 <b>
-<!--tag:dirnav(cd, image._dir).encode(config.Coding)-->
+<!--tag:dirnav(cd, image._dir)-->
 <!--tag:dirnavsep-->
 <a href="<!--tag:rel(image._filename, cd)-->">
 <!--tag:basename(image._filename)--></a>
@@ -2269,22 +2260,22 @@ if pi:
 
 <!--tagcode:
 if len(image._altrepns) > 0:
-    print "Alternative representations:"
+    print("Alternative representations:")
     for rep in image._altrepns.keys():
-        print '<a href="%s">%s</a>&nbsp;' %             (urlquote(rel(join(image._dir._path,                                    image._altrepns[ rep ]), cd)), rep)
-    print '<p>'
+        print('<a href="%s">%s</a>&nbsp;'%(urlquote(rel(join(image._dir._path,image._altrepns[ rep ]), cd)), rep))
+    print('<p>')
 -->
 
 <br>
 <!--tagcode:
-print textnav(cd, image, image._dir._images,
-              "dir", rel(image._dir._pagefn, cd) )
+print(textnav(cd, image, image._dir._images,
+              "dir", rel(image._dir._pagefn, cd) ))
 if len(image._tracks) > 0:
-    print '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
-    print '<span class="tracksind">tracks:</span>'
+    print('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',)
+    print('<span class="tracksind">tracks:</span>')
     for t in image._tracks:
-        print '&nbsp;&nbsp;&nbsp;&nbsp;'
-        print textnav(cd, image, trackmap[t], t, rel(trackindex_fns[t], cd) )
+        print('&nbsp;&nbsp;&nbsp;&nbsp;')
+        print(textnav(cd, image, trackmap[t], t, rel(trackindex_fns[t], cd)))
 --><p>
 
 </td>
@@ -2297,9 +2288,9 @@ if ni and ni._thumbsize:
 else:
     nw = opts.thumb_size
 
-print '<td width="%d">' % nw
+print('<td width="%d">' % nw)
 if ni:
-    print thumbImage(cd, ni, 'align="right"')
+    print(thumbImage(cd, ni, 'align="right"'))
 -->
 
 </td></tr></table>
@@ -2317,21 +2308,21 @@ desc_page = desc_index(dir)
 -->
 
 <table class="toptable dirtop"><tr><td>
-<p class="toptitle"><!--tag:dirnav(cd, dir).encode(config.Coding)--></p>
+<p class="toptitle"><!--tag:dirnav(cd, dir)--></p>
 <!--tagcode:
 if desc_page:
     if desc_page.has_key('title'):
-        print "<p><center><h3>"    
-        print desc_page['title'].encode(config.Coding)
-        print "</h3></center></p>"
+        print("<p><center><h3>")
+        print(unicode2html(desc_page['title']))
+        print("</h3></center></p>")
     if desc_page.has_key('date'):
-        print "<p><h4>"
-        print desc_page['date'].encode(config.Coding)
-        print "</h4></p>"
+        print("<p><h4>")
+        print(unicode2html(desc_page['date']))
+        print("</h4></p>")
     if desc_page.has_key('comment'):
-        print "<p>"
-        print desc_page['comment'].encode(config.Coding)
-        print "</p>"
+        print("<p>")
+        print(unicode2html(desc_page['comment']))
+        print("</p>")
 -->
 </td></tr></table>
 
@@ -2384,7 +2375,7 @@ if len( dir._subdirs ) > 0:
             else:
                 print "<td> </td>"
             if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
-                print  '<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),d._attrfile["date"].encode(config.Coding),d._attrfile["title"].encode(config.Coding))                
+                print  '<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]))                
             else:
                 if len(d._basename)>11:
                     if d._basename[10] in [" ","_","-"]:
@@ -2392,7 +2383,7 @@ if len( dir._subdirs ) > 0:
                     else:
                         print '<td><a href="%s">%s</a></td>'%(rel(d._pagefn,cd),d._basename)
             if d._attrfile.has_key("comment"):
-                print "<td>%s</td>"%d._attrfile["comment"].encode(config.Coding)
+                print "<td>%s</td>"%unicode2html(d._attrfile["comment"])
             else:
                 print "<td> </td>"
             print "</tr>"
@@ -2404,17 +2395,17 @@ if len( dir._subdirs ) > 0:
                 comment=""
                 if  d._attrfile.has_key("comment"):
                     if len(d._attrfile["comment"])>50:
-                        words=re.sub("<BR>"," ",d._attrfile["comment"].encode(config.Coding)).split()
+                        words=re.sub("<BR>"," ",unicode2html(d._attrfile["comment"])).split()
                         for w in words:
                             comment+=w+" "
                             if len(comment)>47:
                                 comment+="..."
                                 break 
                     else:
-                        comment=re.sub("<BR>"," ",d._attrfile["comment"].encode(config.Coding))
+                        comment=re.sub("<BR>"," ",unicode2html(d._attrfile["comment"]))
                 if d._attrfile.has_key("date") and d._attrfile.has_key("title"):  
                     if len(d._attrfile["date"])>0:
-                        print '<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),d._attrfile["date"].encode(config.Coding),d._attrfile["title"].encode(config.Coding), comment)
+                        print '<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]), comment)
                     else:    
                         print '<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment)
                 else:
@@ -2425,13 +2416,13 @@ if len( dir._subdirs ) > 0:
 <!--tagcode:
 if desc_page:
   if desc_page.get_def('description'):
-    print '<p><div class="description">'
-    print desc_page.get_def('description').encode(config.Coding)
-    print '</div></p>'
+    print('<p><div class="description">')
+    print(unicode2html(desc_page.get_def('description')))
+    print('</div></p>')
   
 if len( dir._images ) > 0:
-    print '<h3>Images:</h3>'
-    print table( cd, dir._images, sous_titre )
+    print('<h3>Images:</h3>')
+    print(table( cd, dir._images, sous_titre ))
 
 -->
 

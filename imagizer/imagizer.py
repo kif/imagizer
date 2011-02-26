@@ -62,7 +62,7 @@ elif os.name == 'posix':
 
 unifiedglade = os.path.join(installdir, "selector.glade")
 from signals import Signal
-from encoding import unicode2html
+from encoding import unicode2html, unicode2ascii
 from config import Config
 config = Config()
 config.load(ConfFile)
@@ -229,7 +229,7 @@ class ModelProcessSelected:
                     shutil.copy(src, dst)
 
 ########finaly recreate the structure with pages or make a single page ########################
-        dirs = os.listdir(SelectedDir)
+        dirs = [i for i in os.listdir(SelectedDir) if os.path.isdir(i)]
         dirs.sort()
 #        print "config.ExportSingleDir = "+str(config.ExportSingleDir)
         if config.ExportSingleDir: #SingleDir
