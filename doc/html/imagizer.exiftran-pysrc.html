@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>imagizer.exiftran</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="imagizer-module.html">Package&nbsp;imagizer</a> ::
+        Module&nbsp;exiftran
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="imagizer.exiftran-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="imagizer.exiftran-module.html">Module imagizer.exiftran</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#!/usr/bin/env python</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"># -*- coding: UTF8 -*-</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment">#******************************************************************************\</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment">#* $Source$</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-comment">#* $Id$</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-comment">#*</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-comment">#* Copyright (C) 2006-2010,  J&#233;r&#244;me Kieffer &lt;kieffer@terre-adelie.org&gt;</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment">#* Conception : J&#233;r&#244;me KIEFFER, Mickael Profeta &amp; Isabelle Letard</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment">#* Licence GPL v2</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-comment">#*</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-comment">#* This program is free software; you can redistribute it and/or modify</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment">#* it under the terms of the GNU General Public License as published by</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-comment">#* the Free Software Foundation; either version 2 of the License, or</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-comment">#* (at your option) any later version.</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-comment">#*</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-comment">#* This program is distributed in the hope that it will be useful,</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-comment">#* but WITHOUT ANY WARRANTY; without even the implied warranty of</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment">#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-comment">#* GNU General Public License for more details.</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-comment">#*</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment">#* You should have received a copy of the GNU General Public License</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-comment">#* along with this program; if not, write to the Free Software</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-comment">#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-comment">#*</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-comment">#*****************************************************************************/</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-comment"># Liste des d&#233;pendances : python, PIL, Glade-2</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-comment"># Exiftran existe en version windows maintenant ... nous utilisons une verison modifi&#233;e ...!!!!</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-comment">#todo liste des fonctions a implemanter ....</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-comment"># - se passer de exiftran</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-comment"># - la version windows et la version mac</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-comment"># - faire une doc d&#233;cente.</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-comment"># - proposer d'exporter toutes les photos dans un seul r&#233;pertoire (pas de jour)</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-docstring">exiftran.py a wrapper for the original exiftran fprovided by Gerd Korn</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-docstring">http://linux.bytesex.org/fbida/</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"><tt class="py-docstring">Needs libexif-dev, libjepg-dev and python-dev to be installed on the system.</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"><tt class="py-name">__author__</tt> <tt class="py-op">=</tt> <tt class="py-string">"Jerome Kieffer"</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable imagizer.exiftran.__licence__=imagizer.exiftran-module.html#__licence__"><a title="imagizer.exiftran.__licence__" class="py-name" href="#" onclick="return doclink('link-0', '__licence__', 'link-0');">__licence__</a></tt> <tt class="py-op">=</tt> <tt class="py-string">"GPLv2"</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line"><tt class="py-name">__contact__</tt> <tt class="py-op">=</tt> <tt class="py-string">"Jerome.Kieffer@terre-adelie.org"</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">os</tt><tt class="py-op">,</tt> <tt class="py-name">threading</tt><tt class="py-op">,</tt> <tt class="py-name">logging</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"><tt id="link-1" class="py-name" targets="Variable imagizer.config'.installdir=imagizer.config%27-module.html#installdir,Variable imagizer.exiftran.installdir=imagizer.exiftran-module.html#installdir,Variable imagizer.imagizer.installdir=imagizer.imagizer-module.html#installdir"><a title="imagizer.config'.installdir
+imagizer.exiftran.installdir
+imagizer.imagizer.installdir" class="py-name" href="#" onclick="return doclink('link-1', 'installdir', 'link-1');">installdir</a></tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">dirname</tt><tt class="py-op">(</tt><tt class="py-name">__file__</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">    <tt class="py-keyword">import</tt> <tt class="py-name">libexiftran</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">    <tt id="link-2" class="py-name" targets="Variable imagizer.exiftran.exiftranExe=imagizer.exiftran-module.html#exiftranExe"><a title="imagizer.exiftran.exiftranExe" class="py-name" href="#" onclick="return doclink('link-2', 'exiftranExe', 'link-2');">exiftranExe</a></tt> <tt class="py-op">=</tt> <tt class="py-name">None</tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-string">"Successfully imported libexiftran"</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line"><tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-string">"Failed to import libexiftran: use old fashion"</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Method imagizer.imagizer.photo.name()=imagizer.imagizer.photo-class.html#name"><a title="imagizer.imagizer.photo.name" class="py-name" href="#" onclick="return doclink('link-3', 'name', 'link-3');">name</a></tt> <tt class="py-op">==</tt> <tt class="py-string">'nt'</tt><tt class="py-op">:</tt> <tt class="py-comment">#sys.platform == 'win32':</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt id="link-4" class="py-name"><a title="imagizer.exiftran.exiftranExe" class="py-name" href="#" onclick="return doclink('link-4', 'exiftranExe', 'link-2');">exiftranExe</a></tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">join</tt><tt class="py-op">(</tt><tt id="link-5" class="py-name"><a title="imagizer.config'.installdir
+imagizer.exiftran.installdir
+imagizer.imagizer.installdir" class="py-name" href="#" onclick="return doclink('link-5', 'installdir', 'link-1');">installdir</a></tt><tt class="py-op">,</tt> <tt class="py-string">"exiftran.exe "</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name"><a title="imagizer.imagizer.photo.name" class="py-name" href="#" onclick="return doclink('link-6', 'name', 'link-3');">name</a></tt> <tt class="py-op">==</tt> <tt class="py-string">'posix'</tt><tt class="py-op">:</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt id="link-7" class="py-name" targets="Variable imagizer.exiftran.exiftranPath=imagizer.exiftran-module.html#exiftranPath"><a title="imagizer.exiftran.exiftranPath" class="py-name" href="#" onclick="return doclink('link-7', 'exiftranPath', 'link-7');">exiftranPath</a></tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">join</tt><tt class="py-op">(</tt><tt id="link-8" class="py-name"><a title="imagizer.config'.installdir
+imagizer.exiftran.installdir
+imagizer.imagizer.installdir" class="py-name" href="#" onclick="return doclink('link-8', 'installdir', 'link-1');">installdir</a></tt><tt class="py-op">,</tt> <tt class="py-string">"exiftran "</tt><tt class="py-op">)</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-keyword">not</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">isfile</tt><tt class="py-op">(</tt><tt id="link-9" class="py-name"><a title="imagizer.exiftran.exiftranPath" class="py-name" href="#" onclick="return doclink('link-9', 'exiftranPath', 'link-7');">exiftranPath</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">            <tt class="py-keyword">for</tt> <tt id="link-10" class="py-name" targets="Variable imagizer.exiftran.oneExeDir=imagizer.exiftran-module.html#oneExeDir"><a title="imagizer.exiftran.oneExeDir" class="py-name" href="#" onclick="return doclink('link-10', 'oneExeDir', 'link-10');">oneExeDir</a></tt> <tt class="py-keyword">in</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">environ</tt><tt class="py-op">[</tt><tt class="py-string">"PATH"</tt><tt class="py-op">]</tt><tt class="py-op">.</tt><tt class="py-name">split</tt><tt class="py-op">(</tt><tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">pathsep</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">isfile</tt><tt class="py-op">(</tt><tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">join</tt><tt class="py-op">(</tt><tt id="link-11" class="py-name"><a title="imagizer.exiftran.oneExeDir" class="py-name" href="#" onclick="return doclink('link-11', 'oneExeDir', 'link-10');">oneExeDir</a></tt><tt class="py-op">,</tt> <tt class="py-string">"exiftran"</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">                    <tt id="link-12" class="py-name"><a title="imagizer.exiftran.exiftranPath" class="py-name" href="#" onclick="return doclink('link-12', 'exiftranPath', 'link-7');">exiftranPath</a></tt> <tt class="py-op">=</tt> <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">join</tt><tt class="py-op">(</tt><tt id="link-13" class="py-name"><a title="imagizer.exiftran.oneExeDir" class="py-name" href="#" onclick="return doclink('link-13', 'oneExeDir', 'link-10');">oneExeDir</a></tt><tt class="py-op">,</tt> <tt class="py-string">"exiftran "</tt><tt class="py-op">)</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt id="link-14" class="py-name" targets="Variable imagizer.exiftran.MaxJPEGMem=imagizer.exiftran-module.html#MaxJPEGMem"><a title="imagizer.exiftran.MaxJPEGMem" class="py-name" href="#" onclick="return doclink('link-14', 'MaxJPEGMem', 'link-14');">MaxJPEGMem</a></tt> <tt class="py-op">=</tt> <tt class="py-number">1000000</tt> <tt class="py-comment"># OK up to 100 Mpix</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt id="link-15" class="py-name"><a title="imagizer.exiftran.exiftranExe" class="py-name" href="#" onclick="return doclink('link-15', 'exiftranExe', 'link-2');">exiftranExe</a></tt> <tt class="py-op">=</tt> <tt class="py-string">"JPEGMEM=%i %s "</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt id="link-16" class="py-name"><a title="imagizer.exiftran.MaxJPEGMem" class="py-name" href="#" onclick="return doclink('link-16', 'MaxJPEGMem', 'link-14');">MaxJPEGMem</a></tt><tt class="py-op">,</tt> <tt id="link-17" class="py-name"><a title="imagizer.exiftran.exiftranPath" class="py-name" href="#" onclick="return doclink('link-17', 'exiftranPath', 'link-7');">exiftranPath</a></tt><tt class="py-op">)</tt> </tt>
+<a name="Exiftran"></a><div id="Exiftran-def"><a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line"> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line"> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line"> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line"> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt> <a class="py-toggle" href="#" id="Exiftran-toggle" onclick="return toggle('Exiftran');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html">Exiftran</a><tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Exiftran-expanded"><a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line"><tt class="py-docstring">    This is static class implementing libexiftran in a more pythonic way</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">    <tt id="link-18" class="py-name" targets="Variable imagizer.exiftran.Exiftran.semaphore=imagizer.exiftran.Exiftran-class.html#semaphore"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-18', 'semaphore', 'link-18');">semaphore</a></tt> <tt class="py-op">=</tt> <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Semaphore</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line"> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="Exiftran._exiftranThread"></a><div id="Exiftran._exiftranThread-def"><a name="L81"></a><tt class="py-lineno"> 81</tt> <a class="py-toggle" href="#" id="Exiftran._exiftranThread-toggle" onclick="return toggle('Exiftran._exiftranThread');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html#_exiftranThread">_exiftranThread</a><tt class="py-op">(</tt><tt class="py-param">action</tt><tt class="py-op">,</tt> <tt class="py-param">filename</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran._exiftranThread-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Exiftran._exiftranThread-expanded"><a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line"><tt class="py-docstring">        actual exiftran launcher</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line"><tt class="py-docstring">        @param action: 0 for autorotate, 1 for 180 deg, 2 for 270 deg and 9 for 90 deg reotation clockwise </tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line"><tt class="py-docstring">        @type action: integer</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line"><tt class="py-docstring">        @param filename: name of the jpeg file to process</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"><tt class="py-docstring">        @type filename: string</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">        <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">debug</tt><tt class="py-op">(</tt><tt class="py-string">"Exiftran._exiftranThread %s %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">action</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-19" class="py-name"><a title="imagizer.exiftran.exiftranExe" class="py-name" href="#" onclick="return doclink('link-19', 'exiftranExe', 'link-2');">exiftranExe</a></tt> <tt class="py-keyword">is</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">            <tt class="py-name">libexiftran</tt><tt class="py-op">.</tt><tt class="py-name">run</tt><tt class="py-op">(</tt><tt class="py-name">action</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">action</tt> <tt class="py-op">==</tt> <tt class="py-number">0</tt><tt class="py-op">:</tt><tt class="py-name">action</tt> <tt class="py-op">=</tt> <tt class="py-string">"a"</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">            <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">system</tt><tt class="py-op">(</tt><tt class="py-string">'%s -ip -%s "%s" '</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt id="link-20" class="py-name"><a title="imagizer.exiftran.exiftranExe" class="py-name" href="#" onclick="return doclink('link-20', 'exiftranExe', 'link-2');">exiftranExe</a></tt><tt class="py-op">,</tt> <tt class="py-name">action</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">        <tt id="link-21" class="py-name" targets="Class imagizer.exiftran.Exiftran=imagizer.exiftran.Exiftran-class.html"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-21', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-22" class="py-name"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-22', 'semaphore', 'link-18');">semaphore</a></tt><tt class="py-op">.</tt><tt class="py-name">release</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line"> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="Exiftran.rotate90"></a><div id="Exiftran.rotate90-def"><a name="L99"></a><tt class="py-lineno"> 99</tt> <a class="py-toggle" href="#" id="Exiftran.rotate90-toggle" onclick="return toggle('Exiftran.rotate90');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html#rotate90">rotate90</a><tt class="py-op">(</tt><tt class="py-param">filename</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran.rotate90-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Exiftran.rotate90-expanded"><a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line"><tt class="py-docstring">        rotate the given file by 90 degrees clockwise</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line"><tt class="py-docstring">        @param filename: name of the JPEG file to rotate</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"><tt class="py-docstring">        @type filename: python string</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">        <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">debug</tt><tt class="py-op">(</tt><tt class="py-string">"Exiftran.rotate90 %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">        <tt id="link-23" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-23', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-24" class="py-name"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-24', 'semaphore', 'link-18');">semaphore</a></tt><tt class="py-op">.</tt><tt class="py-name">acquire</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt> <tt class="py-op">=</tt> <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Thread</tt><tt class="py-op">(</tt><tt class="py-name">target</tt><tt class="py-op">=</tt><tt id="link-25" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-25', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-26" class="py-name" targets="Static Method imagizer.exiftran.Exiftran._exiftranThread()=imagizer.exiftran.Exiftran-class.html#_exiftranThread"><a title="imagizer.exiftran.Exiftran._exiftranThread" class="py-name" href="#" onclick="return doclink('link-26', '_exiftranThread', 'link-26');">_exiftranThread</a></tt><tt class="py-op">,</tt> <tt class="py-name">args</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-number">9</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt><tt class="py-op">.</tt><tt id="link-27" class="py-name" targets="Method imagizer.imagizer.ModelCopySelected.start()=imagizer.imagizer.ModelCopySelected-class.html#start,Method imagizer.imagizer.ModelProcessSelected.start()=imagizer.imagizer.ModelProcessSelected-class.html#start,Method imagizer.imagizer.ModelRangeTout.start()=imagizer.imagizer.ModelRangeTout-class.html#start"><a title="imagizer.imagizer.ModelCopySelected.start
+imagizer.imagizer.ModelProcessSelected.start
+imagizer.imagizer.ModelRangeTout.start" class="py-name" href="#" onclick="return doclink('link-27', 'start', 'link-27');">start</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line"> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line"> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="Exiftran.rotate180"></a><div id="Exiftran.rotate180-def"><a name="L112"></a><tt class="py-lineno">112</tt> <a class="py-toggle" href="#" id="Exiftran.rotate180-toggle" onclick="return toggle('Exiftran.rotate180');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html#rotate180">rotate180</a><tt class="py-op">(</tt><tt class="py-param">filename</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran.rotate180-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Exiftran.rotate180-expanded"><a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line"><tt class="py-docstring">        rotate the given file by 180 degrees </tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line"><tt class="py-docstring">        @param filename: name of the JPEG file to rotate</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line"><tt class="py-docstring">        @type filename: python string</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">        <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">debug</tt><tt class="py-op">(</tt><tt class="py-string">"Exiftran.rotate180 %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">        <tt id="link-28" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-28', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-29" class="py-name"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-29', 'semaphore', 'link-18');">semaphore</a></tt><tt class="py-op">.</tt><tt class="py-name">acquire</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt> <tt class="py-op">=</tt> <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Thread</tt><tt class="py-op">(</tt><tt class="py-name">target</tt><tt class="py-op">=</tt><tt id="link-30" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-30', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-31" class="py-name"><a title="imagizer.exiftran.Exiftran._exiftranThread" class="py-name" href="#" onclick="return doclink('link-31', '_exiftranThread', 'link-26');">_exiftranThread</a></tt><tt class="py-op">,</tt> <tt class="py-name">args</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt><tt class="py-op">.</tt><tt id="link-32" class="py-name"><a title="imagizer.imagizer.ModelCopySelected.start
+imagizer.imagizer.ModelProcessSelected.start
+imagizer.imagizer.ModelRangeTout.start" class="py-name" href="#" onclick="return doclink('link-32', 'start', 'link-27');">start</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line"> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line"> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="Exiftran.rotate270"></a><div id="Exiftran.rotate270-def"><a name="L125"></a><tt class="py-lineno">125</tt> <a class="py-toggle" href="#" id="Exiftran.rotate270-toggle" onclick="return toggle('Exiftran.rotate270');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html#rotate270">rotate270</a><tt class="py-op">(</tt><tt class="py-param">filename</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran.rotate270-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Exiftran.rotate270-expanded"><a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line"><tt class="py-docstring">        rotate the given file by 90 degrees counter-clockwise (270deg clockwise) </tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line"><tt class="py-docstring">        @param filename: name of the JPEG file to rotate</tt> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line"><tt class="py-docstring">        @type filename: python string</tt> </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">        <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">debug</tt><tt class="py-op">(</tt><tt class="py-string">"Exiftran.rotate270 %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">        <tt id="link-33" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-33', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-34" class="py-name"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-34', 'semaphore', 'link-18');">semaphore</a></tt><tt class="py-op">.</tt><tt class="py-name">acquire</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt> <tt class="py-op">=</tt> <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Thread</tt><tt class="py-op">(</tt><tt class="py-name">target</tt><tt class="py-op">=</tt><tt id="link-35" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-35', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-36" class="py-name"><a title="imagizer.exiftran.Exiftran._exiftranThread" class="py-name" href="#" onclick="return doclink('link-36', '_exiftranThread', 'link-26');">_exiftranThread</a></tt><tt class="py-op">,</tt> <tt class="py-name">args</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-number">2</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt><tt class="py-op">.</tt><tt id="link-37" class="py-name"><a title="imagizer.imagizer.ModelCopySelected.start
+imagizer.imagizer.ModelProcessSelected.start
+imagizer.imagizer.ModelRangeTout.start" class="py-name" href="#" onclick="return doclink('link-37', 'start', 'link-27');">start</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line"> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line"> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="Exiftran.autorotate"></a><div id="Exiftran.autorotate-def"><a name="L138"></a><tt class="py-lineno">138</tt> <a class="py-toggle" href="#" id="Exiftran.autorotate-toggle" onclick="return toggle('Exiftran.autorotate');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html#autorotate">autorotate</a><tt class="py-op">(</tt><tt class="py-param">filename</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran.autorotate-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Exiftran.autorotate-expanded"><a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line"><tt class="py-docstring">        auto rotate the given file </tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line"><tt class="py-docstring">        @param filename: name of the JPEG file to rotate</tt> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line"><tt class="py-docstring">        @type filename: python string</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line">        <tt class="py-name">logging</tt><tt class="py-op">.</tt><tt class="py-name">debug</tt><tt class="py-op">(</tt><tt class="py-string">"Exiftran.autorotate %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line">        <tt id="link-38" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-38', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-39" class="py-name"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-39', 'semaphore', 'link-18');">semaphore</a></tt><tt class="py-op">.</tt><tt class="py-name">acquire</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt> <tt class="py-op">=</tt> <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Thread</tt><tt class="py-op">(</tt><tt class="py-name">target</tt><tt class="py-op">=</tt><tt id="link-40" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-40', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-41" class="py-name"><a title="imagizer.exiftran.Exiftran._exiftranThread" class="py-name" href="#" onclick="return doclink('link-41', '_exiftranThread', 'link-26');">_exiftranThread</a></tt><tt class="py-op">,</tt> <tt class="py-name">args</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">filename</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line">        <tt class="py-name">myThread</tt><tt class="py-op">.</tt><tt id="link-42" class="py-name"><a title="imagizer.imagizer.ModelCopySelected.start
+imagizer.imagizer.ModelProcessSelected.start
+imagizer.imagizer.ModelRangeTout.start" class="py-name" href="#" onclick="return doclink('link-42', 'start', 'link-27');">start</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line"> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line"> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line">    <tt class="py-decorator">@</tt><tt class="py-decorator">staticmethod</tt> </tt>
+<a name="Exiftran.getSemaphoreValue"></a><div id="Exiftran.getSemaphoreValue-def"><a name="L151"></a><tt class="py-lineno">151</tt> <a class="py-toggle" href="#" id="Exiftran.getSemaphoreValue-toggle" onclick="return toggle('Exiftran.getSemaphoreValue');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="imagizer.exiftran.Exiftran-class.html#getSemaphoreValue">getSemaphoreValue</a><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Exiftran.getSemaphoreValue-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Exiftran.getSemaphoreValue-expanded"><a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line">        <tt class="py-docstring">"""return the value of the semaphore, either 0 or 1"""</tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-43" class="py-name"><a title="imagizer.exiftran.Exiftran" class="py-name" href="#" onclick="return doclink('link-43', 'Exiftran', 'link-21');">Exiftran</a></tt><tt class="py-op">.</tt><tt id="link-44" class="py-name"><a title="imagizer.exiftran.Exiftran.semaphore" class="py-name" href="#" onclick="return doclink('link-44', 'semaphore', 'link-18');">semaphore</a></tt><tt class="py-op">.</tt><tt class="py-name">_Semaphore__value</tt> </tt>
+</div></div><a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="imagizer-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Wed Feb 16 22:44:37 2011
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

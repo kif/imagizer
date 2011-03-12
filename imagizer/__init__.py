@@ -43,7 +43,7 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 
-from imagizer import * #I know this is ugly !
+#from imagizer import * #I know this is ugly !
 from config import Config
 from exiftran import Exiftran
 from imagecache import ImageCache

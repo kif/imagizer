@@ -1957,7 +1957,7 @@ def sous_titre(i):
   if i._attr:
     description = i._attr.get_def('description')
   elif i._comment:
-    description = unicode2html(i._comment)
+    description = unicode2html(i._comment.replace("<BR>", "\n")).replace("\n", "<BR>")
   if description:
     s_titre += '<br>\n' + description
   return s_titre
@@ -2321,7 +2321,7 @@ if desc_page:
         print("</h4></p>")
     if desc_page.has_key('comment'):
         print("<p>")
-        print(unicode2html(desc_page['comment']))
+        print(unicode2html(desc_page['comment'].replace("<BR>","\\n")).replace("\\n","<BR>"))
         print("</p>")
 -->
 </td></tr></table>
@@ -2383,7 +2383,7 @@ if len( dir._subdirs ) > 0:
                     else:
                         print '<td><a href="%s">%s</a></td>'%(rel(d._pagefn,cd),d._basename)
             if d._attrfile.has_key("comment"):
-                print "<td>%s</td>"%unicode2html(d._attrfile["comment"])
+                print "<td>%s</td>"%(unicode2html(d._attrfile["comment"].replace("<BR>","\\n")).replace("\\n","<BR>"))
             else:
                 print "<td> </td>"
             print "</tr>"
@@ -2395,14 +2395,14 @@ if len( dir._subdirs ) > 0:
                 comment=""
                 if  d._attrfile.has_key("comment"):
                     if len(d._attrfile["comment"])>50:
-                        words=re.sub("<BR>"," ",unicode2html(d._attrfile["comment"])).split()
+                        words=unicode2html(d._attrfile["comment"].replace("<BR>"," ")).split()
                         for w in words:
                             comment+=w+" "
                             if len(comment)>47:
                                 comment+="..."
                                 break 
                     else:
-                        comment=re.sub("<BR>"," ",unicode2html(d._attrfile["comment"]))
+                        comment=unicode2html(d._attrfile["comment"].replace("<BR>"," "))
                 if d._attrfile.has_key("date") and d._attrfile.has_key("title"):  
                     if len(d._attrfile["date"])>0:
                         print '<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]), comment)

@@ -483,7 +483,8 @@ class Interface:
         gtk.main()
 
     def flush_event_queue(self):
-        """Updates the GTK GUI before comming back to the gtk.main()"""
+        """Updates the GTK GUI before coming back to the gtk.main()"""
+#        self.xml.show_all()
         while gtk.events_pending():
             gtk.main_iteration()
 
