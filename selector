@@ -66,7 +66,7 @@ elif os.name == 'posix':
 import imagizer
 logger = logging.getLogger("imagizer.selector")
 from imagizer.encoding import  unicode2ascii
-from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, SmartSize, mkdir, RangeTout, installdir, RawImage, findFiles
+from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, smartSize, mkdir, RangeTout, installdir, RawImage, findFiles
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
 
@@ -102,7 +102,7 @@ else:
 #  ##### FullScreen Interface #####
 ################################################################################
 
-class FullScreenInterface:
+class FullScreenInterface(object):
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen"):
         self.image = None
         self.AllJpegs = AllJpegs
@@ -264,7 +264,7 @@ class FullScreenInterface:
 # ##### Normal Interface #####
 ################################################################################
 
-class Interface:
+class Interface(object):
     """
     class interface that manages the GUI using Glade-2
     """
@@ -1247,7 +1247,7 @@ class Interface:
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
         self.ShowImage()
-        t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
+        t = smartSize(size) + (len(self.Selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         dialog.run()
@@ -1280,7 +1280,7 @@ class Interface:
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
         self.ShowImage()
-        t = SmartSize(size) + (len(self.Selected),) + SmartSize(initsize) + (init,)
+        t = smartSize(size) + (len(self.Selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         dialog.run()
@@ -1292,7 +1292,7 @@ class Interface:
         logger.debug("Interface.calculateSize clicked")
         self.settitle()
         size = SelectedSize(self.Selected)
-        t = SmartSize(size) + (len(self.Selected),)
+        t = smartSize(size) + (len(self.Selected),)
         txt = "%.2f %s de données dans %i images sélectionnées" % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         dialog.run()

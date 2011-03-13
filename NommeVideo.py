@@ -308,6 +308,7 @@ class Video:
                 os.system('mplayer -vf rotate=2 "%s"' % self.fullPath)
             else:
                 os.system('mplayer "%s"' % self.fullPath)
+            logging.info("self.rotation was: %s" % self.rotation)
         else:
             os.system('mplayer "%s"' % self.fullPath)
             rotate = raw_input("What rotation should be applied to the file ? [0] ")
@@ -548,15 +549,29 @@ def RelativeName(Name):
 ############ Main program Start ################################################################
 ################################################################################################
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if OP.isdir(sys.argv[1]):
-            RootDir = sys.argv[1]
     if sys.argv[0].lower().find("nommevideo") >= 0:
         Action = "Rename"
     elif sys.argv[0].lower().find("genhtml") >= 0:
         Action = "GenHTML"
     else: #sys.argv[0].lower().find("genhtml") >= 0:
         Action = "DEBUG"
+    debug = False
+    for oneArg in sys.argv[1:]:
+        if OP.isdir(oneArg):
+            RootDir = oneArg
+        elif oneArg.lower().find("-d") in [0, 1]:
+            debug = True
+
+    if debug:
+        logger = logging.Logger("imagizer", logging.DEBUG)
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.DEBUG)
+    else:
+        logger = logging.Logger("imagizer", logging.INFO)
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+
     UpperDir = OP.split(RootDir)[0]
     if Action == "Rename":
         for onefile in FindFile(RootDir):

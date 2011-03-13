@@ -787,7 +787,7 @@ class photo(object):
 
         if self.metadata is None:
             self.metadata = {}
-            self.metadata["Taille"] = "%.2f %s" % SmartSize(os.path.getsize(self.fn))
+            self.metadata["Taille"] = "%.2f %s" % smartSize(os.path.getsize(self.fn))
             self.exif = pyexiv2.Image(self.fn)
             self.exif.readMetadata()
             self.metadata["Titre"] = self.exif.getComment()
@@ -1192,20 +1192,22 @@ def ScaleImage(filename, filigrane=None):
             print("Warning: unable to chmod %s" % filename)
 
 
-def SmartSize(size):
-    """print the size of files in a pretty way"""
+def smartSize(size):
+    """
+    Print the size of files in a pretty way
+    """
     unit = "o"
     fsize = float(size)
     if len(str(size)) > 3:
-        size /= 1024
+        size = size // 1024
         fsize /= 1024.0
         unit = "ko"
         if len(str(size)) > 3:
-            size = size / 1024
+            size = size // 1024
             fsize /= 1024.0
             unit = "Mo"
             if len(str(size)) > 3:
-                size = size / 1024
+                size = size // 1024
                 fsize /= 1024.0
                 unit = "Go"
     return fsize, unit

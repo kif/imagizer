@@ -1,4 +1,4 @@
-#Auroginal author: Loupmagic
+#original author: Loupmagic
 import pygtk
 pygtk.require('2.0')
 import gtk
