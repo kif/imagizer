@@ -14,24 +14,20 @@ class PyGtkMplayer(gtk.Socket):
 
     def __init__(self):
         gtk.Socket.__init__(self)
-        self.fifo = tempfile.mktemp(".fifo", "mplayer")
-        logger.debug("PyGtkMplayer: fifo name=" + self.fifo)
+        logger.debug("PyGtkMplayer: without fifo")
         self.mplayerSubP = None
-        os.mkfifo(self.fifo)
-        os.chmod(self.fifo, 0666)
         self.currentFile = None
 
     def execmplayer(self, cmd):
         "Write in the pipe in slave mode"
-        open(self.fifo, 'w').write(cmd + os.linesep)
+        self.mplayerSubP.stdin.write(cmd + os.linesep)
 
     def setwid(self, wid):
         "Run mplayer in the given window ID"
         logger.debug("PyGtkMplayer: mplayer on wid=%s" % wid)
         self.mplayerSubP = subprocess.Popen(
-                ["mplayer", "-nojoystick", "-nolirc", "-slave", "-vo", "x11", "-wid", str(wid), "-idle", "-input", "file=%s" % self.fifo],
-                stdout=subprocess.PIPE)
-#        os.system(" &" % (wid, self.fifo))
+                ["mplayer", "-nojoystick", "-nolirc", "-slave", "-vo", "x11", "-wid", str(wid), "-idle"],
+                stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
     def loadfile(self, filename):
         self.currentFile = filename
