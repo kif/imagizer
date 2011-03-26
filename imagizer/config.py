@@ -32,14 +32,6 @@ Technically it is a Borg (design Pattern) so every instance of Config has exactl
 import os, locale, logging, ConfigParser
 installdir = os.path.dirname(os.path.abspath(__file__))
 
-#here we detect the OS runnng the program so that we can call exftran in the right way
-if os.name == 'nt': #sys.platform == 'win32':
-    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
-elif os.name == 'posix':
-    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
-else:
-    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
-
 
 
 ################################################################################################
@@ -113,6 +105,20 @@ class Config:
                 "ExifExtraction":False,
                 "Quality": 75
                 }
+            #Video default options
+            self.ScratchDir = "/tmp"
+            self.VideoBitRate = 600
+            self.AudioBitRatePerChannel = 64
+            self.X264Options = "subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:bframes=3:frameref=5"
+            self.FramesPerSecond = 25
+            self.MPlayer = "/usr/bin/mplayer"
+            self.MEncoder = "/usr/bin/mencoder"
+            self.Sox = "/usr/bin/sox"
+            self.Convert = "/usr/bin/convert"
+            self.AviMerge = "/usr/bin/avimerge"
+            self.VideoExtensions = [".avi", ".mpeg", ".mpg", ".mp4", ".divx", ".mov", ".webm", ".mkv"]
+            self.ThumbnailExtensions = [".thm", ".jpg"]
+
 
     def load(self, filenames):
         """retrieves the the default options, if the filenames does not exist, uses the default instead
@@ -188,6 +194,27 @@ class Config:
                 elif j == "ExifExtraction".lower():dico["ExifExtraction"] = configparser.getboolean(k, "ExifExtraction")
                 elif j == "Quality".lower():dico["Quality"] = int(i[1])
             exec("self.%s=dico" % k)
+
+        #Read Video options
+        try:
+            for i in configparser.items("Video"):
+                j = i[0]
+                if j == "ScratchDir".lower():           self.ScratchDir = os.path.abspath(i[1])
+                elif j == "VideoBitRate".lower():       self.VideoBitRate = int(i[1])
+                elif j == "AudioBitRatePerChannel".lower(): self.AudioBitRatePerChannel = int(i[1])
+                elif j == "X264Options".lower():        self.X264Options = i[1]
+                elif j == "FramesPerSecond".lower():    self.FramesPerSecond = float(i[1])
+                elif j == "MPlayer".lower():            self.MPlayer = os.path.abspath(i[1])
+                elif j == "MEncoder".lower():           self.MEncoder = os.path.abspath(i[1])
+                elif j == "Sox".lower():                self.Sox = os.path.abspath(i[1])
+                elif j == "Convert".lower():            self.Convert = os.path.abspath(i[1])
+                elif j == "AviMerge".lower():           self.AviMerge = os.path.abspath(i[1])
+                elif j == "VideoExtensions".lower():    self.VideoExtentions = i[1].split()
+                elif j == "ThumbnailExtensions".lower():    self.ThumbnailExtensions = i[1].split()
+                else: logging.warning("Config.load: unknown key %s" % j)
+        except ConfigParser.NoSectionError:
+            logging.warning("No Video section in configuration file !")
+
 
     def __repr__(self):
         logging.debug("Config.__repr__")
@@ -276,6 +303,21 @@ class Config:
             lsttxt += ["#%s optimized JPEG (2 pass encoding)" % i, "Optimize: %s" % j["Optimize"], ""]
             lsttxt += ["#%s quality (in percent)" % i, "Quality: %s" % j["Quality"], ""]
             lsttxt += ["#%s image can be obtained by Exif extraction ?" % i, "ExifExtraction: %s" % j["ExifExtraction"], ""]
+
+        lsttxt += ["[Video]",
+            "#Directory where you want PBS to work? (/tmp)", "ScratchDir: %s" % self.ScratchDir, "",
+            "#Video bit rate Higher is better but bigger (600)", "VideoBitRate: %s" % self.VideoBitRate, "",
+            "#audio bit rate per ausio channel (x2 for stereo), default=64", "AudioBitRatePerChannel: %s" % self.AudioBitRatePerChannel, "",
+            "#Options to be used for the X264 encoder (man mencoder)", "X264Options: %s" % self.X264Options, "",
+            "#Number of Frames per secondes in the video (25):", "FramesPerSecond: %s" % self.FramesPerSecond, "",
+            "#Path to the mplayer (mplayer package) executable", "Mplayer: %s" % self.MPlayer, "",
+            "#Path to the mencoder (mplayer package) executable", "MEncoder: %s" % self.MEncoder, "",
+            "#Path to the sox (Sound processing) executable", "Sox: %s" % self.Sox, "",
+            "#Path to the convert (imagemagick package) executable", "Convert: %s" % self.Convert, "",
+            "#Path to the avimerge (transcode package) executable", "AviMerge: %s" % self.AviMerge, "",
+            "#List of video extensions", "VideoExtensions: %s" % " ".join(self.VideoExtensions), "",
+            "#list of thumbnail extension related to videos", "ThumbnailExtensions: %s" % " ".join(self.ThumbnailExtensions), "",
+            ]
         w = open(filename, "w")
         w.write(os.linesep.join(lsttxt))
         w.close()

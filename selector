@@ -54,22 +54,13 @@ try:
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 
-#here we detect the OS runnng the program so that we can call exftran in the right way
-
-if os.name == 'nt': #sys.platform == 'win32':
-    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
-elif os.name == 'posix':
-    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
-#else:
-#    raise OSError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
-
 import imagizer
 logger = logging.getLogger("imagizer.selector")
 from imagizer.encoding import  unicode2ascii
 from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, smartSize, mkdir, RangeTout, installdir, RawImage, findFiles
 from imagizer.parser import AttrFile
 from imagizer.dirchooser import WarningSc
-
+from imagizer import listConfigurationFiles
 
 try:
     import pygtk ; pygtk.require('2.0')
@@ -79,7 +70,6 @@ except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 
 config = Config()
-config.load(ConfFile)
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
     ImageFile.MAXBLOCK = 1000 * kpix
@@ -1058,7 +1048,7 @@ class Interface(object):
     def savePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
         logger.debug("Interface.savePref clicked")
-        config.saveConfig(ConfFile[-1])
+        config.saveConfig(listConfigurationFiles[-1])
 
     def setAutoRotate(self, *args):
         """Set the autorotate flag"""

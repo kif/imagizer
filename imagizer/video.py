@@ -1,16 +1,17 @@
+#coding: utf8
 #!/usr/bin/env python 
 # -*- coding: UTF8 -*-
 #******************************************************************************\
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
+#* the Free Software Foundation; either version 3 of the License, or
 #* (at your option) any later version.
 #*
 #* This program is distributed in the hope that it will be useful,
@@ -23,7 +24,6 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
-from Image import Image
 __author__ = "Jérôme Kieffer"
 __date__ = "23 Feb 2011"
 __copyright__ = "Jerome Kieffer"
@@ -31,40 +31,26 @@ __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
 #Find all the videos and renames them, compress then .... and write an html file to set online
-
 import logging
 import Image
 import os.path as OP
-import os, sys, tempfile, shutil, datetime, time, locale
+import os, tempfile, datetime, time
 import subprocess
-from imagizer import unicode2html, Html
+
 from hachoir_core.error import HachoirError
 from hachoir_core.cmd_line import unicodeFilename
 from hachoir_parser import createParser
 from hachoir_metadata import extractMetadata
 
-local = locale.getdefaultlocale()[1]
-webEncoding = "UTF8"
-fileEncoding = "UTF8"
 
-VIDEO_BIT_RATE = 600
-AUDIO_BIT_RATE_PER_CHANNEL = 64
-x264opts = "subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:bframes=3:frameref=5 -ofps 25"
-
-mplayer = "/usr/bin/mplayer"
-mencoder = "/usr/bin/mencoder"
-sox = "/usr/bin/sox"
-convert = "/usr/bin/convert"
-avimerge = "/usr/bin/avimerge"
-
-VideoExts = [".avi", ".mpeg", ".mpg", ".mp4", ".divx", ".mov"]
-ThumbExts = [".thm", ".jpg"]
+from config     import Config
+config = Config()
 
 RootDir = os.getcwd()
 UpperDir = OP.split(RootDir)[0]
 
 
-class Video:
+class Video(object):
     """main Video class"""
     def __init__(self, infile):
         """initialise the class"""
@@ -125,7 +111,7 @@ class Video:
             try:
                 dirdate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(dirname[:10], "%Y-%m-%d")))
             except:
-                pass
+                logging.warning(str("Unable to read date from: %s" % dirname))
         if dirdate:
             if dirdate.date() < self.timeStamp.date():
                 self.timeStamp = datetime.datetime.combine(dirdate.date(), self.timeStamp.time())
@@ -136,7 +122,7 @@ class Video:
         if OP.isfile(self.CommentFile):
             for l in open(OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".txt").readlines():
                 if len(l) > 2:
-                    k, d = l.decode(fileEncoding).split(None, 1)
+                    k, d = l.decode(config.Coding).split(None, 1)
                     self.data[k] = d.strip()
         self.Date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(self.data["ICRD"], "%Y-%m-%d")))
         if self.Date.date < self.timeStamp.date:
@@ -252,7 +238,7 @@ class Video:
     def MplayerMetadata(self):
         """Extract metadata using Mplayer"""
 #        for i in os.popen('%s "%s" -identify -vo null -ao null -frames 0 ' % (mplayer, self.fullPath)).readlines():
-        mplayerProcess = subprocess.Popen([mplayer, self.fullPath, "-identify", "-vo", "null", "-ao", "null", "-frames", "0"],
+        mplayerProcess = subprocess.Popen([config.MPlayer, self.fullPath, "-identify", "-vo", "null", "-ao", "null", "-frames", "0"],
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if not mplayerProcess.wait() == 0:
             logging.warning("mplayer ended with error !")
@@ -281,7 +267,7 @@ class Video:
         """scan the current directory for the thumbnail image"""
         for i in os.listdir(self.videoPath):
             b, e = OP.splitext(i)
-            if self.videoFile.find(b) == 0 and e.lower() in ThumbExts:
+            if self.videoFile.find(b) == 0 and e.lower() in config.ThumbnailExtensions:
                 self.thumb = i
                 filename = OP.join(self.videoPath, self.thumb)
                 filename, realname = unicodeFilename(filename), filename
@@ -303,16 +289,16 @@ class Video:
         """Plays the video using mplayer, tries to rotate the video of needed"""
         if self.rotation:
             if self.rotation == u"Rotated 90 clock-wise":
-                os.system('mplayer -vf rotate=1 "%s"' % self.fullPath)
+                os.system('%s -vf rotate=1 "%s"' % (config.MPlayer, self.fullPath))
             elif self.rotation == u"Rotated 90 counter clock-wise":
-                os.system('mplayer -vf rotate=2 "%s"' % self.fullPath)
+                os.system('%s -vf rotate=2 "%s"' % (config.MPlayer, self.fullPath))
             else:
-                os.system('mplayer "%s"' % self.fullPath)
-            logging.info("self.rotation was: %s" % self.rotation)
+                os.system('%s "%s"' % (config.MPlayer, self.fullPath))
+            logging.info(str("self.rotation was: %s" % self.rotation))
         else:
-            os.system('mplayer "%s"' % self.fullPath)
+            os.system('%s "%s"' % (config.MPlayer, self.fullPath))
             rotate = raw_input("What rotation should be applied to the file ? [0] ")
-            rotate = rotate.strip().lower().decode(local)
+            rotate = rotate.strip().lower().decode(config.Coding)
             logging.debug(rotate)
             if rotate in ["90", "cw"]:
                 self.rotation = u"Rotated 90 clock-wise"
@@ -328,63 +314,23 @@ class Video:
         print "camera : %s" % self.camera
         if self.data.has_key("INAM"):
             print "Former title: %s" % self.data["INAM"]
-        title = raw_input("Title (INAM): ").decode(local)
+        title = raw_input("Title (INAM): ").decode(config.Coding)
         if len(title) > 0:
             self.data["INAM"] = title.strip()
         if self.data.has_key("IKEY"):
             print "Former keywords: " + "\t".join(self.data["IKEY"].split(";"))
-        keywords = raw_input("Keywords (IKEY): ").decode(local).split()
+        keywords = raw_input("Keywords (IKEY): ").decode(config.Coding).split()
         if len(keywords) > 0:
             self.data["IKEY"] = ";".join(keywords)
         f = open(self.CommentFile, "w")
         for i in self.data:
-            f.write((u"%s %s\n" % (i, self.data[i])).encode(fileEncoding))
+            f.write((u"%s %s\n" % (i, self.data[i])).encode(config.Coding))
         f.close()
-
-
-    def Rencode(self):
-        """re-encode the video to the given quality"""
-        if self.rotation:
-            if self.rotation == u"Rotated 90 clock-wise":
-                rotate = " -vf rotate=1 "
-            elif self.rotation == u"Rotated 90 counter clock-wise":
-                rotate = " -vf rotate=2 "
-            else:
-                rotate = " "
-        bDoAudio = (self.audioCodec.lower().find("pcm") >= 0)
-        #print "Audio spec= " + self.audioCodec
-        bDoVideo = (not (self.videoCodec.lower().find("h264") >= 0 or self.videoCodec.lower().find("avc1") >= 0)) or self.videoFile.lower().endswith(".mov")
-        logging.debug(str("DoAudio=%s\tDoVideo=%s" % (bDoAudio, bDoVideo)))
-        if bDoAudio:
-            __, rawaudio = tempfile.mkstemp(suffix=".raw")
-            os.system(mplayer + " %s -dumpaudio   -dumpfile %s " % (self.fullPath, rawaudio))
-            __, wavaudio = tempfile.mkstemp(suffix=".wav")
-            print "AudioSampleRate= %s" % self.audioSampleRate
-#            if self.audioSampleRate == 44100:
-            os.system(sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s " % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
-        __, tmpavi = tempfile.mkstemp(suffix=".avi")
-        if False:
-        #if bDoVideo:
-            os.system(mencoder + rotate + " -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:turbo=1:%s -o %s %s" % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
-            os.remove(tmpavi)
-            os.system(mencoder + rotate + " -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s %s" % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
-            os.remove(tmpavi)
-            if bDoAudio:
-                os.system(mencoder + rotate + "-oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s %s " % (AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
-#                os.remove(wavaudio)
-            else:
-                os.system(mencoder + rotate + "-oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s %s" % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
-            if os.path.isfile("divx2pass.log"):os.remove("divx2pass.log")
-            if os.path.isfile("divx2pass.log.temp"):os.remove("divx2pass.log.temp")
-        else:
-            shutil.copy(self.fullPath, tmpavi)
-        print "%s -o %s -i %s -f %s" % (avimerge, self.destinationFile, tmpavi, self.CommentFile)
-        os.system("%s -o %s -i %s -f %s" % (avimerge, self.destinationFile, tmpavi, self.CommentFile))
-#        os.remove(tmpavi)
 
 
     def PBSRencode(self):
         """re-encode the video to the given quality, using the PBS queuing system"""
+        self.mkdir()
         pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".pbs"
         pbsfile = open(pbsFilename, "w")
         pbsfile.write("#!/bin/bash\n#PBS -d/scratch\nif  [ -d /scratch/$PBS_JOBID ] ; then cd /scratch/$PBS_JOBID ;else cd /tmp; fi\n")
@@ -418,38 +364,38 @@ class Video:
             wavaudio = "audio-%s.wav" % newSampleRate
             if (self.audioSampleRate == 11024) and (self.audioChannel == 1): #specific Ixus 
                 rawaudio = "audio-%s.raw" % self.audioSampleRate
-                pbsfile.write(mplayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.fullPath, rawaudio))
-                pbsfile.write(sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s \n" % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
+                pbsfile.write(config.MPlayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.fullPath, rawaudio))
+                pbsfile.write(config.Sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s \n" % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
                 pbsfile.write("rm %s \n" % rawaudio)
             elif self.audioSampleRate == 44100:
                 wavaudio = "audio-44100.wav"
-                pbsfile.write(mplayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (wavaudio, self.fullPath))
+                pbsfile.write(config.MPlayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (wavaudio, self.fullPath))
             else:
                 rawaudio = "audio-%s.wav" % self.audioSampleRate
-                pbsfile.write(mplayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.fullPath))
-                pbsfile.write(sox + " %s -r %s  %s \n" % (rawaudio, newSampleRate, wavaudio))
+                pbsfile.write(config.MPlayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.fullPath))
+                pbsfile.write(config.Sox + " %s -r %s  %s \n" % (rawaudio, newSampleRate, wavaudio))
                 pbsfile.write("rm %s \n" % rawaudio)
 
         tmpavi = "temporary.avi"
         if bDoVideo:
-            pbsfile.write(mencoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+            pbsfile.write(config.MEncoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
-            pbsfile.write(mencoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+            pbsfile.write(config.MEncoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
             if bDoAudio:
                 if self.audioChannel < 2:
-                    pbsfile.write(mencoder + videoFilters + ' -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+                    pbsfile.write(config.MEncoder + videoFilters + ' -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
                 else:
-                    pbsfile.write(mencoder + videoFilters + ' -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (2 * AUDIO_BIT_RATE_PER_CHANNEL, wavaudio, VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+                    pbsfile.write(config.MEncoder + videoFilters + ' -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (2 * config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
                 pbsfile.write("rm %s \n" % wavaudio)
             else:
-                pbsfile.write(mencoder + videoFilters + '-oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s "%s" \n' % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
+                pbsfile.write(config.MEncoder + videoFilters + '-oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
             pbsfile.write("if [ -f divx2pass.log ]; then rm divx2pass.log ; fi\n")
             pbsfile.write("if [ -f divx2pass.log.temp ]; then rm divx2pass.log.temp ; fi\n")
         else:
             pbsfile.write("cp %s %s\n" % (self.fullPath, tmpavi))
 #            shutil.copy(self.fullPath, tmpavi)
-        pbsfile.write('%s -o %s -i %s -f "%s" \n' % (avimerge, self.destinationFile, tmpavi, self.CommentFile))
+        pbsfile.write('%s -o %s -i %s -f "%s" \n' % (config.AviMerge, self.destinationFile, tmpavi, self.CommentFile))
         pbsfile.write("rm %s \n" % tmpavi)
         pbsfile.close()
         os.system('qsub "%s"' % pbsFilename)
@@ -458,7 +404,7 @@ class Video:
     def GenThumb(self, size=160):
         """Generate a thumbnail for the image"""
         tempdir = tempfile.mkdtemp()
-        sub = subprocess.Popen([mplayer, self.fullPath, "-vo", "jpeg:outdir=%s" % tempdir, "-ao", "null", "-frames", "1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        sub = subprocess.Popen([config.MPlayer, self.fullPath, "-vo", "jpeg:outdir=%s" % tempdir, "-ao", "null", "-frames", "1"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         sub.wait()
         listThumb = [os.path.join(tempdir, i) for i in os.listdir(tempdir)]
         if len(listThumb) != 1:
@@ -467,7 +413,6 @@ class Video:
         img = Image.open(listThumb[0])
         img.thumbnail((size, size))
         img.save(self.thumbName)
-#        sub = subprocess.Popen(["%s -geometry %ix%i %s/*.jpg %s" % (convert, size, size, tempdir, self.thumbName))
         for i in listThumb:
             os.remove(i)
         os.rmdir(tempdir)
@@ -475,175 +420,3 @@ class Video:
 ################################################################################
 # END of the class VIDEO
 ################################################################################
-
-def FindFile(rootDir):
-    """returns a list of the files with the given suffix in the given dir
-    files=os.system('find "%s"  -iname "*.%s"'%(rootDir,suffix)).readlines()
-    """
-    files = []
-    for i in VideoExts:
-        files += parser().findExts(rootDir, i)
-    good = []
-    l = len(rootDir) + 1
-    for i in files: good.append(i.strip()[l:])
-    good.sort()
-    return good
-
-
-
-class parser:
-    """this class searches all the jpeg files"""
-    def __init__(self):
-        self.imagelist = []
-        self.root = None
-        self.suffix = None
-
-
-    def oneDir(self, curent):
-        """ append all the imagesfiles to the list, then goes recursively to the subdirectories"""
-        ls = os.listdir(curent)
-        for i in ls:
-            a = os.path.join(curent, i)
-            if    os.path.isdir(a):
-                self.oneDir(a)
-            if  os.path.isfile(a):
-                if i.lower().endswith(self.suffix):
-                    self.imagelist.append(os.path.join(curent, i))
-
-
-    def findExts(self, root, suffix):
-        self.root = root
-        self.suffix = suffix
-        self.oneDir(self.root)
-        return self.imagelist
-
-
-
-
-
-def RelativeName(Name):
-    cur = []
-    a = RootDir
-    while len(a) > 1:
-        a, b = os.path.split(a)
-        cur.append(b)
-    cur.reverse()
-    fil = []
-    a = Name
-    while len(a) > 1:
-        a, b = os.path.split(a)
-        fil.append(b)
-    fil.reverse()
-    newfil = []
-    for i in range(len(fil)):
-#        print i,newfil
-        if len(cur) < i + 1:newfil.append(fil[i])
-        elif fil[i] == cur[i]:continue
-    return OP.join(*tuple(newfil))
-
-
-
-
-
-################################################################################################
-############ Main program Start ################################################################
-################################################################################################
-if __name__ == "__main__":
-    if sys.argv[0].lower().find("nommevideo") >= 0:
-        Action = "Rename"
-    elif sys.argv[0].lower().find("genhtml") >= 0:
-        Action = "GenHTML"
-    else: #sys.argv[0].lower().find("genhtml") >= 0:
-        Action = "DEBUG"
-    debug = False
-    for oneArg in sys.argv[1:]:
-        if OP.isdir(oneArg):
-            RootDir = oneArg
-        elif oneArg.lower().find("-d") in [0, 1]:
-            debug = True
-
-    if debug:
-        logger = logging.Logger("imagizer", logging.DEBUG)
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.DEBUG)
-    else:
-        logger = logging.Logger("imagizer", logging.INFO)
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-    logger.addHandler(ch)
-
-    UpperDir = OP.split(RootDir)[0]
-    if Action == "Rename":
-        for onefile in FindFile(RootDir):
-    #for onefile in os.listdir("."):
-    #    if OP.splitext(onefile)[1].lower() in VideoExts:
-            vi = Video(onefile)
-            vi.FindThumb()
-            vi.mkdir()
-            if not OP.isfile(vi.destinationFile):
-                vi.PlayVideo()
-                logging.info(vi.__repr__())
-                vi.setTitle()
-                vi.PBSRencode()
-    elif Action == "GenHTML":
-        videos = {}
-        for onefile in FindFile(RootDir):
-            vi = Video(onefile)
-            if not videos.has_key(vi.timeStamp.date().isoformat()):
-                videos[vi.timeStamp.date().isoformat()] = [vi]
-            else:
-                videos[vi.timeStamp.date().isoformat()].append(vi)
-        date = videos.keys()
-        date.sort()
-        print date
-        html = Html("Videos", enc=webEncoding)
-        html.element("a name='begin'")
-
-        for onedate in date:
-            html.element("b", videos[onedate][0].timeStamp.date().strftime("%A, %d %B %Y").capitalize().decode(local))
-            html.start("table", {"cellspacing":10})
-            for onevideo in videos[onedate]:
-                onevideo.GenThumb()
-                html.start("tr")
-                html.start("td", {"width":200})
-                print RelativeName(onevideo.fullPath)
-                html.start("a", {"href":RelativeName(onevideo.fullPath)})
-                thumb = RelativeName(onevideo.thumbName)
-                html.start("img", {"src":thumb, "alt":thumb})
-                html.stop("img")
-                html.stop("a")
-                html.stop("td")
-                html.start("td")
-                html.data(onevideo.timeStamp.time().strftime("%Hh%Mm%Ss").decode(local))
-                html.start("br")
-                logging.debug(str("duration: %s" % onevideo.duration))
-                html.data(u"Dur\xe9e %is" % onevideo.duration)
-                html.stop("td")
-#                print(onevideo.title, type(onevideo.title))
-                html.element("td", onevideo.title)
-                html.stop("tr")
-            html.stop("table")
-            html.start("hr/")
-        html.element("a name='end'")
-        html.write("index.html")
-
-    else:
-        videos = {}
-        for onefile in FindFile(RootDir):
-            vi = Video(onefile)
-            if not videos.has_key(vi.timeStamp.date().isoformat()):
-                videos[vi.timeStamp.date().isoformat()] = [vi]
-            else:
-                videos[vi.timeStamp.date().isoformat()].append(vi)
-        date = videos.keys()
-        date.sort()
-        logging.info("List of all dates:" + os.linesep.join(date))
-        for onedate in date:
-            for onevideo in videos[onedate]:
-                try:
-                    logging.info(str(onevideo))
-                except:
-                    logging.error(str("in processing %s " % onevideo.fullPath))
-                    logging.error(str(onevideo.__repr__()))
-                print "#" * 50
-

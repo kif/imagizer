@@ -55,17 +55,12 @@ gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.dirname(__file__)
-if os.name == 'nt': #sys.platform == 'win32':
-    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf"), "imagizer.conf"]
-elif os.name == 'posix':
-    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer"), ".imagizer"]
 
 unifiedglade = os.path.join(installdir, "selector.glade")
 from signals import Signal
-from encoding import unicode2html, unicode2ascii
+from encoding import unicode2ascii
 from config import Config
 config = Config()
-config.load(ConfFile)
 if config.ImageCache > 1:
     import imagecache
     imageCache = imagecache.ImageCache(maxSize=config.ImageCache)

@@ -34,7 +34,7 @@ __author__ = "Jérôme Kieffer"
 __contact__ = "jerome.kieffer@terre-adelie.org"
 __version__ = "1.1.0"
 
-import logging, sys
+import os, logging, sys
 logger = logging.Logger("imagizer", logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
@@ -42,9 +42,15 @@ ch.setLevel(logging.DEBUG)
 #ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+if os.name == 'nt': #sys.platform == 'win32':
+    listConfigurationFiles = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+elif os.name == 'posix':
+    listConfigurationFiles = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
 
-#from imagizer import * #I know this is ugly !
 from config import Config
+config = Config()
+config.load(listConfigurationFiles)
+
 from exiftran import Exiftran
 from imagecache import ImageCache
 from parser import AttrFile
