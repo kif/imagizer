@@ -160,8 +160,18 @@ class VideoInterface(object):
         if self.video is None:
             logger.warning("VideoInterface.reEncode but self.video is None !!!")
         else:
-            self.video.data["INAM"] = self.xml.get_widget("title").get_text().strip()
-            self.video.data["IKEY"] = ";".join(self.xml.get_widget("keyword").get_text().split())
+            myTitle = self.xml.get_widget("title").get_text().strip()
+            logger.debug("title is type %s" % type(myTitle))
+            if myTitle:
+                self.video.data["INAM"] = myTitle
+            lstKeys = self.xml.get_widget("keyword").get_text().split()
+            if lstKeys:
+                self.video.data["IKEY"] = ";".join(lstKeys)
+            strCamera = self.xml.get_widget("model").get_text().strip()
+            if strCamera:
+                self.video.camera = strCamera
+                self.video.data["ISRF"] = strCamera
+
             f = open(self.video.CommentFile, "w")
             for i in self.video.data:
                 f.write((u"%s %s%s" % (i, self.video.data[i], os.linesep)).encode(config.Coding))
@@ -179,7 +189,7 @@ class VideoInterface(object):
                 logger.warning("Not in DataTime format ...")
             else:
                 self.video.timeStamp = timeVideo
-            self.video.PBSRencode()
+            self.video.reEncode()
 
 if __name__ == "__main__":
     inFile = None

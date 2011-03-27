@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006 - 2009,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -46,7 +46,7 @@ class Config:
         """
         self.__dict__ = self.__shared_state
         if len(self.__dict__) < 5:
-            logging.debug("Config: initializition of the class")
+            logging.debug("Config: initialization of the class")
             self.ScreenSize = 500
             self.NbrPerPage = 20
             self.PagePrefix = "page"
@@ -118,6 +118,7 @@ class Config:
             self.AviMerge = "/usr/bin/avimerge"
             self.VideoExtensions = [".avi", ".mpeg", ".mpg", ".mp4", ".divx", ".mov", ".webm", ".mkv"]
             self.ThumbnailExtensions = [".thm", ".jpg"]
+            self.BatchScriptExecutor = "/bin/bash"
 
 
     def load(self, filenames):
@@ -176,7 +177,7 @@ class Config:
             elif j == "ImageHeight".lower():     self.ImageHeight = int(i[1])
             elif j == "gimp".lower():            self.Gimp = i[1]
             elif j == "dcraw".lower():           self.Dcraw = i[1]
-            else: logging.warning("Config.load: unknown key %s" % j)
+            else: logging.warning(str("Config.load: unknown key %s" % j))
 
 
         for k in ["ScaledImages", "Thumbnails"]:
@@ -209,9 +210,10 @@ class Config:
                 elif j == "Sox".lower():                self.Sox = os.path.abspath(i[1])
                 elif j == "Convert".lower():            self.Convert = os.path.abspath(i[1])
                 elif j == "AviMerge".lower():           self.AviMerge = os.path.abspath(i[1])
-                elif j == "VideoExtensions".lower():    self.VideoExtentions = i[1].split()
+                elif j == "VideoExtensions".lower():    self.VideoExtensions = i[1].split()
                 elif j == "ThumbnailExtensions".lower():    self.ThumbnailExtensions = i[1].split()
-                else: logging.warning("Config.load: unknown key %s" % j)
+                elif j == "BatchScriptExecutor".lower():    self.BatchScriptExecutor = os.path.abspath(i[1])
+                else: logging.warning(str("Config.load: unknown key %s" % j))
         except ConfigParser.NoSectionError:
             logging.warning("No Video section in configuration file !")
 
@@ -237,20 +239,25 @@ class Config:
 
     def printConfig(self):
         """
-        Print out the  
+        Print out the configuration
         """
         logging.debug("Config.printConfig")
         logging.info(self.__repr__())
 
 
     def saveConfig(self, filename):
+        """Wrapper for self.config"""
+        self.save(filename)
+
+
+    def save(self, filename):
         """
         Saves the default options to file
         
         @param filename: name of the file to save the configuration to
         @type filename: string or unicode
         """
-        logging.debug("Config.saveConfig")
+        logging.debug("Config.save")
         lsttxt = ["[Selector]",
         "#Size of the image on the Screen, by default", "ScreenSize: %s" % self.ScreenSize, "",
         "#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]", "Interpolation: %s" % self.Interpolation, "",
@@ -310,17 +317,18 @@ class Config:
             "#audio bit rate per ausio channel (x2 for stereo), default=64", "AudioBitRatePerChannel: %s" % self.AudioBitRatePerChannel, "",
             "#Options to be used for the X264 encoder (man mencoder)", "X264Options: %s" % self.X264Options, "",
             "#Number of Frames per secondes in the video (25):", "FramesPerSecond: %s" % self.FramesPerSecond, "",
-            "#Path to the mplayer (mplayer package) executable", "Mplayer: %s" % self.MPlayer, "",
+            "#Path to the mplayer (mplayer package) executable", "MPlayer: %s" % self.MPlayer, "",
             "#Path to the mencoder (mplayer package) executable", "MEncoder: %s" % self.MEncoder, "",
             "#Path to the sox (Sound processing) executable", "Sox: %s" % self.Sox, "",
             "#Path to the convert (imagemagick package) executable", "Convert: %s" % self.Convert, "",
             "#Path to the avimerge (transcode package) executable", "AviMerge: %s" % self.AviMerge, "",
             "#List of video extensions", "VideoExtensions: %s" % " ".join(self.VideoExtensions), "",
             "#list of thumbnail extension related to videos", "ThumbnailExtensions: %s" % " ".join(self.ThumbnailExtensions), "",
+            "#Batch queueing system launcher (/bin/sh if none present)", "BatchScriptExecutor: %s" % self.BatchScriptExecutor, "",
             ]
         w = open(filename, "w")
         w.write(os.linesep.join(lsttxt))
         w.close()
         if self.DEBUG:
-            logging.info("Configuration saved to file %s" % filename)
+            logging.info(str("Configuration saved to file %s" % filename))
 

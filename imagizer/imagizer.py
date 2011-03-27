@@ -66,7 +66,8 @@ if config.ImageCache > 1:
     imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
 else:
     imageCache = None
-import pyexiv2
+
+from exif import Exif
 
 
 
@@ -662,8 +663,8 @@ class photo(object):
             print "sorry, file %s exists" % strThumbFile
         else:
             if self.exif is None:
-                self.exif = pyexiv2.Image(self.fn)
-                self.exif.readMetadata()
+                self.exif = Exif(self.fn)
+                self.exif.read()
             extract = False
             print "process file %s exists" % strThumbFile
             if ExifExtraction:
@@ -783,9 +784,9 @@ class photo(object):
         if self.metadata is None:
             self.metadata = {}
             self.metadata["Taille"] = "%.2f %s" % smartSize(os.path.getsize(self.fn))
-            self.exif = pyexiv2.Image(self.fn)
-            self.exif.readMetadata()
-            self.metadata["Titre"] = self.exif.getComment()
+            self.exif = Exif(self.fn)
+            self.exif.read()
+            self.metadata["Titre"] = self.exif.comment
             if self.pixelsX and self.pixelsY:
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             else:
@@ -795,7 +796,7 @@ class photo(object):
                 except (IndexError, KeyError):
                     self.taille()
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
-            if "Exif.Image.Orientation" in self.exif.exifKeys():
+            if "Exif.Image.Orientation" in self.exif.exif_keys:
                 self.orientation = self.exif["Exif.Image.Orientation"]
             for key in clef:
                 try:
@@ -869,7 +870,7 @@ class photo(object):
             self.pil = None
         self.metadata["Titre"] = titre
         self.exif.setComment(titre)
-        self.exif.writeMetadata()
+        self.exif.write()
 
 
     def renameFile(self, newname):
@@ -887,8 +888,8 @@ class photo(object):
         self.fn = newfn
         self.exif = newfn
         if self.exif is not None:
-            self.exif = pyexiv2.Image(self.fn)
-            self.exif.readMetadata()
+            self.exif = Exif(self.fn)
+            self.exif.read()
         if (imageCache is not None) and oldname in imageCache:
             imageCache.rename(oldname, newname)
 
@@ -904,7 +905,7 @@ class photo(object):
         if self.metadata == None:
             self.readExif()
         self.exif["Exif.Photo.UserComment"] = originalName
-        self.exif.writeMetadata()
+        self.exif.write()
 
 
     def autorotate(self):
@@ -1047,8 +1048,8 @@ class RawImage:
     def getJpegPath(self):
 
         if self.exif is None:
-            self.exif = pyexiv2.Image(self.strRawFile)
-            self.exif.readMetadata()
+            self.exif = Exif(self.strRawFile)
+            self.exif.read()
         if self.strJepgFile is None:
             self.strJepgFile = unicode2ascii("%s-%s.jpg" % (
                     self.exif.interpretedExifValue("Exif.Photo.DateTimeOriginal").replace(" ", os.sep).replace(":", "-", 2).replace(":", "h", 1).replace(":", "m", 1),
@@ -1088,8 +1089,8 @@ class RawImage:
             img = Image.fromstring("RGB", tuple([int(i) for i in data[1].split()]), "".join(tuple(data[3:])))
             img.save(strJpegFullPath, format='JPEG')
             #Copy all metadata useful for us.
-            exifJpeg = pyexiv2.Image(strJpegFullPath)
-            exifJpeg.readMetadata()
+            exifJpeg = Exif(strJpegFullPath)
+            exifJpeg.read()
             exifJpeg['Exif.Image.Orientation'] = 1
             exifJpeg["Exif.Photo.UserComment"] = self.strRawFile
             for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal', 'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue', 'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings']:
@@ -1098,6 +1099,7 @@ class RawImage:
                 except:
                     print("error in copying metadata %s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
             #self.exif.copyMetadataTo(self.strJepgFile)
+
             exifJpeg.writeMetadata()
 
         else: #in config.Extensions, i.e. a JPEG file

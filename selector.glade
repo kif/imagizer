@@ -3342,7 +3342,6 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                   <widget class="GtkEntry" id="model">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="editable">False</property>
                     <property name="invisible_char">&#x2022;</property>
                   </widget>
                   <packing>

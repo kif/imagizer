@@ -1048,7 +1048,7 @@ class Interface(object):
     def savePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
         logger.debug("Interface.savePref clicked")
-        config.saveConfig(listConfigurationFiles[-1])
+        config.save(listConfigurationFiles[-1])
 
     def setAutoRotate(self, *args):
         """Set the autorotate flag"""

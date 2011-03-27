@@ -123,7 +123,7 @@ if not configured:
     if LANG:
         config.Locale = LANG
     config.printConfig()
-    config.saveConfig("/etc/imagizer.conf")
+    config.save("/etc/imagizer.conf")
     print "Configuration finished .... Saving it\nYou can modify it in /etc/imagizer.conf"
 
     try:

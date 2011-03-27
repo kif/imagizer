@@ -36,6 +36,7 @@ import Image
 import os.path as OP
 import os, tempfile, datetime, time
 import subprocess
+import hashlib
 
 from hachoir_core.error import HachoirError
 from hachoir_core.cmd_line import unicodeFilename
@@ -118,9 +119,10 @@ class Video(object):
         self.data["ICRD"] = self.timeStamp.strftime("%Y-%m-%d")
         self.data["ISRF"] = self.camera
         self.data["IARL"] = self.videoFile.replace("-H264", "")
-        self.CommentFile = OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".txt"
+        self.data["ISRC"] = hashlib.md5(open(self.fullPath, "rb").read()).hexdigest()
+        self.CommentFile = OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta"
         if OP.isfile(self.CommentFile):
-            for l in open(OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".txt").readlines():
+            for l in open(OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta").readlines():
                 if len(l) > 2:
                     k, d = l.decode(config.Coding).split(None, 1)
                     self.data[k] = d.strip()
@@ -328,13 +330,12 @@ class Video(object):
         f.close()
 
 
-    def PBSRencode(self):
+    def reEncode(self):
         """re-encode the video to the given quality, using the PBS queuing system"""
         self.mkdir()
-        pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".pbs"
+        pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".sh"
         pbsfile = open(pbsFilename, "w")
-        pbsfile.write("#!/bin/bash\n#PBS -d/scratch\nif  [ -d /scratch/$PBS_JOBID ] ; then cd /scratch/$PBS_JOBID ;else cd /tmp; fi\n")
-
+        pbsfile.write("#!/bin/bash\n#PBS -d%s\nif  [ -d %s/$PBS_JOBID ] ; then cd %s/$PBS_JOBID ;else cd /tmp; fi\n" % (config.ScratchDir, config.ScratchDir, config.ScratchDir))
         bDoResize = (self.width > 640)
 
         listVideoFilters = []
@@ -398,7 +399,9 @@ class Video(object):
         pbsfile.write('%s -o %s -i %s -f "%s" \n' % (config.AviMerge, self.destinationFile, tmpavi, self.CommentFile))
         pbsfile.write("rm %s \n" % tmpavi)
         pbsfile.close()
-        os.system('qsub "%s"' % pbsFilename)
+        encodeProcess = subprocess.Popen([config.BatchScriptExecutor, pbsFilename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        logging.debug(str("Subprocess with pid=%s" % encodeProcess.pid))
+#        os.system('qsub "%s"' % pbsFilename)
 
 
     def GenThumb(self, size=160):
