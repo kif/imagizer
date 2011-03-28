@@ -869,7 +869,7 @@ class photo(object):
         if os.name == 'nt' and self.pil != None:
             self.pil = None
         self.metadata["Titre"] = titre
-        self.exif.setComment(titre)
+        self.exif.comment = titre
         self.exif.write()
 
 
