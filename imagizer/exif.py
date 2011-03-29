@@ -30,11 +30,11 @@ else:
             return self.readMetadata()
         def write(self):
             return self.writeMetadata()
-        def getcomment(self):
-            return self.getComment()
-        def setcomment(self, value):
-            return self.setComment(value)
-        comment = property(getcomment, setcomment)
+        def getComment(self):
+            return pyexiv2.Image.getComment(self)
+        def setComment(self, value):
+            return pyexiv2.Image.setComment(self, value)
+        comment = property(getComment, setComment)
         def getExifKeys(self):
             return self.exifKeys()
         exif_keys = property(getExifKeys)
