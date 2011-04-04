@@ -229,8 +229,7 @@ else:
 
 
 from imagizer.config import Config
-#import imagizer.EXIF as EXIF
-import pyexiv2
+from imagizer.exif import Exif
 from imagizer.parser import AttrFile
 
 config = Config()
@@ -1979,9 +1978,9 @@ def exif(filename):
  'Exif.Photo.ISOSpeedRatings'
 ]
     data = {}
-    image_exif = pyexiv2.Image(filename)
-    image_exif.readMetadata()
-    comment = image_exif.getComment().decode("utf-8")
+    image_exif = Exif(filename)
+    image_exif.read()
+    comment = image_exif.comment
 
     for i in clef:
         try:
