@@ -118,7 +118,8 @@ class Config:
             self.AviMerge = "/usr/bin/avimerge"
             self.VideoExtensions = [".avi", ".mpeg", ".mpg", ".mp4", ".divx", ".mov", ".webm", ".mkv"]
             self.ThumbnailExtensions = [".thm", ".jpg"]
-            self.BatchScriptExecutor = "/bin/bash"
+            self.BatchScriptExecutor = "/usr/bin/batch"
+            self.BatchUsesPipe = True
 
 
     def load(self, filenames):
@@ -213,6 +214,8 @@ class Config:
                 elif j == "VideoExtensions".lower():    self.VideoExtensions = i[1].split()
                 elif j == "ThumbnailExtensions".lower():    self.ThumbnailExtensions = i[1].split()
                 elif j == "BatchScriptExecutor".lower():    self.BatchScriptExecutor = os.path.abspath(i[1])
+                elif j == "BatchUsesPipe".lower():            self.BatchUsesPipe = configparser.getboolean("Video", "BatchUsesPipe")
+
                 else: logging.warning(str("Config.load: unknown key %s" % j))
         except ConfigParser.NoSectionError:
             logging.warning("No Video section in configuration file !")
@@ -325,6 +328,7 @@ class Config:
             "#List of video extensions", "VideoExtensions: %s" % " ".join(self.VideoExtensions), "",
             "#list of thumbnail extension related to videos", "ThumbnailExtensions: %s" % " ".join(self.ThumbnailExtensions), "",
             "#Batch queueing system launcher (/bin/sh if none present)", "BatchScriptExecutor: %s" % self.BatchScriptExecutor, "",
+            "#Batch queuing needs a pipe (like batch) or not (like PBS)", "BatchUsesPipe: %s" % self.BatchUsesPipe, "",
             ]
         w = open(filename, "w")
         w.write(os.linesep.join(lsttxt))

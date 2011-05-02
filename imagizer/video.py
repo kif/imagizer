@@ -1,6 +1,5 @@
-#coding: utf8
 #!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+# -*- coding: utf8 -*-
 #******************************************************************************\
 #* $Source$
 #* $Id$
@@ -25,38 +24,43 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "23 Feb 2011"
-__copyright__ = "Jerome Kieffer"
+__date__ = "28 Apr 2011"
+__copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
+
+import os, sys, hashlib, logging, tempfile, datetime, time, subprocess, threading
+
+import imagizer
+logger = logging.getLogger("imagizer")
+logger.setLevel(logging.INFO)
+
 #Find all the videos and renames them, compress then .... and write an html file to set online
-import logging
+
 import Image
 import os.path as OP
-import os, tempfile, datetime, time
-import subprocess
-import hashlib
 
 from hachoir_core.error import HachoirError
 from hachoir_core.cmd_line import unicodeFilename
 from hachoir_parser import createParser
 from hachoir_metadata import extractMetadata
 
-
-from config     import Config
+from config  import Config
 config = Config()
 
-RootDir = os.getcwd()
-UpperDir = OP.split(RootDir)[0]
 
+def writeStdOutErr(std, filename):
+        open(filename, 'wb').write(std.read())
 
 class Video(object):
     """main Video class"""
     def __init__(self, infile):
         """initialise the class"""
         self.fullPath = OP.abspath(infile)
-        print "Processing %s" % self.fullPath
+        self.videoPath = ""
+        self.videoFile = ""
+        logger.info("Processing %s" % self.fullPath)
         [self.videoPath, self.videoFile] = OP.split(self.fullPath)
         self.title = u""
         self.width = 0
@@ -116,10 +120,14 @@ class Video(object):
         if dirdate:
             if dirdate.date() < self.timeStamp.date():
                 self.timeStamp = datetime.datetime.combine(dirdate.date(), self.timeStamp.time())
-        self.data["ICRD"] = self.timeStamp.strftime("%Y-%m-%d")
-        self.data["ISRF"] = self.camera
-        self.data["IARL"] = self.videoFile.replace("-H264", "")
-        self.data["ISRC"] = hashlib.md5(open(self.fullPath, "rb").read()).hexdigest()
+        if "ICRD" not in self.data:
+            self.data["ICRD"] = self.timeStamp.strftime("%Y-%m-%d")
+        if "ISRF" not in self.data:
+            self.data["ISRF"] = self.camera
+        if "IARL" not in self.data:
+            self.data["IARL"] = self.videoFile.replace("-H264", "")
+        if "ISRC" not in self.data:
+            self.data["ISRC"] = hashlib.md5(open(self.fullPath, "rb").read()).hexdigest()
         self.CommentFile = OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta"
         if OP.isfile(self.CommentFile):
             for l in open(OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta").readlines():
@@ -141,6 +149,25 @@ class Video(object):
             txt += "\t%s:\t%s\n" % (key, self.data[key])
         return txt
 
+    def isEncoded(self):
+        """
+        Return if a video is already encoded (H264, MP3, name according to convention
+        @return: True if a video is already encoded
+        @rtype: boolean 
+        """
+        bIsEncoded = self.videoFile.endswith(".avi") and\
+                      (self.audioCodec is not None and "mp" in self.audioCodec.lower()) and\
+                      (self.videoCodec is not None and "h264" in self.videoCodec.lower())
+        try:
+            day = "-".join(os.path.split(self.videoPath)[-1].split("-", 3)[:3])
+            time.strptime(day, "%Y-%m-%d")
+        except:
+            bIsEncoded = False
+        try:
+            time.strptime(self.videoFile.split("-")[0], "%Hh%Mm%Ss")
+        except:
+            bIsEncoded = False
+        return bIsEncoded
 
     def mkdir(self):
         if not OP.isdir("%s/%s" % (UpperDir, self.timeStamp.date().isoformat())):
@@ -213,7 +240,7 @@ class Video(object):
                 bDoMplayer = True
             if not bDoMplayer:
                 for n in self.metadata.iterGroups():
-                    if n.header.find("Video stream") == 0:
+                    if n.header.startswith("Video stream"):
                         self.videoCodec = n.get("compression")
                         self.videoBpP = n.get("bits_per_pixel")
                     elif n.header.find("Audio stream") == 0:
@@ -245,25 +272,32 @@ class Video(object):
         if not mplayerProcess.wait() == 0:
             logging.warning("mplayer ended with error !")
         for i in  mplayerProcess.stdout.readlines():
-            if i.find("ID_AUDIO_NCH") == 0:
+            if i.startswith("ID_AUDIO_NCH"):
                 self.audioChannel = int(i.split("=")[1].strip())
-            elif i.find("ID_AUDIO_CODEC") == 0:
+            elif i.startswith("ID_AUDIO_CODEC"):
                 self.audioCodec = i.split("=")[1].strip()
-            elif i.find("ID_AUDIO_RATE") == 0:
+            elif i.startswith("ID_AUDIO_RATE"):
                 self.audioSampleRate = int(i.split("=")[1].strip())
-            elif i.find("ID_AUDIO_BITRATE") == 0:
+            elif i.startswith("ID_AUDIO_BITRATE"):
                 self.audioBitRate = int(i.split("=")[1].strip())
-            elif i.find("ID_VIDEO_CODEC") == 0:
+            elif i.startswith("ID_VIDEO_CODEC"):
                 self.videoCodec = i.split("=")[1].strip()
-            elif i.find("ID_LENGTH") == 0:
+            elif i.startswith("ID_LENGTH"):
                 self.duration = float(i.split("=")[1].strip())
-            elif i.find("ID_VIDEO_FPS") == 0:
+            elif i.startswith("ID_VIDEO_FPS"):
                 self.frameRate = float(i.split("=")[1].strip())
-            elif i.find("ID_VIDEO_HEIGHT") == 0:
+            elif i.startswith("ID_VIDEO_HEIGHT"):
                 self.height = int(i.split("=")[1].strip())
-            elif i.find("ID_VIDEO_WIDTH") == 0:
+            elif i.startswith("ID_VIDEO_WIDTH"):
                 self.width = int(i.split("=")[1].strip())
-
+            elif i.startswith(" Source Form:"):
+                self.data["ISRF"] = i.split(":")[1].strip()
+            elif i.startswith(" Archival Location:"):
+                self.data["IARL"] = i.split(":")[1].strip()
+            elif i.startswith(" Creation Date:"):
+                self.data["ICRD"] = i.split(":")[1].strip()
+            elif i.startswith(" Source:"):
+                self.data["ISRC"] = i.split(":")[1].strip()
 
     def FindThumb(self):
         """scan the current directory for the thumbnail image"""
@@ -398,9 +432,21 @@ class Video(object):
 #            shutil.copy(self.fullPath, tmpavi)
         pbsfile.write('%s -o %s -i %s -f "%s" \n' % (config.AviMerge, self.destinationFile, tmpavi, self.CommentFile))
         pbsfile.write("rm %s \n" % tmpavi)
+        pbsfile.flush()
         pbsfile.close()
-        encodeProcess = subprocess.Popen([config.BatchScriptExecutor, pbsFilename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if config.BatchUsesPipe:
+            encodeProcess = subprocess.Popen([config.BatchScriptExecutor], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            pbscode = open(pbsFilename, "rb").read()
+            logger.debug(pbscode)
+            encodeProcess.stdin.write(pbscode)
+            encodeProcess.stdin.close()
+        else:
+            encodeProcess = subprocess.Popen([config.BatchScriptExecutor, pbsFilename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         logging.debug(str("Subprocess with pid=%s" % encodeProcess.pid))
+        threadStdErr = threading.Thread(target=writeStdOutErr, name="BatchWriteStdErr", args=(encodeProcess.stderr, "%s.e%s" % (pbsFilename, encodeProcess.pid)))
+        threadStdOut = threading.Thread(target=writeStdOutErr, name="BatchWriteStdOut", args=(encodeProcess.stdout, "%s.o%s" % (pbsFilename, encodeProcess.pid)))
+        threadStdErr.start()
+        threadStdOut.start()
 #        os.system('qsub "%s"' % pbsFilename)
 
 
@@ -423,3 +469,262 @@ class Video(object):
 ################################################################################
 # END of the class VIDEO
 ################################################################################
+
+
+class PairVideo(object):
+    """
+    This class represents a pair of video:
+    -Raw Video of any type
+    -Encoded video in H264+MP3
+    -metatdata can either come from an extra file beside the Raw video or from the header of the encoded video
+    """
+    def __init__(self, rawFile=None, encFile=None, rawVideo=None, encVideo=None):
+        """
+        Constructor...
+        """
+        self.__fTime = None
+        self.__datetime = None
+        self.comment = None
+        self.__md5sum = None
+        self.__rawFile = None
+        self.__rawVideo = None
+        self.__encFile = None
+        self.__encVideo = None
+        if rawFile is not None:
+            self.setRawFile(rawFile)
+        if encFile is not None:
+            self.setEncFile(encFile)
+        if rawVideo is not None:
+            self.setRawVideo(rawVideo)
+        if encVideo is not None:
+            self.setEncVideo(encVideo)
+
+    def __repr__(self):
+        return "PairVideo( %s , %s ) with md5= '%s'" % (self.__rawFile, self.__encFile, self.__md5sum)
+
+    def __cmp__(self, other):
+        """
+        Comparator for two pairs of videos 
+        """
+        if self.__datetime < other.__datetime:
+            return - 1
+        elif self.__datetime > other.__datetime:
+            return 1
+        else:
+            return 0
+
+    def getRawFile(self):
+        return self.__rawFile
+    def setRawFile(self, rawFile):
+        """
+        setter for raw file name
+        @param rawFile: name of the raw file
+        @type rawFile: string 
+        """
+        self.__rawFile = rawFile
+        self.__rawVideo = Video(self.__rawFile)
+        self.setDateTime(self.__rawVideo.timeStamp)
+        self.setMd5(hashlib.md5(open(rawFile, "rb").read()).hexdigest())
+    rawFile = property(getRawFile, setRawFile, "property for get/setRawFile")
+
+    def getEncFile(self):
+        return self.__encFile
+    def setEncFile(self, encFile):
+        """
+        setter for enc file
+        @param encFile: name of the raw file
+        @type encFile: string
+        """
+        self.__encFile = encFile
+        self.__encVideo = Video(encFile)
+        self.setDateTime(self.__encVideo.timeStamp)
+    encFile = property(getEncFile, setEncFile, "Property for get/setEncFile")
+
+    def getRawVideo(self):
+        return self.__rawVideo
+    def setRawVideo(self, rawVideo):
+        """
+        setter for raw file name
+        @param rawVideo: input raw video
+        @type rawVideo: instance of Video
+        """
+        self.__rawVideo = rawVideo
+        self.__rawFile = rawVideo.fullPath
+        self.setDateTime(self.__rawVideo.timeStamp)
+        self.setMd5(hashlib.md5(open(rawVideo.fullPath, "rb").read()).hexdigest())
+    rawVideo = property(getRawVideo, setRawVideo, "property for get/setRawVideo")
+
+    def getEncVideo(self):
+        return self.__encVideo
+    def setEncVideo(self, encVideo):
+        """
+        setter for enc file
+        @param encVideo: name of the raw file
+        @type encVideo: string
+        """
+        self.__encVideo = encVideo
+        self.__encFile = encVideo.fullPath
+        self.setDateTime(self.__encVideo.timeStamp)
+        if "ISRC" in encVideo.data:
+            self.setMd5(encVideo.data["ISRC"])
+    encVideo = property(getEncVideo, setEncVideo, "Property for get/setEncVideo")
+
+    def getMd5(self):
+        return self.__md5sum
+    def setMd5(self, md5):
+        if self.__md5sum is None:
+            self.__md5sum = md5
+        else:
+            if self.__md5sum != md5:
+                logger.warning("Un-consistency between md5 was: %s is now %s." % (self.__md5sum, md5))
+            self.__md5sum = md5
+    md5sum = property(getMd5, setMd5, "Property for get/setMd5")
+
+    def getDateTime(self):
+        return self.__datetime
+    def setDateTime(self, _dateTime):
+        if self.__datetime is None:
+            self.__datetime = _dateTime
+        else:
+            if self.__datetime > _dateTime:
+                self.__datetime = _dateTime
+    datetime = property(getDateTime, setDateTime, "Property for get/setDateTime")
+
+
+################################################################################
+# END of the class PairVideo
+################################################################################
+
+
+class AllVideos(object):
+    """
+    Class containing all videos in a given path.
+    """
+    def __init__(self, root):
+        """
+        Constructor
+        @param root: path to the top of the tree to analyse
+        @type root: string or unicode
+        """
+        self.__root = os.path.abspath(root)
+        self.__listVideoFiles = []
+        self.__dictVideoPairs = {}
+        self.__listVideoPairs = []
+        self.current = 0
+        self.rescan()
+
+    def __len__(self):
+        return len(self.__listVideoPairs)
+
+    def __getitem__(self, key):
+        res = None
+        if isinstance(key, int):
+            res = self.__listVideoPairs[key % len(self.__listVideoPairs)]
+        elif isinstance(key, (str, unicode)):
+            if key in self.__dictVideoPairs:
+                res = self.__listVideoPairs[key]
+            else:
+                raise KeyError("No such key")
+        else:
+            raise KeyError("No such key")
+        return res
+
+    def __iter__(self):
+        return self.__listVideoPairs.__iter__()
+
+    def rescan(self):
+        """
+        Rescan all files, looking for new videos
+        """
+        logger.debug("Scanning folder %s" % self.__root)
+        try:
+            currentPair = self.__listVideoPairs[self.current]
+        except:
+            currentPair = None
+        for root, dirs, files in os.walk(self.__root):
+            for oneFile in files:
+                if os.path.splitext(oneFile)[1].lower() in config.VideoExtensions:
+                    videoFile = os.path.join(os.path.join(self.__root, root, oneFile))
+                    if videoFile in self.__listVideoFiles:
+                        continue #process only new files
+                    video = Video(videoFile)
+                    md5 = video.data["ISRC"]
+                    if md5 in self.__dictVideoPairs:
+                        pv = self.__dictVideoPairs[md5]
+                        if video.isEncoded():
+                            pv.setEncVideo(video)
+                        else:
+                            pv.setRawVideo(video)
+                    else:
+                        if video.isEncoded():
+                            pv = PairVideo(encVideo=video)
+                        else:
+                            pv = PairVideo(rawVideo=video)
+                        self.__listVideoPairs.append(pv)
+                        self.__dictVideoPairs[pv.md5sum] = pv
+        self.__listVideoPairs.sort()
+        if currentPair is not None:
+            self.current = self.__listVideoPairs.index(currentPair)
+
+    def next(self):
+        """
+        @return: next pair of videos 
+        @rtype: instance of PairVideo 
+        """
+        self.current = (self.current + 1) % len(self.__listVideoPairs)
+        return self.__listVideoPairs[self.current]
+
+    def previous(self):
+        """
+        @return: previous pair of videos 
+        @rtype: instance of PairVideo 
+        """
+        self.current = (self.current - 1) % len(self.__listVideoPairs)
+        return self.__listVideoPairs[self.current]
+
+    def first(self):
+        """
+        @return: next pair of videos
+        @rtype: instance of PairVideo 
+        """
+        self.current = 0
+        return self.__listVideoPairs[self.current]
+
+    def last(self):
+        """
+        @return: last pair of videos 
+        @rtype: instance of PairVideo 
+        """
+        self.current = len(self.__listVideoPairs) - 1
+        return self.__listVideoPairs[self.current]
+
+def test(inFile):
+    allV = AllVideos(inFile)
+    print "test 1"
+    for i in range(len(allV)):
+        print allV.next()
+
+    print "test 2"
+    for i in range(len(allV)):
+        print allV[i]
+
+    print "test 3"
+    for i in allV:
+        print i
+
+if __name__ == "__main__":
+    DEBUG = False
+    inFile = False
+    for key in sys.argv[1:]:
+        if key.lower().find("-d") in [0, 1]:
+            DEBUG = True
+        elif os.path.exists(key):
+            inFile = key
+    if DEBUG:
+        loggerImagizer = logging.getLogger("imagizer")
+        loggerImagizer.setLevel(logging.DEBUG)
+        logger.debug("We are in debug mode ...First Debug message")
+    if inFile is None:
+        print("To test those video classes, give apath containing videos in it.")
+    else:
+        test(inFile)

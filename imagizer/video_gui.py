@@ -23,24 +23,23 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "15 march 2011"
+__date__ = "28 April 2011"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
-import sys, os, datetime
-import logging
-import imagizer
+import sys, os, datetime, logging
+import __init__
 logger = logging.getLogger("imagizer")
 logger.setLevel(logging.INFO)
-from imagizer.pygtkmplayer import PyGtkMplayer
-from imagizer.video import Video, PairVideo, AllVideos
-from imagizer.video_gui import VideoGUI
-from imagizer.signals import Signal
-from imagizer.imagizer import unifiedglade, smartSize, installdir
-from imagizer.config import Config
-config = Config()
+from imagizer import unifiedglade, smartSize
+from pygtkmplayer import PyGtkMplayer
+from video import Video, PairVideo, AllVideos
+#from signals import Signal
+from imagizer import installdir
+from config import Config
 
+config = Config()
 try:
     import pygtk ; pygtk.require('2.0')
     import gtk
@@ -48,63 +47,17 @@ try:
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 
-
 DEBUG = False
 
 
-class VideoControler(object):
-    """ Contoler implementation of MVC design pattern """
-    def __init__(self, model, view):
-        self.__model = model
-        self.__view = view
-
-        # Connection des signaux
-        model.startSignal.connect(self.__startCallback)
-        model.refreshSignal.connect(self.__refreshCallback)
-        model.finishSignal.connect(self.__stopCallback)
-        model.NbrJobsSignal.connect(self.__NBJCallback)
-
-    def __startCallback(self, label, nbVal):
-        """ Callback pour le signal de début de progressbar."""
-        self.__view.creatProgressBar(label, nbVal)
-
-    def __refreshCallback(self, i, filename):
-        """ Mise à jour de la progressbar."""
-        self.__view.updateProgressBar(i, filename)
-
-    def __stopCallback(self):
-        """ Callback pour le signal de fin de splashscreen."""
-        self.__view.finish()
-
-    def __NBJCallback(self, NbrJobs):
-        """ Callback pour redefinir le nombre de job totaux."""
-        self.__view.ProgressBarMax(NbrJobs)
-
-
-
-def intro(ob):
-    import collections
-    print "Introspection of %s" % ob
-    for i in dir(ob):
-        if isinstance(eval("ob.%s" % (i)), collections.Callable):
-            logger.debug("%s\t\tMethod" % i)
-        else:
-            logger.debug("%s\t\tAttribute" % i)
-
-class VideoInterface(object):
+class VideoGUI(object):
     """
     class interface that manages the GUI using Glade-2
+    
+    #This should be a view in the MVC design pattern
     """
     def __init__(self, inFile):
-        self.allVideo = AllVideos(inFile)
-        self.pairVideo = self.allVideo.previous()
-        if self.pairVideo.encVideo is not None:
-            self.filename = self.pairVideo.encFile
-            self.video = self.pairVideo.encVideo
-        elif self.pairVideo.rawVideo is not None:
-            self.filename = self.pairVideo.rawFile
-            self.video = self.pairVideo.rawVideo
-
+        self.filename = inFile
         self.rotation = 0
         self.title = u""
         self.keywords = u""
@@ -130,12 +83,10 @@ class VideoInterface(object):
         "on_rewind_clicked":self.mplayer.backward,
         "on_forward_clicked":self.mplayer.forward,
         "on_reEncode_clicked":self.reEncode,
-        "on_nextVideo_clicked":self.next,
-        "on_previousVideo_clicked":self.previous,
         }
+
         self.xml.signal_autoconnect(dictHandlers)
-        self.flush_event_queue()
-        self.loadVideo()
+        self.video = None
 
 
     def flush_event_queue(self):
@@ -154,6 +105,7 @@ class VideoInterface(object):
     def loadVideo(self):
         """Load the video information and setup the GUI"""
         logger.debug("VideoInterface.loadVideo")
+        self.video = Video(self.filename)
         self.xml.get_widget("filename").set_text(self.video.videoFile)
         self.xml.get_widget("model").set_text(self.video.camera.encode("UTF-8"))
         self.xml.get_widget("resolution").set_text("%ix%i" % (self.video.width, self.video.height))
@@ -161,12 +113,11 @@ class VideoInterface(object):
         self.xml.get_widget("dateTime").set_text(self.video.timeStamp.strftime("%Y:%m:%d %Hh%Mm%Ss"))
         self.xml.get_widget("duration").set_text("%s s" % self.video.duration)
         self.xml.get_widget("video").set_text("%.1f fps\t%s\t%s" % (self.video.frameRate, self.video.videoCodec, self.video.videoBitRate))
-        self.xml.get_widget("audio").set_text("%s ch\t%.1fHz\t%s\t%s" % (self.video.audioChannel, self.video.audioSampleRate, self.video.audioCodec, self.video.audioBitRate))
+        self.xml.get_widget("audio").set_text("%i ch\t%.1fHz\t%s\t%s" % (self.video.audioChannel, self.video.audioSampleRate, self.video.audioCodec, self.video.audioBitRate))
         if "INAM" in self.video.data:
             self.xml.get_widget("title").set_text(self.video.data["INAM"])
         if "IKEY" in self.video.data:
             self.xml.get_widget("keyword").set_text(" ".join(self.video.data["IKEY"].split(";")))
-        self.play()
 
     def getRotation(self):
         if self.xml.get_widget("ccwRot").get_active() is True:
@@ -176,44 +127,6 @@ class VideoInterface(object):
         elif self.xml.get_widget("cwRot").get_active() is True:
             rotation = 90
         return rotation
-
-
-    def next(self, *args):
-        """
-        Switch to next video
-        """
-        logger.debug("NextVideo")
-#        self.mplayer.quit()
-        self.pairVideo = self.allVideo.next()
-        if self.pairVideo.encVideo is not None:
-            self.filename = self.pairVideo.encFile
-            self.video = self.pairVideo.encVideo
-        elif self.pairVideo.rawVideo is not None:
-            self.filename = self.pairVideo.rawFile
-            self.video = self.pairVideo.rawVideo
-        logger.debug("VideoInterface.Playing video %s " % self.filename)
-        self.loadVideo()
-#        self.play()
-        self.mplayer.loadfile(self.filename)
-
-
-    def previous(self, *args):
-        """
-        Switch to previous video
-        """
-        logger.debug("VideoInterface.PreviousVideo")
- #       self.mplayer.quit()
-        self.pairVideo = self.allVideo.previous()
-        if self.pairVideo.encVideo is not None:
-            self.filename = self.pairVideo.encFile
-            self.video = self.pairVideo.encVideo
-        elif self.pairVideo.rawVideo is not None:
-            self.filename = self.pairVideo.rawFile
-            self.video = self.pairVideo.rawVideo
-        logger.debug("Playing video %s " % self.filename)
-        self.loadVideo()
-        self.mplayer.loadfile(self.filename)
-#        self.play()
 
 
     def play(self, *args):
@@ -271,21 +184,3 @@ class VideoInterface(object):
             else:
                 self.video.timeStamp = timeVideo
             self.video.reEncode()
-
-if __name__ == "__main__":
-    inFile = None
-    for key in sys.argv[1:]:
-        if key.lower().find("-d") in [0, 1]:
-            DEBUG = True
-        elif os.path.exists(key):
-            inFile = key
-    if DEBUG:
-        loggerImagizer = logging.getLogger("imagizer")
-        loggerImagizer.setLevel(logging.DEBUG)
-        logger.debug("We are in debug mode ...First Debug message")
-
-    if inFile is not None:
-        logger.debug("%s" % inFile)
-#        ctrl = VideoControler(AllVideos(inFile), VideoGUI)
-        gui = VideoInterface(inFile)
-        gtk.main()

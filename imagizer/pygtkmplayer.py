@@ -60,6 +60,11 @@ class PyGtkMplayer(gtk.Socket):
         logger.debug("PyGtkMplayer.backward")
         self.execmplayer("seek -10")
 
+    def stop(self, *args):
+        logger.debug("PyGtkMplayer.stop")
+        self.execmplayer("stop")
+
     def quit(self, *args):
         logger.debug("PyGtkMplayer.quit")
         self.execmplayer("quit")
+
