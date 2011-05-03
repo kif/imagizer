@@ -55,9 +55,12 @@ def writeStdOutErr(std, filename):
 
 class Video(object):
     """main Video class"""
-    def __init__(self, infile):
+    root = None
+    def __init__(self, infile, root=None):
         """initialise the class"""
         self.fullPath = OP.abspath(infile)
+        if (Video.root is None) and root is not None:
+            Video.root = OP.abspath(root)
         self.videoPath = ""
         self.videoFile = ""
         logger.info("Processing %s" % self.fullPath)
@@ -170,9 +173,9 @@ class Video(object):
         return bIsEncoded
 
     def mkdir(self):
-        if not OP.isdir("%s/%s" % (UpperDir, self.timeStamp.date().isoformat())):
-            os.mkdir("%s/%s" % (UpperDir, self.timeStamp.date().isoformat()))
-        self.destinationFile = os.path.join(UpperDir, self.timeStamp.date().isoformat(), "%s-%s.avi" % (self.timeStamp.strftime("%Hh%Mm%Ss"), self.camera))
+        if not OP.isdir("%s/%s" % (Video.root, self.timeStamp.date().isoformat())):
+            os.mkdir("%s/%s" % (Video.root, self.timeStamp.date().isoformat()))
+        self.destinationFile = os.path.join(Video.root, self.timeStamp.date().isoformat(), "%s-%s.avi" % (self.timeStamp.strftime("%Hh%Mm%Ss"), self.camera))
         if OP.isfile(self.destinationFile):
             logging.warning(str("Destination file %s exists !" % self.destinationFile))
 
@@ -647,7 +650,7 @@ class AllVideos(object):
                     videoFile = os.path.join(os.path.join(self.__root, root, oneFile))
                     if videoFile in self.__listVideoFiles:
                         continue #process only new files
-                    video = Video(videoFile)
+                    video = Video(videoFile, root=self.__root)
                     md5 = video.data["ISRC"]
                     if md5 in self.__dictVideoPairs:
                         pv = self.__dictVideoPairs[md5]

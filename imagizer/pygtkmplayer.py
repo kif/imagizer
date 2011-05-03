@@ -24,20 +24,27 @@ class PyGtkMplayer(gtk.Socket):
         self.mplayerSubP = None
         self.currentFile = None
         self.videoFilter = None
+        self.listMplayerCmd = None
+
+    def startmplayer(self):
+        self.mplayerSubP = subprocess.Popen(self.listMplayerCmd,
+                stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+
 
     def execmplayer(self, cmd):
         "Write in the pipe in slave mode"
+        if self.mplayerSubP.poll() is not None:
+            self.startmplayer()
         self.mplayerSubP.stdin.write(cmd + os.linesep)
 
-    def setwid(self, wid):
+    def setwid(self, wid=None):
         "Run mplayer in the given window ID"
         logger.debug("PyGtkMplayer: mplayer on wid=%s" % wid)
-        listMplayerCmd = [config.MPlayer, "-nojoystick", "-nolirc", "-slave", "-vo", "x11", "-wid", str(wid), "-idle"]
+        self.listMplayerCmd = [config.MPlayer, "-nojoystick", "-nolirc", "-slave", "-vo", "x11", "-wid", str(wid), "-idle"]
         if self.videoFilter is not None:
-            listMplayerCmd.append("-vf")
-            listMplayerCmd += self.videoFilter.split()
-        self.mplayerSubP = subprocess.Popen(listMplayerCmd,
-                stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+            self.listMplayerCmd.append("-vf")
+            self.listMplayerCmd += self.videoFilter.split()
+        self.startmplayer()
 
     def loadfile(self, filename):
         self.currentFile = filename
