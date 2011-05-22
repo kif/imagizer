@@ -39,7 +39,7 @@ class PyGtkMplayer(gtk.Socket):
 
     def setwid(self, wid=None):
         "Run mplayer in the given window ID"
-        logger.debug("PyGtkMplayer: mplayer on wid=%s" % wid)
+        logger.info("PyGtkMplayer: mplayer on wid=%s" % wid)
         self.listMplayerCmd = [config.MPlayer, "-nojoystick", "-nolirc", "-slave", "-vo", "x11", "-wid", str(wid), "-idle"]
         if self.videoFilter is not None:
             self.listMplayerCmd.append("-vf")

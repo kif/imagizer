@@ -97,6 +97,7 @@ class VideoInterface(object):
     """
     def __init__(self, inFile):
         self.allVideo = AllVideos(inFile)
+        self.allVideo.save()
         self.pairVideo = self.allVideo.previous()
         if self.pairVideo.encVideo is not None:
             self.filename = self.pairVideo.encFile
@@ -229,6 +230,8 @@ class VideoInterface(object):
                 self.mplayer.videoFilter = "rotate=2"
             else:
                 self.mplayer.videoFilter = None
+            self.videoWid = long(self.mplayer.get_id())
+            logger.debug("Mplayer Wid is now  %s" % self.videoWid)
             self.mplayer.setwid(self.videoWid)
             self.mplayer.loadfile(self.filename)
         else:
@@ -284,7 +287,9 @@ if __name__ == "__main__":
         loggerImagizer.setLevel(logging.DEBUG)
         logger.debug("We are in debug mode ...First Debug message")
 
-    if inFile is not None:
+    if inFile is None:
+        logger.warning("Enter the directory you want to work in")
+    else:
         logger.debug("%s" % inFile)
 #        ctrl = VideoControler(AllVideos(inFile), VideoGUI)
         gui = VideoInterface(inFile)

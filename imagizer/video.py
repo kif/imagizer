@@ -63,7 +63,7 @@ class Video(object):
             Video.root = OP.abspath(root)
         self.videoPath = ""
         self.videoFile = ""
-        logger.info("Processing %s" % self.fullPath)
+        logger.info("Analyzing %s" % self.fullPath)
         [self.videoPath, self.videoFile] = OP.split(self.fullPath)
         self.title = u""
         self.width = 0
@@ -349,7 +349,7 @@ class Video(object):
 
     def setTitle(self):
         """asks for a Title and comments for the video"""
-        print "Processing file %s" % self.fullPath
+        print "Analyzing file %s" % self.fullPath
         print "camera : %s" % self.camera
         if self.data.has_key("INAM"):
             print "Former title: %s" % self.data["INAM"]
@@ -372,7 +372,7 @@ class Video(object):
         self.mkdir()
         pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".sh"
         pbsfile = open(pbsFilename, "w")
-        pbsfile.write("#!/bin/bash\n#PBS -d%s\nif  [ -d %s/$PBS_JOBID ] ; then cd %s/$PBS_JOBID ;else cd /tmp; fi\n" % (config.ScratchDir, config.ScratchDir, config.ScratchDir))
+        pbsfile.write("#!/bin/bash\nWorkDir=$(mktemp -d --tmpdir=%s)\necho going to $WorkDir\ncd $WorkDir\n" % (config.ScratchDir))
         bDoResize = (self.width > 640)
 
         listVideoFilters = []
@@ -439,9 +439,9 @@ class Video(object):
         pbsfile.close()
         if config.BatchUsesPipe:
             encodeProcess = subprocess.Popen([config.BatchScriptExecutor], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            pbscode = open(pbsFilename, "rb").read()
-            logger.debug(pbscode)
-            encodeProcess.stdin.write(pbscode)
+            #pbscode = open(pbsFilename, "rb").read()
+            #logger.debug(pbscode)
+            encodeProcess.stdin.write("/bin/sh  %s" % pbsFilename)
             encodeProcess.stdin.close()
         else:
             encodeProcess = subprocess.Popen([config.BatchScriptExecutor, pbsFilename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -450,7 +450,6 @@ class Video(object):
         threadStdOut = threading.Thread(target=writeStdOutErr, name="BatchWriteStdOut", args=(encodeProcess.stdout, "%s.o%s" % (pbsFilename, encodeProcess.pid)))
         threadStdErr.start()
         threadStdOut.start()
-#        os.system('qsub "%s"' % pbsFilename)
 
 
     def GenThumb(self, size=160):
@@ -481,7 +480,7 @@ class PairVideo(object):
     -Encoded video in H264+MP3
     -metatdata can either come from an extra file beside the Raw video or from the header of the encoded video
     """
-    def __init__(self, rawFile=None, encFile=None, rawVideo=None, encVideo=None):
+    def __init__(self, rawFile=None, encFile=None, rawVideo=None, encVideo=None, datetime=None, md5sum=None):
         """
         Constructor...
         """
@@ -501,6 +500,10 @@ class PairVideo(object):
             self.setRawVideo(rawVideo)
         if encVideo is not None:
             self.setEncVideo(encVideo)
+        if datetime is not None:
+            self.__datetime = datetime
+        if md5sum is not None:
+            self.__md5sum = md5sum
 
     def __repr__(self):
         return "PairVideo( %s , %s ) with md5= '%s'" % (self.__rawFile, self.__encFile, self.__md5sum)
@@ -525,9 +528,11 @@ class PairVideo(object):
         @type rawFile: string 
         """
         self.__rawFile = rawFile
-        self.__rawVideo = Video(self.__rawFile)
-        self.setDateTime(self.__rawVideo.timeStamp)
-        self.setMd5(hashlib.md5(open(rawFile, "rb").read()).hexdigest())
+        if self.__datetime is None:
+            self.__rawVideo = Video(self.__rawFile)
+            self.setDateTime(self.__rawVideo.timeStamp)
+        if self.__md5sum is None:
+            self.setMd5(hashlib.md5(open(rawFile, "rb").read()).hexdigest())
     rawFile = property(getRawFile, setRawFile, "property for get/setRawFile")
 
     def getEncFile(self):
@@ -539,11 +544,14 @@ class PairVideo(object):
         @type encFile: string
         """
         self.__encFile = encFile
-        self.__encVideo = Video(encFile)
-        self.setDateTime(self.__encVideo.timeStamp)
+        if self.__datetime is None:
+            self.__encVideo = Video(encFile)
+            self.setDateTime(self.__encVideo.timeStamp)
     encFile = property(getEncFile, setEncFile, "Property for get/setEncFile")
 
     def getRawVideo(self):
+        if (self.__rawVideo is None) and (self.__rawFile is not None):
+            self.__rawVideo = Video(self.__rawFile)
         return self.__rawVideo
     def setRawVideo(self, rawVideo):
         """
@@ -558,6 +566,8 @@ class PairVideo(object):
     rawVideo = property(getRawVideo, setRawVideo, "property for get/setRawVideo")
 
     def getEncVideo(self):
+        if (self.__encVideo is None) and (self.__encFile is not None):
+            self.__encVideo = Video(self.__encFile)
         return self.__encVideo
     def setEncVideo(self, encVideo):
         """
@@ -611,9 +621,10 @@ class AllVideos(object):
         """
         self.__root = os.path.abspath(root)
         self.__listVideoFiles = []
-        self.__dictVideoPairs = {}
+        self.__dictVideoPairs = {} #key=md5sum
         self.__listVideoPairs = []
         self.current = 0
+        self.load()
         self.rescan()
 
     def __len__(self):
@@ -634,6 +645,63 @@ class AllVideos(object):
 
     def __iter__(self):
         return self.__listVideoPairs.__iter__()
+
+    def save(self, filename=None):
+        """
+        Save the list of video pairs to file.
+        @param filename: filename of the file to be written.
+        @type filename: string
+        """
+        if filename is None:
+            filename = os.path.join(self.__root, ".video.lst")
+        logger.debug("AllVideos.save to file %s" % filename)
+        f = open(filename, "w")
+        for vp in self.__listVideoPairs:
+            f.write("%s\t%s\t%s\t%s%s" % (vp.datetime.isoformat(), vp.md5sum, vp.encFile, vp.rawFile, os.linesep))
+        f.close()
+
+    def load(self, filename=None):
+        """
+        Load the list of video pairs to file.
+        @param filename: filename of the file to be written.
+        @type filename: string
+        """
+        if filename is None:
+            filename = os.path.join(self.__root, ".video.lst")
+        if not os.path.isfile(filename):
+            logger.warning("AllVideos.load: No such file %s" % filename)
+            return
+        else:
+            logger.debug("AllVideos.load from file %s" % filename)
+        for oneLine in  open(filename, "rb"):
+            try:
+                dt, md5, ef, rf = oneLine.split(None, 3)
+            except:
+                logger.warning("AllVideos.load: error in parsing %s" % oneLine)
+            else:
+                if md5 == "None":
+                    continue
+                if ef == "None" or not os.path.isfile(ef):
+                    ef = None
+                if rf == "None" or not os.path.isfile(rf):
+                    rf = None
+                if rf is None and ef is None:
+                    continue
+                try:
+                    timestamp = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S")
+                except:
+                    logger.warning("AllVideos.load: error in parsing datetime %s" % dt)
+                    continue
+                vp = PairVideo(rawFile=rf, encFile=ef, datetime=timestamp, md5sum=md5)
+                if md5 in self.__dictVideoPairs:
+                    logger.warning("AllVideos.load: Pair Video already loaded %s" % vp)
+                else:
+                    self.__listVideoPairs.append(vp)
+                    self.__dictVideoPairs[md5] = vp
+                    if ef is not None:
+                        self.__listVideoFiles.append(ef)
+                    if rf is not None:
+                        self.__listVideoFiles.append(rf)
 
     def rescan(self):
         """
@@ -714,6 +782,8 @@ def test(inFile):
     print "test 3"
     for i in allV:
         print i
+
+    print "test 4"
 
 if __name__ == "__main__":
     DEBUG = False
