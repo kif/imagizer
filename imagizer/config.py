@@ -116,7 +116,7 @@ class Config:
             self.Sox = "/usr/bin/sox"
             self.Convert = "/usr/bin/convert"
             self.AviMerge = "/usr/bin/avimerge"
-            self.VideoExtensions = [".avi", ".mpeg", ".mpg", ".mp4", ".divx", ".mov", ".webm", ".mkv"]
+            self.VideoExtensions = [".avi", ".mpeg", ".mpg", ".mp4", ".divx", ".mov", ".webm", ".mkv", ".m2ts"]
             self.ThumbnailExtensions = [".thm", ".jpg"]
             self.BatchScriptExecutor = "/usr/bin/batch"
             self.BatchUsesPipe = True

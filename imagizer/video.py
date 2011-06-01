@@ -65,6 +65,8 @@ class Video(object):
         self.videoFile = ""
         logger.info("Analyzing %s" % self.fullPath)
         [self.videoPath, self.videoFile] = OP.split(self.fullPath)
+        self.timeStamp = datetime.datetime.fromtimestamp(OP.getmtime(self.fullPath))
+
         self.title = u""
         self.width = 0
         self.height = 0
@@ -89,7 +91,7 @@ class Video(object):
         self.thumb = None
 
 
-        self.timeStamp = datetime.datetime.fromtimestamp(OP.getmtime(self.fullPath))
+
         if self.videoFile.lower().startswith("dscf")  :
             self.camera = "Fuji"
             self.deinterleave = False

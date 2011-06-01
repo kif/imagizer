@@ -28,7 +28,9 @@ class PyGtkMplayer(gtk.Socket):
 
     def startmplayer(self):
         self.mplayerSubP = subprocess.Popen(self.listMplayerCmd,
-                stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+                 stdin=subprocess.PIPE
+#                ,stdout=subprocess.PIPE
+                )
 
 
     def execmplayer(self, cmd):

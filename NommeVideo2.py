@@ -165,8 +165,12 @@ class VideoInterface(object):
         self.xml.get_widget("audio").set_text("%s ch\t%.1fHz\t%s\t%s" % (self.video.audioChannel, self.video.audioSampleRate, self.video.audioCodec, self.video.audioBitRate))
         if "INAM" in self.video.data:
             self.xml.get_widget("title").set_text(self.video.data["INAM"])
+        else:
+            self.xml.get_widget("title").set_text("")
         if "IKEY" in self.video.data:
             self.xml.get_widget("keyword").set_text(" ".join(self.video.data["IKEY"].split(";")))
+        else:
+            self.xml.get_widget("keyword").set_text("")
         self.play()
 
     def getRotation(self):
