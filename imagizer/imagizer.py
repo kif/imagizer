@@ -393,7 +393,17 @@ class ModelRangeTout:
             strImageFile = os.path.join(RootDir, date, heure)
             ToProcess = os.path.join(date, heure)
             if os.path.isfile(strImageFile):
-                print "Problème ... %s existe déja " % i
+                logger.warning("Distination file already exists: " + i)
+                existing = photo(strImageFile)
+                try:
+                    existing.readExif()
+                    originalName = existing.exif["Exif.Photo.UserComment"]
+                except:
+                    logger.error("Error in reading Exif for " + i)
+                else:
+                    if os.path.basename(originalName) == os.path.basename(i):
+                        logger.info("File already in repository, leaving as it is")
+                        continue #to next file, i.e. leave the existing one
                 s = 0
                 for j in os.listdir(os.path.join(RootDir, date)):
                     if j.find(heure[:-4]) == 0:s += 1
