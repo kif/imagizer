@@ -268,7 +268,7 @@ class Interface(object):
         self.Xmin = 350
         self.image = None
         self.strCurrentTitle = ""
-
+        self.iCurrentRate = 0
 
         logger.info("Initialization of the windowed graphical interface ...")
         self.xml = GTKglade.XML(unifiedglade, root="Principale")
@@ -483,8 +483,9 @@ class Interface(object):
         """Set the new title of the image"""
         logger.debug("Interface.settitle")
         newtitle = self.xml.get_widget("Titre").get_text()
-        if newtitle != self.strCurrentTitle:
-            self.image.name(newtitle)
+        newRate = float(self.xml.get_widget("Rate").get_value())
+        if (newtitle != self.strCurrentTitle) or (newRate != self.iCurrentRate):
+            self.image.name(newtitle, newRate)
 
 
     def ShowImage(self):
@@ -506,11 +507,20 @@ class Interface(object):
         gc.collect()
         data = self.image.readExif()
 #        if data.has_key("Orientation"): data.pop("Orientation")
+        if "Rate" in data:
+            self.iCurrentRate = int(float(data["Rate"]))
+            self.xml.get_widget("Rate").set_value(self.iCurrentRate)
+            data.pop("Rate")
+        else:
+            self.iCurrentRate = 0
+
+
         for i in data:
             self.xml.get_widget(i).set_text(data[i])
         self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.iCurrentImg])
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         self.strCurrentTitle = data["Titre"]
+
 
 
     def next(self, *args):

@@ -1243,26 +1243,6 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="Selection">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip" translatable="yes">Si l'image est s&#xE9;&#x142;ectionn&#xE9;e, elle sera copi&#xE9;e</property>
-                    <property name="use_underline">True</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                    <signal name="toggled" handler="on_Selection_toggled"/>
-                  </widget>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">12</property>
-                    <property name="bottom_attach">13</property>
-                    <property name="x_options">GTK_FILL</property>
-                    <property name="y_options"></property>
-                  </packing>
-                </child>
-                <child>
                   <widget class="GtkEntry" id="Taille">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1564,6 +1544,51 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                   <packing>
                     <property name="x_options">GTK_FILL</property>
                     <property name="y_options"></property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkHBox" id="hbox2">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkCheckButton" id="Selection">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="has_tooltip">True</property>
+                        <property name="tooltip" translatable="yes">Si l'image est s&#xE9;&#x142;ectionn&#xE9;e, elle sera copi&#xE9;e</property>
+                        <property name="use_underline">True</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_Selection_toggled"/>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkHScale" id="Rate">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip" translatable="yes">Note de l'image sur 5</property>
+                        <property name="adjustment">0 0 7 1 2 2</property>
+                        <property name="restrict_to_fill_level">False</property>
+                        <property name="fill_level">1</property>
+                        <property name="digits">0</property>
+                        <property name="value_pos">right</property>
+                        <signal name="format_value" handler="on_Rate_format_value"/>
+                      </widget>
+                      <packing>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">12</property>
+                    <property name="bottom_attach">13</property>
                   </packing>
                 </child>
               </widget>

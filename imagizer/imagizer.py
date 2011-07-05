@@ -797,6 +797,12 @@ class photo(object):
             self.exif = Exif(self.fn)
             self.exif.read()
             self.metadata["Titre"] = self.exif.comment
+            try:
+                self.metadata["Rate"] = int(float(self.exif["Exif.Image.Rating"]))
+            except KeyError:
+                self.metadata["Rate"] = 0
+                self.exif["Exif.Image.Rating"] = 0
+
             if self.pixelsX and self.pixelsY:
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             else:
@@ -874,12 +880,16 @@ class photo(object):
         return scaled_buf
 
 
-    def name(self, titre):
+    def name(self, titre, rate=None):
         """write the title of the photo inside the description field, in the JPEG header"""
         if os.name == 'nt' and self.pil != None:
             self.pil = None
         self.metadata["Titre"] = titre
+        if rate is not None:
+            self.metadata["Rate"] = rate
+            self.exif["Exif.Image.Rating"] = int(rate)
         self.exif.comment = titre
+
         self.exif.write()
 
 
