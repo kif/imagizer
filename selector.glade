@@ -272,6 +272,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="tooltip" translatable="yes">Quitte imm&#xE9;diatement sans sauvegarder</property>
                                 <property name="label" translatable="yes">Arreter</property>
                                 <property name="use_underline">True</property>
+                                <signal name="activate" handler="on_arreter1_activate"/>
                                 <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </widget>
                             </child>
@@ -1560,6 +1561,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_Selection_toggled"/>
+                        <signal name="activate" handler="on_Selection_activate"/>
                       </widget>
                       <packing>
                         <property name="expand">False</property>

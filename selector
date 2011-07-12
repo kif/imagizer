@@ -382,8 +382,10 @@ class Interface(object):
         'on_precedant_clicked': self.previous,
         'on_droite_clicked': self.turnRight,
         'on_gauche_clicked': self.turnLeft,
-        'on_Selection_toggled': self.select,
-        'on_selectionner_activate': self.select_Shortcut,
+#        'on_Selection_toggled': self.select,
+#        'on_selectionner_activate': self.select_Shortcut,
+        'on_selectionner_activate': self.select_shortcut,
+        'on_Selection_toggled':self.select,
         'on_photo_client_event': self.next,
 
         'on_About_activate': self.about,
@@ -426,7 +428,6 @@ class Interface(object):
         'on_inverserS_activate': self.invertSelection,
         'on_aucun1_activate': self.selectNone,
         'on_TouS_activate': self.selectAll,
-        'on_selectionner_activate': self.select,
         'on_taille_selection_activate': self.calculateSize,
         'on_media_apres_activate': self.selectNewerMedia,
         'on_media_avant_activate': self.SelectOlderMedia,
@@ -465,6 +466,7 @@ class Interface(object):
 
         'on_fullscreen_activate': self.FullScreen,
         'on_lance_diaporama_activate': self.SlideShow,
+
         }
 
         self.xml.signal_autoconnect(dictHandlers)
@@ -629,24 +631,25 @@ class Interface(object):
         myPhoto.ContrastMask(newname)
         self.ShowImage()
 
-    def select_Shortcut(self, *args):
-        """Select or unselect the image"""
-        logger.debug("Interface.select/unselect clicked")
-        self.settitle()
+    def select_shortcut(self, *args):
+        """Select or unselect the image (not directly clicked on the toggle button)"""
+        logger.debug("Interface.select_shortcut")
         etat = not(self.xml.get_widget("Selection").get_active())
-        if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
-        if not etat and (self.AllJpegs[self.iCurrentImg] in self.Selected): self.Selected.remove(self.AllJpegs[self.iCurrentImg])
-        self.Selected.sort()
         self.xml.get_widget("Selection").set_active(etat)
 
     def select(self, *args):
-        """Select or unselect the image"""
+        """Select or unselect the image (directly clicked on the toggle button)"""
         logger.debug("Interface.select")
-        self.settitle()
+#        self.settitle()
         etat = self.xml.get_widget("Selection").get_active()
         if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
-        if not etat and (self.AllJpegs[self.iCurrentImg] in self.Selected): self.Selected.remove(self.AllJpegs[self.iCurrentImg])
+        if not(etat) and (self.AllJpegs[self.iCurrentImg] in self.Selected): self.Selected.remove(self.AllJpegs[self.iCurrentImg])
         self.Selected.sort()
+        self.xml.get_widget("Selection").set_active(etat)
+        if (self.image.metadata["Rate"] == 0) and  etat:
+            self.image.metadata["Rate"] = config.DefaultRatingSelectedImage
+            self.xml.get_widget("Rate").set_value(config.DefaultRatingSelectedImage)
+        self.settitle()
 
     def destroy(self, *args):
         """destroy clicked by user"""
