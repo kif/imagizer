@@ -97,6 +97,7 @@ class FullScreenInterface(object):
         self.image = None
         self.AllJpegs = AllJpegs
         self.Selected = []
+        self.RandomList = []
         self.iCurrentImg = first
         for i in selected:
             if i in self.AllJpegs:
@@ -245,6 +246,16 @@ class FullScreenInterface(object):
                     self.RandomList = range(len(self.AllJpegs))
                     random.shuffle(self.RandomList)
                 self.iCurrentImg = self.RandomList.pop()
+                try:
+                    self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
+                except:
+                    self.image = photo(self.AllJpegs[self.iCurrentImg])
+                    if imageCache is not None:
+                        imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
+                self.image.readExif()
+                min_rating = self.image.metadata["Rate"] * 0.2 + 0.1
+                if random.random() > min_rating:
+                    continue
             self.ShowImage()
             self.flush_event_queue()
             time.sleep(config.SlideShowDelay)
