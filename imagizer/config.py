@@ -87,6 +87,7 @@ class Config:
             self.DEBUG = None
             self.Gimp = "gimp"
             self.Dcraw = "dcraw -w -c"
+            self.DefaultRatingSelectedImage = 3
             self.Thumbnails = {
                 "Size":160,
                 "Suffix": "thumb",

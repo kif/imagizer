@@ -119,7 +119,7 @@ class ModelProcessSelected:
                 pages = 1 + (len(files) - 1) / config.NbrPerPage
                 for i in range(1, pages + 1):
                     folder = os.path.join(pathday, config.PagePrefix + str(i))
-                    if not os.path.isdir(folder): mkdir(folder)
+                    mkdir(folder)
                 for j in range(len(files)):
                     i = 1 + (j) / config.NbrPerPage
                     filename = os.path.join(pathday, config.PagePrefix + str(i), files[j])
@@ -145,13 +145,12 @@ class ModelProcessSelected:
                     print("Unable to handle such file: %s" % filename)
                     return
             daydir = os.path.join(SelectedDir, time.strftime("%Y-%m-%d", timetuple))
-            if not os.path.isdir(daydir):
-                os.mkdir(daydir)
+            os.mkdir(daydir)
             shutil.move(os.path.join(dirname, filename), os.path.join(daydir, time.strftime("%Hh%Mm%S", timetuple) + suffix))
 
         self.startSignal.emit(self.__label, max(1, len(List)))
         if config.Filigrane:
-            filigrane = signature(config.FiligraneSource)
+            filigrane = Signature(config.FiligraneSource)
         else:
             filigrane = None
 
@@ -272,7 +271,7 @@ class ModelCopySelected:
         """
         self.startSignal.emit(self.__label, max(1, len(List)))
         if config.Filigrane:
-            filigrane = signature(config.FiligraneSource)
+            filigrane = Signature(config.FiligraneSource)
         else:
             filigrane = None
 
@@ -389,21 +388,29 @@ class ModelRangeTout:
             except ValueError:
                 date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(RootDir, i))))
                 heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(RootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
-            if not (os.path.isdir(os.path.join(RootDir, date))) : mkdir(os.path.join(RootDir, date))
-            strImageFile = os.path.join(RootDir, date, heure)
+            if not (os.path.isdir(os.path.join(RootDir, date))) :
+                mkdir(os.path.join(RootDir, date))
+#            strImageFile = os.path.join(RootDir, date, heure)
             ToProcess = os.path.join(date, heure)
-            if os.path.isfile(strImageFile):
-                logger.warning("Distination file already exists: " + i)
+            bSkipFile = False
+            for strImageFile in list_files_in_named_dir(RootDir, date, heure):
+                logger.warning("Distination file already exists: %s ->%s" % (i, strImageFile))
                 existing = photo(strImageFile)
                 try:
                     existing.readExif()
                     originalName = existing.exif["Exif.Photo.UserComment"]
                 except:
-                    logger.error("Error in reading Exif for " + i)
+                    logger.error("Error in reading Exif for %s" % i)
                 else:
                     if os.path.basename(originalName) == os.path.basename(i):
                         logger.info("File already in repository, leaving as it is")
+                        bSkipFile = True
                         continue #to next file, i.e. leave the existing one
+            if bSkipFile:
+                continue
+            else:
+                strImageFile = os.path.join(RootDir, date, heure)
+            if os.path.isfile(strImageFile):
                 s = 0
                 for j in os.listdir(os.path.join(RootDir, date)):
                     if j.find(heure[:-4]) == 0:s += 1
@@ -686,7 +693,7 @@ class photo(object):
                 #Check if the thumbnail is correctly oriented
                 if os.path.isfile(strThumbFile):
                     thumbImag = photo(strThumbFile)
-                    if self.larg()*thumbImag.larg() < 0:
+                    if self.larg() * thumbImag.larg() < 0:
                         print("Warning: thumbnail was not with the same orientation as original: %s" % self.filename)
                         os.remove(strThumbFile)
                         extract = False
@@ -987,7 +994,7 @@ class photo(object):
 # # # # # # fin de la classe photo # # # # # # # # # # #
 ########################################################
 
-class signature:
+class Signature(object):
     def __init__(self, filename):
         """
         this filter allows add a signature to an image
@@ -1144,13 +1151,13 @@ def makedir(filen):
         mkdir(filen)
 
 def mkdir(filename):
-    """create an empty directory with the given rights"""
-#    config=Config()
-    os.mkdir(filename)
-    try:
-        os.chmod(filename, config.DefaultDirMode)
-    except OSError:
-        print("Warning: unable to chmod %s" % filename)
+    """create an empty directory with the given rights is not yet existing"""
+    if not os.path.exists(filename):
+        os.mkdir(filename)
+        try:
+            os.chmod(filename, config.DefaultDirMode)
+        except OSError:
+            logger.warning("Unable to chmod %s" % filename)
 
 def findFiles(strRootDir, lstExtentions=config.Extensions, bFromRoot=False):
     """
@@ -1190,8 +1197,8 @@ def ScaleImage(filename, filigrane=None):
     rootdir = os.path.dirname(filename)
     scaledir = os.path.join(rootdir, config.ScaledImages["Suffix"])
     thumbdir = os.path.join(rootdir, config.Thumbnails["Suffix"])
-    if not os.path.isdir(scaledir) : mkdir(scaledir)
-    if not os.path.isdir(thumbdir) : mkdir(thumbdir)
+    mkdir(scaledir)
+    mkdir(thumbdir)
     Img = photo(filename)
     Param = config.ScaledImages.copy()
     Param.pop("Suffix")
@@ -1246,6 +1253,23 @@ def recursive_delete(strDirname):
             os.rmdir(os.path.join(root, name))
     os.rmdir(strDirname)
 
+
+def list_files_in_named_dir(root, dirname, filename):
+    """
+    @param root:name of the root of the repository, a string
+    @param dirname: name of the directory, a string
+    @param filename: name of the file, a string
+    @return: None is so such file exists or the list of filenames
+    """
+    ret = []
+    for adir in os.listdir(root):
+        if adir.startswith(dirname):
+            fullpath = os.path.join(root, adir)
+            if os.path.isdir(fullpath):
+                fullname = os.path.join(fullpath, filename)
+                if os.path.isfile(fullname):
+                    ret.append(fullname)
+    return ret
 
 
 
