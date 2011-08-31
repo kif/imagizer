@@ -394,7 +394,7 @@ class ModelRangeTout:
             ToProcess = os.path.join(date, heure)
             bSkipFile = False
             for strImageFile in list_files_in_named_dir(RootDir, date, heure):
-                logger.warning("Distination file already exists: %s ->%s" % (i, strImageFile))
+                logger.warning("%s -x-> %s" % (i, strImageFile))
                 existing = photo(strImageFile)
                 try:
                     existing.readExif()

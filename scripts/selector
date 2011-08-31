@@ -47,7 +47,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 
 
 import os, locale, random, gc, time, shutil, sys, logging
-
+import os.path as op
 
 try:
     import ImageFile
@@ -205,19 +205,19 @@ class FullScreenInterface(object):
         self.ShowImage()
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg, len(self.AllJpegs)):
-            jc = os.path.dirname(self.AllJpegs[i])
+            jc = op.dirname(self.AllJpegs[i])
             if jc > jour: break
         self.iCurrentImg = i
         self.ShowImage()
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
         if self.iCurrentImg == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg - 1, -1, -1):
-            jc = os.path.dirname(self.AllJpegs[i])
-            jd = os.path.dirname(self.AllJpegs[i - 1])
+            jc = op.dirname(self.AllJpegs[i])
+            jd = op.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
         self.ShowImage()
@@ -286,7 +286,7 @@ class Interface(object):
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
 
-        self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "logo.png")))
+        self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
         self.flush_event_queue()
         if config.AutoRotate:
             i = 1
@@ -609,14 +609,14 @@ class Interface(object):
         logger.debug("Interface.gimp")
         self.settitle()
         filename = self.AllJpegs[self.iCurrentImg]
-        base, ext = os.path.splitext(filename)
+        base, ext = op.splitext(filename)
         newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
-        newnamefull = os.path.join(config.DefaultRepository, newname)
-        shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
+        newnamefull = op.join(config.DefaultRepository, newname)
+        shutil.copy(op.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
         os.system("%s %s" % (config.Gimp, newnamefull))
         self.ShowImage()
@@ -627,7 +627,7 @@ class Interface(object):
         logger.debug("Interface.filter")
         self.settitle()
         filename = self.AllJpegs[self.iCurrentImg]
-        base, ext = os.path.splitext(filename)
+        base, ext = op.splitext(filename)
         newname = base + "-Filtered" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
@@ -702,7 +702,7 @@ class Interface(object):
         ProcessSelected(self.Selected)
         self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
-        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
         logger.info("Interface.toWeb: Done")
@@ -710,10 +710,10 @@ class Interface(object):
     def emptySelected(self, *args):
         """remove all the files in the "Selected" folder"""
 
-        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         for dirs in os.listdir(SelectedDir):
-            curfile = os.path.join(SelectedDir, dirs)
-            if os.path.isdir(curfile):
+            curfile = op.join(SelectedDir, dirs)
+            if op.isdir(curfile):
                 recursive_delete(curfile)
             else:
                 os.remove(curfile)
@@ -735,7 +735,7 @@ class Interface(object):
         self.Selected = []
         #TODO : MVC
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
-        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
         logger.info("Interface.burn: Done")
@@ -808,9 +808,9 @@ class Interface(object):
         """Switch to the first image of the next day"""
         logger.debug("Interface.nextJ clicked")
         self.settitle()
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg, len(self.AllJpegs)):
-            jc = os.path.dirname(self.AllJpegs[i])
+            jc = op.dirname(self.AllJpegs[i])
             if jc > jour: break
         self.iCurrentImg = i
         self.ShowImage()
@@ -820,10 +820,10 @@ class Interface(object):
         logger.debug("Interface.previousJ clicked")
         self.settitle()
         if self.iCurrentImg == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg - 1, -1, -1):
-            jc = os.path.dirname(self.AllJpegs[i])
-            jd = os.path.dirname(self.AllJpegs[i - 1])
+            jc = op.dirname(self.AllJpegs[i])
+            jd = op.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
         self.ShowImage()
@@ -839,10 +839,10 @@ class Interface(object):
         """switch to the first image of the last day"""
         logger.debug("Interface.lastJ clicked")
         self.settitle()
-        lastday = os.path.dirname(self.AllJpegs[-1])
+        lastday = op.dirname(self.AllJpegs[-1])
         for i in range(len(self.AllJpegs) - 1, -1, -1):
-            jc = os.path.dirname(self.AllJpegs[i])
-            jd = os.path.dirname(self.AllJpegs[i - 1])
+            jc = op.dirname(self.AllJpegs[i])
+            jd = op.dirname(self.AllJpegs[i - 1])
             if (jc == lastday) and (jd < jc): break
         self.iCurrentImg = i
         self.ShowImage()
@@ -1251,9 +1251,9 @@ class Interface(object):
         for i in self.AllJpegs[self.iCurrentImg:]:
             if i in self.Selected:
                 continue
-            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
+            size += op.getsize(op.join(config.DefaultRepository, i))
             if size >= maxsize:
-                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
+                size -= op.getsize(op.join(config.DefaultRepository, i))
                 break
             else:
                 self.Selected.append(i)
@@ -1284,9 +1284,9 @@ class Interface(object):
         for i in tmplist:
             if i in self.Selected:
                 continue
-            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
+            size += op.getsize(op.join(config.DefaultRepository, i))
             if size >= maxsize:
-                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
+                size -= op.getsize(op.join(config.DefaultRepository, i))
                 break
             else:
                 self.Selected.append(i)
@@ -1323,31 +1323,49 @@ def SelectedSize(List):
     """Return the size of the selection in byte (octets)"""
     size = 0
     for File in List:
-        size += os.path.getsize(os.path.join(config.DefaultRepository, File))
+        size += op.getsize(op.join(config.DefaultRepository, File))
     return size
 
-def SaveSelected(List):
-    """save the list of selected files"""
-    logger.debug("Saving selection into file %s" % Selected_file)
-    os.remove(Selected_file)
-    f = open(Selected_file, "w")
-    for ligne in List: f.write(ligne + "\n")
-    f.close()
-    os.chmod(Selected_file, config.DefaultFileMode)
+def SaveSelected(selected_list, filename=None):
+    """
+    Save the list of selected files
+    
+    @param selected_list: list of filename selected
+    """
+    if filename is None:
+        selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+    else:
+        selected_fn = str(filename)
+    logger.debug("Saving selection into file %s" % selected_fn)
+    os.remove(selected_fn)
+    with open(selected_fn, "w") as select_file:
+        select_file.write(os.linesep.join(selected_list))
+    os.chmod(selected_fn, config.DefaultFileMode)
 
-def LoadSelected():
-    """Load the list of selected files"""
-    logger.debug("Loading selection from file %s" % Selected_file)
-    try:
-        lignes = open(Selected_file, "r").readlines()
-        select = []
-        for ligne in lignes :
-            select.append(ligne.strip())
-        return select
-    except:
-        logger.warning("Failed to load selection from file %s" % Selected_file)
+def LoadSelected(filename=None):
+    """
+    Load the list of selected filenames 
+    
+    @return: the list of selected images (filenames) 
+    """
+    if filename is None:
+        selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+    else:
+        selected_fn = str(filename)
+    if op.exists(selected_fn):
+        logger.debug("Loading selection from file %s" % selected_fn)
+    else:
+        logger.warning("No such selection file %s" % selected_fn)
         return []
 
+    try:
+        select = [line.strip() for line in open(selected_fn, "r")
+                  if op.isfile(op.join(config.DefaultRepository, line.strip()))]
+    except Exception as exc:
+        logger.warning("Failed (%s) to load selection from file %s" % (exc, selected_fn))
+        return []
+    select.sort()
+    return select
 
 def MessageError(text, Message=gtk.MESSAGE_ERROR):
     dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
@@ -1366,12 +1384,12 @@ class RenameDay(object):
         """
         self.initialFilename = filename
         self.newFilename = self.initialFilename
-        self.dayname = os.path.dirname(filename)
+        self.dayname = op.dirname(filename)
         self.callback = callback
 
-        self.commentfile = os.path.join(config.DefaultRepository, self.dayname, config.CommentFile)
+        self.commentfile = op.join(config.DefaultRepository, self.dayname, config.CommentFile)
         self.comment = AttrFile(self.commentfile)
-        if os.path.isfile(self.commentfile):
+        if op.isfile(self.commentfile):
             try:
                 self.comment.read()
             except:
@@ -1391,7 +1409,7 @@ class RenameDay(object):
         else:
             self.name = u""
             self.comment["title"] = self.name.decode(config.Coding)
-        self.comment["image"] = os.path.split(filename)[1].decode(config.Coding)
+        self.comment["image"] = op.split(filename)[1].decode(config.Coding)
         if not self.comment.has_key("comment"):
             self.comment["comment"] = u""
         self.AllPhotos = AllPhotos
@@ -1417,11 +1435,11 @@ class RenameDay(object):
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
         else:
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode2ascii(self.newname.encode("latin1")).replace(" ", "_",)
-        self.newFilename = os.path.join(self.newdayname, os.path.basename(self.initialFilename))
+        self.newFilename = op.join(self.newdayname, op.basename(self.initialFilename))
 
-        self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
-        if not os.path.isdir(os.path.join(config.DefaultRepository, self.newdayname)):
-            mkdir(os.path.join(config.DefaultRepository, self.newdayname))
+        self.newcommentfile = op.join(config.DefaultRepository, self.newdayname, config.CommentFile)
+        if not op.isdir(op.join(config.DefaultRepository, self.newdayname)):
+            mkdir(op.join(config.DefaultRepository, self.newdayname))
         if self.DescObj.get_modified():
             self.comment["comment"] = self.DescObj.get_text(self.DescObj.get_start_iter(), self.DescObj.get_end_iter()).strip().decode("UTF-8").replace("\n", "<BR>")
         self.comment.write()
@@ -1430,14 +1448,14 @@ class RenameDay(object):
         if self.newname != self.name:
             idx = 0
             for photofile in self.AllPhotos:
-                if os.path.dirname(photofile) == self.dayname:
-                    newphotofile = os.path.join(self.newdayname, os.path.split(photofile)[-1])
-                    if os.path.isfile(os.path.join(config.DefaultRepository, newphotofile)):
-                        base = os.path.splitext(os.path.join(config.DefaultRepository, newphotofile))
+                if op.dirname(photofile) == self.dayname:
+                    newphotofile = op.join(self.newdayname, op.split(photofile)[-1])
+                    if op.isfile(op.join(config.DefaultRepository, newphotofile)):
+                        base = op.splitext(op.join(config.DefaultRepository, newphotofile))
                         count = 0
-                        for i in os.listdir(os.path.join(config.DefaultRepository, self.newdayname)):
+                        for i in os.listdir(op.join(config.DefaultRepository, self.newdayname)):
                             if i.find(base) == 0:count += 1
-                        newphotofile = os.path.splitext(newphotofile) + "-%i.jpg" % count
+                        newphotofile = op.splitext(newphotofile) + "-%i.jpg" % count
                     print "%s -> %s" % (photofile, newphotofile)
                     if (imageCache is not None) and photofile in imageCache:
                         myPhoto = imageCache[photofile]
@@ -1446,17 +1464,17 @@ class RenameDay(object):
                     myPhoto.renameFile(newphotofile)
                     self.AllPhotos[idx] = newphotofile
 
-#                    os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
+#                    os.rename(op.join(config.DefaultRepository, photofile), op.join(config.DefaultRepository, newphotofile))
                     if photofile in self.selected:
                         self.selected[self.selected.index(photofile)] = newphotofile
                 idx += 1
 #move or remove the comment file if necessary
-            if os.path.isfile(self.commentfile):# and not  os.path.isfile(self.newcommentfile):
+            if op.isfile(self.commentfile):# and not  op.isfile(self.newcommentfile):
                 os.rename(self.commentfile, self.newcommentfile)
-#            elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
+#            elif op.isfile(self.commentfile) and op.isfile(self.newcommentfile):
 #                 os.remove(self.commentfile)
-            if len(os.listdir(os.path.join(config.DefaultRepository, self.dayname))) == 0:
-                os.rmdir(os.path.join(config.DefaultRepository, self.dayname))
+            if len(os.listdir(op.join(config.DefaultRepository, self.dayname))) == 0:
+                os.rmdir(op.join(config.DefaultRepository, self.dayname))
         self.xml.get_widget("Renommer").destroy()
         if self.callback is not None:
             self.callback(self)
@@ -1636,7 +1654,7 @@ class Synchronize:
     def synchronize(self, *args):
         self.Read()
         logger.debug("Synchronize.synchronize with mode %s" % config.SynchronizeType)
-        synchrofile = os.path.join(config.DefaultRepository, ".synchro")
+        synchrofile = op.join(config.DefaultRepository, ".synchro")
         synchro = []
         if config.SynchronizeType.lower() == "selected":
             logger.debug("Synchronize.synchronize: exec selected")
@@ -1653,10 +1671,10 @@ class Synchronize:
         synchro.append(config.Selected_save)
         days = []
         for photo in synchro:
-            day = os.path.split(photo)[0]
+            day = op.split(photo)[0]
             if not day in days:
                 days.append(day)
-                if os.path.isfile(os.path.join(config.DefaultRepository, day, config.CommentFile)):synchro.append(os.path.join(day, config.CommentFile))
+                if op.isfile(op.join(config.DefaultRepository, day, config.CommentFile)):synchro.append(op.join(day, config.CommentFile))
         f = open(synchrofile, "w")
         for i in synchro: f.write(i + "\n")
         f.close()
@@ -1686,14 +1704,14 @@ class SelectDay:
         self.xml.signal_connect('on_ChangeDir_destroy', self.destroy)
         self.xml.signal_connect('on_annuler_clicked', self.destroy)
         self.xml.signal_connect('on_Ouvrir_clicked', self.continu)
-        self.days = [os.path.split(self.upperIface.AllJpegs[0])[0]]
+        self.days = [op.split(self.upperIface.AllJpegs[0])[0]]
         self.combobox.append_text(self.days[0])
         for image in self.upperIface.AllJpegs[1:]:
-            day = os.path.split(image)[0]
+            day = op.split(image)[0]
             if day != self.days[-1]:
                 self.days.append(day)
                 self.combobox.append_text(day)
-        self.curday = self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.iCurrentImg])[0])
+        self.curday = self.days.index(op.split(self.upperIface.AllJpegs[self.upperIface.iCurrentImg])[0])
         self.combobox.set_active(self.curday)
 
 
@@ -1703,7 +1721,7 @@ class SelectDay:
         """just distroy the window and goes on ...."""
         day = self.days[self.combobox.get_active()]
         for i in range(len(self.upperIface.AllJpegs)):
-            if os.path.split(self.upperIface.AllJpegs[i])[0] == day:
+            if op.split(self.upperIface.AllJpegs[i])[0] == day:
                 break
         self.upperIface.iCurrentImg = i
         self.upperIface.ShowImage()
@@ -1742,19 +1760,20 @@ if __name__ == '__main__':
                 elif arg.lower().find("-nowarning") >= 0:
                     logger.debug("Initial warning about file renaming is disabled")
                     printWarning = False
-            elif os.path.isdir(arg):
-                config.DefaultRepository = os.path.abspath(arg)
+            elif op.isdir(arg):
+                config.DefaultRepository = op.abspath(arg)
 
     config.printConfig()
-    Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
-    if (printWarning == True) and (not os.path.isfile(Selected_file)):
+    selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+    if (printWarning == True) and (not op.isfile(selected_fn)):
         W = WarningSc(config.DefaultRepository)
         config.DefaultRepository = W.directory
         del W
-        Selected_file = os.path.join(config.DefaultRepository, config.Selected_save)
+        selected_fn = op.join(config.DefaultRepository, config.Selected_save)
 
-    if not os.path.isfile(Selected_file):
-        f = open(Selected_file, "w")
+    if not op.isfile(selected_fn):
+        os.remove(selected_fn)
+        f = open(selected_fn, "w")
         f.close()
 
 

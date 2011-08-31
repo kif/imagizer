@@ -32,20 +32,25 @@ from distutils.core import setup
 from distutils.extension import Extension
 import os, sys, glob, distutils.sysconfig, shutil, locale
 
+SCRIPTS = "scripts"
+
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
+
+
+
 if os.name == 'nt': #sys.platform == 'win32':
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran.exe")
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
     shutil.copy('selector', 'selector.py')
     shutil.copy('generator', 'generator.py')
     shutil.copy('imagizer.conf-windows', 'imagizer.conf')
-    scripts = ['selector.py', "generator.py", "NommeVideo.py", "NommeVideo2.py"]
+
 
 elif os.name == 'posix':
 #    shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
-    scripts = ['selector', "generator", "NommeVideo.py", "NommeVideo2.py"]
+#    scripts = ['selector', "generator", "NommeVideo.py", "NommeVideo2.py"]
     execexiftran = os.path.join(os.getcwd(), "bin", "exiftran")
     os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
@@ -53,6 +58,9 @@ elif os.name == 'posix':
 else:
     raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
     sys.exit(1)
+
+rootdir = os.path.dirname(os.path.abspath(sys.argv[0]))
+scripts = [os.path.join(SCRIPTS, scriptname) for scriptname in os.listdir(os.path.join(rootdir, "scripts"))]
 
 configured = False
 for i in ConfFile:
@@ -95,8 +103,8 @@ setup(name='Imagizer',
 os.remove("imagizer.conf")
 
 if not configured:
-    import config
-    config = config.Config()
+    from imagizer import config
+    #config = config.Config()
     config.load(ConfFile)
 #    textinterface = True
 #    try:
@@ -128,12 +136,12 @@ if not configured:
 
     try:
         import pyexiv2
-    except:
+    except ImportError:
         raise ImportError("You should install pyexiv2 by: #aptitude install python-pyexiv2")
 
     try:
         import Image, ImageStat, ImageChops, ImageFile
-    except:
+    except ImportError:
         raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/\ninstall it by # aptitude install python-imaging")
     try:
         import pygtk ; pygtk.require('2.0')
