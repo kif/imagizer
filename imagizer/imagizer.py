@@ -1172,7 +1172,7 @@ def findFiles(strRootDir, lstExtentions=config.Extensions, bFromRoot=False):
     @rtype: list of strings 
     """
     listFiles = []
-    if strRootDir.endswith("os.sep"):
+    if strRootDir.endswith(os.sep):
         lenRoot = len(strRootDir)
     else:
         lenRoot = len(strRootDir) + 1
