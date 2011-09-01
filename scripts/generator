@@ -204,7 +204,8 @@ if int(sys.version[0]) != 2:
     logger.error("You need Python version 2 to run generator.")
     sys.exit(1)
 
-import os, os.path, dircache
+import os, dircache
+import os.path as op
 from os.path import join, dirname, basename, normpath, splitext
 from os.path import isfile, islink, isdir, exists
 
@@ -218,19 +219,19 @@ import stat
 import distutils.sysconfig
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
-installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
+installdir = op.join(distutils.sysconfig.get_python_lib(), "imagizer")
 if os.name == 'nt': #sys.platform == 'win32':
-    ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+    ConfFile = [op.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), op.join(os.getenv("USERPROFILE"), "imagizer.conf")]
 elif os.name == 'posix':
-    ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
+    ConfFile = ["/etc/imagizer.conf", op.join(os.getenv("HOME"), ".imagizer")]
 else:
     raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
     sys.exit(1)
 
 
-from imagizer.config import Config
-from imagizer.exif import Exif
-from imagizer.parser import AttrFile
+from imagizer.config    import Config
+from imagizer.exif      import Exif
+from imagizer.parser    import AttrFile
 
 config = Config()
 config.load(ConfFile)
@@ -258,7 +259,7 @@ from traceback import print_exception
 
 def urlquote(text):
     """same as urllib.quote but windows compliant"""
-    if os.path.sep == "\\":
+    if op.sep == "\\":
         return urllib.quote(text.replace("\\", "/"))
     else:
         return urllib.quote(text)
@@ -337,13 +338,13 @@ def splitpath(path):
     """Splits a path into a list of components.
     This function works around a quirk in string.split()."""
 
-    # FIXME perhaps call os.path.split repetitively would be better.
+    # FIXME perhaps call op.split repetitively would be better.
     #s = string.split( path, '/' ) # we work with fwd slash only inside.
 
 #We have decided to use all kind of separator
     s = []
     while True:
-        first, second = os.path.split(path)
+        first, second = op.split(path)
         s.append(second)
         if first == "":
             break
@@ -384,7 +385,7 @@ def rel(dest, curdir):
 # #
 # def html_join(a, *p):
 #
-#     """Version of os.path.join() that uses strickly '/', for legal HTML
+#     """Version of op.join() that uses strickly '/', for legal HTML
 #     output."""
 #
 #     # Hopefully, all paths will at some time have gone through this, it should
@@ -404,7 +405,7 @@ def rel(dest, curdir):
 def splitFn(fn):
     """Returns a tuplet ( dir, base, repn, ext ).  Repn is '' if not present."""
 
-    (dir, bn) = os.path.split(fn)
+    (dir, bn) = op.split(fn)
 
     fidx = bn.find(opts.separator)
     if fidx != -1:
@@ -525,7 +526,7 @@ class Dir:
         files = dircache.listdir(join(root, path))
 
         pattr = join(root, self._path, dirattr_fn)
-        longtitle = os.path.split(self._basename)[1]
+        longtitle = op.split(self._basename)[1]
         if not longtitle in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
             self._attrfile = AttrFile(pattr)
             if exists(pattr) and isfile(pattr):
@@ -534,7 +535,7 @@ class Dir:
                     if opts.quiet: print "  read attributes", self._attrfile.keys()
             if not self._attrfile.has_key("comment"):
                 self._attrfile["comment"] = ""
-            longtitle = os.path.split(self._basename)[1]
+            longtitle = op.split(self._basename)[1]
             if not self._attrfile.has_key("date"):
                 try:
                     self._attrfile["date"] = time.strftime("%A, %d %B %Y", time.strptime(longtitle[:10], "%Y-%m-%d")).capitalize().decode(config.Coding)
@@ -624,14 +625,14 @@ class Dir:
         if not longtitle in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
         # fix the problem if there are many pages ...
             if self._attrfile["image"] != "":
-                if not os.path.isfile(join(self._curdir, self._attrfile["image"])):
+                if not op.isfile(join(self._curdir, self._attrfile["image"])):
                     found = False
-                    source = os.path.splitext(self._attrfile["image"])[0]
+                    source = op.splitext(self._attrfile["image"])[0]
 #                    sys.stderr.write("source= %s\n"%source)
                     for i in self._subdirs:
 #                        sys.stderr.write("possibilite= %s\n"%[j._base for j in i._images])
                         if source in [j._base for j in i._images]:
-                            self._attrfile["image"] = os.path.join(os.path.split(i._path)[1], self._attrfile["image"])
+                            self._attrfile["image"] = op.join(op.split(i._path)[1], self._attrfile["image"])
                             found = True
                             break
                     if not found: self._attrfile["image"] = ""
@@ -644,7 +645,7 @@ class Dir:
 #                    sys.stderr.write("pas d'images, uniquement les chox suivants : %s\n"%[i._path for i in self._subdirs])
                     for i in self._subdirs:
                         if len(i._attrfile["image"]) > 0:
-                            self._attrfile["image"] = os.path.join(os.path.split(i._path)[1], i._attrfile["image"])
+                            self._attrfile["image"] = op.join(op.split(i._path)[1], i._attrfile["image"])
                             break
         if self._attrfile:
             if len(self._attrfile["title"]) > 0 and len(self._attrfile["date"]) > 0:
@@ -1944,7 +1945,7 @@ def textnav(dstdir, image, imglist, midtext="", middest=None, pcycling=0):
 def desc_index(dir):
   file_ind = join(dir._path, config.CommentFile)
   attr = None
-  if os.path.exists(file_ind):
+  if op.exists(file_ind):
     attr = AttrFile(file_ind)
     attr.read()
   return attr
@@ -2345,6 +2346,7 @@ if dir._parent:
 
 <!--tagcode:
 import sys
+import os.path as op
 import Image as PilImage
 if len( dir._subdirs ) > 0:
     print '<h3>Sous-repertoires:</h3>'
@@ -2355,13 +2357,13 @@ if len( dir._subdirs ) > 0:
         for d in subdirs:
             print "<tr>"
             if d._attrfile.has_key("image"):
-                temp=os.path.splitext(d._attrfile["image"])[0]+opts.separator+config.Thumbnails["Suffix"]+config.Extensions[0]
-                temp1,temp2=os.path.split(temp)
-                filename=os.path.join(os.path.split(d._curdir)[1],temp1,config.Thumbnails["Suffix"],temp2)
-                longfilename=os.path.join(opts.root,os.path.split(cd)[0],filename)
+                temp=op.splitext(d._attrfile["image"])[0]+opts.separator+config.Thumbnails["Suffix"]+config.Extensions[0]
+                temp1,temp2=op.split(temp)
+                filename=op.join(op.split(d._curdir)[1],temp1,config.Thumbnails["Suffix"],temp2)
+                longfilename=op.join(opts.root,op.split(cd)[0],filename)
 #                mm="--"
 #                print "<"+mm+"Debug LongFilename %s"%longfilename
-                if os.path.isfile(longfilename):
+                if op.isfile(longfilename):
                     im = PilImage.open(longfilename)
                     width,height = im.size
 #                    print "PIL size h=%i w=%i"%(height,width)
@@ -2370,7 +2372,7 @@ if len( dir._subdirs ) > 0:
                     height=3*width/4
 #                    print "Default size h=%i w=%i"%(height,width)
 #                print mm+">"    
-                print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" height=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,os.path.split(cd)[1]),os.path.split(filename)[1],height,width)
+                print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" height=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,op.split(cd)[1]),op.split(filename)[1],height,width)
             else:
                 print "<td> </td>"
             if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
@@ -2535,6 +2537,7 @@ fallbackTemplates[ 'template-sortindex' ] = \
 <!--tagcode:
 if len(allimages) > 0:
     import os
+    import os.path as op
     print '<h3>Images sorted by name:</h3>'
     ilist = list(allimages)
     ilist.sort( lambda x,y: cmp( x._base, y._base ) )
@@ -2774,7 +2777,7 @@ def main():
                 "Error: you said to use PIL but PIL seems not to be installed.")
 
     if opts.templates:
-        opts.templates = os.path.expanduser(opts.templates)
+        opts.templates = op.expanduser(opts.templates)
 
     if (opts.magick_path or opts.old_magick != None) and opts.no_magick:
         print >> sys.stderr, "Error: Ambiguous options, use Magick or not?"
@@ -2879,7 +2882,7 @@ def main():
     # compute pathnames and some global variables
     #
     def prepend(path, pfx):
-        (d, f) = os.path.split(path)
+        (d, f) = op.split(path)
         return join(d, pfx, f)
 
     allimages = rootdir.getAllImages()

@@ -32,7 +32,7 @@ It handles images, progress bars and configuration file.
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "jerome.kieffer@terre-adelie.org"
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 import os, logging, sys
 logger = logging.Logger("imagizer", logging.DEBUG)
@@ -57,4 +57,4 @@ from parser import AttrFile
 from signals import Signal
 from encoding import unicode2html, unicode2ascii
 from html import Html
-
+installdir = os.path.dirname(__file__)

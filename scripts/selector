@@ -56,11 +56,14 @@ except:
 
 import imagizer
 logger = logging.getLogger("imagizer.selector")
-from imagizer.encoding import  unicode2ascii
-from imagizer.imagizer import photo, Config, unifiedglade, CopySelected, ProcessSelected, recursive_delete, smartSize, mkdir, RangeTout, installdir, RawImage, findFiles
-from imagizer.parser import AttrFile
-from imagizer.dirchooser import WarningSc
-from imagizer import listConfigurationFiles
+from imagizer               import installdir, listConfigurationFiles
+from imagizer.encoding      import  unicode2ascii
+from imagizer.config        import Config
+from imagizer.imagizer      import unifiedglade, CopySelected, ProcessSelected, RangeTout
+from imagizer.photo         import Photo, RawImage
+from imagizer.fileutils     import recursive_delete, smartSize, mkdir, findFiles
+from imagizer.parser        import AttrFile
+from imagizer.dirchooser    import WarningSc
 
 try:
     import pygtk ; pygtk.require('2.0')
@@ -126,7 +129,7 @@ class FullScreenInterface(object):
         try:
             self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
         except:
-            self.image = photo(self.AllJpegs[self.iCurrentImg])
+            self.image = Photo(self.AllJpegs[self.iCurrentImg])
             if imageCache is not None:
                 imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
 
@@ -249,7 +252,7 @@ class FullScreenInterface(object):
                 try:
                     self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
                 except:
-                    self.image = photo(self.AllJpegs[self.iCurrentImg])
+                    self.image = Photo(self.AllJpegs[self.iCurrentImg])
                     if imageCache is not None:
                         imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
                 self.image.readExif()
@@ -507,7 +510,7 @@ class Interface(object):
         try:
             self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
         except:
-            self.image = photo(self.AllJpegs[self.iCurrentImg])
+            self.image = Photo(self.AllJpegs[self.iCurrentImg])
             if imageCache is not None:
                 imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
         X, Y = self.xml.get_widget("Principale").get_size()
@@ -636,7 +639,7 @@ class Interface(object):
         try:
             myPhoto = imageCache[filename]
         except:
-            myPhoto = photo(filename)
+            myPhoto = Photo(filename)
             if imageCache is not None:
                 imageCache[filename] = myPhoto
         myPhoto.ContrastMask(newname)
@@ -939,7 +942,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
@@ -957,7 +960,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
@@ -973,7 +976,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
@@ -991,7 +994,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if myPhoto.has_title():
@@ -1007,7 +1010,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
@@ -1025,7 +1028,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
@@ -1041,7 +1044,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
@@ -1059,7 +1062,7 @@ class Interface(object):
             try:
                 myPhoto = imageCache[i]
             except:
-                myPhoto = photo(i)
+                myPhoto = Photo(i)
                 if imageCache is not None:
                     imageCache[i] = myPhoto
             if not myPhoto.has_title():
@@ -1460,7 +1463,7 @@ class RenameDay(object):
                     if (imageCache is not None) and photofile in imageCache:
                         myPhoto = imageCache[photofile]
                     else:
-                        myPhoto = photo(photofile)
+                        myPhoto = Photo(photofile)
                     myPhoto.renameFile(newphotofile)
                     self.AllPhotos[idx] = newphotofile
 
