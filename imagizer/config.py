@@ -68,6 +68,7 @@ class Config:
             self.FiligraneQuality = 75
             self.FiligraneOptimize = False
             self.FiligraneProgressive = False
+            self.ContrastMaskGaussianSize = 5
             self.WebDirIndexStyle = "list"
             self.MediaSize = 680
             self.Burn = "grave-rep $Selected"

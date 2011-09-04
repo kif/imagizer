@@ -33,7 +33,7 @@ __licence__ = "GPLv2"
 __contact__ = "imagizer@terre-adelie.org"
 
 
-import os, logging, shutil
+import os, logging, shutil, time
 import os.path as op
 installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.photo")
@@ -75,7 +75,7 @@ from encoding   import unicode2ascii
 ##########################################################
 class Photo(object):
     """class photo that does all the operations available on photos"""
-    _gaussianKernel = None
+    _gaussianKernelFFT = None
 
     def __init__(self, filename):
         self.filename = filename
@@ -391,46 +391,64 @@ class Photo(object):
             self.orientation = 1
 
 
-    def ContrastMask(self, outfile):
-        """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, il permet de rattrapper une photo trop contrasté, un contre jour, ...
-        Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, en particulier A. Fayolles et F. Mantegazza
-        avril 2006
+    def contrastMask(self, outfile):
+        """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, 
+        il permet de rattrapper une photo trop contrasté, un contre jour, ...
+        Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, 
+        en particulier A. Fayolles et F. Mantegazza avril 2006
         necessite numpy et PIL."""
-        ########################################################################
-        # TODO: this needs refactoring !!
-        ########################################################################
 
         try:
             import numpy
-            import scipy.signal as signal
+#            import scipy.signal as signal
         except:
-            raise ImportError("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
+            logger.error("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
+            return
 
-        if self._gaussianKernel is None:
-            size = 15
-            x, y = numpy.mgrid[-size:size + 1, -size:size + 1]
-            g = numpy.exp(-(x ** 2 / float(size) + y ** 2 / float(size)))
-            self.__class__._gaussianKernel = g / g.sum()
-
+        t0 = time.time()
         self.LoadPIL()
-        x, y = self.pil.size
-        ImageFile.MAXBLOCK = x * y
-        img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("UInt16")
-        img_array.shape = (y, x, 3)
-        red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
-        desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2
-        inv_desat = 255 - desat_array
-        blured_inv_desat = signal.convolve(inv_desat, self.__class__._gaussianKernel, mode='valid')
+        dimX, dimY = self.pil.size
+        if self._gaussianKernelFFT is None or self._gaussianKernelFFT.shape != (dimY, dimX):
+            logger.info("Gaussian (size=%s) and FFT" % config.ContrastMaskGaussianSize)
+            size = 2 * numpy.log(2) * config.ContrastMaskGaussianSize ** 2
+            gx = numpy.exp(-((numpy.arange(dimX, dtype="float32") - (dimX / 2.0)) / size) ** 2)
+            gx2 = numpy.zeros_like(gx)
+            gx2[dimX / 2:] = gx[:-dimX / 2]
+            gx2[:dimX / 2] = gx[-dimX / 2:]
+            gy = numpy.exp(-((numpy.arange(dimY, dtype="float32") - (dimY / 2.0)) / size) ** 2)
+            gy2 = numpy.zeros_like(gy)
+            gy2[dimY / 2:] = gy[:-dimY / 2]
+            gy2[:dimY / 2] = gy[-dimY / 2:]
+            g = numpy.outer(gy2, gx2)
+            self.__class__._gaussianKernelFFT = numpy.fft.fft2(g).conjugate()
+            logger.info("The Gaussian function and FFT took %.3f" % (time.time() - t0))
+#            x, y = numpy.mgrid[-size:size + 1, -size:size + 1]
+#            g = numpy.exp(-(x ** 2 / float(size) + y ** 2 / float(size)))
+#            self.__class__._gaussianKernel = g / g.sum()
 
-        k = Image.fromarray(blured_inv_desat, "L").convert("RGB")
+
+        ImageFile.MAXBLOCK = dimX * dimY
+        img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("float32")
+        img_array.shape = (dimY, dimX, 3)
+        red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
+        #nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2
+        desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2.0
+        inv_desat = 255. - desat_array
+#        blured_inv_desat = signal.convolve(inv_desat, self.__class__._gaussianKernel, mode='valid')
+        blured_inv_desat = numpy.fft.ifft2(numpy.fft.fft2(inv_desat) * self._gaussianKernelFFT).real
+        bmin = blured_inv_desat.min()
+        bmax = blured_inv_desat.max()
+        bisi = ((blured_inv_desat - bmin) / (bmax - bmin) * 255).astype("uint8")
+        k = Image.fromarray(bisi, "L").convert("RGB")
         S = ImageChops.screen(self.pil, k)
         M = ImageChops.multiply(self.pil, k)
         F = ImageChops.add(ImageChops.multiply(self.pil, S), ImageChops.multiply(ImageChops.invert(self.pil), M))
-        F.save(op.join(config.DefaultRepository, outfile), quality=90, progressive=True, Optimize=True)
+        F.save(op.join(config.DefaultRepository, outfile), quality=80, progressive=True, Optimize=True)
         try:
             os.chmod(op.join(config.DefaultRepository, outfile), config.DefaultFileMode)
         except IOError:
-            logger.warning("Unable to chmod %s" % outfile)
+            logger.error("Unable to chmod %s" % outfile)
+        logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
 
 
 ########################################################        
