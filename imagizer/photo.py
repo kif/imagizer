@@ -420,11 +420,8 @@ class Photo(object):
             gy2[dimY / 2:] = gy[:-dimY / 2]
             gy2[:dimY / 2] = gy[-dimY / 2:]
             g = numpy.outer(gy2, gx2)
-            self.__class__._gaussianKernelFFT = numpy.fft.fft2(g).conjugate()
+            self.__class__._gaussianKernelFFT = numpy.fft.fft2(g / g.sum()).conjugate()
             logger.info("The Gaussian function and FFT took %.3f" % (time.time() - t0))
-#            x, y = numpy.mgrid[-size:size + 1, -size:size + 1]
-#            g = numpy.exp(-(x ** 2 / float(size) + y ** 2 / float(size)))
-#            self.__class__._gaussianKernel = g / g.sum()
 
 
         ImageFile.MAXBLOCK = dimX * dimY
@@ -434,11 +431,8 @@ class Photo(object):
         #nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2
         desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2.0
         inv_desat = 255. - desat_array
-#        blured_inv_desat = signal.convolve(inv_desat, self.__class__._gaussianKernel, mode='valid')
         blured_inv_desat = numpy.fft.ifft2(numpy.fft.fft2(inv_desat) * self._gaussianKernelFFT).real
-        bmin = blured_inv_desat.min()
-        bmax = blured_inv_desat.max()
-        bisi = ((blured_inv_desat - bmin) / (bmax - bmin) * 255).astype("uint8")
+        bisi = numpy.round(blured_inv_desat).astype("uint8")
         k = Image.fromarray(bisi, "L").convert("RGB")
         S = ImageChops.screen(self.pil, k)
         M = ImageChops.multiply(self.pil, k)
