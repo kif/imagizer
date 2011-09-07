@@ -642,7 +642,7 @@ class Interface(object):
             myPhoto = Photo(filename)
             if imageCache is not None:
                 imageCache[filename] = myPhoto
-        myPhoto.ContrastMask(newname)
+        myPhoto.contrastMask(newname)
         self.ShowImage()
 
     def select_shortcut(self, *args):
