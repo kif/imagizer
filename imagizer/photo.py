@@ -33,7 +33,7 @@ __licence__ = "GPLv2"
 __contact__ = "imagizer@terre-adelie.org"
 
 
-import os, logging, shutil, time
+import os, logging, shutil, time, subprocess
 import os.path as op
 installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.photo")
@@ -249,16 +249,11 @@ class Photo(object):
             except KeyError:
                 self.metadata["Rate"] = 0
                 self.exif["Exif.Image.Rating"] = 0
-#            except TypeError:
-#                logger.warning("%s metadata[Rate] is set to %s, type %s" % (self.filename, self.exif["Exif.Image.Rating"], type(self.exif["Exif.Image.Rating"])))
-#                self.metadata["Rate"] = 0
-#                self.exif["Exif.Image.Rating"] = 0
             else:
-                if isinstance(rate, (int, float, str)): # pyexiv2 v0.1
-                    self.metadata["Rate"] = int(float(rate))
-                else: # pyexiv2 v0.2+
+                if "value" in dir(rate): # pyexiv2 v0.2+
                     self.metadata["Rate"] = int(rate.value)
-
+                else: # pyexiv2 v0.1
+                    self.metadata["Rate"] = int(float(rate))
 
             if self.pixelsX and self.pixelsY:
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
@@ -406,7 +401,10 @@ class Photo(object):
         il permet de rattrapper une photo trop contrasté, un contre jour, ...
         Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, 
         en particulier A. Fayolles et F. Mantegazza avril 2006
-        necessite numpy et PIL."""
+        necessite numpy et PIL.
+        
+        @param: the name of the output file (JPEG)
+        @return: None"""
 
         try:
             import numpy
@@ -433,7 +431,6 @@ class Photo(object):
             self.__class__._gaussianKernelFFT = numpy.fft.fft2(g / g.sum()).conjugate()
             logger.info("The Gaussian function and FFT took %.3f" % (time.time() - t0))
 
-
         ImageFile.MAXBLOCK = dimX * dimY
         img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("float32")
         img_array.shape = (dimY, dimX, 3)
@@ -447,11 +444,29 @@ class Photo(object):
         S = ImageChops.screen(self.pil, k)
         M = ImageChops.multiply(self.pil, k)
         F = ImageChops.add(ImageChops.multiply(self.pil, S), ImageChops.multiply(ImageChops.invert(self.pil), M))
-        F.save(op.join(config.DefaultRepository, outfile), quality=80, progressive=True, Optimize=True)
+        exitJpeg = op.join(config.DefaultRepository, outfile)
+        F.save(exitJpeg, quality=80, progressive=True, Optimize=True)
         try:
-            os.chmod(op.join(config.DefaultRepository, outfile), config.DefaultFileMode)
+            os.chmod(exitJpeg, config.DefaultFileMode)
         except IOError:
             logger.error("Unable to chmod %s" % outfile)
+        exifJpeg = Exif(exitJpeg)
+        exifJpeg.read()
+        exifJpeg.comment = self.exif.comment
+
+        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
+                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
+                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
+                         "Exif.Image.Orientation", "Exif.Photo.UserComment"
+                         ]:
+            try:
+                exifJpeg[metadata] = self.exif[metadata]
+            except KeyError:
+                pass #'Tag not set'-> unable to copy it
+            except:
+                logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
+        exifJpeg.writeMetadata()
+
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
 
 
@@ -578,7 +593,12 @@ class RawImage:
         extension = op.splitext(self.strRawFile)[1].lower()
         strJpegFullPath = op.join(config.DefaultRepository, self.getJpegPath())
         if extension in config.RawExtensions:
-            data = os.popen("%s %s" % (config.Dcraw, self.strRawFile)).readlines()
+
+            process = subprocess.Popen("%s %s" % (config.Dcraw, self.strRawFile), shell=True, stdout=subprocess.PIPE)
+            ret = process.wait()
+            if ret != 0:
+                logger.error("'%s %s' ended with error %s" % (config.Dcraw, self.strRawFile, ret))
+            data = process.stdout.readlines()
             img = Image.fromstring("RGB", tuple([int(i) for i in data[1].split()]), "".join(tuple(data[3:])))
             img.save(strJpegFullPath, format='JPEG')
             #Copy all metadata useful for us.
