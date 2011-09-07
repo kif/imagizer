@@ -245,10 +245,20 @@ class Photo(object):
             self.exif.read()
             self.metadata["Titre"] = self.exif.comment
             try:
-                self.metadata["Rate"] = int(float(self.exif["Exif.Image.Rating"]))
+                rate = self.exif["Exif.Image.Rating"]
             except KeyError:
                 self.metadata["Rate"] = 0
                 self.exif["Exif.Image.Rating"] = 0
+#            except TypeError:
+#                logger.warning("%s metadata[Rate] is set to %s, type %s" % (self.filename, self.exif["Exif.Image.Rating"], type(self.exif["Exif.Image.Rating"])))
+#                self.metadata["Rate"] = 0
+#                self.exif["Exif.Image.Rating"] = 0
+            else:
+                if isinstance(rate, (int, float, str)): # pyexiv2 v0.1
+                    self.metadata["Rate"] = int(float(rate))
+                else: # pyexiv2 v0.2+
+                    self.metadata["Rate"] = int(rate.value)
+
 
             if self.pixelsX and self.pixelsY:
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
