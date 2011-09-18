@@ -102,6 +102,7 @@ class FullScreenInterface(object):
         self.Selected = []
         self.RandomList = []
         self.iCurrentImg = first
+        self.timestamp = time.time()
         for i in selected:
             if i in self.AllJpegs:
                 self.Selected.append(i)
@@ -115,7 +116,8 @@ class FullScreenInterface(object):
         self.flush_event_queue()
         self.xml.get_widget("FullScreen").connect("key_press_event", self.keypressed)
         self.xml.signal_connect('on_FullScreen_destroy', self.destroy)
-        if mode == "SlideShow": self.SlideShow()
+        if mode == "SlideShow":
+            self.SlideShow()
         self.QuitSlideShow = True
         gtk.main()
 
@@ -126,13 +128,10 @@ class FullScreenInterface(object):
 
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        try:
-            self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
-        except:
+        if imageCache:
+            self.image = imageCache.get(self.AllJpegs[self.iCurrentImg], Photo(self.AllJpegs[self.iCurrentImg]))
+        else:
             self.image = Photo(self.AllJpegs[self.iCurrentImg])
-            if imageCache is not None:
-                imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
-
         X, Y = self.xml.get_widget("FullScreen").get_size()
         logger.debug("Size of image on screen: %sx%s" % (X, Y))
         pixbuf = self.image.show(X, Y)
@@ -166,9 +165,9 @@ class FullScreenInterface(object):
         elif key == "f":
             self.NormalScreen()
         elif key == "Down":
-            self.next()
+            self.next1()
         elif key == "Up":
-            self.previous()
+            self.previous1()
         elif key == "s":
             self.select_Shortcut()
         elif key in ["Escape", "Q"]:
@@ -198,11 +197,11 @@ class FullScreenInterface(object):
         self.xml.get_widget("FullScreen").destroy()
         config.GraphicMode = "Normal"
         gtk.main_quit()
-    def next(self, *args):
+    def next1(self, *args):
         """Switch to the next image"""
         self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
         self.ShowImage()
-    def previous(self, *args):
+    def previous1(self, *args):
         """Switch to the previous image"""
         self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
         self.ShowImage()
@@ -224,6 +223,7 @@ class FullScreenInterface(object):
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
         self.ShowImage()
+
     def select_Shortcut(self, *args):
         """Select or unselect the image"""
         if self.AllJpegs[self.iCurrentImg] not in self.Selected:
@@ -234,6 +234,7 @@ class FullScreenInterface(object):
             sel = ""
         self.Selected.sort()
         self.xml.get_widget("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+
     def SlideShow(self):
         """Starts the slide show"""
         self.QuitSlideShow = False
@@ -249,19 +250,21 @@ class FullScreenInterface(object):
                     self.RandomList = range(len(self.AllJpegs))
                     random.shuffle(self.RandomList)
                 self.iCurrentImg = self.RandomList.pop()
-                try:
-                    self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
-                except:
-                    self.image = Photo(self.AllJpegs[self.iCurrentImg])
-                    if imageCache is not None:
-                        imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
-                self.image.readExif()
-                min_rating = self.image.metadata["Rate"] * 0.2 + 0.1
-                if random.random() > min_rating:
-                    continue
+            if imageCache:
+                self.image = imageCache.get(self.AllJpegs[self.iCurrentImg], Photo(self.AllJpegs[self.iCurrentImg]))
+            else:
+                self.image = Photo(self.AllJpegs[self.iCurrentImg])
+            self.image.readExif()
+            if self.image.metadata["Rate"] < config.SlideShowMinRating:
+                self.flush_event_queue()
+                continue
+            now = time.time()
+            if now - self.timestamp < config.SlideShowDelay:
+                time.sleep(config.SlideShowDelay - now + self.timestamp)
             self.ShowImage()
             self.flush_event_queue()
-            time.sleep(config.SlideShowDelay)
+            self.timestamp = time.time()
+
 
 
 ################################################################################
@@ -392,15 +395,15 @@ class Interface(object):
         dictHandlers = {
         'on_Principale_destroy': self.destroy,
         'on_arreter1_activate': self.destroy,
-        'on_suivant_clicked': self.next,
-        'on_precedant_clicked': self.previous,
+        'on_suivant_clicked': self.next1,
+        'on_precedant_clicked': self.previous1,
         'on_droite_clicked': self.turnRight,
         'on_gauche_clicked': self.turnLeft,
 #        'on_Selection_toggled': self.select,
 #        'on_selectionner_activate': self.select_Shortcut,
         'on_selectionner_activate': self.select_shortcut,
         'on_Selection_toggled':self.select,
-        'on_photo_client_event': self.next,
+        'on_photo_client_event': self.next1,
 
         'on_About_activate': self.about,
         'on_quitter1_activate': self.die,
@@ -415,7 +418,8 @@ class Interface(object):
         'on_poubelle_activate': self.trash,
         'on_Poubelle_clicked': self.trash,
         'on_Gimp_clicked': self.gimp,
-        'on_Filter_clicked': self.filter,
+        'on_Reload_clicked': self.reload_img,
+        'on_Filter_clicked': self.filter_CM,
 
         'on_enregistrerP_activate': self.savePref,
         'on_Autorotate_activate': self.setAutoRotate,
@@ -446,8 +450,8 @@ class Interface(object):
         'on_media_apres_activate': self.selectNewerMedia,
         'on_media_avant_activate': self.SelectOlderMedia,
 
-        'on_precedentI_activate': self.previous,
-        'on_suivantI_activate': self.next,
+        'on_precedentI_activate': self.previous1,
+        'on_suivantI_activate': self.next1,
         'on_premierI_activate': self.first,
         'on_dernierI_activate': self.last,
         'on_plus_10_activate': self.next10,
@@ -507,12 +511,10 @@ class Interface(object):
     def ShowImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         logger.debug("Interface.showImage")
-        try:
-            self.image = imageCache[self.AllJpegs[self.iCurrentImg]]
-        except:
+        if imageCache:
+            self.image = imageCache.get(self.AllJpegs[self.iCurrentImg], Photo(self.AllJpegs[self.iCurrentImg]))
+        else:
             self.image = Photo(self.AllJpegs[self.iCurrentImg])
-            if imageCache is not None:
-                imageCache[self.AllJpegs[self.iCurrentImg]] = self.image
         X, Y = self.xml.get_widget("Principale").get_size()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
@@ -539,9 +541,9 @@ class Interface(object):
 
 
 
-    def next(self, *args):
+    def next1(self, *args):
         """Switch to the next image"""
-        logger.debug("Interface.next")
+        logger.debug("Interface.next1")
         self.settitle()
         self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
         self.ShowImage()
@@ -554,7 +556,7 @@ class Interface(object):
         if self.iCurrentImg > len(self.AllJpegs):self.iCurrentImg = len(self.AllJpegs) - 1
         self.ShowImage()
 
-    def previous(self, *args):
+    def previous1(self, *args):
         """Switch to the previous image"""
         logger.debug("Interface.previous")
         self.settitle()
@@ -621,13 +623,24 @@ class Interface(object):
         newnamefull = op.join(config.DefaultRepository, newname)
         shutil.copy(op.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
-        os.system("%s %s" % (config.Gimp, newnamefull))
+        os.system("%s %s &" % (config.Gimp, newnamefull))
         self.ShowImage()
         self.image.RemoveFromCache()
 
-    def filter(self, *args):
+    def reload_img(self, *args):
+        """Remove image from cache and reloads it"""
+        logger.debug("Interface.gimp")
+        self.settitle()
+        filename = self.AllJpegs[self.iCurrentImg]
+        self.image = Photo(filename)
+        if imageCache:
+            imageCache[filename] = self.image
+        self.ShowImage()
+
+
+    def filter_CM(self, *args):
         """Filter the current image with a contrast mask"""
-        logger.debug("Interface.filter")
+        logger.debug("Interface.filter_CM")
         self.settitle()
         filename = self.AllJpegs[self.iCurrentImg]
         base, ext = op.splitext(filename)
@@ -636,12 +649,10 @@ class Interface(object):
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
-        try:
-            myPhoto = imageCache[filename]
-        except:
+        if imageCache:
+            myPhoto = imageCache.get(filename, Photo(filename))
+        else:
             myPhoto = Photo(filename)
-            if imageCache is not None:
-                imageCache[filename] = myPhoto
         myPhoto.contrastMask(newname)
         self.ShowImage()
 
@@ -939,12 +950,10 @@ class Interface(object):
         logger.debug("Interface.firstT clicked")
         self.settitle()
         for i in self.AllJpegs:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -957,12 +966,10 @@ class Interface(object):
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -973,12 +980,10 @@ class Interface(object):
         logger.debug("Interface.nextT")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -991,12 +996,10 @@ class Interface(object):
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -1007,12 +1010,10 @@ class Interface(object):
         logger.debug("Interface.firstNT clicked")
         self.settitle()
         for i in self.AllJpegs:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -1025,12 +1026,10 @@ class Interface(object):
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -1041,12 +1040,10 @@ class Interface(object):
         logger.debug("Interface.nextNT clicked")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -1059,12 +1056,10 @@ class Interface(object):
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            try:
-                myPhoto = imageCache[i]
-            except:
+            if imageCache:
+                myPhoto = imageCache.get(i, Photo(i))
+            else:
                 myPhoto = Photo(i)
-                if imageCache is not None:
-                    imageCache[i] = myPhoto
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.ShowImage()
@@ -1165,7 +1160,7 @@ class Interface(object):
         """Launch a new window and ask for anew name for the current directory"""
         logger.debug("Interface.renameDay clicked")
         self.settitle()
-        renamdayinstance = RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected, self.renameDayCallback)
+        RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected, self.renameDayCallback)
 
     def renameDayCallback(self, renamdayinstance):
         logger.debug("Interface.renameDayCallback")
@@ -1224,7 +1219,7 @@ class Interface(object):
         """lauch a new window for seting up the slideshow"""
         logger.debug("Interface.slideShowSetup clicked")
         self.settitle()
-        askSlideShowSetup = AskSlideShowSetup(self)
+        AskSlideShowSetup(self)
         if config.GraphicMode == "SlideShow":
             self.xml.get_widget("Principale").destroy()
             gtk.main_quit()
@@ -1460,8 +1455,8 @@ class RenameDay(object):
                             if i.find(base) == 0:count += 1
                         newphotofile = op.splitext(newphotofile) + "-%i.jpg" % count
                     print "%s -> %s" % (photofile, newphotofile)
-                    if (imageCache is not None) and photofile in imageCache:
-                        myPhoto = imageCache[photofile]
+                    if imageCache:
+                        myPhoto = imageCache.get(photofile, Photo(photofile))
                     else:
                         myPhoto = Photo(photofile)
                     myPhoto.renameFile(newphotofile)
@@ -1496,11 +1491,14 @@ class AskSlideShowSetup:
     def __init__(self, upperIface):
         self.upperIface = upperIface
         self.xml = GTKglade.XML(unifiedglade, root="Diaporama")
-        self.xml.signal_connect('on_Diaporama_destroy', self.destroy)
-        self.xml.signal_connect('on_cancel_clicked', self.destroy)
-        self.xml.signal_connect('on_apply_clicked', self.continu)
-        self.xml.signal_connect('on_Lauch_clicked', self.LauchSlideShow)
+        dict_sig = {'on_Diaporama_destroy': self.destroy,
+                    'on_cancel_clicked': self.kill_window,
+                    'on_apply_clicked': self.continu,
+                    'on_Lauch_clicked': self.LauchSlideShow,
+                    }
+        self.xml.signal_autoconnect(dict_sig)
         self.xml.get_widget("delai").set_value(config.SlideShowDelay)
+        self.xml.get_widget("Rating").set_value(config.SlideShowMinRating)
         if   config.SlideShowType.find("chrono") == 0:
             self.xml.get_widget("radio-chrono").set_active(1)
         elif config.SlideShowType.find("anti") == 0:
@@ -1508,9 +1506,11 @@ class AskSlideShowSetup:
         else:
             self.xml.get_widget("radio-random").set_active(1)
 
+
     def LauchSlideShow(self, *args):
         """retrieves the data, destroy the window and lauch the slideshow"""
         config.SlideShowDelay = self.xml.get_widget("delai").get_value()
+        config.SlideShowMinRating = self.xml.get_widget("Rating").get_value()
         if self.xml.get_widget("radio-antichrono").get_active():
             config.SlideShowType = "antichronological"
         elif self.xml.get_widget("radio-chrono").get_active():
@@ -1523,10 +1523,10 @@ class AskSlideShowSetup:
 #        self.xml.signal_connect('on_lance_diaporama_activate'
 
 
-
     def continu(self, *args):
         """retrieves the data, destroy the window and goes on ...."""
         config.SlideShowDelay = self.xml.get_widget("delai").get_value()
+        config.SlideShowMinRating = self.xml.get_widget("Rating").get_value()
         if self.xml.get_widget("radio-antichrono").get_active():
             config.SlideShowType = "antichronological"
         elif self.xml.get_widget("radio-chrono").get_active():
@@ -1535,13 +1535,21 @@ class AskSlideShowSetup:
             config.SlideShowType = "random"
         self.xml.get_widget("Diaporama").destroy()
 
+
     def destroy(self, *args):
-        """destroy clicked by user -> quit the program"""
-#        try:
-#            self.xml.get_widget("Diaporama").destroy()
-#        except:
-#            pass
-        while gtk.events_pending():gtk.main_iteration()
+        """destroy clicked by user -> close the window"""
+        while gtk.events_pending():
+            gtk.main_iteration()
+
+
+    def kill_window(self, *args):
+        """
+        send the signal to close the window
+        """
+        try:
+            self.xml.get_widget("Diaporama").destroy()
+        except:
+            pass
 
 
 class AskMediaSize:
@@ -1588,7 +1596,7 @@ class Synchronize:
         self.xml.signal_connect('on_Synchroniser_destroy', self.destroy)
         self.xml.signal_connect('on_cancel4_clicked', self.destroy)
         self.xml.signal_connect('on_ok4_clicked', self.synchronize)
-        self.xml.signal_connect('on_apply4_clicked', self.apply)
+        self.xml.signal_connect('on_apply4_clicked', self.apply_conf)
         self.xml.get_widget("SyncCommand").set_text(config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
         if config.SynchronizeType.lower() == "newer":
             self.xml.get_widget("SyncOlder").set_active(0)
@@ -1642,20 +1650,20 @@ class Synchronize:
         config.SynchronizeType = "Selected"
 
 
-    def Read(self):
+    def read_conf_GUI(self):
         """read config from GUI"""
         logger.debug("Synchronize.Read activated")
         config.SynchronizeRep = self.xml.get_widget("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
         self.initST = config.SynchronizeType
 
 
-    def apply(self, *args):
-        self.Read()
+    def apply_conf(self, *args):
+        self.read_conf_GUI()
         self.destroy()
 
 
     def synchronize(self, *args):
-        self.Read()
+        self.read_conf_GUI()
         logger.debug("Synchronize.synchronize with mode %s" % config.SynchronizeType)
         synchrofile = op.join(config.DefaultRepository, ".synchro")
         synchro = []

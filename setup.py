@@ -30,8 +30,10 @@ The setup.py script allows to install Imagizer regardless to the operating syste
 
 from distutils.core import setup
 from distutils.extension import Extension
-import os, sys, glob, distutils.sysconfig, shutil, locale
-
+import os, sys, glob, distutils.sysconfig, shutil, locale, imp
+sys.path.insert(0, os.path.dirname(__file__))
+import imagizer
+version = imagizer.__version__
 SCRIPTS = "scripts"
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
@@ -74,8 +76,8 @@ if len(sys.argv) == 1:
 
 
 setup(name='Imagizer',
-    version='1.1.0',
-    author='Jerome Kieffer',
+    version=version,
+    author='Jérôme Kieffer',
     author_email='Jerome.Kieffer@terre-adelie.org',
     url='http://wiki.terre-adelie.org/Imagizer',
     description="Imagizer is a manager for a repository of photos",

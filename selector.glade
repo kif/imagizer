@@ -76,6 +76,7 @@
         <child>
           <widget class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
+            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkAlignment" id="alignment14">
                 <property name="visible">True</property>
@@ -1013,7 +1014,6 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
             <child>
               <widget class="GtkHBox" id="hbox13">
                 <property name="visible">True</property>
-                <property name="homogeneous">True</property>
                 <child>
                   <widget class="GtkImage" id="Logo">
                     <property name="visible">True</property>
@@ -1025,184 +1025,211 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkVBox" id="vbox2">
+                  <widget class="GtkTable" id="table1">
                     <property name="visible">True</property>
+                    <property name="n_rows">2</property>
+                    <property name="n_columns">2</property>
                     <child>
-                      <widget class="GtkVBox" id="vbox3">
+                      <widget class="GtkButton" id="button3">
                         <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
+                        <property name="tooltip" translatable="yes">Filtrer &#xE0; l'aide du masque de contraste</property>
+                        <signal name="clicked" handler="on_Filter_clicked"/>
                         <child>
-                          <widget class="GtkHBox" id="hbox16">
+                          <widget class="GtkAlignment" id="alignment13">
                             <property name="visible">True</property>
+                            <property name="xscale">0</property>
+                            <property name="yscale">0</property>
                             <child>
-                              <widget class="GtkButton" id="Gimp">
+                              <widget class="GtkHBox" id="hbox17">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip" translatable="yes">&#xC9;diter l'image avec le GIMP</property>
-                                <signal name="clicked" handler="on_Gimp_clicked"/>
+                                <property name="spacing">2</property>
                                 <child>
-                                  <widget class="GtkAlignment" id="alignment12">
+                                  <widget class="GtkImage" id="image325">
                                     <property name="visible">True</property>
-                                    <property name="xscale">0</property>
-                                    <property name="yscale">0</property>
-                                    <child>
-                                      <widget class="GtkHBox" id="hbox15">
-                                        <property name="visible">True</property>
-                                        <property name="spacing">2</property>
-                                        <child>
-                                          <widget class="GtkImage" id="image267">
-                                            <property name="visible">True</property>
-                                            <property name="pixbuf">wilber-devel-icon.png</property>
-                                          </widget>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">False</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <widget class="GtkLabel" id="label28">
-                                            <property name="visible">True</property>
-                                            <property name="label" translatable="yes">&#xC9;diter</property>
-                                            <property name="use_underline">True</property>
-                                          </widget>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">False</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                      </widget>
-                                    </child>
+                                    <property name="pixbuf">contrast.png</property>
                                   </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
                                 </child>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkButton" id="button3">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip" translatable="yes">Filtrer &#xE0; l'aide du masque de contraste</property>
-                                <signal name="clicked" handler="on_Filter_clicked"/>
                                 <child>
-                                  <widget class="GtkAlignment" id="alignment13">
+                                  <widget class="GtkLabel" id="label29">
                                     <property name="visible">True</property>
-                                    <property name="xscale">0</property>
-                                    <property name="yscale">0</property>
-                                    <child>
-                                      <widget class="GtkHBox" id="hbox17">
-                                        <property name="visible">True</property>
-                                        <property name="spacing">2</property>
-                                        <child>
-                                          <widget class="GtkImage" id="image325">
-                                            <property name="visible">True</property>
-                                            <property name="pixbuf">contrast.png</property>
-                                          </widget>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">False</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <widget class="GtkLabel" id="label29">
-                                            <property name="visible">True</property>
-                                            <property name="label" translatable="yes">Filtrer</property>
-                                            <property name="use_underline">True</property>
-                                          </widget>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">False</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                      </widget>
-                                    </child>
+                                    <property name="label" translatable="yes">Filtrer</property>
+                                    <property name="use_underline">True</property>
                                   </widget>
-                                </child>
-                              </widget>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </widget>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkButton" id="Poubelle">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
-                            <signal name="clicked" handler="on_Poubelle_clicked"/>
-                            <child>
-                              <widget class="GtkAlignment" id="alignment11">
-                                <property name="visible">True</property>
-                                <property name="xscale">0</property>
-                                <property name="yscale">0</property>
-                                <child>
-                                  <widget class="GtkHBox" id="hbox14">
-                                    <property name="visible">True</property>
-                                    <property name="spacing">2</property>
-                                    <child>
-                                      <widget class="GtkImage" id="image266">
-                                        <property name="visible">True</property>
-                                        <property name="stock">gtk-delete</property>
-                                      </widget>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <widget class="GtkLabel" id="label27">
-                                        <property name="visible">True</property>
-                                        <property name="label" translatable="yes">Poubelle</property>
-                                        <property name="use_underline">True</property>
-                                      </widget>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">False</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
-                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
                                 </child>
                               </widget>
                             </child>
                           </widget>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
                         </child>
                       </widget>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">0</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="Poubelle">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
+                        <property name="tooltip" translatable="yes">D&#xE9;place l'image dans la corbeille</property>
+                        <signal name="clicked" handler="on_Poubelle_clicked"/>
+                        <child>
+                          <widget class="GtkAlignment" id="alignment11">
+                            <property name="visible">True</property>
+                            <property name="xscale">0</property>
+                            <property name="yscale">0</property>
+                            <child>
+                              <widget class="GtkHBox" id="hbox14">
+                                <property name="visible">True</property>
+                                <property name="spacing">2</property>
+                                <child>
+                                  <widget class="GtkImage" id="image266">
+                                    <property name="visible">True</property>
+                                    <property name="stock">gtk-delete</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label27">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Poubelle</property>
+                                    <property name="use_underline">True</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="Gimp">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
+                        <property name="tooltip" translatable="yes">&#xC9;diter l'image avec le GIMP</property>
+                        <signal name="clicked" handler="on_Gimp_clicked"/>
+                        <child>
+                          <widget class="GtkAlignment" id="alignment12">
+                            <property name="visible">True</property>
+                            <property name="xscale">0</property>
+                            <property name="yscale">0</property>
+                            <child>
+                              <widget class="GtkHBox" id="hbox15">
+                                <property name="visible">True</property>
+                                <property name="spacing">2</property>
+                                <child>
+                                  <widget class="GtkImage" id="image267">
+                                    <property name="visible">True</property>
+                                    <property name="pixbuf">wilber-devel-icon.png</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label28">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">&#xC9;diter</property>
+                                    <property name="use_underline">True</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="reload">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
+                        <property name="tooltip" translatable="yes">&#xC9;diter l'image avec le GIMP</property>
+                        <signal name="clicked" handler="on_Reload_clicked"/>
+                        <child>
+                          <widget class="GtkAlignment" id="alignment1">
+                            <property name="visible">True</property>
+                            <property name="xscale">0</property>
+                            <property name="yscale">0</property>
+                            <child>
+                              <widget class="GtkHBox" id="hbox3">
+                                <property name="visible">True</property>
+                                <property name="spacing">2</property>
+                                <child>
+                                  <widget class="GtkImage" id="image13">
+                                    <property name="visible">True</property>
+                                    <property name="icon_name">view-refresh</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label1">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Recharger</property>
+                                    <property name="use_underline">True</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </widget>
+                            </child>
+                          </widget>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                   </widget>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="padding">1</property>
-                    <property name="pack_type">end</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -1573,7 +1600,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Note de l'image sur 5</property>
-                        <property name="adjustment">0 0 7 1 2 2</property>
+                        <property name="adjustment">5 0 7 1 2 2</property>
                         <property name="restrict_to_fill_level">False</property>
                         <property name="fill_level">1</property>
                         <property name="digits">0</property>
@@ -2571,6 +2598,7 @@ que vous utilisez pour archiver vos images</property>
     <child>
       <widget class="GtkVBox" id="vbox11">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <widget class="GtkLabel" id="label39">
             <property name="visible">True</property>
@@ -2603,9 +2631,9 @@ que vous utilisez pour archiver vos images</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkLabel" id="label40">
+          <widget class="GtkLabel" id="label1">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">Orde de d&#xE9;filement des images</property>
+            <property name="label" translatable="yes">Note minimum (0-5)</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -2614,51 +2642,30 @@ que vous utilisez pour archiver vos images</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkRadioButton" id="radio-chrono">
-            <property name="label" translatable="yes">Chronologique</property>
+          <widget class="GtkHScale" id="Rating">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="use_underline">True</property>
-            <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="on_radio_chrono_toggled"/>
-            <signal name="group_changed" handler="on_radio_chrono_group_changed"/>
+            <property name="adjustment">3 0 7 1 2 2</property>
+            <property name="fill_level">5</property>
+            <property name="round_digits">0</property>
           </widget>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
             <property name="position">4</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkRadioButton" id="radio-random">
-            <property name="label" translatable="yes">Al&#xE9;atoire</property>
+          <widget class="GtkHSeparator" id="hseparator3">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="use_underline">True</property>
-            <property name="draw_indicator">True</property>
-            <property name="group">radio-chrono</property>
-            <signal name="toggled" handler="on_radio_random_toggled"/>
-            <signal name="group_changed" handler="on_radio_random_group_changed"/>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
             <property name="position">5</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkRadioButton" id="radio-antichrono">
-            <property name="label" translatable="yes">Anti-chronologique</property>
+          <widget class="GtkLabel" id="label40">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="use_underline">True</property>
-            <property name="draw_indicator">True</property>
-            <property name="group">radio-chrono</property>
-            <signal name="toggled" handler="on_radio_antichrono_toggled"/>
-            <signal name="group_changed" handler="on_radio_antichrono_group_changed"/>
+            <property name="label" translatable="yes">Orde de d&#xE9;filement des images</property>
           </widget>
           <packing>
             <property name="expand">False</property>
@@ -2676,13 +2683,67 @@ que vous utilisez pour archiver vos images</property>
           </packing>
         </child>
         <child>
+          <widget class="GtkRadioButton" id="radio-chrono">
+            <property name="label" translatable="yes">Chronologique</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <signal name="toggled" handler="on_radio_chrono_toggled"/>
+            <signal name="group_changed" handler="on_radio_chrono_group_changed"/>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">8</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkRadioButton" id="radio-random">
+            <property name="label" translatable="yes">Al&#xE9;atoire</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">radio-chrono</property>
+            <signal name="toggled" handler="on_radio_random_toggled"/>
+            <signal name="group_changed" handler="on_radio_random_group_changed"/>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">9</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkRadioButton" id="radio-antichrono">
+            <property name="label" translatable="yes">Anti-chronologique</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="use_underline">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">radio-chrono</property>
+            <signal name="toggled" handler="on_radio_antichrono_toggled"/>
+            <signal name="group_changed" handler="on_radio_antichrono_group_changed"/>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">10</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkHBox" id="hbox20">
             <property name="visible">True</property>
             <child>
               <widget class="GtkButton" id="Lauch">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
+                <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_Lauch_clicked"/>
                 <child>
                   <widget class="GtkAlignment" id="alignment15">
@@ -2732,7 +2793,7 @@ que vous utilisez pour archiver vos images</property>
                 <property name="label">gtk-apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
+                <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_apply_clicked"/>
               </widget>
@@ -2747,7 +2808,7 @@ que vous utilisez pour archiver vos images</property>
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
+                <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_cancel_clicked"/>
               </widget>
@@ -2759,7 +2820,7 @@ que vous utilisez pour archiver vos images</property>
             </child>
           </widget>
           <packing>
-            <property name="position">8</property>
+            <property name="position">11</property>
           </packing>
         </child>
       </widget>

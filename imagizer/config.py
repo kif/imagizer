@@ -47,7 +47,7 @@ class Config:
         self.__dict__ = self.__shared_state
         if len(self.__dict__) < 5:
             logging.debug("Config: initialization of the class")
-            self.ScreenSize = 500
+            self.ScreenSize = 600
             self.NbrPerPage = 20
             self.PagePrefix = "page"
             self.TrashDirectory = "Trash"
@@ -80,6 +80,7 @@ class Config:
             self.WebPageAnchor = "end"
             self.SlideShowDelay = 5.0
             self.SlideShowType = "chronological"
+            self.SlideShowMinRating = 3
             self.SynchronizeRep = "user@host:/mnt/photo"
             self.SynchronizeType = "Newer"
             self.ImageCache = 100
@@ -172,6 +173,7 @@ class Config:
             elif j == "ExportSingleDir".lower(): self.ExportSingleDir = configparser.getboolean("Selector", "ExportSingleDir")
             elif j == "WebPageAnchor".lower():   self.WebPageAnchor = i[1]
             elif j == "SlideShowDelay".lower():  self.SlideShowDelay = float(i[1])
+            elif j == "SlideShowMinRating".lower():self.SlideShowMinRating = min(5, max(0, int(i[1])))
             elif j == "SlideShowType".lower():   self.SlideShowType = i[1]
             elif j == "SynchronizeRep".lower():  self.SynchronizeRep = i[1]
             elif j == "SynchronizeType".lower(): self.SynchronizeType = i[1]
@@ -294,6 +296,7 @@ class Config:
         "#Where should the dirindex page start-up ? [begin/end] ", "WebPageAnchor: %s" % self.WebPageAnchor, "",
         "#Delay between imges in the slideshow? ", "SlideShowDelay: %s" % self.SlideShowDelay, "",
         "#Type of slideshow : chronological, anti-chronological or random ?", "SlideShowType: %s" % self.SlideShowType, "",
+        "#Minimum rating of an image to appear in the slidesho [0-5]", "SlideShowMinRating: %i" % self.SlideShowMinRating, "",
         "#Remote repository to synchronize with (rsync like)", "SynchronizeRep: %s" % self.SynchronizeRep, "",
         "#Synchronization type, acceptable values are Newer, Older, Selected and All", "SynchronizeType: %s" % self.SynchronizeType, "",
         "#Allow the creation of a Cache of images with the given size in number of images", "ImageCache: %s" % self.ImageCache, "",

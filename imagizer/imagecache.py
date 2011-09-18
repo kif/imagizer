@@ -92,6 +92,17 @@ class ImageCache(dict):
         return self.imageDict[ key ]
 
 
+    def get(self, key, default=None):
+        """
+        get method with default answer implemented
+        """
+        if key in self.ordered:
+            return self.__getitem__(key)
+        elif default is not None:
+            self.__setitem__(key, default)
+            return default
+
+
     def keys(self):
         """ 
         Returns the list of keys, ordered
