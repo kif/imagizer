@@ -72,6 +72,13 @@ try:
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 
+try:
+    from rfoo.utils import rconsole
+    rconsole.spawn_server()
+except ImportError:
+    logger.debug("No socket opened for debugging -> please install rfoo")
+
+
 config = Config()
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
@@ -108,11 +115,11 @@ class FullScreenInterface(object):
                 self.Selected.append(i)
         logger.info("Initialization of the fullscreen GUI")
         self.xml = GTKglade.XML(unifiedglade, root="FullScreen")
-        self.ShowImage()
+        self.showImage()
         self.flush_event_queue()
         self.xml.get_widget("FullScreen").maximize()
         self.flush_event_queue()
-        self.ShowImage()
+        self.showImage()
         self.flush_event_queue()
         self.xml.get_widget("FullScreen").connect("key_press_event", self.keypressed)
         self.xml.signal_connect('on_FullScreen_destroy', self.destroy)
@@ -126,12 +133,9 @@ class FullScreenInterface(object):
         while gtk.events_pending():
             gtk.main_iteration()
 
-    def ShowImage(self):
+    def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        if imageCache:
-            self.image = imageCache.get(self.AllJpegs[self.iCurrentImg], Photo(self.AllJpegs[self.iCurrentImg]))
-        else:
-            self.image = Photo(self.AllJpegs[self.iCurrentImg])
+        self.image = Photo(self.AllJpegs[self.iCurrentImg])
         X, Y = self.xml.get_widget("FullScreen").get_size()
         logger.debug("Size of image on screen: %sx%s" % (X, Y))
         pixbuf = self.image.show(X, Y)
@@ -181,12 +185,12 @@ class FullScreenInterface(object):
 
     def turnRight(self, *args):
         """rotate the current image clockwise"""
-        self.image.Rotate(90)
-        self.ShowImage()
+        self.image.rotate(90)
+        self.showImage()
     def turnLeft(self, *args):
         """rotate the current image clockwise"""
-        self.image.Rotate(270)
-        self.ShowImage()
+        self.image.rotate(270)
+        self.showImage()
     def destroy(self, *args):
         """destroy clicked by user"""
         SaveSelected(self.Selected)
@@ -200,11 +204,11 @@ class FullScreenInterface(object):
     def next1(self, *args):
         """Switch to the next image"""
         self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
-        self.ShowImage()
+        self.showImage()
     def previous1(self, *args):
         """Switch to the previous image"""
         self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
-        self.ShowImage()
+        self.showImage()
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
         jour = op.dirname(self.AllJpegs[self.iCurrentImg])
@@ -212,7 +216,7 @@ class FullScreenInterface(object):
             jc = op.dirname(self.AllJpegs[i])
             if jc > jour: break
         self.iCurrentImg = i
-        self.ShowImage()
+        self.showImage()
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
         if self.iCurrentImg == 0: return
@@ -222,7 +226,7 @@ class FullScreenInterface(object):
             jd = op.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
-        self.ShowImage()
+        self.showImage()
 
     def select_Shortcut(self, *args):
         """Select or unselect the image"""
@@ -250,10 +254,7 @@ class FullScreenInterface(object):
                     self.RandomList = range(len(self.AllJpegs))
                     random.shuffle(self.RandomList)
                 self.iCurrentImg = self.RandomList.pop()
-            if imageCache:
-                self.image = imageCache.get(self.AllJpegs[self.iCurrentImg], Photo(self.AllJpegs[self.iCurrentImg]))
-            else:
-                self.image = Photo(self.AllJpegs[self.iCurrentImg])
+            self.image = Photo(self.AllJpegs[self.iCurrentImg])
             self.image.readExif()
             if self.image.metadata["Rate"] < config.SlideShowMinRating:
                 self.flush_event_queue()
@@ -261,7 +262,7 @@ class FullScreenInterface(object):
             now = time.time()
             if now - self.timestamp < config.SlideShowDelay:
                 time.sleep(config.SlideShowDelay - now + self.timestamp)
-            self.ShowImage()
+            self.showImage()
             self.flush_event_queue()
             self.timestamp = time.time()
 
@@ -389,7 +390,7 @@ class Interface(object):
             self.xml.get_widget("LowQ").set_active(0)
             self.xml.get_widget("HiQ").set_active(0)
             self.xml.get_widget("VHiQ").set_active(1)
-        self.ShowImage()
+        self.showImage()
         self.flush_event_queue()
 
         dictHandlers = {
@@ -488,7 +489,7 @@ class Interface(object):
         }
 
         self.xml.signal_autoconnect(dictHandlers)
-        self.ShowImage()
+        self.showImage()
         self.flush_event_queue()
         gtk.main()
 
@@ -508,13 +509,10 @@ class Interface(object):
             self.image.name(newtitle, newRate)
 
 
-    def ShowImage(self):
+    def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         logger.debug("Interface.showImage")
-        if imageCache:
-            self.image = imageCache.get(self.AllJpegs[self.iCurrentImg], Photo(self.AllJpegs[self.iCurrentImg]))
-        else:
-            self.image = Photo(self.AllJpegs[self.iCurrentImg])
+        self.image = Photo(self.AllJpegs[self.iCurrentImg])
         X, Y = self.xml.get_widget("Principale").get_size()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
@@ -546,7 +544,7 @@ class Interface(object):
         logger.debug("Interface.next1")
         self.settitle()
         self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
-        self.ShowImage()
+        self.showImage()
 
     def next10(self, *args):
         """Switch forward of 10 images """
@@ -554,14 +552,14 @@ class Interface(object):
         self.settitle()
         self.iCurrentImg = self.iCurrentImg + 10
         if self.iCurrentImg > len(self.AllJpegs):self.iCurrentImg = len(self.AllJpegs) - 1
-        self.ShowImage()
+        self.showImage()
 
     def previous1(self, *args):
         """Switch to the previous image"""
         logger.debug("Interface.previous")
         self.settitle()
         self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
-        self.ShowImage()
+        self.showImage()
 
     def previous10(self, *args):
         """Switch 10 images backward"""
@@ -569,35 +567,35 @@ class Interface(object):
         self.settitle()
         self.iCurrentImg = self.iCurrentImg - 10
         if self.iCurrentImg < 0: self.iCurrentImg = 0
-        self.ShowImage()
+        self.showImage()
 
     def first(self, *args):
         """switch to the first image"""
         logger.debug("Interface.first")
         self.settitle()
         self.iCurrentImg = 0
-        self.ShowImage()
+        self.showImage()
 
     def last(self, *args):
         """switch to the last image"""
         logger.debug("Interface.last")
         self.settitle()
         self.iCurrentImg = len(self.AllJpegs) - 1
-        self.ShowImage()
+        self.showImage()
 
     def turnRight(self, *args):
         """rotate the current image clockwise"""
         logger.debug("Interface.turnRight")
         self.settitle()
-        self.image.Rotate(90)
-        self.ShowImage()
+        self.image.rotate(90)
+        self.showImage()
 
     def turnLeft(self, *args):
         """rotate the current image counterclockwise"""
         logger.debug("Interface.turnLeft")
         self.settitle()
-        self.image.Rotate(270)
-        self.ShowImage()
+        self.image.rotate(270)
+        self.showImage()
 
     def trash(self, *args):
         """Send the current file to the trash"""
@@ -607,7 +605,7 @@ class Interface(object):
         self.AllJpegs.remove(self.AllJpegs[self.iCurrentImg])
         self.image.Trash()
         self.iCurrentImg = self.iCurrentImg % len(self.AllJpegs)
-        self.ShowImage()
+        self.showImage()
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
@@ -624,18 +622,18 @@ class Interface(object):
         shutil.copy(op.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
         os.system("%s %s &" % (config.Gimp, newnamefull))
-        self.ShowImage()
+        self.showImage()
         self.image.RemoveFromCache()
 
     def reload_img(self, *args):
         """Remove image from cache and reloads it"""
-        logger.debug("Interface.gimp")
+        logger.debug("Interface.reload")
         self.settitle()
         filename = self.AllJpegs[self.iCurrentImg]
+        if (imageCache is not None) and (filename in imageCache):
+            imageCache.pop(filename)
         self.image = Photo(filename)
-        if imageCache:
-            imageCache[filename] = self.image
-        self.ShowImage()
+        self.showImage()
 
 
     def filter_CM(self, *args):
@@ -649,12 +647,8 @@ class Interface(object):
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
-        if imageCache:
-            myPhoto = imageCache.get(filename, Photo(filename))
-        else:
-            myPhoto = Photo(filename)
-        myPhoto.contrastMask(newname)
-        self.ShowImage()
+        self.image = self.image.contrastMask(newname)
+        self.showImage()
 
     def select_shortcut(self, *args):
         """Select or unselect the image (not directly clicked on the toggle button)"""
@@ -827,7 +821,7 @@ class Interface(object):
             jc = op.dirname(self.AllJpegs[i])
             if jc > jour: break
         self.iCurrentImg = i
-        self.ShowImage()
+        self.showImage()
 
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
@@ -840,14 +834,14 @@ class Interface(object):
             jd = op.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
-        self.ShowImage()
+        self.showImage()
 
     def firstJ(self, *args):
         """switch to the first image of the first day"""
         logger.debug("Interface.firstJ clicked")
         self.settitle()
         self.iCurrentImg = 0
-        self.ShowImage()
+        self.showImage()
 
     def lastJ(self, *args):
         """switch to the first image of the last day"""
@@ -859,7 +853,7 @@ class Interface(object):
             jd = op.dirname(self.AllJpegs[i - 1])
             if (jc == lastday) and (jd < jc): break
         self.iCurrentImg = i
-        self.ShowImage()
+        self.showImage()
 
     def firstS(self, *args):
         """switch to the first image selected"""
@@ -867,7 +861,7 @@ class Interface(object):
         self.settitle()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
-        self.ShowImage()
+        self.showImage()
 
     def lastS(self, *args):
         """switch to the last image selected"""
@@ -875,7 +869,7 @@ class Interface(object):
         self.settitle()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
-        self.ShowImage()
+        self.showImage()
 
     def nextS(self, *args):
         """switch to the next image selected"""
@@ -885,7 +879,7 @@ class Interface(object):
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i in self.Selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def previousS(self, *args):
@@ -898,7 +892,7 @@ class Interface(object):
         for i in temp:
             if i in self.Selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def firstNS(self, *args):
@@ -908,7 +902,7 @@ class Interface(object):
         for i in self.AllJpegs:
             if i not in self.Selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def lastNS(self, *args):
@@ -920,7 +914,7 @@ class Interface(object):
         for i in temp:
             if i not in self.Selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def nextNS(self, *args):
@@ -930,7 +924,7 @@ class Interface(object):
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i not in self.Selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def previousNS(self, *args):
@@ -942,7 +936,7 @@ class Interface(object):
         for i in temp:
             if i not in self.Selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def firstT(self, *args):
@@ -950,13 +944,10 @@ class Interface(object):
         logger.debug("Interface.firstT clicked")
         self.settitle()
         for i in self.AllJpegs:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def    previousT(self, *args):
@@ -966,13 +957,10 @@ class Interface(object):
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def nextT(self, *args):
@@ -980,13 +968,10 @@ class Interface(object):
         logger.debug("Interface.nextT")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def lastT(self, *args):
@@ -996,13 +981,10 @@ class Interface(object):
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def firstNT(self, *args):
@@ -1010,13 +992,10 @@ class Interface(object):
         logger.debug("Interface.firstNT clicked")
         self.settitle()
         for i in self.AllJpegs:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def previousNT(self, *args):
@@ -1026,13 +1005,10 @@ class Interface(object):
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def nextNT(self, *args):
@@ -1040,13 +1016,10 @@ class Interface(object):
         logger.debug("Interface.nextNT clicked")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
     def lastNT(self, *args):
@@ -1056,13 +1029,10 @@ class Interface(object):
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            if imageCache:
-                myPhoto = imageCache.get(i, Photo(i))
-            else:
-                myPhoto = Photo(i)
+            myPhoto = Photo(i)
             if not myPhoto.has_title():
                 self.iCurrentImg = self.AllJpegs.index(i)
-                self.ShowImage()
+                self.showImage()
                 return
 
 
@@ -1167,7 +1137,7 @@ class Interface(object):
         self.AllJpegs = renamdayinstance.AllPhotos
         self.Selected = renamdayinstance.selected
         self.iCurrentImg = self.AllJpegs.index(renamdayinstance.newFilename)
-        self.ShowImage()
+        self.showImage()
 
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
@@ -1206,7 +1176,7 @@ class Interface(object):
             self.AllJpegs += listNew
             self.AllJpegs.sort()
             self.iCurrentImg = self.AllJpegs.index(first)
-            self.ShowImage()
+            self.showImage()
 
 
     def defineMediaSize(self, *args):
@@ -1258,7 +1228,7 @@ class Interface(object):
         self.Selected.sort()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
-        self.ShowImage()
+        self.showImage()
         t = smartSize(size) + (len(self.Selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
@@ -1291,7 +1261,7 @@ class Interface(object):
         self.Selected.sort()
         if len(self.Selected) == 0:return
         self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
-        self.ShowImage()
+        self.showImage()
         t = smartSize(size) + (len(self.Selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
@@ -1455,10 +1425,7 @@ class RenameDay(object):
                             if i.find(base) == 0:count += 1
                         newphotofile = op.splitext(newphotofile) + "-%i.jpg" % count
                     print "%s -> %s" % (photofile, newphotofile)
-                    if imageCache:
-                        myPhoto = imageCache.get(photofile, Photo(photofile))
-                    else:
-                        myPhoto = Photo(photofile)
+                    myPhoto = Photo(photofile)
                     myPhoto.renameFile(newphotofile)
                     self.AllPhotos[idx] = newphotofile
 
@@ -1735,7 +1702,7 @@ class SelectDay:
             if op.split(self.upperIface.AllJpegs[i])[0] == day:
                 break
         self.upperIface.iCurrentImg = i
-        self.upperIface.ShowImage()
+        self.upperIface.showImage()
         self.xml.get_widget("ChangeDir").destroy()
 
     def destroy(self, *args):

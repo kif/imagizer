@@ -28,7 +28,7 @@
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
-import logging
+import logging, os
 logger = logging.getLogger("imagizer.imagecache")
 from config import Config
 config = Config()
@@ -54,30 +54,36 @@ class ImageCache(dict):
         self.__dict__ = self.__shared_state
         if  ImageCache.__data_initialized is False:
             ImageCache.__data_initialized = True
-            logging.debug("ImageCache.__init__: initalization of the Borg")
+            logger.debug("ImageCache.__init__: initalization of the Borg")
             self.ordered = []
             self.imageDict = {}
             self.maxSize = maxSize
             self.size = 0
 
 
+    def __repr__(self):
+        """
+        """
+        out = ["{"]
+        for key in self.ordered:
+            out.append(" '%s': %s," % (key, self.imageDict[key]))
+        out.append("}")
+        return os.linesep.join(out)
+
+
     def __setitem__(self, key, value):
         """
         x.__setitem__(i, y) <==> x[i]=y
         """
-        logging.debug("ImageCache.__setitem__: %s" % key)
+        logger.debug("ImageCache.__setitem__: %s" % key)
         self.imageDict[ key ] = value
         if key in self.ordered:
             index = self.ordered.index(key)
             self.ordered.pop(index)
-            self.size -= 1
-        self.size += 1
-        if self.size > self.maxSize:
-            firstKey = self.ordered[ 0 ]
+        if len(self.ordered) > self.maxSize:
+            firstKey = self.ordered.pop(0)
             logger.debug("Removing from cache: %s" % firstKey)
             self.imageDict.pop(firstKey)
-            self.size -= 1
-            self.ordered = self.ordered[1:]
         self.ordered.append(key)
 
 
@@ -85,11 +91,25 @@ class ImageCache(dict):
         """
         x.__getitem__(y) <==> x[y]
         """
-        logging.debug("ImageCache.__setitem__: %s" % key)
+        logger.debug("ImageCache.__setitem__: %s" % key)
         index = self.ordered.index(key)
         self.ordered.pop(index)
         self.ordered.append(key)
         return self.imageDict[ key ]
+
+
+    def __contains__(self, key):
+        """
+        D.__contains__(k) -> True if D has a key k, else False
+        """
+        return key in self.imageDict
+    has_key = __contains__
+
+
+    def __len__(self):
+        """
+        """
+        return len(self.ordered)
 
 
     def get(self, key, default=None):
@@ -107,7 +127,7 @@ class ImageCache(dict):
         """ 
         Returns the list of keys, ordered
         """
-        logging.debug("ImageCache.keys")
+        logger.debug("ImageCache.keys")
         return self.ordered[:]
 
 
@@ -115,7 +135,7 @@ class ImageCache(dict):
         """
         Remove a key for the dictionary and return it's value
         """
-        logging.debug("ImageCache.pop %s" % key)
+        logger.debug("ImageCache.pop %s" % key)
         try:
             index = self.ordered.index(key)
         except:
@@ -129,7 +149,7 @@ class ImageCache(dict):
         Change the name of a key without affecting anything else
         If the name is not present: do nothing.
         """
-        logging.debug("ImageCache.rename %s->%s" % (oldKey, newKey))
+        logger.debug("ImageCache.rename %s->%s" % (oldKey, newKey))
         if oldKey not in self.ordered:
             return
         index = self.ordered.index(oldKey)

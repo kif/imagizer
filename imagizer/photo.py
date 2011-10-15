@@ -78,33 +78,54 @@ class Photo(object):
     _gaussianKernelFFT = None
 
     def __init__(self, filename):
+        """
+        @param filename: Name of the image file, starting from the repository root
+        """
         self.filename = filename
         self.fn = op.join(config.DefaultRepository, self.filename)
+        if not op.isfile(self.fn):
+            logger.error("No such photo %s" % self.fn)
         self.metadata = None
         self.pixelsX = None
         self.pixelsY = None
         self.pil = None
         self.exif = None
-        if not op.isfile(self.fn):
-            logger.error("No such photo %s" % self.fn)
-#        self.bImageCache = (imageCache is not None)
         self.scaledPixbuffer = None
         self.orientation = 1
+        if (imageCache is not None) and (filename in imageCache):
+            logger.debug("Image %s found in Cache", filename)
+            fromCache = imageCache[filename]
+            self.metadata = fromCache.metadata
+            self.pixelsX = fromCache.pixelsX
+            self.pixelsY = fromCache.pixelsY
+            self.pil = fromCache.pil
+            self.exif = fromCache.exif
+            self.scaledPixbuffer = fromCache.scaledPixbuffer
+            self.orientation = fromCache.orientation
+        else:
+            logger.debug("Image %s not in Cache", filename)
+            imageCache[filename] = self
+        return None
+
 
     def LoadPIL(self):
         """Load the image"""
         self.pil = Image.open(self.fn)
+#        imageCache[self.filename].pil = self.pil
+
 
     def larg(self):
         """width-height of a jpeg file"""
         self.taille()
         return self.pixelsX - self.pixelsY
 
+
     def taille(self):
         """width and height of a jpeg file"""
         if self.pixelsX == None and self.pixelsY == None:
             self.LoadPIL()
             self.pixelsX, self.pixelsY = self.pil.size
+
 
     def SaveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
         """save a thumbnail of the given name, with the given size and the interpolation methode (quality) 
@@ -149,7 +170,7 @@ class Photo(object):
                 print("Warning: unable to chmod %s" % strThumbFile)
 
 
-    def Rotate(self, angle=0):
+    def rotate(self, angle=0):
         """does a looseless rotation of the given jpeg file"""
         if os.name == 'nt' and self.pil != None:
             del self.pil
@@ -161,64 +182,63 @@ class Photo(object):
         if angle == 90:
             if imageCache is not None:
                 Exiftran.rotate90(self.fn)
-#                os.system('%s -ip -9 "%s" &' % (exiftran, self.fn))
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
+                logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
-                self.metadata["Resolution"] = "%i x % i" % (y, x)
+                if self.metadata is not None:
+                    self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
                 Exiftran.rotate90(self.fn)
-#                os.system('%s -ip -9 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 270:
             if imageCache is not None:
                 Exiftran.rotate270(self.fn)
-#                os.system('%s -ip -2 "%s" &' % (exiftran, self.fn))
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+                logger.debug("rotate 270 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
-                self.metadata["Resolution"] = "%i x % i" % (y, x)
+                if self.metadata is not None:
+                    self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
                 Exiftran.rotate270(self.fn)
-#                os.system('%s -ip -2 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 180:
             if imageCache is not None:
                 Exiftran.rotate180(self.fn)
-#                os.system('%s -ip -1 "%s" &' % (exiftran, self.fn))
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
+                logger.debug("rotate 270 of %s" % newPixbuffer)
             else:
                 Exiftran.rotate180(self.fn)
-#                os.system('%s -ip -1 "%s" ' % (exiftran, self.fn))
                 self.pixelsX = None
                 self.pixelsY = None
         else:
             print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
         if imageCache is not None:
             self.scaledPixbuffer = newPixbuffer
+            imageCache[self.filename] = self
         logger.debug("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, self.pixelsX, self.pixelsY, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
 
 
-    def RemoveFromCache(self):
+    def removeFromCache(self):
         """remove the curent image from the Cache .... for various reasons"""
         if imageCache is not None:
             if self.filename in imageCache.ordered:
-                imageCache.imageDict.pop(self.filename)
-                index = imageCache.ordered.index(self.filename)
-                imageCache.ordered.pop(index)
-                imageCache.size -= 1
+                imageCache.pop(self.filename)
 
 
     def Trash(self):
         """Send the file to the trash folder"""
-        self.RemoveFromCache()
+        self.removeFromCache()
         Trashdir = op.join(config.DefaultRepository, config.TrashDirectory)
         td = op.dirname(op.join(Trashdir, self.filename))
         if not op.isdir(td):
             makedir(td)
         shutil.move(self.fn, op.join(Trashdir, self.filename))
+        logger.debug("sent %s to trash" % self.filename)
+        self.removeFromCache()
 
 
     def readExif(self):
@@ -315,9 +335,10 @@ class Photo(object):
             nx = self.pixelsX
             ny = self.pixelsY
 
+#       Put in Cache the "BIG" image
         if self.scaledPixbuffer is None:
+            logger.debug("self.scaledPixbuffer is empty")
             pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
-#            Put in Cache the "BIG" image
             if Rbig < 1:
                 self.scaledPixbuffer = pixbuf.scale_simple(nxBig, nyBig, gtkInterpolation[config.Interpolation])
             else :
@@ -362,7 +383,7 @@ class Photo(object):
         if self.exif is not None:
             self.exif = Exif(self.fn)
             self.exif.read()
-        if (imageCache is not None) and oldname in imageCache:
+        if (imageCache is not None) and (oldname in imageCache):
             imageCache.rename(oldname, newname)
 
 
@@ -404,7 +425,8 @@ class Photo(object):
         necessite numpy et PIL.
         
         @param: the name of the output file (JPEG)
-        @return: None"""
+        @return: filtered Photo instance
+        """
 
         try:
             import numpy
@@ -466,8 +488,8 @@ class Photo(object):
             except:
                 logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
         exifJpeg.writeMetadata()
-
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
+        return Photo(outfile)
 
 
 ########################################################        
