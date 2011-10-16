@@ -44,7 +44,10 @@
 """
 Selector is the graphical (GUI) interface part of the Imagizer project.
 """
-
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import os, locale, random, gc, time, shutil, sys, logging
 import os.path as op
@@ -59,7 +62,7 @@ logger = logging.getLogger("imagizer.selector")
 from imagizer               import installdir, listConfigurationFiles
 from imagizer.encoding      import  unicode2ascii
 from imagizer.config        import Config
-from imagizer.imagizer      import unifiedglade, CopySelected, ProcessSelected, RangeTout
+from imagizer.imagizer      import unifiedglade, copySelected, processSelected, rangeTout, gtkFlush
 from imagizer.photo         import Photo, RawImage
 from imagizer.fileutils     import recursive_delete, smartSize, mkdir, findFiles
 from imagizer.parser        import AttrFile
@@ -116,11 +119,11 @@ class FullScreenInterface(object):
         logger.info("Initialization of the fullscreen GUI")
         self.xml = GTKglade.XML(unifiedglade, root="FullScreen")
         self.showImage()
-        self.flush_event_queue()
+        gtkFlush()
         self.xml.get_widget("FullScreen").maximize()
-        self.flush_event_queue()
+        gtkFlush()
         self.showImage()
-        self.flush_event_queue()
+        gtkFlush()
         self.xml.get_widget("FullScreen").connect("key_press_event", self.keypressed)
         self.xml.signal_connect('on_FullScreen_destroy', self.destroy)
         if mode == "SlideShow":
@@ -130,8 +133,7 @@ class FullScreenInterface(object):
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
-        while gtk.events_pending():
-            gtk.main_iteration()
+        gtkFlush()
 
     def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
@@ -495,9 +497,7 @@ class Interface(object):
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
-#        self.xml.show_all()
-        while gtk.events_pending():
-            gtk.main_iteration()
+        gtkFlush()
 
 
     def settitle(self):
@@ -603,7 +603,7 @@ class Interface(object):
         self.settitle()
         if self.AllJpegs[self.iCurrentImg] in  self.Selected:self.Selected.remove(self.AllJpegs[self.iCurrentImg])
         self.AllJpegs.remove(self.AllJpegs[self.iCurrentImg])
-        self.image.Trash()
+        self.image.trash()
         self.iCurrentImg = self.iCurrentImg % len(self.AllJpegs)
         self.showImage()
 
@@ -698,7 +698,7 @@ class Interface(object):
         logger.debug("Interface.copyAndResize")
         self.settitle()
         #TODO: go through MVC
-        ProcessSelected(self.Selected)
+        processSelected(self.Selected)
         self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         logger.info("Interface.copyAndResize: Done")
@@ -707,7 +707,7 @@ class Interface(object):
         """lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
         logger.debug("Interface.toWeb")
         self.settitle()
-        ProcessSelected(self.Selected)
+        processSelected(self.Selected)
         self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
@@ -730,7 +730,7 @@ class Interface(object):
     def copy(self, *args):
         """lauch the copy of all selected files"""
         self.settitle()
-        CopySelected(self.Selected)
+        copySelected(self.Selected)
         self.Selected = []
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         print "Done"
@@ -739,7 +739,7 @@ class Interface(object):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
         logger.debug("Interface.burn")
         self.settitle()
-        CopySelected(self.Selected)
+        copySelected(self.Selected)
         self.Selected = []
         #TODO : MVC
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
@@ -1450,7 +1450,7 @@ class RenameDay(object):
             self.xml.get_widget("Renommer").destroy()
         except:
             pass
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
 
 
 class AskSlideShowSetup:
@@ -1505,8 +1505,7 @@ class AskSlideShowSetup:
 
     def destroy(self, *args):
         """destroy clicked by user -> close the window"""
-        while gtk.events_pending():
-            gtk.main_iteration()
+        gtkFlush()
 
 
     def kill_window(self, *args):
@@ -1543,7 +1542,8 @@ class AskMediaSize:
             self.xml.get_widget("TailleCD").destroy()
         except:
             pass
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
+
 
 class Synchronize:
     """
@@ -1594,7 +1594,7 @@ class Synchronize:
         self.xml.signal_connect('on_SyncNewer_toggled', self.SetSyncNewer)
         self.xml.signal_connect('on_SyncOlder_toggled', self.SetSyncOlder)
         self.xml.signal_connect('on_SyncSelected_toggled', self.SetSyncSelected)
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
 
 
     def SetSyncAll(self, *args):
@@ -1711,8 +1711,7 @@ class SelectDay:
             self.xml.get_widget("ChangeDir").destroy()
         except:
             pass
-        while gtk.events_pending():
-            gtk.main_iteration()
+        gtkFlush()
 
 ################################################################################
 # Main program of selector
@@ -1726,10 +1725,12 @@ if __name__ == '__main__':
                 if arg[1].lower() == "h":
                     print("Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n")
                     sys.exit(0)
-                elif arg.lower().find("-debug") >= 0:
-#                    logger.setLevel(logging.DEBUG)
+                elif arg.lower().find("-debug") in [0, 1]:
                     loggerImagizer = logging.getLogger("imagizer")
                     loggerImagizer.setLevel(logging.DEBUG)
+                    if "=" in arg:
+                        logfile = arg.split("=", 1)[1]
+                        loggerImagizer.addHandler(logging.FileHandler(logfile))
                     logger.debug("We are in debug mode ...First Debug message")
                     config.DEBUG = True
                 elif arg.lower().find("-noautorotate") >= 0:
@@ -1755,7 +1756,7 @@ if __name__ == '__main__':
         f.close()
 
 
-    AF, first = RangeTout(config.DefaultRepository)
+    AF, first = rangeTout(config.DefaultRepository)
     values = (AF, first, LoadSelected(), config.GraphicMode)
     while config.GraphicMode != "Quit":
         if config.GraphicMode == "Normal":

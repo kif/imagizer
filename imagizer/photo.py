@@ -28,10 +28,9 @@ Module containing most classes for handling images
 """
 
 __author__ = "Jérôme Kieffer"
-__date__ = "20110901"
-__licence__ = "GPLv2"
-__contact__ = "imagizer@terre-adelie.org"
-
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import os, logging, shutil, time, subprocess
 import os.path as op
@@ -77,7 +76,7 @@ class Photo(object):
     """class photo that does all the operations available on photos"""
     _gaussianKernelFFT = None
 
-    def __init__(self, filename):
+    def __init__(self, filename, dontCache=False):
         """
         @param filename: Name of the image file, starting from the repository root
         """
@@ -104,11 +103,12 @@ class Photo(object):
             self.orientation = fromCache.orientation
         else:
             logger.debug("Image %s not in Cache", filename)
-            imageCache[filename] = self
+            if dontCache is False:
+                imageCache[filename] = self
         return None
 
 
-    def LoadPIL(self):
+    def loadPIL(self):
         """Load the image"""
         self.pil = Image.open(self.fn)
 #        imageCache[self.filename].pil = self.pil
@@ -123,11 +123,11 @@ class Photo(object):
     def taille(self):
         """width and height of a jpeg file"""
         if self.pixelsX == None and self.pixelsY == None:
-            self.LoadPIL()
+            self.loadPIL()
             self.pixelsX, self.pixelsY = self.pil.size
 
 
-    def SaveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
+    def saveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
         """save a thumbnail of the given name, with the given size and the interpolation methode (quality) 
         resampling filters :
         NONE = 0
@@ -160,7 +160,7 @@ class Photo(object):
             if not extract:
 #                print "on essaie avec PIL"
                 if self.pil is None:
-                    self.LoadPIL()
+                    self.loadPIL()
                 copyOfImage = self.pil.copy()
                 copyOfImage.thumbnail((Size, Size), Interpolation)
                 copyOfImage.save(strThumbFile, quality=Quality, progressive=Progressive, optimize=Optimize)
@@ -229,7 +229,7 @@ class Photo(object):
                 imageCache.pop(self.filename)
 
 
-    def Trash(self):
+    def trash(self):
         """Send the file to the trash folder"""
         self.removeFromCache()
         Trashdir = op.join(config.DefaultRepository, config.TrashDirectory)
@@ -436,7 +436,7 @@ class Photo(object):
             return
 
         t0 = time.time()
-        self.LoadPIL()
+        self.loadPIL()
         dimX, dimY = self.pil.size
         if self._gaussianKernelFFT is None or self._gaussianKernelFFT.shape != (dimY, dimX):
             logger.info("Gaussian (size=%s) and FFT" % config.ContrastMaskGaussianSize)

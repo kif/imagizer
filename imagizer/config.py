@@ -28,6 +28,10 @@
 Config is a class containing all the configuration of the imagizer suite.
 Technically it is a Borg (design Pattern) so every instance of Config has exactly the same contents.
 """
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import os, locale, logging, ConfigParser
 installdir = os.path.dirname(os.path.abspath(__file__))

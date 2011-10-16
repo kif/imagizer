@@ -1,4 +1,8 @@
 # coding: utf8
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 import pygtk
 pygtk.require('2.0')
 import gtk

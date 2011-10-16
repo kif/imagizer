@@ -31,8 +31,10 @@ It handles images, progress bars and configuration file.
 """
 
 __author__ = "Jérôme Kieffer"
-__contact__ = "jerome.kieffer@terre-adelie.org"
-__version__ = "1.2.1"
+__version__ = "1.2.2"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import os, logging, sys
 logger = logging.Logger("imagizer", logging.DEBUG)

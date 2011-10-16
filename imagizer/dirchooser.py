@@ -26,6 +26,10 @@
 """
 Library used by selector and the installer to select the working directories.
 """
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import os, sys, logging
 logger = logging.getLogger("imagizer.dirchooser")

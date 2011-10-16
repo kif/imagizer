@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006-2009,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006-2011,  Jérome Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -28,6 +28,11 @@
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
+
 import logging, os
 logger = logging.getLogger("imagizer.imagecache")
 from config import Config

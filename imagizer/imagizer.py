@@ -4,7 +4,7 @@
 #* $Source$
 #* $Id$
 #*
-#* Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -28,21 +28,22 @@
 General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
-
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging
 logger = logging.getLogger("imagizer.imagizer")
 
 
-from exiftran import Exiftran
-
 try:
-    import Image, ImageStat, ImageChops, ImageFile
+    import Image #IGNORE:F0401
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 try:
-    import pygtk ; pygtk.require('2.0')
-    import gtk
-    import gtk.glade as GTKglade
+    import pygtk ; pygtk.require('2.0') #IGNORE:F0401
+    import gtk, gtk.gdk                 #IGNORE:E0601
+    import gtk.glade as GTKglade        #IGNORE:E0611
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 #Variables globales qui sont des CONSTANTES !
@@ -61,15 +62,15 @@ from signals import Signal
 from encoding import unicode2ascii
 from config import Config
 config = Config()
-if config.ImageCache > 1:
-    import imagecache
-    imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
-else:
-    imageCache = None
 import fileutils
-from exif import Exif
 from photo import Photo, Signature
 
+def gtkFlush():
+    """
+    Flush all graphics stuff (outside main loop)
+    """
+    while gtk.events_pending(): #IGNORE:E1101
+        gtk.main_iteration()    #IGNORE:E1101
 
 
 
@@ -98,7 +99,9 @@ from photo import Photo, Signature
 
 
 class ModelProcessSelected:
-    """Implemantation MVC de la procedure ProcessSelected"""
+    """
+    Implemantation MVC de la procedure processSelected
+    """
     def __init__(self):
         """
         """
@@ -107,12 +110,24 @@ class ModelProcessSelected:
         self.refreshSignal = Signal()
         self.finishSignal = Signal()
         self.NbrJobsSignal = Signal()
-    def start(self, List):
-        """ Lance les calculs
+
+
+    def start(self, lstFiles):
+        """ 
+        Lance les calculs pour "processSelected"
+        i.e. 
+        
+        @param lstFiles: list of files to process
         """
 
-        def SplitIntoPages(pathday, GlobalCount):
-            """Split a directory (pathday) into pages of 20 images"""
+        def splitIntoPages(pathday, globalCount):
+            """Split a directory (pathday) into pages of 20 images (see config.NbrPerPage)
+            
+            @param pathday:
+            @param globalCount:
+            @return: the number of images for current page   
+            """
+            logger.debug("In splitIntoPages %s %s", pathday, globalCount)
             files = []
             for  i in os.listdir(pathday):
                 if os.path.splitext(i)[1] in config.Extensions:files.append(i)
@@ -125,17 +140,22 @@ class ModelProcessSelected:
                 for j in range(len(files)):
                     i = 1 + (j) / config.NbrPerPage
                     filename = os.path.join(pathday, config.PagePrefix + str(i), files[j])
-                    self.refreshSignal.emit(GlobalCount, files[j])
-                    GlobalCount += 1
+                    self.refreshSignal.emit(globalCount, files[j])
+                    globalCount += 1
                     shutil.move(os.path.join(pathday, files[j]), filename)
-                    ScaleImage(filename, filigrane)
+                    scaleImage(filename, filigrane)
             else:
                 for j in files:
-                    self.refreshSignal.emit(GlobalCount, j)
-                    GlobalCount += 1
-                    ScaleImage(os.path.join(pathday, j), filigrane)
-            return GlobalCount
-        def ArrangeOneFile(dirname, filename):
+                    self.refreshSignal.emit(globalCount, j)
+                    globalCount += 1
+                    scaleImage(os.path.join(pathday, j), filigrane)
+            return globalCount
+
+        def arrangeOneFile(dirname, filename):
+            """
+            @param dirname:
+            @param filename:
+            """
             try:
                 timetuple = time.strptime(filename[:19], "%Y-%m-%d_%Hh%Mm%S")
                 suffix = filename[19:]
@@ -144,13 +164,14 @@ class ModelProcessSelected:
                     timetuple = time.strptime(filename[:11], "%Y-%m-%d_")
                     suffix = filename[11:]
                 except ValueError:
-                    print("Unable to handle such file: %s" % filename)
+                    logger.warning("Unable to handle such file: %s" % filename)
                     return
             daydir = os.path.join(SelectedDir, time.strftime("%Y-%m-%d", timetuple))
             os.mkdir(daydir)
             shutil.move(os.path.join(dirname, filename), os.path.join(daydir, time.strftime("%Hh%Mm%S", timetuple) + suffix))
 
-        self.startSignal.emit(self.__label, max(1, len(List)))
+        logger.debug("In Process Selected" + " ".join(lstFiles))
+        self.startSignal.emit(self.__label, max(1, len(lstFiles)))
         if config.Filigrane:
             filigrane = Signature(config.FiligraneSource)
         else:
@@ -166,7 +187,7 @@ class ModelProcessSelected:
 #if SingleDir : revert to a foldered structure
             DayOrFile = os.path.join(SelectedDir, day)
             if os.path.isfile(DayOrFile):
-                ArrangeOneFile(SelectedDir, day)
+                arrangeOneFile(SelectedDir, day)
                 AlsoProcess += 1
 #end SingleDir normalization
             elif os.path.isdir(DayOrFile):
@@ -175,7 +196,7 @@ class ModelProcessSelected:
                 elif day.find(config.PagePrefix) == 0: #subpages in SIngleDir mode that need to be flatten
                     for File in os.listdir(DayOrFile):
                         if     os.path.isfile(os.path.join(DayOrFile, File)):
-                            ArrangeOneFile(DayOrFile, File)
+                            arrangeOneFile(DayOrFile, File)
                             AlsoProcess += 1
 #                        elif os.path.isdir(os.path.join(DayOrFile,File)) and File in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
 #                            recursive_delete(os.path.join(DayOrFile,File))
@@ -197,26 +218,26 @@ class ModelProcessSelected:
                                 AlsoProcess += 1
 
 #######then copy the selected files to their folders###########################        
-        for File in List:
+        for File in lstFiles:
             dest = os.path.join(SelectedDir, File)
             src = os.path.join(config.DefaultRepository, File)
             destdir = os.path.dirname(dest)
             if not os.path.isdir(destdir):
                 fileutils.makedir(destdir)
             if not os.path.exists(dest):
-                print "copie de %s " % (File)
+                logger.info("copie de %s " % File)
                 shutil.copy(src, dest)
                 try:
                     os.chmod(dest, config.DefaultFileMode)
                 except OSError:
-                    print("Warning: unable to chmod %s" % dest)
+                    logger.warning("Unable to chmod %s" % dest)
                 AlsoProcess += 1
             else :
-                print "%s existe déja" % (dest)
+                logger.warning("%s existe déja" % dest)
         if AlsoProcess > 0:self.NbrJobsSignal.emit(AlsoProcess)
 ######copy the comments of the directory to the Selected directory 
         AlreadyDone = []
-        for File in List:
+        for File in lstFiles:
             directory = os.path.split(File)[0]
             if directory in AlreadyDone:
                 continue
@@ -228,9 +249,9 @@ class ModelProcessSelected:
                     shutil.copy(src, dst)
 
 ########finaly recreate the structure with pages or make a single page ########################
-        dirs = [i for i in os.listdir(SelectedDir) if os.path.isdir(i)]
+        logger.debug("in ModelProcessSelected, SelectedDir= %s", SelectedDir)
+        dirs = [ i for i in os.listdir(SelectedDir) if os.path.isdir(os.path.join(SelectedDir, i))]
         dirs.sort()
-#        print "config.ExportSingleDir = "+str(config.ExportSingleDir)
         if config.ExportSingleDir: #SingleDir
             #first move all files to the root
             for day in dirs:
@@ -244,24 +265,26 @@ class ModelProcessSelected:
                             timetuple = time.strptime(day[:10], "%Y-%m-%d")
                             suffix = filename
                         except ValueError:
-                            print ("Unable to handle dir: %s\t file: %s" % (day, filename))
+                            logger.info("Unable to handle dir: %s\t file: %s" , day, filename)
                             continue
                     src = os.path.join(daydir, filename)
                     dst = os.path.join(SelectedDir, time.strftime("%Y-%m-%d_%Hh%Mm%S", timetuple) + suffix)
                     shutil.move(src, dst)
                 fileutils.recursive_delete(daydir)
-            SplitIntoPages(SelectedDir, 0)
+            splitIntoPages(SelectedDir, 0)
         else: #Multidir
-            GlobalCount = 0
+            logger.debug("in Multidir, dirs= " + " ".join(dirs))
+            globalCount = 0
             for day in dirs:
-                GlobalCount = SplitIntoPages(os.path.join(SelectedDir, day), GlobalCount)
+                globalCount = splitIntoPages(os.path.join(SelectedDir, day), globalCount)
 
         self.finishSignal.emit()
 
 
-
 class ModelCopySelected:
-    """Implemantation MVC de la procedure CopySelected"""
+    """
+    Implemantation MVC de la procedure copySelected
+    """
     def __init__(self):
         """
         """
@@ -270,10 +293,14 @@ class ModelCopySelected:
         self.refreshSignal = Signal()
         self.finishSignal = Signal()
         self.NbrJobsSignal = Signal()
-    def start(self, List):
-        """ Lance les calculs
+
+    def start(self, lstFiles):
+        """ 
+        Lance les calculs
+        
+        @param lstFiles: list of files to process
         """
-        self.startSignal.emit(self.__label, max(1, len(List)))
+        self.startSignal.emit(self.__label, max(1, len(lstFiles)))
         if config.Filigrane:
             filigrane = Signature(config.FiligraneSource)
         else:
@@ -296,13 +323,13 @@ class ModelCopySelected:
                                 shutil.rmtree(src)
 
 #######then copy the selected files to their folders###########################        
-        GlobalCount = 0
-        for File in List:
+        globalCount = 0
+        for File in lstFiles:
             dest = os.path.join(SelectedDir, File)
             src = os.path.join(config.DefaultRepository, File)
             destdir = os.path.dirname(dest)
-            self.refreshSignal.emit(GlobalCount, File)
-            GlobalCount += 1
+            self.refreshSignal.emit(globalCount, File)
+            globalCount += 1
             if not os.path.isdir(destdir):
                 fileutils.makedir(destdir)
             if not os.path.exists(dest):
@@ -314,12 +341,12 @@ class ModelCopySelected:
                 try:
                     os.chmod(dest, config.DefaultFileMode)
                 except OSError:
-                    print("Warning: unable to chmod %s" % dest)
+                    logger.warning("In ModelCopySelected: unable to chmod %s", dest)
             else :
-                print "%s existe déja" % (dest)
+                logger.info("In ModelCopySelected: %s already exists", dest)
 ######copy the comments of the directory to the Selected directory 
         AlreadyDone = []
-        for File in List:
+        for File in lstFiles:
             directory = os.path.split(File)[0]
             if directory in AlreadyDone:
                 continue
@@ -335,7 +362,7 @@ class ModelCopySelected:
 
 
 class ModelRangeTout:
-    """Implemantation MVC de la procedure RangeTout
+    """Implemantation MVC de la procedure rangeTout
     moves all the JPEG files to a directory named from 
     their day and with the name according to the time"""
 
@@ -349,11 +376,13 @@ class ModelRangeTout:
         self.NbrJobsSignal = Signal()
 
 
-    def start(self, RootDir):
+    def start(self, rootDir):
         """ Lance les calculs
+        
+        @param rootDir: top level directory to start processing
         """
-        config.DefaultRepository = RootDir
-        AllJpegs = fileutils.findFiles(RootDir)
+        config.DefaultRepository = rootDir
+        AllJpegs = fileutils.findFiles(rootDir)
         AllFilesToProcess = []
         AllreadyDone = []
         NewFiles = []
@@ -378,11 +407,7 @@ class ModelRangeTout:
         for h in range(NumFiles):
             i = AllFilesToProcess[h]
             self.refreshSignal.emit(h, i)
-            myPhoto = Photo(i)
-            try:
-                imageCache[i] = myPhoto
-            except:
-                pass
+            myPhoto = Photo(i, dontCache=True)
             data = myPhoto.readExif()
             try:
                 datei, heurei = data["Heure"].split()
@@ -391,21 +416,21 @@ class ModelRangeTout:
                 model = data["Modele"].split(",")[-1]
                 heure = unicode2ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
             except ValueError:
-                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(RootDir, i))))
-                heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(RootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
-            if not (os.path.isdir(os.path.join(RootDir, date))) :
-                fileutils.mkdir(os.path.join(RootDir, date))
-#            strImageFile = os.path.join(RootDir, date, heure)
+                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(rootDir, i))))
+                heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(rootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
+            if not (os.path.isdir(os.path.join(rootDir, date))) :
+                fileutils.mkdir(os.path.join(rootDir, date))
+#            strImageFile = os.path.join(rootDir, date, heure)
             ToProcess = os.path.join(date, heure)
             bSkipFile = False
-            for strImageFile in fileutils.list_files_in_named_dir(RootDir, date, heure):
-                logger.warning("%s -x-> %s" % (i, strImageFile))
-                existing = Photo(strImageFile)
+            for strImageFile in fileutils.list_files_in_named_dir(rootDir, date, heure):
+                logger.warning("%s -x-> %s", i, strImageFile)
+                existing = Photo(strImageFile, dontCache=True)
                 try:
                     existing.readExif()
                     originalName = existing.exif["Exif.Photo.UserComment"]
                 except:
-                    logger.error("Error in reading Exif for %s" % i)
+                    logger.error("in ModelRangeTout: reading Exif for %s", i)
                 else:
                     if os.path.basename(originalName) == os.path.basename(i):
                         logger.info("File already in repository, leaving as it is")
@@ -414,32 +439,25 @@ class ModelRangeTout:
             if bSkipFile:
                 continue
             else:
-                strImageFile = os.path.join(RootDir, date, heure)
+                strImageFile = os.path.join(rootDir, date, heure)
             if os.path.isfile(strImageFile):
                 s = 0
-                for j in os.listdir(os.path.join(RootDir, date)):
+                for j in os.listdir(os.path.join(rootDir, date)):
                     if j.find(heure[:-4]) == 0:s += 1
                 ToProcess = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
-                strImageFile = os.path.join(RootDir, ToProcess)
-            shutil.move(os.path.join(RootDir, i), strImageFile)
+                strImageFile = os.path.join(rootDir, ToProcess)
+            shutil.move(os.path.join(rootDir, i), strImageFile)
             try:
                 os.chown(strImageFile, uid, gid)
                 os.chmod(strImageFile, config.DefaultFileMode)
             except OSError:
-                print "Warning: unable to chown ot chmod  %s" % strImageFile
-            myPhoto = Photo(strImageFile)
+                logger.warning("in ModelRangeTout: unable to chown ot chmod  %s" , strImageFile)
+            myPhoto = Photo(strImageFile, dontCache=True)
 #            Save the old image name in exif tag
             myPhoto.storeOriginalName(i)
 
             if config.AutoRotate:
                 myPhoto.autorotate()
-
-#Set the new images in cache for further display 
-            try:
-                imageCache[ ToProcess ] = myPhoto
-            except:
-                pass
-##################################################
             AllreadyDone.append(ToProcess)
             NewFiles.append(ToProcess)
         AllreadyDone.sort()
@@ -478,7 +496,10 @@ class Controler:
 
 
 class ControlerX:
-    """ Implémentation du contrôleur. C'est lui qui lie les modèle et la(les) vue(s)."""
+    """ 
+    Implementation of controleur via X11. 
+    C'est lui qui lie les modèle et la(les) vue(s).
+    """
     def __init__(self, model, viewx):
 #        self.__model = model # Ne sert pas ici, car on ne fait que des actions modèle -> vue
         self.__viewx = viewx
@@ -512,17 +533,17 @@ class View:
     def creatProgressBar(self, label, nbVal):
         """ Création de la progressbar.        """
         self.__nbVal = nbVal
-        print label
+        logger.info(label)
 
     def ProgressBarMax(self, nbVal):
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
-#        print "Modification du maximum : %i"%self.__nbVal    
 
     def updateProgressBar(self, h, filename):
         """ Mise à jour de la progressbar
         """
-        print "%5.1f %% processing  ... %s" % (100.0 * (h + 1) / self.__nbVal, filename)
+        logger.info("%5.1f %% processing  ... %s" , 100.0 * (h + 1) / self.__nbVal, filename)
+
     def finish(self):
         """nothin in text mode"""
         pass
@@ -552,13 +573,12 @@ class ViewX:
         self.pb = self.xml.get_widget("progress")
         self.xml.get_widget("splash").set_title(label)
         self.xml.get_widget("splash").show()
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
         self.__nbVal = nbVal
 
     def ProgressBarMax(self, nbVal):
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
-
 
     def updateProgressBar(self, h, filename):
         """ 
@@ -579,16 +599,17 @@ class ViewX:
         else:
             self.pb.set_fraction(1.0)
         self.pb.set_text(filename)
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
+
     def finish(self):
         """destroys the interface of the splash screen"""
         self.xml.get_widget("splash").destroy()
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
         del self.xml
         gc.collect()
 
 
-def RangeTout(repository, bUseX=True):
+def rangeTout(repository, bUseX=True):
     """moves all the JPEG files to a directory named from their day and with the 
     name according to the time
     This is a MVC implementation
@@ -607,57 +628,71 @@ def RangeTout(repository, bUseX=True):
     return model.start(repository)
 
 
-
-def ProcessSelected(SelectedFiles):
-    """This procedure uses the MVC implementation of processSelected
+def processSelected(lstSelectedFiles):
+    """
+    This procedure uses the MVC implementation of processSelected
     It makes a copy of all selected photos and scales them
     copy all the selected files to "selected" subdirectory, 20 per page
+
+    @param  lstSelectedFiles: list of selected files to process
+    @return: None 
     """
-    print "execution %s" % SelectedFiles
+    logger.info("Process selected of " + " ".join(lstSelectedFiles))
     model = ModelProcessSelected()
     view = View()
     Controler(model, view)
     viewx = ViewX()
     ControlerX(model, viewx)
-    model.start(SelectedFiles)
+    model.start(lstSelectedFiles)
 
-def CopySelected(SelectedFiles):
-    """This procedure makes a copy of all selected photos and scales them
-    copy all the selected files to "selected" subdirectory
+
+def copySelected(lstSelectedFiles):
     """
-    print "Copy %s" % SelectedFiles
+    This procedure makes a copy of all selected photos and scales them
+    copy all the selected files to "selected" subdirectory
+
+    @param  lstSelectedFiles: list of selected files to process
+    @return: None 
+    """
+    logger.info("Copy Selected of " + " ".join(lstSelectedFiles))
     model = ModelCopySelected()
     view = View()
     Controler(model, view)
     viewx = ViewX()
     ControlerX(model, viewx)
-    model.start(SelectedFiles)
+    model.start(lstSelectedFiles)
 
 
 
 #######################################################################################
-def ScaleImage(filename, filigrane=None):
-    """common processing for one image : create a subfolder "scaled" and "thumb" : """
+def scaleImage(filename, filigrane=None):
+    """Common processing for one image : 
+    - create a subfolder "scaled" and "thumb"
+    - populate it
+    
+    @param filename: path to the file
+    @param filigrane: None or a Signature instance (see imagizer.photo.Signature) 
+     """
     rootdir = os.path.dirname(filename)
     scaledir = os.path.join(rootdir, config.ScaledImages["Suffix"])
     thumbdir = os.path.join(rootdir, config.Thumbnails["Suffix"])
     fileutils.mkdir(scaledir)
     fileutils.mkdir(thumbdir)
-    photo = Photo(filename)
-    Param = config.ScaledImages.copy()
-    Param.pop("Suffix")
-    Param["strThumbFile"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
-    photo.SaveThumb(**Param)
-    Param = config.Thumbnails.copy()
-    Param.pop("Suffix")
-    Param["strThumbFile"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
-    photo.SaveThumb(**Param)
-    if filigrane:
+    photo = Photo(filename, dontCache=True)
+    param = config.ScaledImages.copy()
+    param.pop("Suffix")
+    param["strThumbFile"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
+    photo.saveThumb(**param)
+    param = config.Thumbnails.copy()
+    param.pop("Suffix")
+    param["strThumbFile"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
+    photo.saveThumb(**param)
+    if filigrane is not None:
         filigrane.substract(photo.pil).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
         try:
             os.chmod(filename, config.DefaultFileMode)
         except OSError:
-            print("Warning: unable to chmod %s" % filename)
+            logger.warning("in scaleImage: Unable to chmod %s" % filename)
 
 
 
@@ -672,5 +707,5 @@ if __name__ == "__main__":
     ####################################################################################    
     #Definition de la classe des variables de configuration globales : Borg"""
     config.DefaultRepository = os.path.abspath(sys.argv[1])
-    print config.DefaultRepository
-    RangeTout(sys.argv[1])
+    logger.info("%s", config.DefaultRepository)
+    rangeTout(sys.argv[1])

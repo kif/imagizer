@@ -36,15 +36,15 @@
 
 
 """
-exiftran.py a wrapper for the original exiftran fprovided by Gerd Korn
+exiftran.py a wrapper for the original exiftran provided by Gerd Korn
 http://linux.bytesex.org/fbida/
 
 Needs libexif-dev, libjepg-dev and python-dev to be installed on the system.
-
 """
-__author__ = "Jerome Kieffer"
-__licence__ = "GPLv2"
-__contact__ = "Jerome.Kieffer@terre-adelie.org"
+__author__ = "Jérôme Kieffer"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import os, threading, logging
 

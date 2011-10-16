@@ -1,7 +1,8 @@
 # coding: utf8
 __author__ = "Jérôme Kieffer"
-__licence__ = "GPLv3"
-__date__ = "2011-03-27"
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20111016"
+__license__ = "GPL"
 
 import pyexiv2
 try:
