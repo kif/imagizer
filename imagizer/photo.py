@@ -67,14 +67,14 @@ from exif       import Exif
 from exiftran   import Exiftran
 from fileutils  import mkdir, makedir, smartSize
 from encoding   import unicode2ascii
-
+import blur
 
 ##########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
 ##########################################################
 class Photo(object):
     """class photo that does all the operations available on photos"""
-    _gaussianKernelFFT = None
+    _gaussian = blur.Gaussian()
 
     def __init__(self, filename, dontCache=False):
         """
@@ -438,20 +438,6 @@ class Photo(object):
         t0 = time.time()
         self.loadPIL()
         dimX, dimY = self.pil.size
-        if self._gaussianKernelFFT is None or self._gaussianKernelFFT.shape != (dimY, dimX):
-            logger.info("Gaussian (size=%s) and FFT" % config.ContrastMaskGaussianSize)
-            size = 2 * numpy.log(2) * config.ContrastMaskGaussianSize ** 2
-            gx = numpy.exp(-((numpy.arange(dimX, dtype="float32") - (dimX / 2.0)) / size) ** 2)
-            gx2 = numpy.zeros_like(gx)
-            gx2[dimX / 2:] = gx[:-dimX / 2]
-            gx2[:dimX / 2] = gx[-dimX / 2:]
-            gy = numpy.exp(-((numpy.arange(dimY, dtype="float32") - (dimY / 2.0)) / size) ** 2)
-            gy2 = numpy.zeros_like(gy)
-            gy2[dimY / 2:] = gy[:-dimY / 2]
-            gy2[:dimY / 2] = gy[-dimY / 2:]
-            g = numpy.outer(gy2, gx2)
-            self.__class__._gaussianKernelFFT = numpy.fft.fft2(g / g.sum()).conjugate()
-            logger.info("The Gaussian function and FFT took %.3f" % (time.time() - t0))
 
         ImageFile.MAXBLOCK = dimX * dimY
         img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("float32")
@@ -460,7 +446,7 @@ class Photo(object):
         #nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2
         desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2.0
         inv_desat = 255. - desat_array
-        blured_inv_desat = numpy.fft.ifft2(numpy.fft.fft2(inv_desat) * self._gaussianKernelFFT).real
+        blured_inv_desat = self._gaussian.blur(inv_desat, config.ContrastMaskGaussianSize)
         bisi = numpy.round(blured_inv_desat).astype("uint8")
         k = Image.fromarray(bisi, "L").convert("RGB")
         S = ImageChops.screen(self.pil, k)
