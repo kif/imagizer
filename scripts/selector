@@ -34,19 +34,14 @@
 # Liste des dépendances : python, PIL, Glade-2
 # Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
 #
-#todo liste des fonctions a implemanter ....
-# - se passer de exiftran
-# - la version windows et la version mac
-# - faire une doc décente.
-# - proposer d'exporter toutes les photos dans un seul répertoire (pas de jour)
 
 
 """
 Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
-__contact = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__contact__ = "imagizer@terre-adelie.org"
+__date__ = "20111105"
 __license__ = "GPL"
 
 import os, locale, random, gc, time, shutil, sys, logging

@@ -42,7 +42,7 @@ http://linux.bytesex.org/fbida/
 Needs libexif-dev, libjepg-dev and python-dev to be installed on the system.
 """
 __author__ = "Jérôme Kieffer"
-__contact = "imagizer@terre-adelie.org"
+__contact__ = "imagizer@terre-adelie.org"
 __date__ = "20111016"
 __license__ = "GPL"
 

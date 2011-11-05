@@ -27,7 +27,7 @@ __author__ = "Jérôme Kieffer"
 __date__ = "23 Feb 2011"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPL"
-__contact__ = "Jerome.Kieffer@terre-adelie.org"
+__contact__ = "imagizer@terre-adelie.org"
 
 import os
 from encoding import unicode2html

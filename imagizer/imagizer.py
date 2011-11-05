@@ -29,7 +29,7 @@ General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
-__contact = "imagizer@terre-adelie.org"
+__contact__ = "imagizer@terre-adelie.org"
 __date__ = "20111016"
 __license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging

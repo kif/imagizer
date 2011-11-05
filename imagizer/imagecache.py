@@ -29,7 +29,7 @@ ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
 __author__ = "Jérôme Kieffer"
-__contact = "imagizer@terre-adelie.org"
+__contact__ = "imagizer@terre-adelie.org"
 __date__ = "20111016"
 __license__ = "GPL"
 
