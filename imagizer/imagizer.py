@@ -428,7 +428,9 @@ class ModelRangeTout:
                 existing = Photo(strImageFile, dontCache=True)
                 try:
                     existing.readExif()
-                    originalName = existing.exif["Exif.Photo.UserComment"]
+                    originalName = existing["Exif.Photo.UserComment"]
+                    if "human_value" in dir(originalName):
+                        originalName = originalName.human_value
                 except:
                     logger.error("in ModelRangeTout: reading Exif for %s", i)
                 else:
