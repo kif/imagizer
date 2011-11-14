@@ -283,9 +283,15 @@ class Photo(object):
                     self.pixelsY = self.exif["Exif.Photo.PixelYDimension"]
                 except (IndexError, KeyError):
                     self.taille()
+                else:
+                    if "human_value" in dir(self.pixelsX):
+                        self.pixelsX = self.pixelsX.value
+                        self.pixelsY = self.pixelsY.value
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             if "Exif.Image.Orientation" in self.exif.exif_keys:
                 self.orientation = self.exif["Exif.Image.Orientation"]
+                if "human_value" in dir(self.orientation):
+                    self.orientation = self.orientation.value
             for key in clef:
                 try:
                     self.metadata[clef[key]] = self.exif.interpretedExifValue(key).decode(config.Coding).strip()

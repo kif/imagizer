@@ -429,11 +429,11 @@ class ModelRangeTout:
                 try:
                     existing.readExif()
                     originalName = existing["Exif.Photo.UserComment"]
-                    if "human_value" in dir(originalName):
-                        originalName = originalName.human_value
                 except:
                     logger.error("in ModelRangeTout: reading Exif for %s", i)
                 else:
+                    if "human_value" in dir(originalName):
+                        originalName = originalName.human_value
                     if os.path.basename(originalName) == os.path.basename(i):
                         logger.info("File already in repository, leaving as it is")
                         bSkipFile = True
