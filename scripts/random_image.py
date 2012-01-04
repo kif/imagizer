@@ -38,29 +38,32 @@ from imagizer.photo     import Photo
 config = Config()
 logger = logging.getLogger("imagizer.random_image")
 
+def create_link(linkName,lst=[]):
+    if (os.path.islink(linkName)):
+        try:
+            os.unlink(linkName)
+        except IOError:
+            raise IOError("Unable to remove initial link file. Check rights")
+    if linkName.startswith("-"):
+        logger.error("You need to give the name of the link to create ! One argument is expected")
+        return     
+    while True:
+        if lst==[]:
+            lst = findFiles(config.DefaultRepository)
+            random.shuffle(lst)
+        imFile = lst.pop()
+        photo = Photo(imFile)
+        metadata = photo.readExif()
+        rate = metadata.get("Rate", 0)
+        rating = 0.01 + 0.2 * rate
+        if random.random() < rating:
+            print("%s[%s] ---> %s" % (imFile, rate, linkName))
+            os.symlink(photo.fn, linkName)
+            break
 
 if (len(sys.argv) < 2):
     logger.error("You need to give the name of the link to create ! One argument is expected")
     sys.exit(1)
-linkName = sys.argv[1]
-if (os.path.islink(linkName)):
-    try:
-        os.unlink(linkName)
-    except IOError:
-        raise IOError("Unable to remove initial link file. Check rights")
+for oneFile in sys.argv[1:]:
+    create_link(oneFile)
 
-if linkName.startswith("-"):
-    logger.error("You need to give the name of the link to create ! One argument is expected")
-    sys.exit(0)
-
-listImages = findFiles(config.DefaultRepository)
-random.shuffle(listImages)
-for imFile in listImages:
-    photo = Photo(imFile)
-    metadata = photo.readExif()
-    rate = metadata.get("Rate", 0)
-    rating = 0.01 + 0.2 * rate
-    if random.random() < rating:
-        print("%s[%s] ---> %s" % (imFile, rate, linkName))
-        os.symlink(photo.fn, linkName)
-        break

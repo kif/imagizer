@@ -23,18 +23,18 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "28 April 2011"
+__date__ = "03 January 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
-import sys, os, datetime, logging
-import __init__
+import os, datetime, logging
 logger = logging.getLogger("imagizer")
 logger.setLevel(logging.INFO)
-from imagizer import unifiedglade, smartSize
+from imagizer import unifiedglade
+from fileutils import smartSize
 from pygtkmplayer import PyGtkMplayer
-from video import Video, PairVideo, AllVideos
+from video import Video
 #from signals import Signal
 from imagizer import installdir
 from config import Config
