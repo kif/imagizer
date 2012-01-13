@@ -618,7 +618,7 @@ class Interface(object):
         os.chmod(newnamefull, config.DefaultFileMode)
         os.system("%s %s &" % (config.Gimp, newnamefull))
         self.showImage()
-        self.image.RemoveFromCache()
+        self.image.removeFromCache()
 
     def reload_img(self, *args):
         """Remove image from cache and reloads it"""
