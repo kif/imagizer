@@ -85,20 +85,20 @@ class Photo(object):
         if not op.isfile(self.fn):
             logger.error("No such photo %s" % self.fn)
         self.metadata = None
-        self.pixelsX = None
-        self.pixelsY = None
-        self.pil = None
-        self.exif = None
+        self._pixelsX = None
+        self._pixelsY = None
+        self._pil = None
+        self._exif = None
         self.scaledPixbuffer = None
         self.orientation = 1
         if (imageCache is not None) and (filename in imageCache):
             logger.debug("Image %s found in Cache", filename)
             fromCache = imageCache[filename]
             self.metadata = fromCache.metadata
-            self.pixelsX = fromCache.pixelsX
-            self.pixelsY = fromCache.pixelsY
-            self.pil = fromCache.pil
-            self.exif = fromCache.exif
+            self._pixelsX = fromCache.pixelsX
+            self._pixelsY = fromCache.pixelsY
+            self._pil = fromCache.pil
+            self._exif = fromCache.exif
             self.scaledPixbuffer = fromCache.scaledPixbuffer
             self.orientation = fromCache.orientation
         else:
@@ -108,23 +108,56 @@ class Photo(object):
         return None
 
 
-    def loadPIL(self):
-        """Load the image"""
-        self.pil = Image.open(self.fn)
-#        imageCache[self.filename].pil = self.pil
+    def getPIL(self):
+        if self._pil is None:
+            self._pil = Image.open(self.fn)
+        return self._pil
+    def setPIL(self, value):self._pil = value
+    def delPIL(self):
+        del self._pil
+        self.pil = None
+    pil = property(getPIL, setPIL, delPIL, doc="property: PIL object")
 
+    def loadPIL(self):
+        """Deprecated method to load PIL data"""
+        import traceback
+        logger.warning("Use of loadPIL is deprecated!!!")
+        traceback.print_stack()
+        self.getPIL()
+
+    def getPixelsX(self):
+        if self._pixelsX is None:
+            self._pixelsX = self.pil.size[0]
+        return self._pixelsX
+    def setPixelsX(self, value): self._pixelsX = value
+    pixelsX = property(getPixelsX, setPixelsX, doc="Property to get the size in pixels via PIL")
+
+    def getPixelsY(self):
+        if self._pixelsY is None:
+            self._pixelsY = self.pil.size[1]
+        return self._pixelsY
+    def setPixelsY(self, value): self._pixelsY = value
+    pixelsY = property(getPixelsY, setPixelsY, doc="Property to get the size in pixels via PIL")
+
+
+    def getExif(self):
+        if self._exif is None:
+            self._exif = Exif(self.fn)
+            self._exif.read()
+        return self._exif
+    exif = property(getExif, doc="property for exif data")
 
     def larg(self):
         """width-height of a jpeg file"""
-        self.taille()
         return self.pixelsX - self.pixelsY
 
 
     def taille(self):
-        """width and height of a jpeg file"""
-        if self.pixelsX == None and self.pixelsY == None:
-            self.loadPIL()
-            self.pixelsX, self.pixelsY = self.pil.size
+        """Deprecated method to taille data"""
+        import traceback
+        logger.warning("Use of taille is deprecated!!!")
+        traceback.print_stack()
+        self.getPIL()
 
 
     def saveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
@@ -139,9 +172,6 @@ class Photo(object):
         if  op.isfile(strThumbFile):
             logger.warning("Thumbnail %s exists" % strThumbFile)
         else:
-            if self.exif is None:
-                self.exif = Exif(self.fn)
-                self.exif.read()
             extract = False
             print "process file %s exists" % strThumbFile
             if ExifExtraction:
@@ -158,9 +188,6 @@ class Photo(object):
                         os.remove(strThumbFile)
                         extract = False
             if not extract:
-#                print "on essaie avec PIL"
-                if self.pil is None:
-                    self.loadPIL()
                 copyOfImage = self.pil.copy()
                 copyOfImage.thumbnail((Size, Size), Interpolation)
                 copyOfImage.save(strThumbFile, quality=Quality, progressive=Progressive, optimize=Optimize)
@@ -174,7 +201,6 @@ class Photo(object):
         """does a looseless rotation of the given jpeg file"""
         if os.name == 'nt' and self.pil != None:
             del self.pil
-        self.taille()
         x = self.pixelsX
         y = self.pixelsY
         logger.debug("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
@@ -261,8 +287,6 @@ class Photo(object):
         if self.metadata is None:
             self.metadata = {}
             self.metadata["Taille"] = "%.2f %s" % smartSize(op.getsize(self.fn))
-            self.exif = Exif(self.fn)
-            self.exif.read()
             self.metadata["Titre"] = self.exif.comment
             try:
                 rate = self.exif["Exif.Image.Rating"]
@@ -275,14 +299,14 @@ class Photo(object):
                 else: # pyexiv2 v0.1
                     self.metadata["Rate"] = int(float(rate))
 
-            if self.pixelsX and self.pixelsY:
+            if self._pixelsX and self._pixelsY:
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             else:
                 try:
                     self.pixelsX = self.exif["Exif.Photo.PixelXDimension"]
                     self.pixelsY = self.exif["Exif.Photo.PixelYDimension"]
                 except (IndexError, KeyError):
-                    self.taille()
+                    pass
                 else:
                     if "human_value" in dir(self.pixelsX):
                         self.pixelsX = self.pixelsX.value
@@ -322,7 +346,6 @@ class Photo(object):
             config.ImageWidth = Xsize
         if Ysize > config.ImageHeight:
             config.ImageHeight = Ysize
-        self.taille()
 
 #        Prepare the big image to be put in cache
         Rbig = min(float(config.ImageWidth) / self.pixelsX, float(config.ImageHeight) / self.pixelsY)
@@ -368,7 +391,6 @@ class Photo(object):
             self.metadata["Rate"] = rate
             self.exif["Exif.Image.Rating"] = int(rate)
         self.exif.comment = titre
-
         self.exif.write()
 
 
@@ -385,10 +407,7 @@ class Photo(object):
         os.rename(self.fn, newfn)
         self.filename = newname
         self.fn = newfn
-        self.exif = newfn
-        if self.exif is not None:
-            self.exif = Exif(self.fn)
-            self.exif.read()
+        self._exif = None
         if (imageCache is not None) and (oldname in imageCache):
             imageCache.rename(oldname, newname)
 
@@ -401,8 +420,6 @@ class Photo(object):
         @param  originalName: name of the file before it was processed by selector
         @type   originalName: python string
         """
-        if self.metadata == None:
-            self.readExif()
         self.exif["Exif.Photo.UserComment"] = originalName
         self.exif.write()
 
@@ -411,11 +428,9 @@ class Photo(object):
         """does autorotate the image according to the EXIF tag"""
         if os.name == 'nt' and self.pil is not None:
             del self.pil
-
         self.readExif()
         if self.orientation != 1:
             Exiftran.autorotate(self.fn)
-#            os.system('%s -aip "%s" &' % (exiftran, self.fn))
             if self.orientation > 4:
                 self.pixelsX = self.exif["Exif.Photo.PixelYDimension"]
                 self.pixelsY = self.exif["Exif.Photo.PixelXDimension"]
@@ -442,7 +457,6 @@ class Photo(object):
             return
 
         t0 = time.time()
-        self.loadPIL()
         dimX, dimY = self.pil.size
 
         ImageFile.MAXBLOCK = dimX * dimY
@@ -481,6 +495,57 @@ class Photo(object):
                 logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
         exifJpeg.writeMetadata()
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
+        return Photo(outfile)
+
+    def autoWB(self, outfile):
+        """
+        apply Auto White - Balance to the current image
+        
+        @param: the name of the output file (JPEG)
+        @return: filtered Photo instance
+
+        """
+        try:
+            import numpy
+        except:
+            logger.error("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
+            return
+        t0 = time.time()
+        position = 5e-4
+        rgb1 = numpy.fromstring(self.pil.tostring(), dtype="uint8")
+        rgb1.shape = -1, 3
+        rgb = rgb1.astype("float32")
+        rgb1.sort(1)
+        pos_min = int(round(rgb1.shape[0] * position))
+        pos_max = rgb1.shape[0] - pos_min
+        rgb_min = rgb1[pos_min]
+        rgb_max = rgb1[pos_max]
+        rgb[:, 0] = 255.0 * (rgb[:, 0].clip(rgb_min[0], rgb_max[0]) - rgb_min[0]) / (rgb_max[0] - rgb_min[0])
+        rgb[:, 1] = 255.0 * (rgb[:, 1].clip(rgb_min[1], rgb_max[1]) - rgb_min[1]) / (rgb_max[1] - rgb_min[1])
+        rgb[:, 2] = 255.0 * (rgb[:, 2].clip(rgb_min[2], rgb_max[2]) - rgb_min[2]) / (rgb_max[2] - rgb_min[2])
+        out = Image.fromstring("RGB", (self.pixelsX, self.pixelsY), rgb.round().astype("uint8").tostring())
+        exitJpeg = op.join(config.DefaultRepository, outfile)
+        out.save(exitJpeg, quality=80, progressive=True, Optimize=True)
+        try:
+            os.chmod(exitJpeg, config.DefaultFileMode)
+        except IOError:
+            logger.error("Unable to chmod %s" % outfile)
+        exifJpeg = Exif(exitJpeg)
+        exifJpeg.read()
+        exifJpeg.comment = self.exif.comment
+        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
+                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
+                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
+                         "Exif.Image.Orientation", "Exif.Photo.UserComment"
+                         ]:
+            try:
+                exifJpeg[metadata] = self.exif[metadata]
+            except KeyError:
+                pass #'Tag not set'-> unable to copy it
+            except:
+                logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
+        exifJpeg.writeMetadata()
+        logger.info("The whoole Auto White-Balance took %.3f" % (time.time() - t0))
         return Photo(outfile)
 
 
