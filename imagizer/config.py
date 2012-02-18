@@ -30,7 +30,7 @@ Technically it is a Borg (design Pattern) so every instance of Config has exactl
 """
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20120218"
 __license__ = "GPL"
 
 import os, locale, logging, ConfigParser
@@ -94,6 +94,7 @@ class Config:
             self.Gimp = "gimp"
             self.Dcraw = "dcraw -w -c"
             self.DefaultRatingSelectedImage = 3
+            self.SelectedFilter = "ContrastMask"
             self.Thumbnails = {
                 "Size":160,
                 "Suffix": "thumb",
@@ -165,27 +166,28 @@ class Config:
             elif j == "DefaultFileMode".lower():
                 self.DefaultFileMode = int(i[1], 8)
                 self.DefaultDirMode = self.DefaultFileMode + 3145 #73 = +111 en octal ... 3145 +s mode octal    
-            elif j == "RawExtensions".lower():   self.RawExtensions = i[1].split()
-            elif j == "Extensions".lower():      self.Extensions = i[1].split()
-            elif j == "DefaultRepository".lower():self.DefaultRepository = i[1]
-            elif j == "MediaSize".lower():       self.MediaSize = float(i[1])
-            elif j == "Burn".lower():            self.Burn = i[1]
-            elif j == "WebServer".lower():       self.WebServer = i[1]
-            elif j == "WebRepository".lower():   self.WebRepository = i[1]
-            elif j == "Locale".lower():          self.Locale = i[1]
-            elif j == "Coding".lower():          self.Coding = i[1]
-            elif j == "ExportSingleDir".lower(): self.ExportSingleDir = configparser.getboolean("Selector", "ExportSingleDir")
-            elif j == "WebPageAnchor".lower():   self.WebPageAnchor = i[1]
-            elif j == "SlideShowDelay".lower():  self.SlideShowDelay = float(i[1])
-            elif j == "SlideShowMinRating".lower():self.SlideShowMinRating = min(5, max(0, int(i[1])))
-            elif j == "SlideShowType".lower():   self.SlideShowType = i[1]
-            elif j == "SynchronizeRep".lower():  self.SynchronizeRep = i[1]
-            elif j == "SynchronizeType".lower(): self.SynchronizeType = i[1]
-            elif j == "ImageCache".lower():      self.ImageCache = int(i[1])
-            elif j == "ImageWidth".lower():      self.ImageWidth = int(i[1])
-            elif j == "ImageHeight".lower():     self.ImageHeight = int(i[1])
-            elif j == "gimp".lower():            self.Gimp = i[1]
-            elif j == "dcraw".lower():           self.Dcraw = i[1]
+            elif j == "RawExtensions".lower():      self.RawExtensions = i[1].split()
+            elif j == "Extensions".lower():         self.Extensions = i[1].split()
+            elif j == "DefaultRepository".lower():  self.DefaultRepository = i[1]
+            elif j == "MediaSize".lower():          self.MediaSize = float(i[1])
+            elif j == "Burn".lower():               self.Burn = i[1]
+            elif j == "WebServer".lower():          self.WebServer = i[1]
+            elif j == "WebRepository".lower():      self.WebRepository = i[1]
+            elif j == "Locale".lower():             self.Locale = i[1]
+            elif j == "Coding".lower():             self.Coding = i[1]
+            elif j == "ExportSingleDir".lower():    self.ExportSingleDir = configparser.getboolean("Selector", "ExportSingleDir")
+            elif j == "WebPageAnchor".lower():      self.WebPageAnchor = i[1]
+            elif j == "SlideShowDelay".lower():     self.SlideShowDelay = float(i[1])
+            elif j == "SlideShowMinRating".lower(): self.SlideShowMinRating = min(5, max(0, int(i[1])))
+            elif j == "SlideShowType".lower():      self.SlideShowType = i[1]
+            elif j == "SynchronizeRep".lower():     self.SynchronizeRep = i[1]
+            elif j == "SynchronizeType".lower():    self.SynchronizeType = i[1]
+            elif j == "ImageCache".lower():         self.ImageCache = int(i[1])
+            elif j == "ImageWidth".lower():         self.ImageWidth = int(i[1])
+            elif j == "ImageHeight".lower():        self.ImageHeight = int(i[1])
+            elif j == "gimp".lower():               self.Gimp = i[1]
+            elif j == "dcraw".lower():              self.Dcraw = i[1]
+            elif j == "SelectedFilter".lower():      self.SelectedFilter = i[1]
             else: logging.warning(str("Config.load: unknown key %s" % j))
 
 
@@ -305,7 +307,8 @@ class Config:
         "#Synchronization type, acceptable values are Newer, Older, Selected and All", "SynchronizeType: %s" % self.SynchronizeType, "",
         "#Allow the creation of a Cache of images with the given size in number of images", "ImageCache: %s" % self.ImageCache, "",
         "#Gnu Image Manipulation Program (GIMP) path to executable", "Gimp: %s" % self.Gimp, "",
-        "#Digital Camera Raw (dcraw) extraction program and option (-w -c is  suggested)", "Dcraw: %s" % self.Dcraw, ""]
+        "#Digital Camera Raw (dcraw) extraction program and option (-w -c is  suggested)", "Dcraw: %s" % self.Dcraw, "",
+        "#Filter selected by default for image processing: ContrastMask, AutoWB, ...", "SelectedFilter: %s" % self.SelectedFilter, ""]
         if self.ImageWidth is not None:
             lsttxt += ["#Width of the last image displayed ... should not be modified", "ImageWidth:%s" % self.ImageWidth, ""]
         if self.ImageHeight is not None:

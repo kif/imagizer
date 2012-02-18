@@ -23,13 +23,6 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
-
-# version 0.3 : 28/10/2004
-# version 1.1 : 11/01/2005
-# version 1.2 : 13/02/2006 : includes a configuration file
-# version 1.3 : correction d'un bug quant à l'allocation de mémoire dans libjpeg
-# version 1.4 : 04/2006 : passage du pre-processing dans un bibliotheque externe utilisant le design pattern 
-# version 1.75: using some cache to speed-up display
 #
 # Liste des dépendances : python, PIL, Glade-2
 # Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
@@ -41,7 +34,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111105"
+__date__ = "20120218"
 __license__ = "GPL"
 
 import os, locale, random, gc, time, shutil, sys, logging
@@ -80,7 +73,8 @@ except ImportError:
 config = Config()
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
-    ImageFile.MAXBLOCK = 1000 * kpix
+    ImageFile.MAXBLOCK = 2 ** 25 #Thats 33 Mpix 
+    #1000 * kpix 
 
 if config.ImageCache > 1:
     from imagizer.imagecache import ImageCache
@@ -387,6 +381,12 @@ class Interface(object):
             self.xml.get_widget("LowQ").set_active(0)
             self.xml.get_widget("HiQ").set_active(0)
             self.xml.get_widget("VHiQ").set_active(1)
+        if config.SelectedFilter == "ContrastMask":
+            self.xml.get_widget("ContrastMask").set_active(1)
+        elif config.SelectedFilter == "AutoWB":
+            self.xml.get_widget("AutoWB").set_active(1)
+        else:
+            logger.error("No such SelectedFilter %s", config.SelectedFilter)
         self.showImage()
         self.flush_event_queue()
 
@@ -417,7 +417,7 @@ class Interface(object):
         'on_Poubelle_clicked': self.trash,
         'on_Gimp_clicked': self.gimp,
         'on_Reload_clicked': self.reload_img,
-        'on_Filter_clicked': self.filter_CM,
+        'on_Filter_clicked': self.filter_im,
 
         'on_enregistrerP_activate': self.savePref,
         'on_Autorotate_activate': self.setAutoRotate,
@@ -483,6 +483,8 @@ class Interface(object):
         'on_fullscreen_activate': self.FullScreen,
         'on_lance_diaporama_activate': self.SlideShow,
 
+        "on_AutoWB_activate": self.filterAutoWB,
+        "on_ContrastMask_activate": self.filterContrastMask
         }
 
         self.xml.signal_autoconnect(dictHandlers)
@@ -630,20 +632,42 @@ class Interface(object):
         self.image = Photo(filename)
         self.showImage()
 
-
-    def filter_CM(self, *args):
-        """Filter the current image with a contrast mask"""
-        logger.debug("Interface.filter_CM")
+    def filter_im(self, *args):
+        """ Apply the selected filter to the current image"""
+        logger.debug("Interface.filter_image")
         self.settitle()
+        if config.SelectedFilter == "ContrastMask":
+            self.filter_ContrastMask()
+        elif config.SelectedFilter == "AutoWB":
+            self.filter_AutoWB()
+        else:
+            logger.error("Unknown filter: %s", config.SelectedFilter)
+        self.showImage()
+
+    def filter_ContrastMask(self, *args):
+        """Filter the current image with a contrast mask"""
+        logger.debug("Interface.filter_ContrastMask")
         filename = self.AllJpegs[self.iCurrentImg]
         base, ext = op.splitext(filename)
-        newname = base + "-Filtered" + ext
+        newname = base + "-ContrastMask" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
         self.image = self.image.contrastMask(newname)
-        self.showImage()
+
+    def filter_AutoWB(self, *args):
+        """Filter the current image with Auto White Balance"""
+        logger.debug("Interface.filter_AutoWB")
+        filename = self.AllJpegs[self.iCurrentImg]
+        base, ext = op.splitext(filename)
+        newname = base + "-AutoWB" + ext
+        if not newname in self.AllJpegs:
+            self.AllJpegs.append(newname)
+            self.AllJpegs.sort()
+        self.iCurrentImg = self.AllJpegs.index(newname)
+        self.image = self.image.autoWB(newname)
+
 
     def select_shortcut(self, *args):
         """Select or unselect the image (not directly clicked on the toggle button)"""
@@ -1275,7 +1299,19 @@ class Interface(object):
         dialog.run()
         dialog.destroy()
 
+    def filterAutoWB(self, *args):
+        """
+        Set the default filter to AutoWB
+        """
+        logger.debug("Interface.AutoWB clicked")
+        config.SelectedFilter = "AutoWB"
 
+    def filterContrastMask(self, *args):
+        """
+        Set the default filter to Contrast Mask 
+        """
+        logger.debug("Interface.ContrastMask clicked")
+        config.SelectedFilter = "ContrastMask"
 
 ################################################################################
 # # # # # # # fin de la classe interface graphique # # # # # #

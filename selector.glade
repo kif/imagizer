@@ -1012,6 +1012,17 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                           <widget class="GtkMenu" id="menu1">
                             <property name="visible">True</property>
                             <child>
+                              <widget class="GtkRadioMenuItem" id="AutoWB">
+                                <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">Corrige automatiquement la balance des blancs</property>
+                                <property name="label" translatable="yes">Balance des blancs automatiques</property>
+                                <property name="use_underline">True</property>
+                                <property name="draw_as_radio">True</property>
+                                <property name="group">ContrastMask</property>
+                                <signal name="activate" handler="on_AutoWB_activate"/>
+                              </widget>
+                            </child>
+                            <child>
                               <widget class="GtkRadioMenuItem" id="ContrastMask">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Selection le filtre "masque de contrast" qui augmente le contraste</property>
@@ -1020,16 +1031,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                 <property name="active">True</property>
                                 <property name="draw_as_radio">True</property>
                                 <property name="group">AutoWB</property>
-                              </widget>
-                            </child>
-                            <child>
-                              <widget class="GtkRadioMenuItem" id="AutoWB">
-                                <property name="visible">True</property>
-                                <property name="tooltip" translatable="yes">Corrige automatiquement la balance des blancs</property>
-                                <property name="label" translatable="yes">Balance des blancs automatiques</property>
-                                <property name="use_underline">True</property>
-                                <property name="draw_as_radio">True</property>
-                                <property name="group">ContrastMask</property>
+                                <signal name="activate" handler="on_ContrastMask_activate"/>
                               </widget>
                             </child>
                           </widget>

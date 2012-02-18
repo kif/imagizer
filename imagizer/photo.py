@@ -480,20 +480,24 @@ class Photo(object):
             logger.error("Unable to chmod %s" % outfile)
         exifJpeg = Exif(exitJpeg)
         exifJpeg.read()
+        self.exif.copy(exifJpeg)
         exifJpeg.comment = self.exif.comment
-
-        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
-                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
-                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
-                         "Exif.Image.Orientation", "Exif.Photo.UserComment"
-                         ]:
-            try:
-                exifJpeg[metadata] = self.exif[metadata]
-            except KeyError:
-                pass #'Tag not set'-> unable to copy it
-            except:
-                logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
-        exifJpeg.writeMetadata()
+#
+#        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
+#                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
+#                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
+#                         "Exif.Image.Orientation", "Exif.Photo.UserComment"
+#                         ]:
+#            if metadata in self.exif:
+#                logger.debug("Copying metadata %s", metadata)
+#                try:
+#                    exifJpeg[metadata] = self.exif[metadata]
+#                except KeyError:
+#                    pass #'Tag not set'-> unable to copy it
+#                except:
+#                    logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
+        logger.debug("Write metadata to %s", exitJpeg)
+        exifJpeg.write()
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
         return Photo(outfile)
 
@@ -508,14 +512,14 @@ class Photo(object):
         try:
             import numpy
         except:
-            logger.error("This filter needs the numpy library available on https://sourceforge.net/projects/numpy/files/")
+            logger.error("This filter needs the numpy library available on http://numpy.scipy.org/")
             return
         t0 = time.time()
         position = 5e-4
         rgb1 = numpy.fromstring(self.pil.tostring(), dtype="uint8")
         rgb1.shape = -1, 3
         rgb = rgb1.astype("float32")
-        rgb1.sort(1)
+        rgb1.sort(axis=0)
         pos_min = int(round(rgb1.shape[0] * position))
         pos_max = rgb1.shape[0] - pos_min
         rgb_min = rgb1[pos_min]
@@ -532,19 +536,9 @@ class Photo(object):
             logger.error("Unable to chmod %s" % outfile)
         exifJpeg = Exif(exitJpeg)
         exifJpeg.read()
-        exifJpeg.comment = self.exif.comment
-        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
-                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
-                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
-                         "Exif.Image.Orientation", "Exif.Photo.UserComment"
-                         ]:
-            try:
-                exifJpeg[metadata] = self.exif[metadata]
-            except KeyError:
-                pass #'Tag not set'-> unable to copy it
-            except:
-                logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
-        exifJpeg.writeMetadata()
+        self.exif.copy(exifJpeg)
+        logger.debug("Write metadata to %s", exitJpeg)
+        exifJpeg.write()
         logger.info("The whoole Auto White-Balance took %.3f" % (time.time() - t0))
         return Photo(outfile)
 
@@ -692,7 +686,7 @@ class RawImage:
                     logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
             #self.exif.copyMetadataTo(self.strJepgFile)
 
-            exifJpeg.writeMetadata()
+            exifJpeg.write()
 
         else: #in config.Extensions, i.e. a JPEG file
             shutil.copy(self.strRawFile, strJpegFullPath)

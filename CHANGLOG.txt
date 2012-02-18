@@ -1,0 +1,13 @@
+
+version 1.5 : multiple filters (Contrast Mask + Auto White-Balance) (02-2012)
+version 1.45: using some cache to speed-up display
+version 1.4 : 04/2006 : passage du pre-processing dans un bibliotheque externe utilisant le design pattern
+version 1.3 : correction d'un bug quant à l'allocation de mémoire dans libjpeg
+version 1.2 : 13/02/2006 : includes a configuration file
+version 1.1 : 11/01/2005
+version 0.3 : 28/10/2004
+
+
+
+ 
+

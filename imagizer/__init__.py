@@ -31,7 +31,7 @@ It handles images, progress bars and configuration file.
 """
 
 __author__ = "Jérôme Kieffer"
-__version__ = "1.3.0"
+__version__ = "1.5.0"
 __contact__ = "imagizer@terre-adelie.org"
 __date__ = "20120205"
 __license__ = "GPL"
