@@ -24,16 +24,15 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "28 Apr 2011"
+__date__ = "20 Feb 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
 
-import os, sys, hashlib, logging, tempfile, datetime, time, subprocess, threading
+import os, sys, hashlib, logging, tempfile, datetime, time, subprocess, threading, json
 
-import imagizer
-logger = logging.getLogger("imagizer")
+logger = logging.getLogger("imagizer.video")
 logger.setLevel(logging.INFO)
 
 #Find all the videos and renames them, compress then .... and write an html file to set online
@@ -63,10 +62,8 @@ class Video(object):
             Video.root = OP.abspath(root)
         self.videoPath = ""
         self.videoFile = ""
-        logger.info("Analyzing %s" % self.fullPath)
         [self.videoPath, self.videoFile] = OP.split(self.fullPath)
         self.timeStamp = datetime.datetime.fromtimestamp(OP.getmtime(self.fullPath))
-
         self.title = u""
         self.width = 0
         self.height = 0
@@ -74,7 +71,6 @@ class Video(object):
         self.duration = 0
         self.root = None
         self.suffix = None
-        self.metadata = None
         self.bitRate = None
         self.audioCodec = None
         self.audioBitRate = None
@@ -89,9 +85,16 @@ class Video(object):
         self.destinationFile = None
         self.thumbName = None
         self.thumb = None
+        self.camera = None
+        self.deinterleave = None
+        self.md5 = hashlib.md5(open(self.fullPath, "rb").read()).hexdigest()
+        self.fromDisk()
 
-
-
+    def analyse(self):
+        """
+        analyses a video
+        """
+        logger.info("Analyzing %s" % self.fullPath)
         if self.videoFile.lower().startswith("dscf")  :
             self.camera = "Fuji"
             self.deinterleave = False
@@ -132,16 +135,16 @@ class Video(object):
         if "IARL" not in self.data:
             self.data["IARL"] = self.videoFile.replace("-H264", "")
         if "ISRC" not in self.data:
-            self.data["ISRC"] = hashlib.md5(open(self.fullPath, "rb").read()).hexdigest()
+            self.data["ISRC"] = self.md5
         self.CommentFile = OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta"
         if OP.isfile(self.CommentFile):
             for l in open(OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta").readlines():
                 if len(l) > 2:
                     k, d = l.decode(config.Coding).split(None, 1)
                     self.data[k] = d.strip()
-        self.Date = datetime.datetime.fromtimestamp(time.mktime(time.strptime(self.data["ICRD"], "%Y-%m-%d")))
-        if self.Date.date < self.timeStamp.date:
-            self.timeStamp = datetime.datetime.combine(self.Date.date(), self.timeStamp.time())
+        videoDate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(self.data["ICRD"], "%Y-%m-%d")))
+        if videoDate.date < self.timeStamp.date:
+            self.timeStamp = datetime.datetime.combine(videoDate.date(), self.timeStamp.time())
         self.camera = self.data["ISRF"]
 
 
@@ -153,6 +156,50 @@ class Video(object):
         for key in self.data:
             txt += "\t%s:\t%s\n" % (key, self.data[key])
         return txt
+
+
+    def toDisk(self, filename=None):
+        """
+        Save the metadata to a file, by default .metadata/videoFile.avi.json
+        """
+        if filename is None:
+            filename = os.path.join(OP.dirname(self.fullPath), ".metadata", OP.basename(self.fullPath) + ".json")
+        if not OP.isdir(OP.dirname(filename)):
+            os.makedirs(OP.dirname(filename))
+        dictToSave = {}
+        for key in self.__dict__:
+            val = self.__dict__[key]
+            if hasattr(val, "__call__"): #skip methods
+                continue
+            elif key == "timeStamp":
+                dictToSave[key] = tuple(val.utctimetuple())
+            else:
+                dictToSave[key] = val
+        with open(filename, "wb") as myFile:
+            json.dump(dictToSave, myFile)
+
+    def fromDisk(self, filename=None):
+        """
+        Load the metadata from a file, by default .metadata/videoFile.avi.json
+        """
+        if filename is None:
+            filename = os.path.join(OP.dirname(self.fullPath), ".metadata", OP.basename(self.fullPath) + ".json")
+        if not os.path.isfile(filename):
+            logger.warning("No metadata dump for %s", self.videoFile)
+            self.analyse()
+            self.toDisk()
+            return
+        logger.info("Loading metadata for %s" % self.fullPath)
+        with open(filename, "rb") as myFile:
+            red = json.load(myFile)
+        if ("md5" in red) and (self.md5 == red["md5"]):
+            self.__dict__.update(red)
+            if "timeStamp" in red:
+                self.timeStamp = datetime.datetime(*(red["timeStamp"][:-2]))
+        else:
+            logger.warning("Metadata are not consistent: the video has changed")
+            self.analyse()
+            self.toDisk()
 
     def isEncoded(self):
         """
@@ -189,14 +236,14 @@ class Video(object):
             filename, realname = unicodeFilename(filename), filename
             myParser = createParser(filename, realname)
             try:
-                self.metadata = extractMetadata(myParser)
+                hachoirMetadata = extractMetadata(myParser)
             except HachoirError, err:
                 print "Metadata extraction error: %s" % unicode(err)
-                self.metadata = None
-        if self.metadata:
+                hachoirMetadata = None
+        if hachoirMetadata:
             bDoMplayer = False
             try:
-                self.timeStamp = self.metadata.get("creation_date")
+                self.timeStamp = hachoirMetadata.get("creation_date")
             except:
                 pass
             if type(self.timeStamp) == type(datetime.date(2000, 10, 10)):
@@ -206,12 +253,12 @@ class Video(object):
                     hour = datetime.time(0, 0, 0)
                 self.timeStamp = datetime.datetime.combine(self.timeStamp, hour)
             try:
-                self.duration = self.metadata.get("duration").seconds
+                self.duration = hachoirMetadata.get("duration").seconds
             except:
                 bDoMplayer = True
-            self.width = self.metadata.get("width")
+            self.width = hachoirMetadata.get("width")
             try:
-                self.title = self.metadata.get("title").encode("latin1").decode("utf8")
+                self.title = hachoirMetadata.get("title").encode("latin1").decode("utf8")
             except:
                 self.title = u""
 #            convertLatin1ToUTF8 = False
@@ -221,30 +268,30 @@ class Video(object):
 #            if convertLatin1ToUTF8:
 #                self.title = self.title.encode("latin1").decode("UTF8")
 #Work-around for latin1 related bug 
-            self.height = self.metadata.get("height")
+            self.height = hachoirMetadata.get("height")
             try:
-                self.frameRate = self.metadata.get("frame_rate")
+                self.frameRate = hachoirMetadata.get("frame_rate")
             except:
                 bDoMplayer = True
                 #self.frameRate = 24 #default value for Canon G11
 
             try:
-                self.bitRate = self.metadata.get("bit_rate")
+                self.bitRate = hachoirMetadata.get("bit_rate")
             except:
                 bDoMplayer = True
                 #self.bitRate = None
             oldcamera = self.camera
             try:
-                self.camera = self.metadata.get("producer").replace(" ", "_")
+                self.camera = hachoirMetadata.get("producer").replace(" ", "_")
                 self.deinterleave = False
             except:
                 self.camera = oldcamera
             try:
-                self.metadata.iterGroups()
+                hachoirMetadata.iterGroups()
             except:
                 bDoMplayer = True
             if not bDoMplayer:
-                for n in self.metadata.iterGroups():
+                for n in hachoirMetadata.iterGroups():
                     if n.header.startswith("Video stream"):
                         self.videoCodec = n.get("compression")
                         self.videoBpP = n.get("bits_per_pixel")
@@ -515,7 +562,7 @@ class PairVideo(object):
         Comparator for two pairs of videos 
         """
         if self.__datetime < other.__datetime:
-            return - 1
+            return -1
         elif self.__datetime > other.__datetime:
             return 1
         else:

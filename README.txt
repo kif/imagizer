@@ -23,15 +23,14 @@ relies on a program written by Martin Blais  http://curator.sourceforge.net/
 Installation :
 ==============
 
-As for most python programs:
+For debian/ubuntu users: there is a script to build a deb package and install it:
+./build-package.sh
+
+For all the other :
 # python setup.py install
 
 Dependences
 -----------
-Python-2.3 or newer
-Pythom-imaging (PIL)
-python-glade2 (so GTK2 ...)
-the program provides a customized version of exiftran ....
 
 
 Detailed description of selector

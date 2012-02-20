@@ -93,10 +93,13 @@ donc etre lancé sur un serveur.
 
 Dépendances
 ============
-Python-2.3 ou plus récent
+Python-2.6 ou plus récent
 Pythom-imaging (PIL)
 python-glade2
-exiftran
+#exiftran
+numpy 
+pyexiv2
+
 
 
 

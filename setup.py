@@ -30,7 +30,7 @@ The setup.py script allows to install Imagizer regardless to the operating syste
 
 from distutils.core import setup
 from distutils.extension import Extension
-import os, sys, glob, distutils.sysconfig, shutil, locale, imp
+import os, sys, distutils.sysconfig, shutil, locale
 sys.path.insert(0, os.path.dirname(__file__))
 import imagizer
 version = imagizer.__version__
@@ -42,7 +42,7 @@ installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 
 
 if os.name == 'nt': #sys.platform == 'win32':
-    execexiftran = os.path.join(os.getcwd(), "bin", "exiftran.exe")
+    execexiftran = os.path.join("bin", "exiftran.exe")
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
     shutil.copy('selector', 'selector.py')
     shutil.copy('generator', 'generator.py')
@@ -53,7 +53,7 @@ elif os.name == 'posix':
 #    shutil.copy(os.path.join(os.getcwd(),"bin","exiftran"+str(int(1+log(os.sys.maxint+1)/log(2)))),os.path.join(os.getcwd(),"bin","exiftran"))
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
 #    scripts = ['selector', "generator", "NommeVideo.py", "NommeVideo2.py"]
-    execexiftran = os.path.join(os.getcwd(), "bin", "exiftran")
+    execexiftran = os.path.join("bin", "exiftran")
     os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
 
@@ -74,7 +74,7 @@ if len(sys.argv) == 1:
     sys.argv.append("install")
 
 
-
+print execexiftran
 setup(name='Imagizer',
     version=version,
     author='Jérôme Kieffer',
@@ -90,18 +90,28 @@ setup(name='Imagizer',
     ],
     packages=['imagizer'],
     package_dir={'imagizer': 'imagizer'},
+#    package_data={'imagizer': [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
     ext_package="imagizer",
     ext_modules=[
          Extension(
              name='libexiftran',
              sources=[os.path.join("libexiftran", i) for i in os.listdir("libexiftran") if i.endswith(".c")],
-#             glob.glob(os.path.join("libexiftran", "*.c")),
              define_macros=[],
              libraries=["jpeg", "exif", "m"],
-    #               include_dirs=["/usr/include/libexif"]
          ),
     ],
-    )
+    classifiers=[
+          'Development Status :: 5 - production',
+          'Environment :: Graphic',
+          'Environment :: GTK',
+          'Intended Audience :: End Users/Desktop',
+          'Intended Audience :: Photographs',
+          'License :: OSI Approved :: GPL',
+          'Operating System :: MacOS :: MacOS X',
+          'Operating System :: Microsoft :: Windows',
+          'Operating System :: POSIX',
+          'Programming Language :: Python',
+          ],)
 os.remove("imagizer.conf")
 
 if not configured:
