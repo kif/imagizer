@@ -23,14 +23,16 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
+from __future__ import with_statement
+
 __author__ = "Jérôme Kieffer"
-__date__ = "20 Feb 2012"
+__date__ = "25 Feb 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
 
-import os, sys, hashlib, logging, tempfile, datetime, time, subprocess, threading, json
+import os, sys, hashlib, logging, tempfile, datetime, time, subprocess, threading, json, stat
 
 logger = logging.getLogger("imagizer.video")
 logger.setLevel(logging.INFO)
@@ -39,7 +41,10 @@ logger.setLevel(logging.INFO)
 
 import Image
 import os.path as OP
-
+if sys.version >= (3, 0):
+    from queue import Queue
+else:
+    from Queue import Queue
 from hachoir_core.error import HachoirError
 from hachoir_core.cmd_line import unicodeFilename
 from hachoir_parser import createParser
@@ -52,9 +57,68 @@ config = Config()
 def writeStdOutErr(std, filename):
         open(filename, 'wb').write(std.read())
 
+def calcFastMd5(filename):
+    block = 2 ** 20
+    size = os.path.getsize(filename)
+    if size > 2 * block :
+        with open(filename, "rb") as myFile:
+            data = myFile.read(block)
+            myFile.seek(size - 2 * block)
+            data += myFile.read(block)
+    else:
+        data = open(filename, "rb").read()
+    return hashlib.md5(data).hexdigest()
+
 class Video(object):
     """main Video class"""
     root = None
+    queue = Queue()
+    sem = threading.Semaphore()
+    semLauncher = threading.Semaphore()
+    jobId = 0
+
+    @classmethod
+    def startProcessing(cls, script):
+        """
+        @param script: 
+        @return: jobID which is a sting: Plugin-000001
+        """
+        if script.strip() == "":
+            return
+        with cls.semLauncher:
+            cls.jobId += 1
+            idx = cls.jobId
+        logger.warning("Starting processing job %i" % idx)
+        cls.queue.put_nowait((idx, script))
+        logger.warning("Size of the process queue: %s", cls.queue.qsize())
+        if cls.sem._Semaphore__value > 0 :
+            logger.warning("No process Loop running: stating it")
+            t = threading.Thread(target=cls.processingLoop)
+            t.start()
+        return idx
+
+    @classmethod
+    def processingLoop(cls):
+        """
+        Process all jobs in the queue.  
+        """
+        with cls.sem:
+            while not cls.queue.empty():
+                idx, script = cls.queue.get_nowait()
+                logger.warning("%s %s", idx, script)
+                encodeProcess = subprocess.Popen(script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                logging.warning("Subprocess %i with pid=%s" % (idx, encodeProcess.pid))
+#                out, err = encodeProcess.communicate()
+                threadStdErr = threading.Thread(target=writeStdOutErr, name="BatchWriteStdErr", args=(encodeProcess.stderr, "%s.e%s" % (script, idx)))
+                threadStdOut = threading.Thread(target=writeStdOutErr, name="BatchWriteStdOut", args=(encodeProcess.stdout, "%s.o%s" % (script, idx)))
+                threadStdErr.start()
+                threadStdOut.start()
+#                open("%s.e%s" % (script, idx), 'wb').write(err)
+#                open("%s.o%s" % (script, idx), 'wb').write(out)
+                logging.warning(str("Subprocess %i with pid=%s finished with %s" % (idx, encodeProcess.pid, encodeProcess.wait())))
+
+
+
     def __init__(self, infile, root=None):
         """initialise the class"""
         self.fullPath = OP.abspath(infile)
@@ -62,6 +126,7 @@ class Video(object):
             Video.root = OP.abspath(root)
         self.videoPath = ""
         self.videoFile = ""
+        self.origName = ""
         [self.videoPath, self.videoFile] = OP.split(self.fullPath)
         self.timeStamp = datetime.datetime.fromtimestamp(OP.getmtime(self.fullPath))
         self.title = u""
@@ -81,13 +146,15 @@ class Video(object):
         self.videoBitRate = None
         self.videoBpP = None
         self.frameRate = None
-        self.data = {}
+#        self.data = {}
         self.destinationFile = None
         self.thumbName = None
         self.thumb = None
         self.camera = None
+        self.keywords = []
         self.deinterleave = None
-        self.md5 = hashlib.md5(open(self.fullPath, "rb").read()).hexdigest()
+        self.fastMd5 = calcFastMd5(self.fullPath)
+        self.origMd5 = None
         self.fromDisk()
 
     def analyse(self):
@@ -128,33 +195,28 @@ class Video(object):
         if dirdate:
             if dirdate.date() < self.timeStamp.date():
                 self.timeStamp = datetime.datetime.combine(dirdate.date(), self.timeStamp.time())
-        if "ICRD" not in self.data:
-            self.data["ICRD"] = self.timeStamp.strftime("%Y-%m-%d")
-        if "ISRF" not in self.data:
-            self.data["ISRF"] = self.camera
-        if "IARL" not in self.data:
-            self.data["IARL"] = self.videoFile.replace("-H264", "")
-        if "ISRC" not in self.data:
-            self.data["ISRC"] = self.md5
-        self.CommentFile = OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta"
-        if OP.isfile(self.CommentFile):
-            for l in open(OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta").readlines():
+        CommentFile = OP.splitext(self.fullPath.replace(" ", "_"))[0] + ".meta"
+        if OP.isfile(CommentFile):
+            for l in open(CommentFile):
                 if len(l) > 2:
                     k, d = l.decode(config.Coding).split(None, 1)
-                    self.data[k] = d.strip()
-        videoDate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(self.data["ICRD"], "%Y-%m-%d")))
-        if videoDate.date < self.timeStamp.date:
-            self.timeStamp = datetime.datetime.combine(videoDate.date(), self.timeStamp.time())
-        self.camera = self.data["ISRF"]
-
+                    if k == "ISRF":
+                        self.camera = d.strip()
+                    elif k == "ICRD":
+                        videoDate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(d.strip(), "%Y-%m-%d")))
+                        if videoDate.date < self.timeStamp.date:
+                            self.timeStamp = datetime.datetime.combine(videoDate.date(), self.timeStamp.time())
+                    elif k == "INAM":
+                        self.title = d.strip()
+                    elif k == "IKEY":
+                        self.keyword = d.strip().split(";")
 
     def __repr__(self):
         """Returns some information on the current video flux"""
         txt = "%s\n" % self.videoFile
         txt += "camera: %s\tWidth= %i\tHeigth= %i\n" % (self.camera, self.width, self.height)
         txt += "Type: %s,\t title:%s\n" % (type(self.title), self.title)
-        for key in self.data:
-            txt += "\t%s:\t%s\n" % (key, self.data[key])
+        txt += self.getComment()
         return txt
 
 
@@ -176,7 +238,7 @@ class Video(object):
             else:
                 dictToSave[key] = val
         with open(filename, "wb") as myFile:
-            json.dump(dictToSave, myFile)
+            json.dump(dictToSave, myFile, sort_keys=True, indent=4)
 
     def fromDisk(self, filename=None):
         """
@@ -192,7 +254,7 @@ class Video(object):
         logger.info("Loading metadata for %s" % self.fullPath)
         with open(filename, "rb") as myFile:
             red = json.load(myFile)
-        if ("md5" in red) and (self.md5 == red["md5"]):
+        if ("fastMd5" in red) and (self.fastMd5 == red["fastMd5"]):
             self.__dict__.update(red)
             if "timeStamp" in red:
                 self.timeStamp = datetime.datetime(*(red["timeStamp"][:-2]))
@@ -261,13 +323,6 @@ class Video(object):
                 self.title = hachoirMetadata.get("title").encode("latin1").decode("utf8")
             except:
                 self.title = u""
-#            convertLatin1ToUTF8 = False
-#            for i in self.title:
-#                logging.debug("%s %s" % (i, ord(i)))
-#                if ord(i) > 127: convertLatin1ToUTF8 = True
-#            if convertLatin1ToUTF8:
-#                self.title = self.title.encode("latin1").decode("UTF8")
-#Work-around for latin1 related bug 
             self.height = hachoirMetadata.get("height")
             try:
                 self.frameRate = hachoirMetadata.get("frame_rate")
@@ -343,13 +398,15 @@ class Video(object):
             elif i.startswith("ID_VIDEO_WIDTH"):
                 self.width = int(i.split("=")[1].strip())
             elif i.startswith(" Source Form:"):
-                self.data["ISRF"] = i.split(":")[1].strip()
+                self.camera = i.split(":")[1].strip()
             elif i.startswith(" Archival Location:"):
-                self.data["IARL"] = i.split(":")[1].strip()
+                self.origName = i.split(":")[1].strip()
             elif i.startswith(" Creation Date:"):
-                self.data["ICRD"] = i.split(":")[1].strip()
+                videoDate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(i.split(":")[1].strip(), "%Y-%m-%d")))
+                if videoDate.date < self.timeStamp.date:
+                    self.timeStamp = datetime.datetime.combine(videoDate.date(), self.timeStamp.time())
             elif i.startswith(" Source:"):
-                self.data["ISRC"] = i.split(":")[1].strip()
+                self.fastMd5 = i.split(":")[1].strip()
 
     def FindThumb(self):
         """scan the current directory for the thumbnail image"""
@@ -398,22 +455,33 @@ class Video(object):
 
     def setTitle(self):
         """asks for a Title and comments for the video"""
-        print "Analyzing file %s" % self.fullPath
-        print "camera : %s" % self.camera
-        if self.data.has_key("INAM"):
-            print "Former title: %s" % self.data["INAM"]
-        title = raw_input("Title (INAM): ").decode(config.Coding)
-        if len(title) > 0:
-            self.data["INAM"] = title.strip()
-        if self.data.has_key("IKEY"):
-            print "Former keywords: " + "\t".join(self.data["IKEY"].split(";"))
-        keywords = raw_input("Keywords (IKEY): ").decode(config.Coding).split()
-        if len(keywords) > 0:
-            self.data["IKEY"] = ";".join(keywords)
-        f = open(self.CommentFile, "w")
-        for i in self.data:
-            f.write((u"%s %s\n" % (i, self.data[i])).encode(config.Coding))
-        f.close()
+
+        print("Analyzing file %s" % self.fullPath)
+        print("camera : %s" % self.camera)
+        if self.title:
+            print("Former title: %s" % self.title)
+        self.title = raw_input("Title (INAM): ").decode(config.Coding).strip()
+        if self.keywords:
+            print "Former keywords: " + "\t".join(self.keywords.split(";"))
+        self.keywords = raw_input("Keywords (IKEY): ").decode(config.Coding).split()
+        self.toDisk()
+
+    def getComment(self):
+        data = {"ICRD":self.timeStamp.strftime("%Y-%m-%d"),
+                "ISRC":self.fastMd5,
+                }
+        if self.origName:
+            data["IARL"] = self.origName
+        else:
+            data["IARL"] = self.videoFile.replace("-H264", "")
+        if self.camera:
+            data["ISRF"] = self.camera
+        if self.title :
+            data["INAM"] = self.title
+        if self.keywords:
+            data["IKEY"] = ";".join(self.keywords)
+        return os.linesep.join([u"%s %s" % (i, j) for i, j in data.iteritems()]).encode(config.Coding)
+
 
 
     def reEncode(self):
@@ -421,7 +489,7 @@ class Video(object):
         self.mkdir()
         pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".sh"
         pbsfile = open(pbsFilename, "w")
-        pbsfile.write("#!/bin/bash\nWorkDir=$(mktemp -d --tmpdir=%s)\necho going to $WorkDir\ncd $WorkDir\n" % (config.ScratchDir))
+        pbsfile.write("#!/bin/bash\nWorkDir=$(mktemp -d -tmpdir=%s -t imagizer-XXXXXX)\necho going to $WorkDir\ncd $WorkDir\n" % (config.ScratchDir))
         bDoResize = (self.width > 640)
 
         listVideoFilters = []
@@ -451,54 +519,46 @@ class Video(object):
             wavaudio = "audio-%s.wav" % newSampleRate
             if (self.audioSampleRate == 11024) and (self.audioChannel == 1): #specific Ixus 
                 rawaudio = "audio-%s.raw" % self.audioSampleRate
-                pbsfile.write(config.MPlayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.fullPath, rawaudio))
+                pbsfile.write(config.MPlayer + ' -quiet "%s" -dumpaudio   -dumpfile %s \n' % (self.fullPath, rawaudio))
                 pbsfile.write(config.Sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s \n" % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
                 pbsfile.write("rm %s \n" % rawaudio)
             elif self.audioSampleRate == 44100:
                 wavaudio = "audio-44100.wav"
-                pbsfile.write(config.MPlayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (wavaudio, self.fullPath))
+                pbsfile.write(config.MPlayer + ' -quiet -ao pcm:fast:file=%s -vo null "%s"  \n' % (wavaudio, self.fullPath))
             else:
                 rawaudio = "audio-%s.wav" % self.audioSampleRate
-                pbsfile.write(config.MPlayer + ' -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.fullPath))
+                pbsfile.write(config.MPlayer + ' -quiet -ao pcm:fast:file=%s -vo null "%s"  \n' % (rawaudio, self.fullPath))
                 pbsfile.write(config.Sox + " %s -r %s  %s \n" % (rawaudio, newSampleRate, wavaudio))
                 pbsfile.write("rm %s \n" % rawaudio)
 
         tmpavi = "temporary.avi"
         if bDoVideo:
-            pbsfile.write(config.MEncoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+            pbsfile.write(config.MEncoder + videoFilters + ' -quiet -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
-            pbsfile.write(config.MEncoder + videoFilters + ' -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+            pbsfile.write(config.MEncoder + videoFilters + ' -quiet -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
             if bDoAudio:
                 if self.audioChannel < 2:
-                    pbsfile.write(config.MEncoder + videoFilters + ' -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+                    pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
                 else:
-                    pbsfile.write(config.MEncoder + videoFilters + ' -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (2 * config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+                    pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (2 * config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
                 pbsfile.write("rm %s \n" % wavaudio)
             else:
-                pbsfile.write(config.MEncoder + videoFilters + '-oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+                pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
             pbsfile.write("if [ -f divx2pass.log ]; then rm divx2pass.log ; fi\n")
             pbsfile.write("if [ -f divx2pass.log.temp ]; then rm divx2pass.log.temp ; fi\n")
         else:
             pbsfile.write("cp %s %s\n" % (self.fullPath, tmpavi))
-#            shutil.copy(self.fullPath, tmpavi)
-        pbsfile.write('%s -o %s -i %s -f "%s" \n' % (config.AviMerge, self.destinationFile, tmpavi, self.CommentFile))
+        pbsfile.write('cat  > comment.txt << EndOfComment\n')
+        pbsfile.write(self.getComment() + "\n"*2)
+        pbsfile.write('EndOfComment\n')
+        pbsfile.write('%s -o %s -i %s -f comment.txt \n' % (config.AviMerge, self.destinationFile, tmpavi))
         pbsfile.write("rm %s \n" % tmpavi)
         pbsfile.flush()
         pbsfile.close()
-        if config.BatchUsesPipe:
-            encodeProcess = subprocess.Popen([config.BatchScriptExecutor], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            #pbscode = open(pbsFilename, "rb").read()
-            #logger.debug(pbscode)
-            encodeProcess.stdin.write("/bin/sh  %s" % pbsFilename)
-            encodeProcess.stdin.close()
-        else:
-            encodeProcess = subprocess.Popen([config.BatchScriptExecutor, pbsFilename], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        logging.debug(str("Subprocess with pid=%s" % encodeProcess.pid))
-        threadStdErr = threading.Thread(target=writeStdOutErr, name="BatchWriteStdErr", args=(encodeProcess.stderr, "%s.e%s" % (pbsFilename, encodeProcess.pid)))
-        threadStdOut = threading.Thread(target=writeStdOutErr, name="BatchWriteStdOut", args=(encodeProcess.stdout, "%s.o%s" % (pbsFilename, encodeProcess.pid)))
-        threadStdErr.start()
-        threadStdOut.start()
+        os.chmod(pbsFilename, stat.S_IEXEC + stat.S_IWRITE + stat.S_IREAD)
+        pid = self.__class__.startProcessing(pbsFilename)
+        logging.debug(str("Subprocess with pid=%s" % pid))
 
 
     def GenThumb(self, size=160):
@@ -581,7 +641,7 @@ class PairVideo(object):
             self.__rawVideo = Video(self.__rawFile)
             self.setDateTime(self.__rawVideo.timeStamp)
         if self.__md5sum is None:
-            self.setMd5(hashlib.md5(open(rawFile, "rb").read()).hexdigest())
+            self.setMd5(self.__rawVideo.md5)
     rawFile = property(getRawFile, setRawFile, "property for get/setRawFile")
 
     def getEncFile(self):
@@ -611,7 +671,7 @@ class PairVideo(object):
         self.__rawVideo = rawVideo
         self.__rawFile = rawVideo.fullPath
         self.setDateTime(self.__rawVideo.timeStamp)
-        self.setMd5(hashlib.md5(open(rawVideo.fullPath, "rb").read()).hexdigest())
+        self.setMd5(rawVideo.fastMd5)
     rawVideo = property(getRawVideo, setRawVideo, "property for get/setRawVideo")
 
     def getEncVideo(self):
@@ -627,8 +687,8 @@ class PairVideo(object):
         self.__encVideo = encVideo
         self.__encFile = encVideo.fullPath
         self.setDateTime(self.__encVideo.timeStamp)
-        if "ISRC" in encVideo.data:
-            self.setMd5(encVideo.data["ISRC"])
+        if encVideo.origMd5:
+            self.setMd5(encVideo.origMd5)
     encVideo = property(getEncVideo, setEncVideo, "Property for get/setEncVideo")
 
     def getMd5(self):
@@ -768,7 +828,7 @@ class AllVideos(object):
                     if videoFile in self.__listVideoFiles:
                         continue #process only new files
                     video = Video(videoFile, root=self.__root)
-                    md5 = video.data["ISRC"]
+                    md5 = video.fastMd5
                     if md5 in self.__dictVideoPairs:
                         pv = self.__dictVideoPairs[md5]
                         if video.isEncoded():

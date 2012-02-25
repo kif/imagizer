@@ -23,7 +23,7 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "03 January 2012"
+__date__ = "25 February 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -46,6 +46,11 @@ try:
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 
+try:
+    from rfoo.utils import rconsole
+    rconsole.spawn_server()
+except ImportError:
+    logger.debug("No socket opened for debugging -> please install rfoo")
 
 DEBUG = False
 
@@ -161,12 +166,12 @@ class VideoInterface(object):
         self.xml.get_widget("duration").set_text("%s s" % self.video.duration)
         self.xml.get_widget("video").set_text("%.1f fps\t%s\t%s" % (self.video.frameRate, self.video.videoCodec, self.video.videoBitRate))
         self.xml.get_widget("audio").set_text("%s ch\t%.1fHz\t%s\t%s" % (self.video.audioChannel, self.video.audioSampleRate, self.video.audioCodec, self.video.audioBitRate))
-        if "INAM" in self.video.data:
-            self.xml.get_widget("title").set_text(self.video.data["INAM"])
+        if self.video.title:
+            self.xml.get_widget("title").set_text(self.video.title)
         else:
             self.xml.get_widget("title").set_text("")
-        if "IKEY" in self.video.data:
-            self.xml.get_widget("keyword").set_text(" ".join(self.video.data["IKEY"].split(";")))
+        if self.video.keywords:
+            self.xml.get_widget("keyword").set_text(" ".join(self.video.keywords))
         else:
             self.xml.get_widget("keyword").set_text("")
         self.play()
@@ -249,19 +254,14 @@ class VideoInterface(object):
             myTitle = self.xml.get_widget("title").get_text().strip()
             logger.debug("title is type %s" % type(myTitle))
             if myTitle:
-                self.video.data["INAM"] = myTitle
+                self.video.title = myTitle
             lstKeys = self.xml.get_widget("keyword").get_text().split()
             if lstKeys:
-                self.video.data["IKEY"] = ";".join(lstKeys)
+                self.video.keywords = lstKeys
             strCamera = self.xml.get_widget("model").get_text().strip()
             if strCamera:
                 self.video.camera = strCamera
-                self.video.data["ISRF"] = strCamera
 
-            f = open(self.video.CommentFile, "w")
-            for i in self.video.data:
-                f.write((u"%s %s%s" % (i, self.video.data[i], os.linesep)).encode(config.Coding))
-            f.close()
             rotate = self.getRotation()
             if rotate == 90:
                 self.video.rotation = u"Rotated 90 clock-wise"
@@ -275,6 +275,7 @@ class VideoInterface(object):
                 logger.warning("Not in DataTime format ...")
             else:
                 self.video.timeStamp = timeVideo
+            self.video.toDisk()
             self.video.reEncode()
 
 if __name__ == "__main__":
