@@ -146,7 +146,6 @@ class Video(object):
         self.videoBitRate = None
         self.videoBpP = None
         self.frameRate = None
-#        self.data = {}
         self.destinationFile = None
         self.thumbName = None
         self.thumb = None
@@ -154,7 +153,12 @@ class Video(object):
         self.keywords = []
         self.deinterleave = None
         self.fastMd5 = calcFastMd5(self.fullPath)
-        self.origMd5 = None
+        try:
+            time.strptime(self.videoFile[:9], "%Hh%Mm%Ss")
+        except:
+            self.origMd5 = self.fastMd5
+        else:
+            self.origMd5 = None
         self.fromDisk()
 
     def analyse(self):
@@ -489,7 +493,7 @@ class Video(object):
         self.mkdir()
         pbsFilename = os.path.splitext(self.fullPath.replace(" ", "_"))[0] + ".sh"
         pbsfile = open(pbsFilename, "w")
-        pbsfile.write("#!/bin/bash\nWorkDir=$(mktemp -d -tmpdir=%s -t imagizer-XXXXXX)\necho going to $WorkDir\ncd $WorkDir\n" % (config.ScratchDir))
+        pbsfile.write("#!/bin/bash\nWorkDir=$(mktemp -d --tempdir=%s -t imagizer-XXXXXX)\necho going to $WorkDir\ncd $WorkDir\n" % (config.ScratchDir))
         bDoResize = (self.width > 640)
 
         listVideoFilters = []
