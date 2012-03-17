@@ -50,7 +50,7 @@ logger = logging.getLogger("imagizer.selector")
 from imagizer               import installdir, listConfigurationFiles
 from imagizer.encoding      import  unicode2ascii
 from imagizer.config        import Config
-from imagizer.imagizer      import unifiedglade, copySelected, processSelected, rangeTout, gtkFlush
+from imagizer.imagizer      import unifiedglade, copySelected, processSelected, rangeTout, gtkFlush, timer_pass 
 from imagizer.photo         import Photo, RawImage
 from imagizer.fileutils     import recursive_delete, smartSize, mkdir, findFiles
 from imagizer.parser        import AttrFile
@@ -107,6 +107,7 @@ class FullScreenInterface(object):
                 self.Selected.append(i)
         logger.info("Initialization of the fullscreen GUI")
         self.xml = GTKglade.XML(unifiedglade, root="FullScreen")
+        self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
         self.showImage()
         gtkFlush()
         self.xml.get_widget("FullScreen").maximize()
@@ -283,7 +284,7 @@ class Interface(object):
         self.xml = GTKglade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
-
+        self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
         self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
         self.flush_event_queue()
         if config.AutoRotate:

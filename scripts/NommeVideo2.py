@@ -23,7 +23,7 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "25 February 2012"
+__date__ = "17 March 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -34,7 +34,7 @@ logger = logging.getLogger("imagizer")
 logger.setLevel(logging.INFO)
 from imagizer.pygtkmplayer import PyGtkMplayer
 from imagizer.video import AllVideos
-from imagizer.imagizer import unifiedglade, installdir
+from imagizer.imagizer import unifiedglade, installdir, timer_pass
 from imagizer.fileutils import smartSize
 from imagizer.config import Config
 config = Config()
@@ -116,6 +116,7 @@ class VideoInterface(object):
         self.xml = GTKglade.XML(unifiedglade, root="videoWindow")
         self.xml.get_widget("logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "gnome_mplayer_logo.png")))
         self.xml.get_widget("videoWindow").show_now()
+        self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
         hbox1 = self.xml.get_widget("hbox1")
         self.mplayer = PyGtkMplayer()
         hbox1.pack2(self.mplayer)
@@ -191,7 +192,7 @@ class VideoInterface(object):
         Switch to next video
         """
         logger.debug("NextVideo")
-#        self.mplayer.quit()
+        self.pairVideo.saveMetadata()
         self.pairVideo = self.allVideo.next()
         if self.pairVideo.encVideo is not None:
             self.filename = self.pairVideo.encFile
@@ -238,10 +239,12 @@ class VideoInterface(object):
             else:
                 self.mplayer.videoFilter = None
             self.videoWid = long(self.mplayer.get_id())
+            self.pairVideo.saveMetadata()
             logger.debug("Mplayer Wid is now  %s" % self.videoWid)
             self.mplayer.setwid(self.videoWid)
             self.mplayer.loadfile(self.filename)
         else:
+            self.pairVideo.saveMetadata()
             self.mplayer.play(*args)
 
 
