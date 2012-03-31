@@ -50,7 +50,7 @@ logger = logging.getLogger("imagizer.selector")
 from imagizer               import installdir, listConfigurationFiles
 from imagizer.encoding      import  unicode2ascii
 from imagizer.config        import Config
-from imagizer.imagizer      import unifiedglade, copySelected, processSelected, rangeTout, gtkFlush, timer_pass 
+from imagizer.imagizer      import unifiedglade, copySelected, processSelected, rangeTout, gtkFlush, timer_pass
 from imagizer.photo         import Photo, RawImage
 from imagizer.fileutils     import recursive_delete, smartSize, mkdir, findFiles
 from imagizer.parser        import AttrFile
@@ -119,7 +119,7 @@ class FullScreenInterface(object):
         if mode == "SlideShow":
             self.SlideShow()
         self.QuitSlideShow = True
-        gtk.main()
+#        gtk.main()
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
@@ -491,7 +491,7 @@ class Interface(object):
         self.xml.signal_autoconnect(dictHandlers)
         self.showImage()
         self.flush_event_queue()
-        gtk.main()
+#        gtk.main()
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
@@ -777,6 +777,7 @@ class Interface(object):
         dialog.destroy()
         if result == gtk.RESPONSE_OK:
             SaveSelected(self.Selected)
+            config.GraphicMode = "Quit"
             gtk.main_quit()
             config.GraphicMode = "Quit"
 
@@ -1702,7 +1703,7 @@ class Synchronize:
             self.xml.get_widget("Synchroniser").destroy()
         except:
             pass
-        while gtk.events_pending():gtk.main_iteration()
+        gtkFlush()
 
 
 
@@ -1723,9 +1724,6 @@ class SelectDay:
                 self.combobox.append_text(day)
         self.curday = self.days.index(op.split(self.upperIface.AllJpegs[self.upperIface.iCurrentImg])[0])
         self.combobox.set_active(self.curday)
-
-
-
 
     def continu(self, *args):
         """just distroy the window and goes on ...."""
@@ -1793,13 +1791,16 @@ if __name__ == '__main__':
     while config.GraphicMode != "Quit":
         if config.GraphicMode == "Normal":
             ifc = Interface(*values)
+            gtk.main()
             values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
             del ifc
             gc.collect()
         elif config.GraphicMode in ["FullScreen", "SlideShow"]:
             ifc = FullScreenInterface(*values)
+            gtk.main()
             values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
             del ifc
             gc.collect()
-        if config.DEBUG: print "Switching to mode %s" % config.GraphicMode
+        if config.DEBUG:
+            print("Switching to mode %s" % config.GraphicMode)
 

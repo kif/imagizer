@@ -23,7 +23,7 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "17 March 2012"
+__date__ = "31 March 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -34,7 +34,7 @@ logger = logging.getLogger("imagizer")
 logger.setLevel(logging.INFO)
 from imagizer.pygtkmplayer import PyGtkMplayer
 from imagizer.video import AllVideos
-from imagizer.imagizer import unifiedglade, installdir, timer_pass
+from imagizer.imagizer import unifiedglade, installdir, timer_pass, gtkFlush
 from imagizer.fileutils import smartSize
 from imagizer.config import Config
 config = Config()
@@ -43,6 +43,7 @@ try:
     import pygtk ; pygtk.require('2.0')
     import gtk
     import gtk.glade as GTKglade
+    import gobject
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
 
@@ -116,7 +117,7 @@ class VideoInterface(object):
         self.xml = GTKglade.XML(unifiedglade, root="videoWindow")
         self.xml.get_widget("logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "gnome_mplayer_logo.png")))
         self.xml.get_widget("videoWindow").show_now()
-        self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
+        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
         hbox1 = self.xml.get_widget("hbox1")
         self.mplayer = PyGtkMplayer()
         hbox1.pack2(self.mplayer)
@@ -145,10 +146,7 @@ class VideoInterface(object):
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
-#        self.xml.show_all()
-        while gtk.events_pending():
-            gtk.main_iteration()
-
+        gtkFlush()
 
     def destroy(self, *args):
         """destroy clicked by user"""
@@ -202,7 +200,6 @@ class VideoInterface(object):
             self.video = self.pairVideo.rawVideo
         logger.debug("VideoInterface.Playing video %s " % self.filename)
         self.loadVideo()
-#        self.play()
         self.mplayer.loadfile(self.filename)
 
 
@@ -211,7 +208,6 @@ class VideoInterface(object):
         Switch to previous video
         """
         logger.debug("VideoInterface.PreviousVideo")
- #       self.mplayer.quit()
         self.pairVideo = self.allVideo.previous()
         if self.pairVideo.encVideo is not None:
             self.filename = self.pairVideo.encFile
@@ -222,7 +218,6 @@ class VideoInterface(object):
         logger.debug("Playing video %s " % self.filename)
         self.loadVideo()
         self.mplayer.loadfile(self.filename)
-#        self.play()
 
 
     def play(self, *args):

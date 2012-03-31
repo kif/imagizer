@@ -702,7 +702,7 @@ def timer_pass():
     Dummy function that releases the gil for 1ms
     """
     time.sleep(1e-3)
-    return gtk.TRUE
+    return True
 
 
 
