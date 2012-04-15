@@ -98,7 +98,7 @@ def gtkFlush():
 
 
 
-class ModelProcessSelected:
+class ModelProcessSelected(object):
     """
     Implemantation MVC de la procedure processSelected
     """
@@ -281,7 +281,7 @@ class ModelProcessSelected:
         self.finishSignal.emit()
 
 
-class ModelCopySelected:
+class ModelCopySelected(object):
     """
     Implemantation MVC de la procedure copySelected
     """
@@ -361,7 +361,7 @@ class ModelCopySelected:
 
 
 
-class ModelRangeTout:
+class ModelRangeTout(object):
     """Implemantation MVC de la procedure rangeTout
     moves all the JPEG files to a directory named from 
     their day and with the name according to the time"""
@@ -380,6 +380,8 @@ class ModelRangeTout:
         """ Lance les calculs
         
         @param rootDir: top level directory to start processing
+        @return: 2tuple containing the list of all images and the start-index
+        @rtype: (list,integer)
         """
         config.DefaultRepository = rootDir
         AllJpegs = fileutils.findFiles(rootDir)
@@ -471,7 +473,7 @@ class ModelRangeTout:
         else:
             return AllreadyDone, 0
 
-class Controler:
+class Controler(object):
     """ Implémentation du contrôleur de la vue utilisant la console"""
     def __init__(self, model, view):
 #        self.__model = model # Ne sert pas ici, car on ne fait que des actions modèle -> vue
@@ -497,7 +499,7 @@ class Controler:
 
 
 
-class ControlerX:
+class ControlerX(object):
     """ 
     Implementation of controleur via X11. 
     C'est lui qui lie les modèle et la(les) vue(s).
@@ -525,7 +527,7 @@ class ControlerX:
 
 
 
-class View:
+class View(object):
     """ Implémentation de la vue.
     Utilisation de la console.
     """
@@ -550,7 +552,7 @@ class View:
         """nothin in text mode"""
         pass
 
-class ViewX:
+class ViewX(object):
     """ 
     Implementation of the view as a splashscren
     """
@@ -620,6 +622,8 @@ def rangeTout(repository, bUseX=True):
     @type repository: string
     @param bUseX: set to False to disable the use of the graphical splash screen
     @type bUseX: boolean
+    @return: 2tuple containing the list of all images and the start-index
+    @rtype: (list,integer)
     """
     model = ModelRangeTout()
     view = View()
