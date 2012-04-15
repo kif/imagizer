@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+# coding: utf8
 #******************************************************************************\
 #* $Source$
 #* $Id$
 #*
 #* Copyright (C) 2001, Martin Blais <blais@furius.ca>
+#* Copyright (C) 2012, Jerome Kieffer <imagizer@terre-adelie.org>
 #*
 #* This program is free software; you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -22,13 +24,16 @@
 #*****************************************************************************/
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
-
+__authors__ = ["Martin Blais", "Jérôme Kieffer"]
+__contact = "imagizer@terre-adelie.org"
+__date__ = "20120415"
+__license__ = "GPL"
 import re, os, sys, logging
 logger = logging.getLogger("imagizer.parser")
 import config
 config = config.Config()
 
-class AttrFile:
+class AttrFile(object):
     """Attributes file representation and trivial parser."""
 
 
@@ -85,8 +90,8 @@ class AttrFile:
                 f.write("\n\n")
             f.close()
         except IOError, e:
-            print >> sys.stderr, "Error: cannot open attributes file", \
-                  self._path
+            sys.stderr.write("Error: cannot open attributes file %s: %s%s"\
+                             % (self._path, e, os.linesep))
             self._lines = ''
         try:
             os.chmod(self._path, config.DefaultFileMode)
@@ -135,7 +140,7 @@ class AttrFile:
                 self._attrmap[ key ] = txt
 
 
-    def get(self, field):
+    def get(self, field, default=None):
         """
         Returns an attribute field content extracted from this attributes
         file.
@@ -144,20 +149,7 @@ class AttrFile:
         if field in self._attrmap:
             return self._attrmap[ field ]
         else:
-            logger.error("AttrFile.get(%s): No such field in %s" % (field, self._path))
-            raise KeyError("AttrFile.get(%s): No such field in %s" % (field, self._path))
-
-
-    def get_def(self, field, default=None):
-        """
-        Returns an attribute field content extracted from this attributes
-        file.
-        """
-        logger.debug("AttrFile.get_def(%s)" % field)
-        if field in self._attrmap:
-            return self._attrmap[ field ]
-        else:
-            logger.debug("AttrFile.get_def(%s), returned default:%s" % (field, default))
+            logger.debug("AttrFile.get(%s), returned default:%s" % (field, default))
             return default
 
 
@@ -205,7 +197,16 @@ class AttrFile:
 
 
     def __getitem__(self, key):
-        return self.get(key)
+        """
+        Returns an attribute field content extracted from this attributes
+        file.
+        """
+        logger.debug("AttrFile.__getitem__(%s)" % key)
+        if key in self._attrmap:
+            return self._attrmap[ key ]
+        else:
+            logger.error("AttrFile.__getitem__(%s): No such field in %s" % (key, self._path))
+            raise KeyError("AttrFile.__getitem__(%s): No such field in %s" % (key, self._path))
 
 
     def __setitem__(self, key, value):
@@ -216,8 +217,9 @@ class AttrFile:
         return self._attrmap.keys()
 
 
-    def has_key(self, key):
-        return self._attrmap.has_key(key)
+    def __contains__(self, key):
+        return key in self._attrmap
+    has_key = __contains__
 
 
     def __len__(self):
@@ -229,6 +231,5 @@ class AttrFile:
         Returns contents to a string for debugging purposes.
         """
         lsttxt = ["AttrFile for %s" % self._path]
-        for a in self._attrmap:
-            lsttxt += [a + ":", self._attrmap[a], ""]
+        lsttxt += ["%s: %s" % (a, b) for a, b in self._attrmap.items()]
         return os.linesep.join(lsttxt)

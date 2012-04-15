@@ -30,13 +30,18 @@ Technically it is a Borg (design Pattern) so every instance of Config has exactl
 """
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20120218"
+__date__ = "20120409"
 __license__ = "GPL"
 
 import os, locale, logging, ConfigParser
 installdir = os.path.dirname(os.path.abspath(__file__))
 
-
+def float_or_None(inp):
+    try:
+        out = float(inp)
+    except:
+        out = None
+    return out
 
 ################################################################################################
 ###############  Class Config for storing the cofiguratio in a Borg ############################
@@ -118,7 +123,7 @@ class Config:
             self.VideoBitRate = 600
             self.AudioBitRatePerChannel = 64
             self.X264Options = "subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:bframes=3:frameref=5"
-            self.FramesPerSecond = 25
+            self.FramesPerSecond = None
             self.MPlayer = "/usr/bin/mplayer"
             self.MEncoder = "/usr/bin/mencoder"
             self.Sox = "/usr/bin/sox"
@@ -215,7 +220,7 @@ class Config:
                 elif j == "VideoBitRate".lower():       self.VideoBitRate = int(i[1])
                 elif j == "AudioBitRatePerChannel".lower(): self.AudioBitRatePerChannel = int(i[1])
                 elif j == "X264Options".lower():        self.X264Options = i[1]
-                elif j == "FramesPerSecond".lower():    self.FramesPerSecond = float(i[1])
+                elif j == "FramesPerSecond".lower():    self.FramesPerSecond = float_or_None(i[1])
                 elif j == "MPlayer".lower():            self.MPlayer = os.path.abspath(i[1])
                 elif j == "MEncoder".lower():           self.MEncoder = os.path.abspath(i[1])
                 elif j == "Sox".lower():                self.Sox = os.path.abspath(i[1])

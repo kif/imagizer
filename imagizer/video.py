@@ -26,7 +26,7 @@
 from __future__ import with_statement
 
 __author__ = "Jérôme Kieffer"
-__date__ = "25 Feb 2012"
+__date__ = "09 Apr 2012"
 __copyright__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -256,8 +256,14 @@ class Video(object):
             self.toDisk()
             return
         logger.info("Loading metadata for %s" % self.fullPath)
-        with open(filename, "rb") as myFile:
-            red = json.load(myFile)
+        try:
+            with open(filename, "rb") as myFile:
+                red = json.load(myFile)
+        except Exception as err:
+            logger.warning("Json failed to load %s with error: %s", file,err)
+            self.analyse()
+            self.toDisk()
+            return            
         if ("fastMd5" in red) and (self.fastMd5 == red["fastMd5"]):
             self.__dict__.update(red)
             if "timeStamp" in red:
@@ -322,12 +328,15 @@ class Video(object):
                 self.duration = hachoirMetadata.get("duration").seconds
             except:
                 bDoMplayer = True
-            self.width = hachoirMetadata.get("width")
+            try:
+                self.width = hachoirMetadata.get("width")
+                self.height = hachoirMetadata.get("height")
+            except:
+                bDoMplayer = True
             try:
                 self.title = hachoirMetadata.get("title").encode("latin1").decode("utf8")
             except:
                 self.title = u""
-            self.height = hachoirMetadata.get("height")
             try:
                 self.frameRate = hachoirMetadata.get("frame_rate")
             except:
@@ -537,18 +546,22 @@ class Video(object):
 
         tmpavi = "temporary.avi"
         if bDoVideo:
-            pbsfile.write(config.MEncoder + videoFilters + ' -quiet -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+            if config.FramesPerSecond:
+                ofps = "-ofps %s"%config.FramesPerSecond
+            else:
+                ofps = ""
+            pbsfile.write(config.MEncoder + videoFilters + ' -quiet -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:%s %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, ofps, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
-            pbsfile.write(config.MEncoder + videoFilters + ' -quiet -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+            pbsfile.write(config.MEncoder + videoFilters + ' -quiet -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, ofps, tmpavi, self.fullPath))
             pbsfile.write("rm %s \n" % tmpavi)
             if bDoAudio:
                 if self.audioChannel < 2:
-                    pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+                    pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac mp3lame -lameopts mode=3:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s %s -o %s "%s" \n' % (config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, ofps, tmpavi, self.fullPath))
                 else:
-                    pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (2 * config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+                    pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac mp3lame -lameopts mode=0:vbr=3:br=%s -audiofile %s -ovc x264 -x264encopts bitrate=%s:pass=3:%s %s -o %s "%s" \n' % (2 * config.AudioBitRatePerChannel, wavaudio, config.VideoBitRate, config.X264Options, ofps, tmpavi, self.fullPath))
                 pbsfile.write("rm %s \n" % wavaudio)
             else:
-                pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s -ofps %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, config.FramesPerSecond, tmpavi, self.fullPath))
+                pbsfile.write(config.MEncoder + videoFilters + ' -quiet -oac copy -ovc x264 -x264encopts bitrate=%s:pass=3:%s %s -o %s "%s" \n' % (config.VideoBitRate, config.X264Options, ofps, tmpavi, self.fullPath))
             pbsfile.write("if [ -f divx2pass.log ]; then rm divx2pass.log ; fi\n")
             pbsfile.write("if [ -f divx2pass.log.temp ]; then rm divx2pass.log.temp ; fi\n")
         else:
@@ -645,7 +658,7 @@ class PairVideo(object):
             self.__rawVideo = Video(self.__rawFile)
             self.setDateTime(self.__rawVideo.timeStamp)
         if self.__md5sum is None:
-            self.setMd5(self.__rawVideo.md5)
+            self.setMd5(self.__rawVideo.fastMd5)
     rawFile = property(getRawFile, setRawFile, "property for get/setRawFile")
 
     def getEncFile(self):
@@ -716,11 +729,30 @@ class PairVideo(object):
                 self.__datetime = _dateTime
     datetime = property(getDateTime, setDateTime, "Property for get/setDateTime")
 
+    def toDisk(self):
+        if self.__rawVideo is not None:
+            self.__rawVideo.toDisk()
+        if self.__encVideo is not None:
+            self.__encVideo.toDisk()
 
+    def reEncode(self):
+        if self.__rawVideo is not None:
+            self.__rawVideo.reEncode()
+        else:
+            logger.error("No raw video to encode !! \n%s"%self.__repr__())
+
+    #TODO:
+    #use python properties to set/read the underlying videos attributes.
+    
 ################################################################################
 # END of the class PairVideo
 ################################################################################
 
+    def saveMetadata(self):
+        if self.__rawVideo:
+            self.__rawVideo.toDisk()
+        if self.__encVideo:
+            self.__encVideo.toDisk()
 
 class AllVideos(object):
     """

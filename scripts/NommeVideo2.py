@@ -142,6 +142,7 @@ class VideoInterface(object):
         self.xml.signal_autoconnect(dictHandlers)
         self.flush_event_queue()
         self.loadVideo()
+#        gtk.main()
 
 
     def flush_event_queue(self):

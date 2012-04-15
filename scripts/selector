@@ -286,7 +286,7 @@ class Interface(object):
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
         self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
-        self.flush_event_queue()
+        gtkFlush()
         if config.AutoRotate:
             i = 1
         else:
@@ -389,7 +389,7 @@ class Interface(object):
         else:
             logger.error("No such SelectedFilter %s", config.SelectedFilter)
         self.showImage()
-        self.flush_event_queue()
+        gtkFlush()
 
         dictHandlers = {
         'on_Principale_destroy': self.destroy,
@@ -490,7 +490,7 @@ class Interface(object):
 
         self.xml.signal_autoconnect(dictHandlers)
         self.showImage()
-        self.flush_event_queue()
+        gtkFlush()
 #        gtk.main()
 
     def flush_event_queue(self):
