@@ -880,7 +880,7 @@ class Interface(object):
 
     def searchJ(self, *args):
         """start the searching widget"""
-        logger.warning("Interface.searchJ clicked")
+        logger.debug("Interface.searchJ clicked")
         SearchDay(self.AllJpegs, self.setDay)
 
     def setDay(self, path):
