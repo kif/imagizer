@@ -136,7 +136,7 @@ class SearchDay(object):
         @param callback: callback function wich is called with the selected day/image on quit 
         """
         logger.info("Initialization of the search GUI")
-        if "__call__" in dir(callback):
+        if callable(callback):
             self.callback = callback
         else:
             self.callback = logger.critical
@@ -156,7 +156,7 @@ class SearchDay(object):
                        }
 
         self.xml.signal_autoconnect(dictSignals)
-        for img in files:
+        for img in lst_photo:
             a = Day(img)
         self.days = list(a.__class__.cache.keys())
         self.days.sort()
@@ -206,13 +206,14 @@ class SearchDay(object):
                 if len(inTitle) + len(inComment) == 0:
                     match.append(d)
                 else:
+                    day = Day.get(d)
                     good = False
                     for k in inTitle:
-                        if k and (k in unicode2ascii(Day.get(d).title.lower())):
+                        if k and (k in unicode2ascii(day.title.lower())):
                             good = True
                     if not good:
                         for k in inComment:
-                            if k and (k in unicode2ascii(Day.get(d).comment.lower())):
+                            if k and (k in unicode2ascii(day.comment.lower())):
                                 good = True
                     if good:
                         match.append(d)
