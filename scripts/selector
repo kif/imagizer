@@ -55,6 +55,7 @@ from imagizer.photo         import Photo, RawImage
 from imagizer.fileutils     import recursive_delete, smartSize, mkdir, findFiles
 from imagizer.parser        import AttrFile
 from imagizer.dirchooser    import WarningSc
+from imagizer.search_day    import SearchDay
 
 try:
     import pygtk ; pygtk.require('2.0')
@@ -461,6 +462,7 @@ class Interface(object):
         'on_suivantJ_activate': self.nextJ,
         'on_premierJ_activate': self.firstJ,
         'on_dernierJ_activate': self.lastJ,
+        'on_searchJ_activate': self.searchJ,
 
         'on_precedentS_activate': self.previousS,
         'on_suivantS_activate': self.nextS,
@@ -876,6 +878,18 @@ class Interface(object):
         self.iCurrentImg = i
         self.showImage()
 
+    def searchJ(self, *args):
+        """start the searching widget"""
+        logger.warning("Interface.searchJ clicked")
+        SearchDay(self.AllJpegs, self.setDay)
+
+    def setDay(self, path):
+        try:
+            self.iCurrentImg = self.AllJpegs.index(path)
+        except ValueError:
+            logger.error("%s not in AllJpegs" % path)
+        else:
+            self.showImage()
     def firstS(self, *args):
         """switch to the first image selected"""
         logger.debug("Interface.firstS clicked")

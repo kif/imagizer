@@ -184,7 +184,7 @@ class SearchDay(object):
         """destroy clicked by user"""
         if self.xml.get_widget("SearchWindow"):
             self.xml.get_widget("SearchWindow").destroy()
-        gtk.main_quit()
+#        gtk.main_quit()
 
     def search(self, *args):
         logger.debug("search button pressed")

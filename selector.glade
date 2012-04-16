@@ -796,6 +796,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                         <property name="tooltip" translatable="yes">Outil de recharche sur les jours</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
+                                        <signal name="activate" handler="on_searchJ_activate"/>
                                       </widget>
                                     </child>
                                   </widget>
