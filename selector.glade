@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <glade-interface>
-  <!-- interface-requires gtk+ 2.6 -->
+  <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkFileChooserDialog" id="filer">
     <property name="visible">True</property>
@@ -741,6 +741,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="indexJ">
                                         <property name="label">gtk-index</property>
                                         <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Liste des jours</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_indexJ_activate"/>
@@ -750,6 +751,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="premierJ">
                                         <property name="label">gtk-goto-first</property>
                                         <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Aller au premier jour</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_premierJ_activate"/>
@@ -759,6 +761,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="precedentJ">
                                         <property name="label">gtk-go-back</property>
                                         <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Aller au jour pr&#xE9;c&#xE9;dent</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_precedentJ_activate"/>
@@ -769,6 +772,7 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="suivantJ">
                                         <property name="label">gtk-go-forward</property>
                                         <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Aller au jour suivant</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_suivantJ_activate"/>
@@ -779,9 +783,19 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                                       <widget class="GtkImageMenuItem" id="dernierJ">
                                         <property name="label">gtk-goto-last</property>
                                         <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Aller au dernier jour</property>
                                         <property name="use_underline">True</property>
                                         <property name="use_stock">True</property>
                                         <signal name="activate" handler="on_dernierJ_activate"/>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkImageMenuItem" id="searchJ">
+                                        <property name="label">gtk-find</property>
+                                        <property name="visible">True</property>
+                                        <property name="tooltip" translatable="yes">Outil de recharche sur les jours</property>
+                                        <property name="use_underline">True</property>
+                                        <property name="use_stock">True</property>
                                       </widget>
                                     </child>
                                   </widget>
@@ -3783,6 +3797,260 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
         </child>
         <child>
           <placeholder/>
+        </child>
+      </widget>
+    </child>
+  </widget>
+  <widget class="GtkDialog" id="SearchWindow">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Recherche de jour</property>
+    <property name="icon_name">document-print-preview</property>
+    <property name="type_hint">normal</property>
+    <signal name="destroy" handler="on_SearchWindow_destroy"/>
+    <child internal-child="vbox">
+      <widget class="GtkVBox" id="dialog-vbox6">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <widget class="GtkHBox" id="hbox1">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <widget class="GtkVBox" id="vbox1">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <widget class="GtkTable" id="table1">
+                    <property name="visible">True</property>
+                    <property name="n_rows">2</property>
+                    <property name="n_columns">3</property>
+                    <child>
+                      <widget class="GtkEntry" id="InTitle">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x2022;</property>
+                        <signal name="activate" handler="on_InTitle_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="InComment">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x2022;</property>
+                        <signal name="activate" handler="on_InComment_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label4">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Dans le Titre</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label5">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Dans le Commentaire</property>
+                      </widget>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="SearchButton">
+                        <property name="label">gtk-find</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="on_SearchButton_clicked"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkTable" id="table2">
+                    <property name="visible">True</property>
+                    <property name="n_rows">2</property>
+                    <property name="n_columns">4</property>
+                    <child>
+                      <widget class="GtkLabel" id="label2">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Date Fin :</property>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label3">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Date D&#xE9;but :</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkCalendar" id="CalendarStart">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="year">2012</property>
+                        <property name="month">3</property>
+                        <property name="day">14</property>
+                        <signal name="day_selected_double_click" handler="on_CalendarStart_day_selected_double_click"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkCalendar" id="CalendarStop">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="year">2012</property>
+                        <property name="month">3</property>
+                        <property name="day">14</property>
+                        <signal name="day_selected_double_click" handler="on_CalendarStop_day_selected_double_click"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="EntryStop">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x2022;</property>
+                        <signal name="activate" handler="on_EntryStop_activate"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkEntry" id="EntryStart">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x2022;</property>
+                        <signal name="activate" handler="on_EntryStart_activate"/>
+                        <signal name="enter_notify_event" handler="on_EntryStart_enter_notify_event"/>
+                        <signal name="editing_done" handler="on_EntryStart_editing_done"/>
+                      </widget>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Resultats :</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkTreeView" id="Results">
+                <property name="height_request">200</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="enable_tree_lines">True</property>
+              </widget>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <widget class="GtkHButtonBox" id="dialog-action_area6">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <widget class="GtkButton" id="OK">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_OK_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="Cancel">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_Cancel_clicked"/>
+              </widget>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
         </child>
       </widget>
     </child>
