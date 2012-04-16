@@ -197,7 +197,6 @@ class SearchDay(object):
             return
         inTitle = unicode2ascii(self.xml.get_widget("InTitle").get_text().lower()).split()
         inComment = unicode2ascii(self.xml.get_widget("InComment").get_text().lower()).split()
-        print inTitle, inComment
         t0 = time.time()
         match = []
         for d in self.days:
@@ -217,11 +216,10 @@ class SearchDay(object):
                                 good = True
                     if good:
                         match.append(d)
-        print("search took %.3f" % (time.time() - t0))
+        logger.info("search took %.3f" , (time.time() - t0))
         self.store = gtk.ListStore(str, str, str, str)
         for i in match:
             d = Day.get(i)
-            print(d)
             comment = d.comment.replace("<BR>", " ")
             if len(comment) > 60:
                 comment = comment[:60] + "..."
