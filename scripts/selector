@@ -34,7 +34,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20120218"
+__date__ = "20120530"
 __license__ = "GPL"
 
 import os, locale, random, gc, time, shutil, sys, logging
@@ -90,7 +90,7 @@ if os.getenv("LANGUAGE"):
         locale.setlocale(locale.LC_ALL, config.Locale)
 else:
     locale.setlocale(locale.LC_ALL, config.Locale)
-
+ifc = object()
 ################################################################################
 #  ##### FullScreen Interface #####
 ################################################################################
@@ -1171,7 +1171,12 @@ class Interface(object):
         logger.debug("Interface.renameDayCallback")
         self.AllJpegs = renamdayinstance.AllPhotos
         self.Selected = renamdayinstance.selected
-        self.iCurrentImg = self.AllJpegs.index(renamdayinstance.newFilename)
+        newFilename = renamdayinstance.newFilename
+        self.image.filename = newFilename
+        self.image.fn = os.path.join(config.DefaultRepository, newFilename)
+        self.image._exif = None
+        self.image._pil = None
+        self.iCurrentImg = self.AllJpegs.index(newFilename)
         self.showImage()
 
     def importImages(self, *args):

@@ -29,7 +29,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20120530"
 __license__ = "GPL"
 
 import os, logging, shutil, time, subprocess
@@ -391,7 +391,11 @@ class Photo(object):
             self.metadata["Rate"] = rate
             self.exif["Exif.Image.Rating"] = int(rate)
         self.exif.comment = titre
-        self.exif.write()
+        try:
+            self.exif.write()
+        except IOError as error:
+            logger.warning("Got IO exception %s: file has probably changed:\n photo.name=%s\n exif.name=%s\n pil.name=%s" %
+                           (error, self.filename, self.exif.filename, self.pil.filename))
 
 
     def renameFile(self, newname):
