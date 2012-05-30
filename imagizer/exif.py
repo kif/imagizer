@@ -1,7 +1,7 @@
 # coding: utf8
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20120530"
 __license__ = "GPL"
 
 import pyexiv2
