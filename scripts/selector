@@ -59,7 +59,7 @@ from imagizer.search_day    import SearchDay
 
 try:
     import pygtk ; pygtk.require('2.0')
-    import gtk
+    import gtk, gobject
     import gtk.glade as GTKglade
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
@@ -108,7 +108,7 @@ class FullScreenInterface(object):
                 self.Selected.append(i)
         logger.info("Initialization of the fullscreen GUI")
         self.xml = GTKglade.XML(unifiedglade, root="FullScreen")
-        self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
+        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
         self.showImage()
         gtkFlush()
         self.xml.get_widget("FullScreen").maximize()
@@ -285,7 +285,7 @@ class Interface(object):
         self.xml = GTKglade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
-        self.timeout_handler_id = gtk.timeout_add(1000, timer_pass)
+        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
         self.xml.get_widget("Logo").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
         gtkFlush()
         if config.AutoRotate:
