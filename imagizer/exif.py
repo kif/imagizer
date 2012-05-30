@@ -60,7 +60,7 @@ else:
 
             """
             if comment:
-                other.getComment(self.getComment())
+                other.setComment(self.getComment())
             if exif:
                 for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
                          'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
