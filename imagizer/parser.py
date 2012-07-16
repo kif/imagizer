@@ -52,8 +52,8 @@ class AttrFile(object):
             f = open(self._path, "rb")
             self._lines = f.read()
             f.close()
-        except IOError, e:
-            logger.error("Cannot open attributes file %s" % self._path)
+        except IOError as error:
+            logger.error("Cannot open attributes file %s: %s", self._path, error)
             self._lines = ''
 
         self.parse(self._lines)
@@ -156,7 +156,7 @@ class AttrFile(object):
     def set(self, field, value):
         """
         Sets a field of the description file. Returns true if the value has
-        changed.  
+        changed.
         Set a field value to None to remove the field.
         """
         logger.debug("AttrFile.set(%s,value: %s)" % (field, type(value)))
