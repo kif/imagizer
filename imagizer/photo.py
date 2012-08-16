@@ -65,7 +65,7 @@ else:
 
 from exif       import Exif
 from exiftran   import Exiftran
-from fileutils  import mkdir, makedir, smartSize
+from fileutils  import makedir, smartSize
 from encoding   import unicode2ascii
 import blur
 
@@ -127,14 +127,14 @@ class Photo(object):
 
     def getPixelsX(self):
         if self._pixelsX is None:
-            self._pixelsX = self.pil.size[0]
+            self._pixelsX = max(1, self.pil.size[0])
         return self._pixelsX
     def setPixelsX(self, value): self._pixelsX = value
     pixelsX = property(getPixelsX, setPixelsX, doc="Property to get the size in pixels via PIL")
 
     def getPixelsY(self):
         if self._pixelsY is None:
-            self._pixelsY = self.pil.size[1]
+            self._pixelsY = max(1, self.pil.size[1])
         return self._pixelsY
     def setPixelsY(self, value): self._pixelsY = value
     pixelsY = property(getPixelsY, setPixelsY, doc="Property to get the size in pixels via PIL")
@@ -443,8 +443,7 @@ class Photo(object):
         if self.orientation != 1:
             Exiftran.autorotate(self.fn)
             if self.orientation > 4:
-                self.pixelsX = self.exif["Exif.Photo.PixelYDimension"]
-                self.pixelsY = self.exif["Exif.Photo.PixelXDimension"]
+                self.pixelsX, self.pixelsY = self.pixelsY, self.pixelsX
                 self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             self.orientation = 1
 
