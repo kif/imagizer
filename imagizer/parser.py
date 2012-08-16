@@ -89,7 +89,7 @@ class AttrFile(object):
                 f.write(self._attrmap[k].encode(coding))
                 f.write("\n\n")
             f.close()
-        except IOError, e:
+        except IOError as e:
             sys.stderr.write("Error: cannot open attributes file %s: %s%s"\
                              % (self._path, e, os.linesep))
             self._lines = ''

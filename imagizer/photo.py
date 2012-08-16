@@ -29,7 +29,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20120530"
+__date__ = "20120816"
 __license__ = "GPL"
 
 import os, logging, shutil, time, subprocess
@@ -382,15 +382,22 @@ class Photo(object):
         return scaled_buf
 
 
-    def name(self, titre, rate=None):
-        """write the title of the photo inside the description field, in the JPEG header"""
-        if os.name == 'nt' and self.pil != None:
+    def name(self, title, rate=None):
+        """
+        write the title of the photo inside the description field, in the JPEG header
+        
+        @param title: entitled name of the image (string)
+        @param  rate: rating of the image (int between 0 and 5)
+        """
+        if (os.name == 'nt') and (self.pil is not None):
             self.pil = None
-        self.metadata["Titre"] = titre
+        if self.exif.filename != self.filename:
+            self._exif = None
+        self.metadata["Titre"] = title
         if rate is not None:
             self.metadata["Rate"] = rate
             self.exif["Exif.Image.Rating"] = int(rate)
-        self.exif.comment = titre
+        self.exif.comment = title
         try:
             self.exif.write()
         except IOError as error:
