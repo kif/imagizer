@@ -1810,8 +1810,9 @@ if __name__ == '__main__':
         del W
         selected_fn = op.join(config.DefaultRepository, config.Selected_save)
 
+
     if not op.isfile(selected_fn):
-        os.remove(selected_fn)
+#        os.remove(selected_fn)
         f = open(selected_fn, "w")
         f.close()
 
