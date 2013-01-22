@@ -74,8 +74,8 @@ except ImportError:
 config = Config()
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
-    ImageFile.MAXBLOCK = 2 ** 25 #Thats 33 Mpix 
-    #1000 * kpix 
+    ImageFile.MAXBLOCK = 2 ** 25 #Thats 33 Mpix
+    #1000 * kpix
 
 if config.ImageCache > 1:
     from imagizer.imagecache import ImageCache
@@ -1204,12 +1204,23 @@ class Interface(object):
         logger.debug("Interface.importImageCallBack with dirname= %s" % path)
         self.settitle()
         listNew = []
+        allJpegsFullPath = []
+        for afile in self.AllJpegs[:]:
+            if os.path.exists(os.path.join(config.DefaultRepository,afile)):
+                allJpegsFullPath.append(os.path.join(config.DefaultRepository,afile))
+            else:
+                logger.info("Removing non existing image file: %s" % afile)
+                self.AllJpegs.remove(afile)
+
         #TODO Use MVC here ...
         for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
-            logger.debug("Importing: %s" % oneRaw)
-            raw = RawImage(oneRaw)
-            raw.extractJPEG()
-            listNew.append(raw.getJpegPath())
+            if oneRaw in allJpegsFullPath:
+                logger.info("file already in repository: %s" % oneRaw)
+            else:
+                logger.debug("Importing: %s" % oneRaw)
+                raw = RawImage(oneRaw)
+                raw.extractJPEG()
+                listNew.append(raw.getJpegPath())
         if len(listNew) > 0:
             listNew.sort()
             first = listNew[0]
@@ -1248,7 +1259,7 @@ class Interface(object):
 
 
     def selectNewerMedia(self, *args):
-        """Calculate the size of the selected images then add newer images to complete the media (CD or DVD). 
+        """Calculate the size of the selected images then add newer images to complete the media (CD or DVD).
         Finally the last selected image is shown and the total size is printed"""
         logger.debug("Interface.selectNewerMedia clicked")
         self.settitle()
@@ -1279,7 +1290,7 @@ class Interface(object):
 
 
     def SelectOlderMedia(self, *args):
-        """Calculate the size of the selected images then add older images to complete the media (CD or DVD). 
+        """Calculate the size of the selected images then add older images to complete the media (CD or DVD).
         Finally the first selected image is shown and the total size is printed"""
         logger.debug("Interface.SelectOlderMedia clicked")
         self.settitle()
@@ -1329,7 +1340,7 @@ class Interface(object):
 
     def filterContrastMask(self, *args):
         """
-        Set the default filter to Contrast Mask 
+        Set the default filter to Contrast Mask
         """
         logger.debug("Interface.ContrastMask clicked")
         config.SelectedFilter = "ContrastMask"
@@ -1349,7 +1360,7 @@ def SelectedSize(List):
 def SaveSelected(selected_list, filename=None):
     """
     Save the list of selected files
-    
+
     @param selected_list: list of filename selected
     """
     if filename is None:
@@ -1364,9 +1375,9 @@ def SaveSelected(selected_list, filename=None):
 
 def LoadSelected(filename=None):
     """
-    Load the list of selected filenames 
-    
-    @return: the list of selected images (filenames) 
+    Load the list of selected filenames
+
+    @return: the list of selected images (filenames)
     """
     if filename is None:
         selected_fn = op.join(config.DefaultRepository, config.Selected_save)
@@ -1603,7 +1614,7 @@ class Synchronize:
     """
     def __init__(self, current, AllPhotos, selected):
         """
-        
+
         """
         logger.debug("Synchronize.init(%i,%i,%i)" % (current, len(AllPhotos), len(selected)))
         logger.debug("Recorded Synchronize type: %s" % config.SynchronizeType)
