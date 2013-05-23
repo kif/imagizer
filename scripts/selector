@@ -532,7 +532,11 @@ class Interface(object):
 
 
         for i in data:
-            self.xml.get_widget(i).set_text(data[i])
+            try:
+                self.xml.get_widget(i).set_text(data[i])
+            except Exception:  # unexcpected error
+                logger.error("unexpected metadata %s: %s" % (i, data[i]))
+
         self.xml.get_widget("Principale").set_title("Selector : %s" % self.AllJpegs[self.iCurrentImg])
         self.xml.get_widget("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
         self.strCurrentTitle = data["Titre"]

@@ -1,27 +1,27 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# * $Source$
+# * $Id$
+# *
+# * Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 """
 Module containing most classes for handling images
@@ -47,12 +47,12 @@ try:
     import gtk.glade as GTKglade
 except ImportError:
     raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
-#Variables globales qui sont des CONSTANTES !
+# Variables globales qui sont des CONSTANTES !
 gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP_BILINEAR, gtk.gdk.INTERP_HYPER]
-#gtk.gdk.INTERP_NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
-#gtk.gdk.INTERP_TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
-#gtk.gdk.INTERP_BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
-#gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
+# gtk.gdk.INTERP_NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
+# gtk.gdk.INTERP_TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
+# gtk.gdk.INTERP_BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
+# gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
 
 
 from config import Config
@@ -161,7 +161,7 @@ class Photo(object):
 
 
     def saveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
-        """save a thumbnail of the given name, with the given size and the interpolation methode (quality) 
+        """save a thumbnail of the given name, with the given size and the interpolation methode (quality)
         resampling filters :
         NONE = 0
         NEAREST = 0
@@ -180,7 +180,7 @@ class Photo(object):
                     extract = True
                 except (OSError, IOError):
                     extract = False
-                #Check if the thumbnail is correctly oriented
+                # Check if the thumbnail is correctly oriented
                 if op.isfile(strThumbFile):
                     thumbImag = Photo(strThumbFile)
                     if self.larg() * thumbImag.larg() < 0:
@@ -289,14 +289,23 @@ class Photo(object):
             self.metadata["Taille"] = "%.2f %s" % smartSize(op.getsize(self.fn))
             self.metadata["Titre"] = self.exif.comment
             try:
+                self.metadata["Titre"].encode(config.Coding)
+            except Exception as error:
+                logger.error("%s in comment: %s" % (error, self.metadata["Titre"]))
+                try:
+                    self.metadata["Titre"] = self.metadata["Titre"].decode("latin1")
+                except Exception as error2:
+                    logger.error("%s Failed as well in latin1, resetting" % (error2))
+                    self.metadata["Titre"] = u""
+            try:
                 rate = self.exif["Exif.Image.Rating"]
             except KeyError:
                 self.metadata["Rate"] = 0
                 self.exif["Exif.Image.Rating"] = 0
             else:
-                if "value" in dir(rate): # pyexiv2 v0.2+
+                if "value" in dir(rate):  # pyexiv2 v0.2+
                     self.metadata["Rate"] = int(rate.value)
-                else: # pyexiv2 v0.1
+                else:  # pyexiv2 v0.1
                     self.metadata["Rate"] = int(float(rate))
 
             if self._pixelsX and self._pixelsY:
@@ -318,7 +327,11 @@ class Photo(object):
                     self.orientation = self.orientation.value
             for key in clef:
                 try:
-                    self.metadata[clef[key]] = self.exif.interpretedExifValue(key).decode(config.Coding).strip()
+                    value = self.exif.interpretedExifValue(key)
+                    if value:
+                        self.metadata[clef[key]] = value.decode(config.Coding).strip()
+                    else:
+                        self.metadata[clef[key]] = u""
                 except (IndexError, KeyError):
                     self.metadata[clef[key]] = u""
         return self.metadata.copy()
@@ -403,8 +416,8 @@ class Photo(object):
         rename the current instance of photo:
         -Move the file
         -update the cache
-        -change the name and other attributes of the instance 
-        -change the exif metadata. 
+        -change the name and other attributes of the instance
+        -change the exif metadata.
         """
         oldname = self.filename
         newfn = op.join(config.DefaultRepository, newname)
@@ -420,7 +433,7 @@ class Photo(object):
         """
         Save the original name of the file into the Exif.Photo.UserComment tag.
         This tag is usually not used, people prefer the JPEG tag for entiteling images.
-        
+
         @param  originalName: name of the file before it was processed by selector
         @type   originalName: python string
         """
@@ -443,12 +456,12 @@ class Photo(object):
 
 
     def contrastMask(self, outfile):
-        """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste, 
+        """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste,
         il permet de rattrapper une photo trop contrasté, un contre jour, ...
-        Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful, 
+        Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful,
         en particulier A. Fayolles et F. Mantegazza avril 2006
         necessite numpy et PIL.
-        
+
         @param: the name of the output file (JPEG)
         @return: filtered Photo instance
         """
@@ -467,7 +480,7 @@ class Photo(object):
         img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("float32")
         img_array.shape = (dimY, dimX, 3)
         red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
-        #nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2
+        # nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2
         desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2.0
         inv_desat = 255. - desat_array
         blured_inv_desat = self._gaussian.blur(inv_desat, config.ContrastMaskGaussianSize)
@@ -508,7 +521,7 @@ class Photo(object):
     def autoWB(self, outfile):
         """
         apply Auto White - Balance to the current image
-        
+
         @param: the name of the output file (JPEG)
         @return: filtered Photo instance
 
@@ -547,7 +560,7 @@ class Photo(object):
         return Photo(outfile)
 
 
-########################################################        
+########################################################
 # # # # # # fin de la classe photo # # # # # # # # # # #
 ########################################################
 
@@ -561,11 +574,11 @@ class Signature(object):
         self.sig.convert("RGB")
         (self.xs, self.ys) = self.sig.size
         self.bigsig = self.sig
-        #The signature file is entented to be white on a black background, this inverts the color if necessary
+        # The signature file is entented to be white on a black background, this inverts the color if necessary
         if ImageStat.Stat(self.sig)._getmean() > 127:
             self.sig = ImageChops.invert(self.sig)
 
-        self.orientation = -1 #this is an impossible value
+        self.orientation = -1  # this is an impossible value
         (self.x, self.y) = (self.xs, self.ys)
 
     def mask(self, orientation=5):
@@ -576,12 +589,12 @@ class Signature(object):
         1 or 2 upper right
         3 centered in heith right side ...."""
         if orientation == self.orientation and (self.x, self.y) == self.bigsig.size:
-            #no need to change the mask
+            # no need to change the mask
             return
         self.orientation = orientation
         self.bigsig = Image.new("RGB", (self.x, self.y), (0, 0, 0))
         if self.x < self.xs or self.y < self.ys :
-            #the signature is larger than the image
+            # the signature is larger than the image
             return
         if self.orientation == 0:
             self.bigsig.paste(self.sig, (self.x / 2 - self.xs / 2, self.y / 2 - self.ys / 2, self.x / 2 - self.xs / 2 + self.xs, self.y / 2 - self.ys / 2 + self.ys))
@@ -621,8 +634,8 @@ class RawImage:
     def __init__(self, strRawFile):
         """
         Contructor of the class
-        
-        @param strRawFile: path to the RawImage 
+
+        @param strRawFile: path to the RawImage
         @type strRawFile: string
         """
         self.strRawFile = strRawFile
@@ -678,7 +691,7 @@ class RawImage:
             data = process.stdout.readlines()
             img = Image.fromstring("RGB", tuple([int(i) for i in data[1].split()]), "".join(tuple(data[3:])))
             img.save(strJpegFullPath, format='JPEG')
-            #Copy all metadata useful for us.
+            # Copy all metadata useful for us.
             exifJpeg = Exif(strJpegFullPath)
             exifJpeg.read()
             exifJpeg['Exif.Image.Orientation'] = 1
@@ -688,11 +701,11 @@ class RawImage:
                     exifJpeg[metadata] = self.exif[metadata]
                 except:
                     logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
-            #self.exif.copyMetadataTo(self.strJepgFile)
+            # self.exif.copyMetadataTo(self.strJepgFile)
 
             exifJpeg.write()
 
-        else: #in config.Extensions, i.e. a JPEG file
+        else:  # in config.Extensions, i.e. a JPEG file
             shutil.copy(self.strRawFile, strJpegFullPath)
             Exiftran.autorotate(strJpegFullPath)
 
