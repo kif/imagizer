@@ -53,7 +53,7 @@ from config import Config
 config = Config()
 config.load(listConfigurationFiles)
 
-from exiftran import Exiftran
+# import pyexiftran as Exiftran
 from imagecache import ImageCache
 from parser import AttrFile
 from signals import Signal

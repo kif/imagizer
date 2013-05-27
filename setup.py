@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
 #* $Source$
@@ -27,7 +27,7 @@
 """
 The setup.py script allows to install Imagizer regardless to the operating system
 """
-
+import glob
 from distutils.core import setup
 from distutils.extension import Extension
 import os, sys, distutils.sysconfig, shutil, locale
@@ -38,7 +38,11 @@ SCRIPTS = "scripts"
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
+EXIFTRAN = "pyexiftran"
+JPEG_VERSION = "80"  # "62"
+JPEG_DIR = os.path.join(EXIFTRAN, "jpeg", JPEG_VERSION)
 
+sources = glob.glob(os.path.join(EXIFTRAN, "*.c")) + glob.glob(os.path.join(JPEG_DIR, "*.c"))
 
 
 if os.name == 'nt': #sys.platform == 'win32':
@@ -94,10 +98,11 @@ setup(name='Imagizer',
     ext_package="imagizer",
     ext_modules=[
          Extension(
-             name='libexiftran',
-             sources=[os.path.join("libexiftran", i) for i in os.listdir("libexiftran") if i.endswith(".c")],
-             define_macros=[],
-             libraries=["jpeg", "exif", "m"],
+         name='pyexiftran',
+         sources=sources,
+         define_macros=[],
+         include_dirs=[JPEG_DIR],
+         libraries=["jpeg", "exif", "m"],
          ),
     ],
     classifiers=[

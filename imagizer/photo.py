@@ -64,7 +64,7 @@ else:
     imageCache = None
 
 from exif       import Exif
-from exiftran   import Exiftran
+import pyexiftran
 from fileutils  import mkdir, makedir, smartSize
 from encoding   import unicode2ascii
 import blur
@@ -207,7 +207,7 @@ class Photo(object):
 
         if angle == 90:
             if imageCache is not None:
-                Exiftran.rotate90(self.fn)
+                pyexiftran.rotate90(self.fn)
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
@@ -215,12 +215,12 @@ class Photo(object):
                 if self.metadata is not None:
                     self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
-                Exiftran.rotate90(self.fn)
+                pyexiftran.rotate90(self.fn)
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 270:
             if imageCache is not None:
-                Exiftran.rotate270(self.fn)
+                pyexiftran.rotate270(self.fn)
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
                 logger.debug("rotate 270 of %s" % newPixbuffer)
                 self.pixelsX = y
@@ -228,16 +228,16 @@ class Photo(object):
                 if self.metadata is not None:
                     self.metadata["Resolution"] = "%i x % i" % (y, x)
             else:
-                Exiftran.rotate270(self.fn)
+                pyexiftran.rotate270(self.fn)
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 180:
             if imageCache is not None:
-                Exiftran.rotate180(self.fn)
+                pyexiftran.rotate180(self.fn)
                 newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
                 logger.debug("rotate 270 of %s" % newPixbuffer)
             else:
-                Exiftran.rotate180(self.fn)
+                pyexiftran.rotate180(self.fn)
                 self.pixelsX = None
                 self.pixelsY = None
         else:
@@ -447,7 +447,7 @@ class Photo(object):
             del self.pil
         self.readExif()
         if self.orientation != 1:
-            Exiftran.autorotate(self.fn)
+            pyexiftran.autorotate(self.fn)
             if self.orientation > 4:
                 self.pixelsX = self.exif["Exif.Photo.PixelYDimension"]
                 self.pixelsY = self.exif["Exif.Photo.PixelXDimension"]
@@ -707,6 +707,6 @@ class RawImage:
 
         else:  # in config.Extensions, i.e. a JPEG file
             shutil.copy(self.strRawFile, strJpegFullPath)
-            Exiftran.autorotate(strJpegFullPath)
+            pyexiftran.autorotate(strJpegFullPath)
 
         os.chmod(strJpegFullPath, config.DefaultFileMode)
