@@ -27,6 +27,16 @@ else:
         """
         Wrapper for pyexiv2 v0.1.x  
         """
+        def __init__(self, filename):
+            """    :
+            Constructor of the class Exif for handling Exif metadata  
+            Wrapper for pyexiv2 v0.1.x
+            
+            @param filename: path to an image file
+            @type filename: string
+            """
+            self.filename = filename
+            pyexiv2.Image.__init__(self, filename)
         def read(self):
             return self.readMetadata()
         def write(self):
