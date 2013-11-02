@@ -32,6 +32,7 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "20130527"
 __license__ = "GPL"
 
+from math import ceil
 import os, logging, shutil, time, subprocess
 import os.path as op
 installdir = op.dirname(__file__)
@@ -180,13 +181,33 @@ class Photo(object):
                     extract = True
                 except (OSError, IOError):
                     extract = False
-                # Check if the thumbnail is correctly oriented
-                if op.isfile(strThumbFile):
-                    thumbImag = Photo(strThumbFile)
-                    if self.larg() * thumbImag.larg() < 0:
+
+                if extract and op.isfile(strThumbFile):
+                    thumbImag = Photo(strThumbFile, dontCache=True)
+                    if self.larg() * thumbImag.larg() < 0:  # Check if the thumbnail is correctly oriented
                         print("Warning: thumbnail was not with the same orientation as original: %s" % self.filename)
                         os.remove(strThumbFile)
                         extract = False
+                    else:
+                        # crop thumbnail to remove black borders
+                        orig_ratio = float(self.pixelsY) / self.pixelsX
+                        box = None
+                        if self.larg() > 0:  # image in lanscape, maybe crop horizontal bands
+                            new_height = thumbImag.pixelsX * orig_ratio
+                            if abs(new_height - thumbImag.pixelsY) > 2:  # Not the good format
+                                offset = int(ceil((thumbImag.pixelsY - new_height) / 2.0))
+                                box = (0, offset,
+                                       thumbImag.pixelsX, thumbImag.pixelsY - offset)
+                        else:  # image in portrait, maybe crop verical bands
+                            new_width = thumbImag.pixelsY / orig_ratio
+                            if abs(new_width - thumbImag.pixelsX) > 2:  # Not the good format
+                                offset = int(ceil((thumbImag.pixelsX - new_width) / 2.0))
+                                box = (offset, 0,
+                                       thumbImag.pixelsX - offset, thumbImag.pixelsY)
+                        if box is not None:
+                            thumbImag.pil.crop(box).save(strThumbFile)
+
+
             if not extract:
                 copyOfImage = self.pil.copy()
                 copyOfImage.thumbnail((Size, Size), Interpolation)
