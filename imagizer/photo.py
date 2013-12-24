@@ -372,7 +372,13 @@ class Photo(object):
 
     def show(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
         """
-        return a pixbuf to shows the image in a Gtk window
+        Generate a gtk pixbuffer from size and center 
+        
+        @param Xsize: Width of the image buffer 
+        @param Ysize: Height of the image buffer
+        @param Xcenter: fraction of image to center on in x
+        @param Ycenter: fraction of image to center on in Y
+        @return: a pixbuf to shows the image in a Gtk window
         """
 
         scaled_buf = None
@@ -407,7 +413,31 @@ class Photo(object):
             else :
                 self.scaledPixbuffer = pixbuf
             logger.debug("To Cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
-        if (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
+        if Xcenter and Ycenter:
+            logger.debug("zooming to ")
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
+            Xcenter *= self.pixelsX
+            Ycenter *= self.pixelsY
+            xmin = int(Xcenter - Xsize / 2.0)
+            ymin = int(Ycenter - Ysize / 2.0)
+            width = min(Xsize, self.pixelsX)
+            height = min(Ysize, self.pixelsY)
+            ymax = int(Ycenter + Ysize / 2.0)
+            if xmin < 0:
+                xmin = 0
+            if ymin < 0:
+                ymin = 0
+            if xmin + Xsize > self.pixelsX:
+                xmin = max(0, self.pixelsX - Xsize)
+            if ymin + Ysize > self.pixelsY:
+                ymin = max(0, self.pixelsY - Ysize)
+            pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
+            return pixbuf.subpixbuf(xmin, ymin, width, height)
+            if Rbig < 1:
+                self.scaledPixbuffer = pixbuf.scale_simple(nxBig, nyBig, gtkInterpolation[config.Interpolation])
+            else :
+                self.scaledPixbuffer = pixbuf
+        elif (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
             scaled_buf = self.scaledPixbuffer
             logger.debug("In cache No resize %s" % self.filename)
         else:
