@@ -76,7 +76,6 @@
         <child>
           <widget class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkAlignment" id="alignment14">
                 <property name="visible">True</property>
@@ -1911,12 +1910,20 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
           </packing>
         </child>
         <child>
-          <widget class="GtkImage" id="photo">
+          <widget class="GtkEventBox" id="ev_photo">
             <property name="visible">True</property>
-            <property name="stock">gtk-missing-image</property>
-            <signal name="client_event" handler="on_photo_client_event"/>
-            <signal name="scroll_event" handler="on_photo_client_event"/>
-            <property name="icon-size">6</property>
+            <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+            <signal name="button_press_event" handler="on_photo_button_press_event"/>
+            <signal name="motion_notify_event" handler="on_photo_motion_notify_event"/>
+            <child>
+              <widget class="GtkImage" id="photo">
+                <property name="visible">True</property>
+                <property name="events"></property>
+                <property name="extension_events">cursor</property>
+                <property name="stock">gtk-missing-image</property>
+                <property name="icon-size">6</property>
+              </widget>
+            </child>
           </widget>
           <packing>
             <property name="position">2</property>
@@ -2649,7 +2656,6 @@ que vous utilisez pour archiver vos images</property>
     <child>
       <widget class="GtkVBox" id="vbox11">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <widget class="GtkLabel" id="label39">
             <property name="visible">True</property>
@@ -2698,7 +2704,6 @@ que vous utilisez pour archiver vos images</property>
             <property name="can_focus">True</property>
             <property name="adjustment">3 0 7 1 2 2</property>
             <property name="fill_level">5</property>
-            <property name="round_digits">0</property>
           </widget>
           <packing>
             <property name="position">4</property>
@@ -3320,7 +3325,6 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
         <child>
           <widget class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkHBox" id="hbox6">
                 <property name="visible">True</property>
@@ -3653,7 +3657,6 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                     <child>
                       <widget class="GtkVSeparator" id="vseparator1">
                         <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
                       </widget>
                       <packing>
                         <property name="resize">False</property>
@@ -3811,16 +3814,13 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox6">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <widget class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <widget class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <widget class="GtkTable" id="table1">
                     <property name="visible">True</property>
@@ -3962,9 +3962,9 @@ Dans tous les cas, la r&#xE9;f&#xE9;rence du fichier originale est not&#xE9;e da
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x2022;</property>
+                        <signal name="editing_done" handler="on_EntryStart_editing_done"/>
                         <signal name="activate" handler="on_EntryStart_activate"/>
                         <signal name="enter_notify_event" handler="on_EntryStart_enter_notify_event"/>
-                        <signal name="editing_done" handler="on_EntryStart_editing_done"/>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>

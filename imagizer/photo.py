@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: UTF8 -*-
-#******************************************************************************\
+# ******************************************************************************\
 # * $Source$
 # * $Id$
 # *
@@ -22,7 +22,7 @@
 # * along with this program; if not, write to the Free Software
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
-#*****************************************************************************/
+# *****************************************************************************/
 """
 Module containing most classes for handling images
 """
@@ -70,9 +70,9 @@ from fileutils  import mkdir, makedir, smartSize
 from encoding   import unicode2ascii
 import blur
 
-##########################################################
+# #########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
-##########################################################
+# #########################################################
 class Photo(object):
     """class photo that does all the operations available on photos"""
     _gaussian = blur.Gaussian()
@@ -370,7 +370,7 @@ class Photo(object):
             return False
 
 
-    def show(self, Xsize=600, Ysize=600):
+    def show(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
         """
         return a pixbuf to shows the image in a Gtk window
         """
@@ -526,7 +526,7 @@ class Photo(object):
         exifJpeg.read()
         self.exif.copy(exifJpeg)
         exifJpeg.comment = self.exif.comment
-#
+# 
 #        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
 #                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
 #                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
@@ -587,9 +587,9 @@ class Photo(object):
         return Photo(outfile)
 
 
-########################################################
+# #######################################################
 # # # # # # fin de la classe photo # # # # # # # # # # #
-########################################################
+# #######################################################
 
 class Signature(object):
     def __init__(self, filename):
