@@ -282,7 +282,12 @@ class Interface(object):
         self.iCurrentRate = 0
 
         logger.info("Initialization of the windowed graphical interface ...")
-        self.xml = GTKglade.XML(unifiedglade, root="Principale")
+        self.glade = gtk.Builder()
+        self.glade.add_from_file(unifiedglade)
+        self.glade.connect_signals(self)
+        self.xml = self.glade.get_object("Principale")
+         
+#         self.xml = GTKglade.XML(unifiedglade, root="Principale")
         self.xml.get_widget("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.xml.get_widget("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
@@ -487,7 +492,9 @@ class Interface(object):
         'on_lance_diaporama_activate': self.SlideShow,
 
         "on_AutoWB_activate": self.filterAutoWB,
-        "on_ContrastMask_activate": self.filterContrastMask
+        "on_ContrastMask_activate": self.filterContrastMask,
+        
+        "on_photo_event": self.photo_event
         }
 
         self.xml.signal_autoconnect(dictHandlers)
@@ -1349,6 +1356,13 @@ class Interface(object):
         logger.debug("Interface.ContrastMask clicked")
         config.SelectedFilter = "ContrastMask"
 
+    def photo_event(self, *arg):
+        """
+        Mouse bouton released on image
+        """
+        logger.info("Interface.photo_event ")
+        print(arg)
+        
 ################################################################################
 # # # # # # # fin de la classe interface graphique # # # # # #
 ################################################################################
