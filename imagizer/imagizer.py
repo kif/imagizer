@@ -1,27 +1,27 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# * $Source$
+# * $Id$
+# *
+# * Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 
 """
@@ -30,31 +30,47 @@ It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20131226"
 __license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging
 logger = logging.getLogger("imagizer.imagizer")
 
 
 try:
-    import Image #IGNORE:F0401
+    import Image  # IGNORE:F0401
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
-try:
-    import pygtk ; pygtk.require('2.0') #IGNORE:F0401
-    import gtk, gtk.gdk                 #IGNORE:E0601
-    import gtk.glade as GTKglade        #IGNORE:E0611
+try:  # this is for gtk3 but we are not yet there ...
+#     from gi.repository import Gtk as gtk
+#     from gi.repository import GObject as gobject
+#     from gi.repository import Gdk as gdk
+#     from gi.repository import GdkPixbuf
+#     gtkInterpolation = [GdkPixbuf.InterpType.NEAREST, GdkPixbuf.InterpType.TILES,
+#                         GdkPixbuf.InterpType.BILINEAR, GdkPixbuf.InterpType.HYPER]
+    import gtk  # IGNORE:E0601
+    import gobject
+    import gtk.gdk as gdk  # IGNORE:E0601
+    gtkInterpolation = [gdk.INTERP_NEAREST, gdk.INTERP_TILES, gdk.INTERP_BILINEAR, gdk.INTERP_HYPER]
+    GTKglade = None
 except ImportError:
-    raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
-#Variables globales qui sont des CONSTANTES !
-gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP_BILINEAR, gtk.gdk.INTERP_HYPER]
-#gtk.gdk.INTERP_NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
-#gtk.gdk.INTERP_TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
-#gtk.gdk.INTERP_BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
-#gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
+    try:
+        import pygtk ; pygtk.require('2.0')  # IGNORE:F0401
+        import gtk  # IGNORE:E0601
+        import gtk.gdk as gdk  # IGNORE:E0601
+        import gtk.glade as GTKglade  # IGNORE:E0611
+        gtkInterpolation = [gdk.INTERP_NEAREST, gdk.INTERP_TILES, gdk.INTERP_BILINEAR, gdk.INTERP_HYPER]
+
+    except ImportError:  # GTK3
+            raise ImportError("Selector needs Gtk and glade available from http://www.pygtk.org/")
+
+# About interpolation (from documentation)
+# NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
+# TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
+# BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
+# HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
 
 
-#here we detect the OS runnng the program so that we can call exftran in the right way
+# here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.dirname(__file__)
 
 unifiedglade = os.path.join(installdir, "selector.glade")
@@ -65,16 +81,31 @@ config = Config()
 import fileutils
 from photo import Photo, Signature
 
+def buildUI(windows_name="Principale"):
+    """
+    Create the glade object compatible with both GTK2 & GTK3 style
+    @param: window name as define  in glade file 
+    @return: builder instance
+    """
+    if GTKglade:
+        xml = GTKglade.XML(unifiedglade, root=windows_name)
+        xml.connect_signals = xml.signal_autoconnect
+        xml.get_object = xml.get_widget
+    else:
+        xml = gtk.Builder()
+        xml.add_objects_from_file(unifiedglade, (windows_name,))
+    return xml
+
 def gtkFlush():
     """
     Flush all graphics stuff (outside main loop)
     """
-    while gtk.events_pending(): #IGNORE:E1101
-        gtk.main_iteration()    #IGNORE:E1101
+    while gtk.events_pending():  # IGNORE:E1101
+        gtk.main_iteration()  # IGNORE:E1101
 
 
 
-#class Model:
+# class Model:
 #    """ Implémentation de l'applicatif
 #    """
 #    def __init__(self, label):
@@ -83,14 +114,14 @@ def gtkFlush():
 #        self.__label = label
 #        self.startSignal = Signal()
 #        self.refreshSignal = Signal()
-#        
+#
 #    def start(self):
 #        """ Lance les calculs
 #        """
 #        self.startSignal.emit(self.__label, NBVALUES)
 #        for i in xrange(NBVALUES):
 #            time.sleep(0.5)
-#            
+#
 #            # On lève le signal de rafraichissement des vues éventuelles
 #            # Note qu'ici on ne sait absolument pas si quelque chose s'affiche ou non
 #            # ni de quelle façon c'est affiché.
@@ -184,16 +215,16 @@ class ModelProcessSelected(object):
 #####first of all : copy the subfolders into the day folder to help mixing the files
         AlsoProcess = 0
         for day in os.listdir(SelectedDir):
-#if SingleDir : revert to a foldered structure
+# if SingleDir : revert to a foldered structure
             DayOrFile = os.path.join(SelectedDir, day)
             if os.path.isfile(DayOrFile):
                 arrangeOneFile(SelectedDir, day)
                 AlsoProcess += 1
-#end SingleDir normalization
+# end SingleDir normalization
             elif os.path.isdir(DayOrFile):
                 if day in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
                     fileutils.recursive_delete(DayOrFile)
-                elif day.find(config.PagePrefix) == 0: #subpages in SIngleDir mode that need to be flatten
+                elif day.find(config.PagePrefix) == 0:  # subpages in SIngleDir mode that need to be flatten
                     for File in os.listdir(DayOrFile):
                         if     os.path.isfile(os.path.join(DayOrFile, File)):
                             arrangeOneFile(DayOrFile, File)
@@ -217,7 +248,7 @@ class ModelProcessSelected(object):
                             if os.path.splitext(File)[1] in config.Extensions:
                                 AlsoProcess += 1
 
-#######then copy the selected files to their folders###########################        
+#######then copy the selected files to their folders###########################
         for File in lstFiles:
             dest = os.path.join(SelectedDir, File)
             src = os.path.join(config.DefaultRepository, File)
@@ -235,7 +266,7 @@ class ModelProcessSelected(object):
             else :
                 logger.warning("%s existe déja" % dest)
         if AlsoProcess > 0:self.NbrJobsSignal.emit(AlsoProcess)
-######copy the comments of the directory to the Selected directory 
+######copy the comments of the directory to the Selected directory
         AlreadyDone = []
         for File in lstFiles:
             directory = os.path.split(File)[0]
@@ -252,8 +283,8 @@ class ModelProcessSelected(object):
         logger.debug("in ModelProcessSelected, SelectedDir= %s", SelectedDir)
         dirs = [ i for i in os.listdir(SelectedDir) if os.path.isdir(os.path.join(SelectedDir, i))]
         dirs.sort()
-        if config.ExportSingleDir: #SingleDir
-            #first move all files to the root
+        if config.ExportSingleDir:  # SingleDir
+            # first move all files to the root
             for day in dirs:
                 daydir = os.path.join(SelectedDir, day)
                 for filename in os.listdir(daydir):
@@ -272,7 +303,7 @@ class ModelProcessSelected(object):
                     shutil.move(src, dst)
                 fileutils.recursive_delete(daydir)
             splitIntoPages(SelectedDir, 0)
-        else: #Multidir
+        else:  # Multidir
             logger.debug("in Multidir, dirs= " + " ".join(dirs))
             globalCount = 0
             for day in dirs:
@@ -322,7 +353,7 @@ class ModelCopySelected(object):
                             if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]):
                                 shutil.rmtree(src)
 
-#######then copy the selected files to their folders###########################        
+#######then copy the selected files to their folders###########################
         globalCount = 0
         for File in lstFiles:
             dest = os.path.join(SelectedDir, File)
@@ -344,7 +375,7 @@ class ModelCopySelected(object):
                     logger.warning("In ModelCopySelected: unable to chmod %s", dest)
             else :
                 logger.info("In ModelCopySelected: %s already exists", dest)
-######copy the comments of the directory to the Selected directory 
+######copy the comments of the directory to the Selected directory
         AlreadyDone = []
         for File in lstFiles:
             directory = os.path.split(File)[0]
@@ -439,7 +470,7 @@ class ModelRangeTout(object):
                     if os.path.basename(originalName) == os.path.basename(i):
                         logger.info("File already in repository, leaving as it is")
                         bSkipFile = True
-                        continue #to next file, i.e. leave the existing one
+                        continue  # to next file, i.e. leave the existing one
             if bSkipFile:
                 continue
             else:
@@ -573,10 +604,10 @@ class ViewX(object):
         Creation of a progress bar.
         """
         self.xml = GTKglade.XML(unifiedglade, root="splash")
-        self.xml.get_widget("image").set_from_pixbuf(gtk.gdk.pixbuf_new_from_file(os.path.join(installdir, "Splash.png")))
-        self.pb = self.xml.get_widget("progress")
-        self.xml.get_widget("splash").set_title(label)
-        self.xml.get_widget("splash").show()
+        self.xml.get_object("image").set_from_pixbuf(gdk.pixbuf_new_from_file(os.path.join(installdir, "Splash.png")))
+        self.pb = self.xml.get_object("progress")
+        self.xml.get_object("splash").set_title(label)
+        self.xml.get_object("splash").show()
         gtkFlush()
         self.__nbVal = nbVal
 
@@ -607,7 +638,7 @@ class ViewX(object):
 
     def finish(self):
         """destroys the interface of the splash screen"""
-        self.xml.get_widget("splash").destroy()
+        self.xml.get_object("splash").destroy()
         gtkFlush()
         del self.xml
         gc.collect()
@@ -715,8 +746,8 @@ def timer_pass():
 
 
 if __name__ == "__main__":
-    ####################################################################################    
-    #Definition de la classe des variables de configuration globales : Borg"""
+    ####################################################################################
+    # Definition de la classe des variables de configuration globales : Borg"""
     config.DefaultRepository = os.path.abspath(sys.argv[1])
     logger.info("%s", config.DefaultRepository)
     rangeTout(sys.argv[1])
