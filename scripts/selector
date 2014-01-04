@@ -1361,7 +1361,7 @@ class Interface(object):
         if event.button == 1:
             if self.is_zoomed:
                 pixbuf = self.image.show(width, height)
-                self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
+                self.xml.get_object("photo").set_from_pixbuf(pixbuf)
                 del pixbuf
                 gc.collect()
                 self.is_zoomed = False
@@ -1374,7 +1374,7 @@ class Interface(object):
                 pixbuf = self.image.show(width, height,
                                          float(event.x) / width,
                                          float(event.y) / height)
-                self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
+                self.xml.get_object("photo").set_from_pixbuf(pixbuf)
                 del pixbuf
                 gc.collect()
                 self.is_zoomed = True
