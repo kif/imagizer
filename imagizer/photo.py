@@ -29,7 +29,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20130527"
+__date__ = "20140104"
 __license__ = "GPL"
 
 from math import ceil
