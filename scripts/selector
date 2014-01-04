@@ -484,7 +484,7 @@ class Interface(object):
         "on_AutoWB_activate": self.filterAutoWB,
         "on_ContrastMask_activate": self.filterContrastMask,
 
-        "on_photo_event": self.photo_event
+        "on_photo_button_press_event": self.photo_event
         }
         self.xml.connect_signals(dictHandlers)
         self.showImage()
