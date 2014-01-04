@@ -275,6 +275,7 @@ class Interface(object):
         self.image = None
         self.strCurrentTitle = ""
         self.iCurrentRate = 0
+        self.is_zoomed = False
 
         logger.info("Initialization of the windowed graphical interface ...")
         self.xml = buildUI("Principale")
@@ -484,7 +485,8 @@ class Interface(object):
         "on_AutoWB_activate": self.filterAutoWB,
         "on_ContrastMask_activate": self.filterContrastMask,
 
-        "on_photo_button_press_event": self.photo_event
+        "on_photo_button_press_event": self.image_pressed,
+
         }
         self.xml.connect_signals(dictHandlers)
         self.showImage()
@@ -1345,12 +1347,37 @@ class Interface(object):
         logger.debug("Interface.ContrastMask clicked")
         config.SelectedFilter = "ContrastMask"
 
-    def photo_event(self, *arg):
+    def image_pressed(self, *args):
         """
-        Mouse bouton released on image
+        mouse button pressed on image
         """
-        logger.info("Interface.photo_event ")
-        print(arg)
+        logger.info("Interface.image_pressed")
+#        print("Interface.image_pressed: " + ", ".join([str(i) for  i in args]))
+        ev_box, event = args
+#        print "ev_box", ev_box.allocation.width, ev_box.allocation.height
+#        print "event", event.x, event.y, event.button
+        width = ev_box.allocation.width
+        height = ev_box.allocation.height
+        if event.button == 1:
+            if self.is_zoomed:
+                pixbuf = self.image.show(width, height)
+                self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
+                del pixbuf
+                gc.collect()
+                self.is_zoomed = False
+            else:
+                return
+        elif event.button == 3:
+            if self.is_zoomed:
+                return
+            else:
+                pixbuf = self.image.show(width, height,
+                                         float(event.x) / width,
+                                         float(event.y) / height)
+                self.xml.get_widget("photo").set_from_pixbuf(pixbuf)
+                del pixbuf
+                gc.collect()
+                self.is_zoomed = True
 
 ################################################################################
 # # # # # # # fin de la classe interface graphique # # # # # #
