@@ -883,7 +883,6 @@
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Selection</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_selection_activate" swapped="no"/>
                         <child type="submenu">
                           <object class="GtkMenu" id="selection_menu">
                             <property name="can_focus">False</property>
@@ -1010,7 +1009,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Image</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_image62_activate" swapped="no"/>
                                 <child type="submenu">
                                   <object class="GtkMenu" id="image62_menu">
                                     <property name="can_focus">False</property>
@@ -1089,7 +1087,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Jour</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_jour1_activate" swapped="no"/>
                                 <child type="submenu">
                                   <object class="GtkMenu" id="jour1_menu">
                                     <property name="can_focus">False</property>
@@ -1178,7 +1175,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Selectionné</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_selectionné1_activate" swapped="no"/>
                                 <child type="submenu">
                                   <object class="GtkMenu" id="selectionné1_menu">
                                     <property name="can_focus">False</property>
@@ -1241,7 +1237,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Non Sélectionné</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_non_sélectionné1_activate" swapped="no"/>
                                 <child type="submenu">
                                   <object class="GtkMenu" id="non_sélectionné1_menu">
                                     <property name="can_focus">False</property>
@@ -1306,7 +1301,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Titré</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_titré1_activate" swapped="no"/>
                                 <child type="submenu">
                                   <object class="GtkMenu" id="titré1_menu">
                                     <property name="can_focus">False</property>
@@ -1365,7 +1359,6 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Non Titré</property>
                                 <property name="use_underline">True</property>
-                                <signal name="activate" handler="on_non_titré1_activate" swapped="no"/>
                                 <child type="submenu">
                                   <object class="GtkMenu" id="non_titré1_menu">
                                     <property name="can_focus">False</property>
@@ -2108,7 +2101,6 @@
                         <property name="fill_level">1</property>
                         <property name="digits">0</property>
                         <property name="value_pos">right</property>
-                        <signal name="format-value" handler="on_Rate_format_value" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -2403,7 +2395,6 @@
             <property name="can_focus">False</property>
             <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
             <signal name="button-press-event" handler="on_photo_button_press_event" swapped="no"/>
-            <signal name="motion-notify-event" handler="on_photo_motion_notify_event" swapped="no"/>
             <child>
               <object class="GtkImage" id="photo">
                 <property name="visible">True</property>
@@ -3114,7 +3105,7 @@
           <object class="GtkLabel" id="label33">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Veuillez préciser la taille des média 
+            <property name="label" translatable="yes">Veuillez préciser la taille des média
 que vous utilisez pour archiver vos images</property>
           </object>
           <packing>
@@ -3575,7 +3566,7 @@ que vous utilisez pour archiver vos images</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Les images peuvent être au format:
 - JPEG: elle seront copiés dans l'arborescence selector (et non déplacées)
-- RAW: une vignette JPEG sera alors extraite et placée dans l'arborescence. 
+- RAW: une vignette JPEG sera alors extraite et placée dans l'arborescence.
 
 Dans tous les cas, la référence du fichier originale est notée dans les entêtes Exif.</property>
                     <property name="justify">fill</property>

@@ -283,6 +283,8 @@ class Interface(object):
         self.xml.get_object("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
         self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
         self.xml.get_object("Logo").set_from_pixbuf(gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
+        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
+        self.xml.get_object("Rate").set_adjustment(self.adj_Rate)
         gtkFlush()
         if config.AutoRotate:
             i = 1
@@ -395,10 +397,10 @@ class Interface(object):
         'on_precedant_clicked': self.previous1,
         'on_droite_clicked': self.turnRight,
         'on_gauche_clicked': self.turnLeft,
-#        'on_Selection_toggled': self.select,
-#        'on_selectionner_activate': self.select_Shortcut,
-        'on_selectionner_activate': self.select_shortcut,
+        'on_selectionner_activate': self.select,
+        'on_Selection_activate': self.select_shortcut,
         'on_Selection_toggled':self.select,
+
         'on_photo_client_event': self.next1,
 
         'on_About_activate': self.about,
