@@ -398,7 +398,7 @@ class Interface(object):
         'on_droite_clicked': self.turnRight,
         'on_gauche_clicked': self.turnLeft,
         'on_selectionner_activate': self.select,
-        'on_Selection_activate': self.select_shortcut,
+#        'on_Selection_activate': self.select_shortcut,
         'on_Selection_toggled':self.select,
 
         'on_photo_client_event': self.next1,
@@ -1820,6 +1820,7 @@ class SelectDay:
 
 if __name__ == '__main__':
     printWarning = True
+
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             if arg[0] == "-":
