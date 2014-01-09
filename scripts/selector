@@ -46,6 +46,7 @@ except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 
 import imagizer, imagizer.imagizer
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("imagizer.selector")
 from imagizer               import installdir, listConfigurationFiles
 from imagizer.encoding      import  unicode2ascii
@@ -56,7 +57,7 @@ from imagizer.fileutils     import recursive_delete, smartSize, mkdir, findFiles
 from imagizer.parser        import AttrFile
 from imagizer.dirchooser    import WarningSc
 from imagizer.search_day    import SearchDay
-
+from imagizer.argparse import ArgumentParser
 from imagizer.imagizer import gtk, gdk, GTKglade, gobject, buildUI
 
 try:
@@ -1821,28 +1822,26 @@ class SelectDay:
 if __name__ == '__main__':
     printWarning = True
 
-    if len(sys.argv) > 1:
-        for arg in sys.argv[1:]:
-            if arg[0] == "-":
-                if arg[1].lower() == "h":
-                    print("Selector classe des photos,\nil prend comme paramettre le chemin début de recherche et comme option:\n -nowarning : évite le message d'avertissement au lancement\n -noautorotate : ne fait pas de tests de rotation automatique, accélèrer le tri.\n")
-                    sys.exit(0)
-                elif arg.lower().find("-debug") in [0, 1]:
-                    loggerImagizer = logging.getLogger("imagizer")
-                    loggerImagizer.setLevel(logging.DEBUG)
-                    if "=" in arg:
-                        logfile = arg.split("=", 1)[1]
-                        loggerImagizer.addHandler(logging.FileHandler(logfile))
-                    logger.debug("We are in debug mode ...First Debug message")
-                    config.DEBUG = True
-                elif arg.lower().find("-noautorotate") >= 0:
-                    logger.debug("Autorotate is disabled")
-                    config.AutoRotate = False
-                elif arg.lower().find("-nowarning") >= 0:
-                    logger.debug("Initial warning about file renaming is disabled")
-                    printWarning = False
-            elif op.isdir(arg):
-                config.DefaultRepository = op.abspath(arg)
+    parser = ArgumentParser(prog="selector",
+                            description="Selector classe toutes les photos du répertoire donné",
+                            epilog="Attention selector renomme tous les fichiers")
+    parser.add_argument("-d", "--debug", help="mode debug tres verbeux", action="store_true", default=False)
+    parser.add_argument("--nowarning", help="desactive l'avertissement", action="store_true", default=False)
+    parser.add_argument("--noautorotate", help="no pas tourner automatiquement les images", action="store_true", default=False)
+    parser.add_argument("path", help="repertoire a traiter", nargs='?')
+    args = parser.parse_args()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+        logger.debug("We are in debug mode ...First Debug message")
+    if args.noautorotate:
+        config.AutoRotate = False
+        logger.debug("Autorotate is disabled")
+    if args.nowarning:
+        logger.debug("Initial warning about file renaming is disabled")
+        printWarning = False
+    if args.path and  op.isdir(args.path):
+        logger.debug("Working on directory %s" % args.path)
+        config.DefaultRepository = op.abspath(args.path)
 
     config.printConfig()
     selected_fn = op.join(config.DefaultRepository, config.Selected_save)
