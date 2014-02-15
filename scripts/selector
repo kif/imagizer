@@ -1565,6 +1565,10 @@ class AskSlideShowSetup:
                     'on_Lauch_clicked': self.LauchSlideShow,
                     }
         self.xml.connect_signals(signals)
+        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
+        self.xml.get_object("Rating").set_adjustment(self.adj_Rate)
+        self.adj_delai = gtk.Adjustment(10, 1, 60, 1)
+        self.xml.get_object("delai").set_adjustment(self.adj_delai)
         self.xml.get_object("delai").set_value(config.SlideShowDelay)
         self.xml.get_object("Rating").set_value(config.SlideShowMinRating)
         if   config.SlideShowType.find("chrono") == 0:
