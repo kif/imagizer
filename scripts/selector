@@ -59,7 +59,7 @@ from imagizer.dirchooser    import WarningSc
 from imagizer.search_day    import SearchDay
 from imagizer.argparse import ArgumentParser
 from imagizer.imagizer import gtk, gdk, GTKglade, gobject, buildUI
-
+from imagizer.selection import Selected
 try:
     from rfoo.utils import rconsole
     rconsole.spawn_server()
@@ -95,13 +95,13 @@ class FullScreenInterface(object):
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen"):
         self.image = None
         self.AllJpegs = AllJpegs
-        self.Selected = []
+        self.selected = Selected()
         self.RandomList = []
         self.iCurrentImg = first
         self.timestamp = time.time()
         for i in selected:
             if i in self.AllJpegs:
-                self.Selected.append(i)
+                self.selected.append(i)
         logger.info("Initialization of the fullscreen GUI")
         self.xml = buildUI("FullScreen")
         self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
@@ -131,7 +131,7 @@ class FullScreenInterface(object):
         self.xml.get_object("image793").set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
-        if self.AllJpegs[self.iCurrentImg] in self.Selected:
+        if self.AllJpegs[self.iCurrentImg] in self.selected:
             sel = "[Selected]"
         else:
             sel = ""
@@ -182,7 +182,7 @@ class FullScreenInterface(object):
         self.showImage()
     def destroy(self, *args):
         """destroy clicked by user"""
-        SaveSelected(self.Selected)
+        self.selected.save()
         gtk.main_quit()
         config.GraphicMode = "Quit"
     def NormalScreen(self, *args):
@@ -219,13 +219,13 @@ class FullScreenInterface(object):
 
     def select_Shortcut(self, *args):
         """Select or unselect the image"""
-        if self.AllJpegs[self.iCurrentImg] not in self.Selected:
-            self.Selected.append(self.AllJpegs[self.iCurrentImg])
+        if self.AllJpegs[self.iCurrentImg] not in self.selected:
+            self.selected.append(self.AllJpegs[self.iCurrentImg])
             sel = "[Selected]"
         else:
-            self.Selected.remove(self.AllJpegs[self.iCurrentImg])
+            self.selected.remove(self.AllJpegs[self.iCurrentImg])
             sel = ""
-        self.Selected.sort()
+        self.selected.sort()
         self.xml.get_object("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
 
     def SlideShow(self):
@@ -267,10 +267,10 @@ class Interface(object):
     """
     def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default"):
         self.AllJpegs = AllJpegs
-        self.Selected = []
+        self.selected = Selected()
         for i in selected:
             if i in self.AllJpegs:
-                self.Selected.append(i)
+                self.selected.append(i)
         self.iCurrentImg = first
         self.Xmin = 350
         self.image = None
@@ -539,7 +539,7 @@ class Interface(object):
                 logger.error("unexpected metadata %s: %s" % (i, data[i]))
 
         self.xml.get_object("Principale").set_title("Selector : %s" % self.AllJpegs[self.iCurrentImg])
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
+        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         self.strCurrentTitle = data["Titre"]
 
 
@@ -606,7 +606,7 @@ class Interface(object):
         """Send the current file to the trash"""
         logger.debug("Interface.trash")
         self.settitle()
-        if self.AllJpegs[self.iCurrentImg] in  self.Selected:self.Selected.remove(self.AllJpegs[self.iCurrentImg])
+        if self.AllJpegs[self.iCurrentImg] in  self.selected:self.selected.remove(self.AllJpegs[self.iCurrentImg])
         self.AllJpegs.remove(self.AllJpegs[self.iCurrentImg])
         self.image.trash()
         self.iCurrentImg = self.iCurrentImg % len(self.AllJpegs)
@@ -688,9 +688,9 @@ class Interface(object):
         logger.debug("Interface.select")
 #        self.settitle()
         etat = self.xml.get_object("Selection").get_active()
-        if etat and (self.AllJpegs[self.iCurrentImg] not in self.Selected): self.Selected.append(self.AllJpegs[self.iCurrentImg])
-        if not(etat) and (self.AllJpegs[self.iCurrentImg] in self.Selected): self.Selected.remove(self.AllJpegs[self.iCurrentImg])
-        self.Selected.sort()
+        if etat and (self.AllJpegs[self.iCurrentImg] not in self.selected): self.selected.append(self.AllJpegs[self.iCurrentImg])
+        if not(etat) and (self.AllJpegs[self.iCurrentImg] in self.selected): self.selected.remove(self.AllJpegs[self.iCurrentImg])
+        self.selected.sort()
         self.xml.get_object("Selection").set_active(etat)
         if (self.image.metadata["Rate"] == 0) and  etat:
             self.image.metadata["Rate"] = config.DefaultRatingSelectedImage
@@ -725,18 +725,18 @@ class Interface(object):
         logger.debug("Interface.copyAndResize")
         self.settitle()
         # TODO: go through MVC
-        processSelected(self.Selected)
-        self.Selected = []
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
+        processSelected(self.selected)
+        self.selected = Selected()
+        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         logger.info("Interface.copyAndResize: Done")
 
     def toWeb(self, *args):
         """lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
         logger.debug("Interface.toWeb")
         self.settitle()
-        processSelected(self.Selected)
-        self.Selected = []
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
+        processSelected(self.selected)
+        self.selected = Selected()
+        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
@@ -757,19 +757,19 @@ class Interface(object):
     def copy(self, *args):
         """lauch the copy of all selected files"""
         self.settitle()
-        copySelected(self.Selected)
-        self.Selected = []
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
+        copySelected(self.selected)
+        self.selected = Selected()
+        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         print "Done"
 
     def burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
         logger.debug("Interface.burn")
         self.settitle()
-        copySelected(self.Selected)
-        self.Selected = []
+        copySelected(self.selected)
+        self.selected = Selected()
         # TODO : MVC
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.Selected))
+        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0 : print "Error n° : %i" % out
@@ -783,7 +783,7 @@ class Interface(object):
         result = dialog.run()
         dialog.destroy()
         if result == gtk.RESPONSE_OK:
-            SaveSelected(self.Selected)
+            self.selected.save()
             config.GraphicMode = "Quit"
             gtk.main_quit()
             config.GraphicMode = "Quit"
@@ -793,32 +793,32 @@ class Interface(object):
         """Saves all the selection of photos """
         logger.debug("Interface.saveSelection")
         self.settitle()
-        SaveSelected(self.Selected)
+        self.selected.save()
 
 
     def loadSelection(self, *args):
         """Load a previously saved  selection of photos """
         logger.debug("Interface.loadSelection")
         self.settitle()
-        self.Selected = LoadSelected()
-        for i in self.Selected:
+        self.selected = Selected.load()
+        for i in self.selected:
             if not(i in self.AllJpegs):
-                self.Selected.remove(i)
-        self.xml.get_object("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.Selected)
+                self.selected.remove(i)
+        self.xml.get_object("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
 
 
     def selectAll(self, *args):
         """Select all photos for processing"""
         logger.debug("Interface.selectAll")
         self.settitle()
-        self.Selected = self.AllJpegs
+        self.selected = self.AllJpegs
         self.xml.get_object("Selection").set_active(True)
 
     def selectNone(self, *args):
         """Select NO photos and empty selection"""
         logger.debug("Interface.selectNone")
         self.settitle()
-        self.Selected = []
+        self.selected = Selected()
         self.xml.get_object("Selection").set_active(False)
 
     def invertSelection(self, *args):
@@ -826,10 +826,10 @@ class Interface(object):
         logger.debug("Interface.invertSelection")
         self.settitle()
         temp = self.AllJpegs[:]
-        for i in self.Selected:
+        for i in self.selected:
             temp.remove(i)
-        self.Selected = temp
-        self.xml.get_object("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.Selected)
+        self.selected = temp
+        self.xml.get_object("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
 
 
     def about(self, *args):
@@ -899,25 +899,27 @@ class Interface(object):
         """switch to the first image selected"""
         logger.debug("Interface.firstS clicked")
         self.settitle()
-        if len(self.Selected) == 0:return
-        self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
+        if len(self.selected) == 0:
+            return
+        self.iCurrentImg = self.AllJpegs.index(self.selected[0])
         self.showImage()
 
     def lastS(self, *args):
         """switch to the last image selected"""
         logger.debug("Interface.lastS clicked")
         self.settitle()
-        if len(self.Selected) == 0:return
-        self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
+        if len(self.selected) == 0:
+            return
+        self.iCurrentImg = self.AllJpegs.index(self.selected[-1])
         self.showImage()
 
     def nextS(self, *args):
         """switch to the next image selected"""
         logger.debug("Interface.nextS clicked")
         self.settitle()
-        if len(self.Selected) == 0:return
+        if len(self.selected) == 0:return
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
-            if i in self.Selected:
+            if i in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.showImage()
                 return
@@ -926,11 +928,11 @@ class Interface(object):
         """switch to the previous image selected"""
         logger.debug("Interface.previousS clicked")
         self.settitle()
-        if len(self.Selected) == 0:return
+        if len(self.selected) == 0:return
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
-            if i in self.Selected:
+            if i in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.showImage()
                 return
@@ -940,7 +942,7 @@ class Interface(object):
         logger.debug("Interface.firstNS clicked")
         self.settitle()
         for i in self.AllJpegs:
-            if i not in self.Selected:
+            if i not in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.showImage()
                 return
@@ -952,7 +954,7 @@ class Interface(object):
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
-            if i not in self.Selected:
+            if i not in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.showImage()
                 return
@@ -962,7 +964,7 @@ class Interface(object):
         logger.debug("Interface.nextNS clicked")
         self.settitle()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
-            if i not in self.Selected:
+            if i not in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.showImage()
                 return
@@ -974,7 +976,7 @@ class Interface(object):
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
-            if i not in self.Selected:
+            if i not in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
                 self.showImage()
                 return
@@ -1170,12 +1172,12 @@ class Interface(object):
         """Launch a new window and ask for anew name for the current directory"""
         logger.debug("Interface.renameDay clicked")
         self.settitle()
-        RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.Selected, self.renameDayCallback)
+        RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.selected, self.renameDayCallback)
 
     def renameDayCallback(self, renamdayinstance):
         logger.debug("Interface.renameDayCallback")
         self.AllJpegs = renamdayinstance.AllPhotos
-        self.Selected = renamdayinstance.selected
+        self.selected = renamdayinstance.selected
         newFilename = renamdayinstance.newFilename
         self.image.filename = newFilename
         self.image.fn = os.path.join(config.DefaultRepository, newFilename)
@@ -1260,7 +1262,7 @@ class Interface(object):
         """lauch the synchronization window"""
         logger.debug("Interface.synchronize clicked")
         self.settitle()
-        Synchronize(self.iCurrentImg, self.AllJpegs, self.Selected)
+        Synchronize(self.iCurrentImg, self.AllJpegs, self.selected)
 
 
     def selectNewerMedia(self, *args):
@@ -1268,24 +1270,24 @@ class Interface(object):
         Finally the last selected image is shown and the total size is printed"""
         logger.debug("Interface.selectNewerMedia clicked")
         self.settitle()
-        size = SelectedSize(self.Selected)
+        size = self.selected.get_nbytes()
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
-        init = len(self.Selected)
+        init = len(self.selected)
         for i in self.AllJpegs[self.iCurrentImg:]:
-            if i in self.Selected:
+            if i in self.selected:
                 continue
             size += op.getsize(op.join(config.DefaultRepository, i))
             if size >= maxsize:
                 size -= op.getsize(op.join(config.DefaultRepository, i))
                 break
             else:
-                self.Selected.append(i)
-        self.Selected.sort()
-        if len(self.Selected) == 0:return
-        self.iCurrentImg = self.AllJpegs.index(self.Selected[-1])
+                self.selected.append(i)
+        self.selected.sort()
+        if len(self.selected) == 0:return
+        self.iCurrentImg = self.AllJpegs.index(self.selected[-1])
         self.showImage()
-        t = smartSize(size) + (len(self.Selected),) + smartSize(initsize) + (init,)
+        t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         dialog.run()
@@ -1299,26 +1301,26 @@ class Interface(object):
         Finally the first selected image is shown and the total size is printed"""
         logger.debug("Interface.SelectOlderMedia clicked")
         self.settitle()
-        size = SelectedSize(self.Selected)
+        size = self.selected.get_nbytes()
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
-        init = len(self.Selected)
+        init = len(self.selected)
         tmplist = self.AllJpegs[:self.iCurrentImg]
         tmplist.reverse()
         for i in tmplist:
-            if i in self.Selected:
+            if i in self.selected:
                 continue
             size += op.getsize(op.join(config.DefaultRepository, i))
             if size >= maxsize:
                 size -= op.getsize(op.join(config.DefaultRepository, i))
                 break
             else:
-                self.Selected.append(i)
-        self.Selected.sort()
-        if len(self.Selected) == 0:return
-        self.iCurrentImg = self.AllJpegs.index(self.Selected[0])
+                self.selected.append(i)
+        self.selected.sort()
+        if len(self.selected) == 0:return
+        self.iCurrentImg = self.AllJpegs.index(self.selected[0])
         self.showImage()
-        t = smartSize(size) + (len(self.Selected),) + smartSize(initsize) + (init,)
+        t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         dialog.run()
@@ -1329,8 +1331,8 @@ class Interface(object):
         """Calculate the size of the selection and print it"""
         logger.debug("Interface.calculateSize clicked")
         self.settitle()
-        size = SelectedSize(self.Selected)
-        t = smartSize(size) + (len(self.Selected),)
+        size = self.selected.get_nbytes()
+        t = smartSize(size) + (len(self.selected),)
         txt = "%.2f %s de données dans %i images sélectionnées" % t
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
         dialog.run()
@@ -1341,7 +1343,7 @@ class Interface(object):
         Set the default filter to AutoWB
         """
         logger.debug("Interface.AutoWB clicked")
-        config.SelectedFilter = "AutoWB"
+        config.selectedFilter = "AutoWB"
 
     def filterContrastMask(self, *args):
         """
@@ -1386,54 +1388,6 @@ class Interface(object):
 # # # # # # # fin de la classe interface graphique # # # # # #
 ################################################################################
 
-
-def SelectedSize(List):
-    """Return the size of the selection in byte (octets)"""
-    size = 0
-    for File in List:
-        size += op.getsize(op.join(config.DefaultRepository, File))
-    return size
-
-def SaveSelected(selected_list, filename=None):
-    """
-    Save the list of selected files
-
-    @param selected_list: list of filename selected
-    """
-    if filename is None:
-        selected_fn = op.join(config.DefaultRepository, config.Selected_save)
-    else:
-        selected_fn = str(filename)
-    logger.debug("Saving selection into file %s" % selected_fn)
-    os.remove(selected_fn)
-    with open(selected_fn, "w") as select_file:
-        select_file.write(os.linesep.join(selected_list))
-    os.chmod(selected_fn, config.DefaultFileMode)
-
-def LoadSelected(filename=None):
-    """
-    Load the list of selected filenames
-
-    @return: the list of selected images (filenames)
-    """
-    if filename is None:
-        selected_fn = op.join(config.DefaultRepository, config.Selected_save)
-    else:
-        selected_fn = str(filename)
-    if op.exists(selected_fn):
-        logger.debug("Loading selection from file %s" % selected_fn)
-    else:
-        logger.warning("No such selection file %s" % selected_fn)
-        return []
-
-    try:
-        select = [line.strip() for line in open(selected_fn, "r")
-                  if op.isfile(op.join(config.DefaultRepository, line.strip()))]
-    except Exception as exc:
-        logger.warning("Failed (%s) to load selection from file %s" % (exc, selected_fn))
-        return []
-    select.sort()
-    return select
 
 def MessageError(text, Message=gtk.MESSAGE_ERROR):
     dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
@@ -1663,7 +1617,7 @@ class Synchronize:
         logger.debug("Recorded Synchronize type: %s" % config.SynchronizeType)
         self.current = current
         self.AllPhotos = AllPhotos
-        self.Selected = selected
+        self.selected = selected
         self.initST = config.SynchronizeType
         self.xml = buildUI("Synchroniser")
         signals = {'on_Synchroniser_destroy': self.destroy,
@@ -1744,7 +1698,7 @@ class Synchronize:
         synchro = []
         if config.SynchronizeType.lower() == "selected":
             logger.debug("Synchronize.synchronize: exec selected")
-            synchro = self.Selected
+            synchro = self.selected
         elif config.SynchronizeType.lower() == "newer":
             logger.debug("Synchronize.synchronize: exec newer")
             synchro = self.AllPhotos[self.current:]
@@ -1863,18 +1817,18 @@ if __name__ == '__main__':
 
 
     AF, first = rangeTout(config.DefaultRepository)
-    values = (AF, first, LoadSelected(), config.GraphicMode)
+    values = (AF, first, Selected.load(), config.GraphicMode)
     while config.GraphicMode != "Quit":
         if config.GraphicMode == "Normal":
             ifc = Interface(*values)
             gtk.main()
-            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
+            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.selected, config.GraphicMode)
             del ifc
             gc.collect()
         elif config.GraphicMode in ["FullScreen", "SlideShow"]:
             ifc = FullScreenInterface(*values)
             gtk.main()
-            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.Selected, config.GraphicMode)
+            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.selected, config.GraphicMode)
             del ifc
             gc.collect()
         if config.DEBUG:
