@@ -127,19 +127,18 @@ class Photo(object):
         self.getPIL()
 
     def getPixelsX(self):
-        if self._pixelsX is None:
+        if not self._pixelsX:
             self._pixelsX = max(1, self.pil.size[0])
         return self._pixelsX
     def setPixelsX(self, value): self._pixelsX = value
     pixelsX = property(getPixelsX, setPixelsX, doc="Property to get the size in pixels via PIL")
 
     def getPixelsY(self):
-        if self._pixelsY is None:
+        if not self._pixelsY:
             self._pixelsY = max(1, self.pil.size[1])
         return self._pixelsY
     def setPixelsY(self, value): self._pixelsY = value
     pixelsY = property(getPixelsY, setPixelsY, doc="Property to get the size in pixels via PIL")
-
 
     def getExif(self):
         if self._exif is None:
@@ -372,9 +371,9 @@ class Photo(object):
 
     def show(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
         """
-        Generate a gtk pixbuffer from size and center 
-        
-        @param Xsize: Width of the image buffer 
+        Generate a gtk pixbuffer from size and center
+
+        @param Xsize: Width of the image buffer
         @param Ysize: Height of the image buffer
         @param Xcenter: fraction of image to center on in x
         @param Ycenter: fraction of image to center on in Y
@@ -556,7 +555,7 @@ class Photo(object):
         exifJpeg.read()
         self.exif.copy(exifJpeg)
         exifJpeg.comment = self.exif.comment
-# 
+#
 #        for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
 #                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
 #                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',

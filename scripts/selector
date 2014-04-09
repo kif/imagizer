@@ -557,7 +557,7 @@ class Interface(object):
                 data = image.readExif()
                 if "Rate" in data:
                     rate = int(float(data["Rate"]))
-                    if rate>=self.min_mark:
+                    if rate >= self.min_mark:
                         break
             else:
                 print("No image found with rating > %s" % self.min_mark)
@@ -584,7 +584,7 @@ class Interface(object):
                 data = image.readExif()
                 if "Rate" in data:
                     rate = int(float(data["Rate"]))
-                    if rate>=self.min_mark:
+                    if rate >= self.min_mark:
                         break
             else:
                 print("No image found with rating > %s" % self.min_mark)
