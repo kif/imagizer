@@ -39,6 +39,7 @@ __license__ = "GPL"
 
 import os, locale, random, gc, time, shutil, sys, logging
 import os.path as op
+import weakref
 
 try:
     import ImageFile
@@ -277,7 +278,7 @@ class Interface(object):
         self.strCurrentTitle = ""
         self.iCurrentRate = 0
         self.is_zoomed = False
-
+        self.min_mark = 0
         logger.info("Initialization of the windowed graphical interface ...")
         self.xml = buildUI("Principale")
         self.xml.get_object("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
@@ -489,7 +490,7 @@ class Interface(object):
         "on_ContrastMask_activate": self.filterContrastMask,
 
         "on_photo_button_press_event": self.image_pressed,
-
+        "on_note_minimale_activate": self.start_image_mark_window,
         }
         self.xml.connect_signals(dictHandlers)
         self.showImage()
@@ -548,7 +549,19 @@ class Interface(object):
         """Switch to the next image"""
         logger.debug("Interface.next1")
         self.settitle()
-        self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
+        if self.min_mark < 1:
+            self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
+        else:
+            for i in range(self.iCurrentImg + 1, len(self.AllJpegs)):
+                image = Photo(self.AllJpegs[i])
+                data = image.readExif()
+                if "Rate" in data:
+                    rate = int(float(data["Rate"]))
+                    if rate>=self.min_mark:
+                        break
+            else:
+                print("No image found with rating > %s" % self.min_mark)
+            self.iCurrentImg = i
         self.showImage()
 
     def next10(self, *args):
@@ -563,7 +576,20 @@ class Interface(object):
         """Switch to the previous image"""
         logger.debug("Interface.previous")
         self.settitle()
-        self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
+        if self.min_mark < 1:
+            self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
+        else:
+            for i in range(self.iCurrentImg - 1, -1, -1):
+                image = Photo(self.AllJpegs[i])
+                data = image.readExif()
+                if "Rate" in data:
+                    rate = int(float(data["Rate"]))
+                    if rate>=self.min_mark:
+                        break
+            else:
+                print("No image found with rating > %s" % self.min_mark)
+            self.iCurrentImg = i
+
         self.showImage()
 
     def previous10(self, *args):
@@ -1186,6 +1212,11 @@ class Interface(object):
         self.iCurrentImg = self.AllJpegs.index(newFilename)
         self.showImage()
 
+    def start_image_mark_window(self, *args):
+        """display widget to select minimum mark"""
+        self.mark_window = MinimumRatingWindow(self)
+        self.mark_window.show_all()
+
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         logger.debug("Interface.importImages called")
@@ -1396,6 +1427,37 @@ def MessageError(text, Message=gtk.MESSAGE_ERROR):
     dialog.destroy()
 
 
+class MinimumRatingWindow(gtk.Window):
+    def __init__(self, upperIface):
+        gtk.Window.__init__(self)
+        self.set_title("Note minimale")
+        self.upperIface = upperIface
+        layout = gtk.VBox()
+        self.add(layout)
+        self.slider = gtk.HScale()
+        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
+        self.slider.set_adjustment(self.adj_Rate)
+        self.slider.set_value(upperIface.min_mark)
+        self.slider.connect("value_changed", self.mark_changed)
+        layout.pack_start(self.slider, True, True, 0)
+        self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
+        self.close.connect("clicked", self.kill_window)
+        layout.pack_start(self.close, True, True, 0)
+
+    def mark_changed(self, *args):
+        self.upperIface.min_mark = self.slider.get_value()
+
+    def kill_window(self, *args):
+        """
+        send the signal to close the window
+        """
+        self.upperIface.min_mark = 0
+        try:
+            self.destroy()
+        except:
+            pass
+
+
 class RenameDay(object):
     """prompt a windows and asks for a name for the day"""
     def __init__(self, filename, AllPhotos, selected, callback=None):
@@ -1508,7 +1570,7 @@ class RenameDay(object):
         gtkFlush()
 
 
-class AskSlideShowSetup:
+class AskSlideShowSetup(object):
     """pop up a windows and asks for the setup of the SlideShow"""
     def __init__(self, upperIface):
         self.upperIface = upperIface
