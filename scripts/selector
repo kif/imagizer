@@ -141,7 +141,6 @@ class FullScreenInterface(object):
     def keypressed(self, widget, event, *args):
         """keylogger"""
         key = gdk.keyval_name (event.keyval)
-        # print "Keyval = %s\t Key = %s"%(event.keyval,key)
         if key == "Page_Up":
             self.previousJ()
         elif key == "Page_Down":
@@ -234,7 +233,6 @@ class FullScreenInterface(object):
         self.QuitSlideShow = False
         self.RandomList = []
         while not self.QuitSlideShow:
-#            print "Delai= %s; type = %s"%(config.SlideShowDelay,config.SlideShowType)
             if config.SlideShowType == "chronological":
                 self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
             elif config.SlideShowType == "antichronological":
@@ -587,6 +585,7 @@ class Interface(object):
                     if rate >= self.min_mark:
                         break
             else:
+                i = 0
                 print("No image found with rating > %s" % self.min_mark)
             self.iCurrentImg = i
 
@@ -765,7 +764,8 @@ class Interface(object):
         self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
-        if out != 0 : print "Error n° : %i" % out
+        if out != 0:
+            print("Error n° : %i" % out)
         logger.info("Interface.toWeb: Done")
 
     def emptySelected(self, *args):
@@ -778,7 +778,7 @@ class Interface(object):
                 recursive_delete(curfile)
             else:
                 os.remove(curfile)
-        print "Done"
+        print("Done")
 
     def copy(self, *args):
         """lauch the copy of all selected files"""
@@ -786,7 +786,7 @@ class Interface(object):
         copySelected(self.selected)
         self.selected = Selected()
         self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
-        print "Done"
+        print("Done")
 
     def burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
@@ -798,7 +798,8 @@ class Interface(object):
         self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
-        if out != 0 : print "Error n° : %i" % out
+        if out != 0:
+            print("Error n° : %i" % out)
         logger.info("Interface.burn: Done")
 
     def die(self, *args):
@@ -1388,10 +1389,7 @@ class Interface(object):
         mouse button pressed on image
         """
         logger.info("Interface.image_pressed")
-#        print("Interface.image_pressed: " + ", ".join([str(i) for  i in args]))
         ev_box, event = args
-#        print "ev_box", ev_box.allocation.width, ev_box.allocation.height
-#        print "event", event.x, event.y, event.button
         width = ev_box.allocation.width
         height = ev_box.allocation.height
         if event.button == 1:
@@ -1482,7 +1480,7 @@ class RenameDay(object):
         try:
             self.timetuple = time.strptime(self.dayname[:10], "%Y-%m-%d")
         except:
-            print "something is wrong with this name : " + self.dayname
+            print("something is wrong with this name : %s" % self.dayname)
             return
         self.comment["date"] = time.strftime("%A, %d %B %Y", self.timetuple).capitalize().decode(config.Coding)
         if self.comment.has_key("title"):
@@ -1506,10 +1504,8 @@ class RenameDay(object):
         self.xml.get_object("Date").set_text(self.comment["date"].encode("UTF-8"))
         self.xml.get_object("Commentaire").set_text(self.comment["title"].encode("UTF-8"))
         self.DescObj = self.xml.get_object("Description").get_buffer()
-#        print     self.comment["comment"]
         comment = self.comment["comment"].encode("UTF-8").strip().replace("<BR>", "\n",)
         self.DescObj.set_text(comment)
-#        print     comment
 
     def continu(self, *args):
         """just distroy the window and goes on ...."""
@@ -1541,7 +1537,7 @@ class RenameDay(object):
                         for i in os.listdir(op.join(config.DefaultRepository, self.newdayname)):
                             if i.find(base) == 0:count += 1
                         newphotofile = op.splitext(newphotofile) + "-%i.jpg" % count
-                    print "%s -> %s" % (photofile, newphotofile)
+                    print("%s -> %s" % (photofile, newphotofile))
                     myPhoto = Photo(photofile)
                     myPhoto.renameFile(newphotofile)
                     self.AllPhotos[idx] = newphotofile
@@ -1655,7 +1651,7 @@ class AskMediaSize:
         try:
             config.MediaSize = abs(float(txt))
         except:
-            print "%s does not seem to be the size of a media" % txt
+            print("%s does not seem to be the size of a media" % txt)
         self.xml.get_object("TailleCD").destroy()
 
     def destroy(self, *args):
