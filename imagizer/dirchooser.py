@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
 #* $Source$
@@ -28,31 +28,26 @@ Library used by selector and the installer to select the working directories.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20140429"
 __license__ = "GPL"
 
 import os, sys, logging
 logger = logging.getLogger("imagizer.dirchooser")
-try:
-    import pygtk ; pygtk.require('2.0')
-    import gtk, gtk.glade
-except:
-        raise "Selector needs pygtk and glade-2 available from http://www.pygtk.org/"
 
-from config import Config
+from .config import Config
 config = Config()
-
+from .imagizer import buildUI, gtk
 unifiedglade = os.path.join(os.path.dirname(__file__), "selector.glade")
 
-class WarningSc:
+class WarningSc(object):
     """
     Print a warning before starting the program and allows to change the working directory
     """
     def __init__(self, directory, window="dialog-warning", manageGTK=True, callBack=None):
         """
         Print a small dialog screen
-        
-        @param callBack: method to be called with the directory chosen 
+
+        @param callBack: method to be called with the directory chosen
         @type callBack: method or function
         """
         logger.debug("WarningSc.init")
@@ -62,13 +57,15 @@ class WarningSc:
         self.quit = True
         self.callBack = callBack
         self.guiFiler = None
-        self.gui = gtk.glade.XML(unifiedglade, root=self.window)
-        self.gui.signal_connect('on_dialog_destroy', self.destroy)
-        self.gui.signal_connect('on_Select_clicked', self.filer)
-        self.gui.signal_connect('on_cancel_clicked', self.destroy)
-        self.gui.signal_connect('on_ok_clicked', self.continu)
-        self.gui.signal_connect('on_dirname_editing_done', self.continu)
-        self.gui.get_widget("dirname").set_text(directory)
+        self.gui = buildUI(self.window)
+#        self.gui = gtk.glade.XML(unifiedglade, root=self.window)
+        signals = {'on_dialog_destroy': self.destroy,
+                   'on_Select_clicked': self.filer,
+                   'on_cancel_clicked': self.destroy,
+                   'on_ok_clicked': self.continu,
+                   'on_dirname_editing_done': self.continu}
+        self.gui.connect_signals(signals)
+        self.gui.get_object("dirname").set_text(directory)
 
         if self.manageGTK:
             gtk.main()
@@ -81,11 +78,11 @@ class WarningSc:
         Just destroy the window and goes on ....
         """
         logger.debug("WarningSc.continue")
-        self.directory = self.gui.get_widget("dirname").get_text().strip()
+        self.directory = self.gui.get_object("dirname").get_text().strip()
         if self.manageGTK:
             gtk.main_quit()
         self.quit = False
-        self.gui.get_widget(self.window).destroy()
+        self.gui.get_object(self.window).destroy()
         while gtk.events_pending():
             gtk.main_iteration()
         if self.callBack is not None:
@@ -100,7 +97,7 @@ class WarningSc:
             if self.quit:
                 sys.exit(0)
         else:
-            self.gui.get_widget(self.window).destroy()
+            self.gui.get_object(self.window).destroy()
             while gtk.events_pending():
                 gtk.main_iteration()
 
@@ -111,7 +108,7 @@ class WarningSc:
         """
         logger.debug("WarningSc.dirchooser.filer called")
         self.guiFiler = gtk.glade.XML(unifiedglade, root="filer")
-        self.guiFiler.get_widget("filer").set_current_folder(self.directory)
+        self.guiFiler.get_object("filer").set_current_folder(self.directory)
         self.guiFiler.signal_connect('on_Open_clicked', self.filerSelect)
         self.guiFiler.signal_connect('on_Cancel_clicked', self.filerDestroy)
 
@@ -121,21 +118,21 @@ class WarningSc:
         Close the filer GUI and update the data
         """
         logger.debug("WarningSc.filerSelect called")
-        self.directory = self.guiFiler.get_widget("filer").get_current_folder()
-        self.gui.get_widget("dirname").set_text(self.directory)
-        self.guiFiler.get_widget("filer").destroy()
+        self.directory = self.guiFiler.get_object("filer").get_current_folder()
+        self.gui.get_object("dirname").set_text(self.directory)
+        self.guiFiler.get_object("filer").destroy()
 
     def filerDestroy(self, *args):
         """
         Close the filer GUI
         """
         logger.debug("WarningSc.filerDestroy called")
-        self.guiFiler.get_widget("filer").destroy()
+        self.guiFiler.get_object("filer").destroy()
 
     def getDirectory(self):
         """
         Return the directory chosen
         """
         logger.debug("WarningSc.getDirectory")
-        self.directory = self.gui.get_widget("dirname").get_text().strip()
+        self.directory = self.gui.get_object("dirname").get_text().strip()
         return self.directory
