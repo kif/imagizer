@@ -1,0 +1,25 @@
+#!/usr/bin/python
+
+
+
+#/usr/lib/xscreensaver/spampy -root -window-id 0x1E00CBC
+#Use gtk.Plug, which is a GTK container that embeds itself in a window if you give it a window ID.
+
+
+import sys, os
+from argparse import ArgumentParser
+
+with open("/tmp/screensaver.py.log", "w") as f:
+    f.write(" : ".join(sys.argv))
+    f.write(os.linesep)
+
+def parse():
+    parser = ArgumentParser(description='Imagizer screen-saver')
+    parser.add_argument('-display', dest='display', help='host:display.screen')
+    parser.add_argument('-window', dest='window', help="Draw on a newly-created window.  This is the default.")
+    parser.add_argument('-root', dest='root', action="store_true", default=False, help="Draw on the root window.")
+    parser.add_argument('-delay', dest="delay", type=int, help="Per-frame  delay,  in  seconds.  Default: 20 seconds.")
+    parser.add_argument("-window-id", dest="window_id", help="Identifier of the window to display.")
+    args = parser.parse_args()
+if __name__ == "__main__":
+    parse()
