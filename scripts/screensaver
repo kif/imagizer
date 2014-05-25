@@ -6,20 +6,117 @@
 #Use gtk.Plug, which is a GTK container that embeds itself in a window if you give it a window ID.
 
 
-import sys, os
+import sys, os, gc, logging, time, glob, random
 from argparse import ArgumentParser
+from imagizer.imagizer      import gtk
+from imagizer.photo         import Photo
+from imagizer.config        import Config
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("imagizer.screensaver")
+config = Config()
 
 with open("/tmp/screensaver.py.log", "w") as f:
     f.write(" : ".join(sys.argv))
     f.write(os.linesep)
 
-def parse():
-    parser = ArgumentParser(description='Imagizer screen-saver')
-    parser.add_argument('-display', dest='display', help='host:display.screen')
-    parser.add_argument('-window', dest='window', help="Draw on a newly-created window.  This is the default.")
-    parser.add_argument('-root', dest='root', action="store_true", default=False, help="Draw on the root window.")
-    parser.add_argument('-delay', dest="delay", type=int, help="Per-frame  delay,  in  seconds.  Default: 20 seconds.")
-    parser.add_argument("-window-id", dest="window_id", help="Identifier of the window to display.")
-    args = parser.parse_args()
+
+
+class ScreeenSaver(object):
+    def __init__(self):
+        self.plug = None
+        self.args = None
+        self.current = None
+        self.next = None
+        self.all_jpg = []
+
+    def init_window(self):
+        if self.args.window_id:
+            wid = int(self.args.window_id, 16)
+            print wid
+            self.plug = gtk.Plug(wid)
+        else:
+            print("how to grab root")
+            self.plug = gtk.Window()
+
+    def scan(self):
+        """
+        Scan the repository for all valid files
+        """
+        if config.DefaultRepository.endswith(os.sep):
+            l = len(config.DefaultRepository)
+        else:
+            l = len(config.DefaultRepository) + 1
+        self.all_jpg = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "*", "*.jpg")]
+
+
+
+    def parse(self):
+        parser = ArgumentParser(description='Imagizer screen-saver')
+        parser.add_argument('-display', dest='display', help='host:display.screen')
+        parser.add_argument('-window', dest='window', help="Draw on a newly-created window.  This is the default.")
+        parser.add_argument('-root', dest='root', action="store_true", default=False, help="Draw on the root window.")
+        parser.add_argument('-delay', dest="delay", type=int, help="Per-frame  delay,  in  seconds.  Default: 20 seconds.")
+        parser.add_argument("-window-id", dest="window_id", help="Identifier of the window to display.")
+        self.args = parser.parse_args()
+        print self.args
+
+
+    def show(self):
+        """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+        self.image = Photo(self.AllJpegs[self.iCurrentImg])
+        X, Y = self.xml.get_object("FullScreen").get_size()
+        logger.debug("Size of image on screen: %sx%s" % (X, Y))
+        pixbuf = self.image.show(X, Y)
+        self.xml.get_object("image793").set_from_pixbuf(pixbuf)
+        del pixbuf
+        gc.collect()
+        if self.AllJpegs[self.iCurrentImg] in self.selected:
+            sel = "[Selected]"
+        else:
+            sel = ""
+        self.xml.get_object("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+
+
+    def slideshow(self):
+        """Starts the slide show"""
+        self.QuitSlideShow = False
+        self.RandomList = []
+        while not self.QuitSlideShow:
+            if config.SlideShowType == "chronological":
+                self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
+            elif config.SlideShowType == "antichronological":
+                self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
+            elif config.SlideShowType == "random":
+                if len(self.RandomList) == 0:
+                    self.RandomList = range(len(self.AllJpegs))
+                    random.shuffle(self.RandomList)
+                self.iCurrentImg = self.RandomList.pop()
+            self.image = Photo(self.AllJpegs[self.iCurrentImg])
+            self.image.readExif()
+            if self.image.metadata["Rate"] < config.SlideShowMinRating:
+                self.flush_event_queue()
+                continue
+            now = time.time()
+            if now - self.timestamp < config.SlideShowDelay:
+                time.sleep(config.SlideShowDelay - now + self.timestamp)
+            self.showImage()
+            self.flush_event_queue()
+            self.timestamp = time.time()
+
+    def __repr__(self):
+        pass #TODO
+
+    def save(self):
+        pass#todo
+
+    def load(self):
+        pass #todo
+
+
+
 if __name__ == "__main__":
-    parse()
+
+    scs = ScreeenSaver()
+    scs.parse()
+    scs.init_window()
+    gtk.main()
