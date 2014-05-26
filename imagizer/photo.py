@@ -108,6 +108,8 @@ class Photo(object):
                 imageCache[filename] = self
         return None
 
+    def __repr__(self):
+        return "Photo object on filename %s" % self.filename
 
     def getPIL(self):
         if self._pil is None:
@@ -173,7 +175,7 @@ class Photo(object):
             logger.warning("Thumbnail %s exists" % strThumbFile)
         else:
             extract = False
-            print "process file %s exists" % strThumbFile
+            print("process file %s exists" % strThumbFile)
             if ExifExtraction:
                 try:
                     self.exif.dumpThumbnailToFile(strThumbFile[:-4])
@@ -261,7 +263,7 @@ class Photo(object):
                 self.pixelsX = None
                 self.pixelsY = None
         else:
-            print "Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée."
+            print("Erreur ! il n'est pas possible de faire une rotation de ce type sans perte de donnée.")
         if imageCache is not None:
             self.scaledPixbuffer = newPixbuffer
             imageCache[self.filename] = self
