@@ -84,7 +84,7 @@ from photo import Photo, Signature
 def buildUI(windows_name="Principale"):
     """
     Create the glade object compatible with both GTK2 & GTK3 style
-    @param: window name as define  in glade file 
+    @param: window name as define  in glade file
     @return: builder instance
     """
     if GTKglade:
@@ -144,19 +144,19 @@ class ModelProcessSelected(object):
 
 
     def start(self, lstFiles):
-        """ 
+        """
         Lance les calculs pour "processSelected"
-        i.e. 
-        
+        i.e.
+
         @param lstFiles: list of files to process
         """
 
         def splitIntoPages(pathday, globalCount):
             """Split a directory (pathday) into pages of 20 images (see config.NbrPerPage)
-            
+
             @param pathday:
             @param globalCount:
-            @return: the number of images for current page   
+            @return: the number of images for current page
             """
             logger.debug("In splitIntoPages %s %s", pathday, globalCount)
             files = []
@@ -326,9 +326,9 @@ class ModelCopySelected(object):
         self.NbrJobsSignal = Signal()
 
     def start(self, lstFiles):
-        """ 
+        """
         Lance les calculs
-        
+
         @param lstFiles: list of files to process
         """
         self.startSignal.emit(self.__label, max(1, len(lstFiles)))
@@ -394,7 +394,7 @@ class ModelCopySelected(object):
 
 class ModelRangeTout(object):
     """Implemantation MVC de la procedure rangeTout
-    moves all the JPEG files to a directory named from 
+    moves all the JPEG files to a directory named from
     their day and with the name according to the time"""
 
     def __init__(self):
@@ -409,7 +409,7 @@ class ModelRangeTout(object):
 
     def start(self, rootDir):
         """ Lance les calculs
-        
+
         @param rootDir: top level directory to start processing
         @return: 2tuple containing the list of all images and the start-index
         @rtype: (list,integer)
@@ -531,8 +531,8 @@ class Controler(object):
 
 
 class ControlerX(object):
-    """ 
-    Implementation of controleur via X11. 
+    """
+    Implementation of controleur via X11.
     C'est lui qui lie les modèle et la(les) vue(s).
     """
     def __init__(self, model, viewx):
@@ -584,12 +584,12 @@ class View(object):
         pass
 
 class ViewX(object):
-    """ 
+    """
     Implementation of the view as a splashscren
     """
     def __init__(self):
-        """ 
-        Initialization of the view in the constructor 
+        """
+        Initialization of the view in the constructor
 
         Ici, on ne fait rien, car la progressbar sera créée au moment
         où on en aura besoin. Dans un cas réel, on initialise les widgets
@@ -600,7 +600,7 @@ class ViewX(object):
         self.pb = None
 
     def creatProgressBar(self, label, nbVal):
-        """ 
+        """
         Creation of a progress bar.
         """
         self.xml = GTKglade.XML(unifiedglade, root="splash")
@@ -616,17 +616,17 @@ class ViewX(object):
         self.__nbVal = nbVal
 
     def updateProgressBar(self, h, filename):
-        """ 
+        """
         Update the progress-bar to the given value with the given filename writen on it
 
         fr: Mise à jour de la progressbar
         fr: Dans le cas d'un toolkit, c'est ici qu'il faudra appeler le traitement
         fr:des évènements.
-        
+
         @param h: current number of the file
         @type h: integer or float
         @param filename: name of the current element
-        @type filename: string 
+        @type filename: string
         @return: None
         """
         if h < self.__nbVal:
@@ -645,10 +645,10 @@ class ViewX(object):
 
 
 def rangeTout(repository, bUseX=True):
-    """moves all the JPEG files to a directory named from their day and with the 
+    """moves all the JPEG files to a directory named from their day and with the
     name according to the time
     This is a MVC implementation
-    
+
     @param repository: the name of the starting repository
     @type repository: string
     @param bUseX: set to False to disable the use of the graphical splash screen
@@ -672,7 +672,7 @@ def processSelected(lstSelectedFiles):
     copy all the selected files to "selected" subdirectory, 20 per page
 
     @param  lstSelectedFiles: list of selected files to process
-    @return: None 
+    @return: None
     """
     logger.info("Process selected of " + " ".join(lstSelectedFiles))
     model = ModelProcessSelected()
@@ -689,7 +689,7 @@ def copySelected(lstSelectedFiles):
     copy all the selected files to "selected" subdirectory
 
     @param  lstSelectedFiles: list of selected files to process
-    @return: None 
+    @return: None
     """
     logger.info("Copy Selected of " + " ".join(lstSelectedFiles))
     model = ModelCopySelected()
@@ -703,12 +703,12 @@ def copySelected(lstSelectedFiles):
 
 #######################################################################################
 def scaleImage(filename, filigrane=None):
-    """Common processing for one image : 
+    """Common processing for one image :
     - create a subfolder "scaled" and "thumb"
     - populate it
-    
+
     @param filename: path to the file
-    @param filigrane: None or a Signature instance (see imagizer.photo.Signature) 
+    @param filigrane: None or a Signature instance (see imagizer.photo.Signature)
      """
     rootdir = os.path.dirname(filename)
     scaledir = os.path.join(rootdir, config.ScaledImages["Suffix"])
@@ -734,9 +734,9 @@ def scaleImage(filename, filigrane=None):
 
 def timer_pass():
     """
-    Dummy function that releases the gil for 1ms
+    Dummy function that releases the gil for 1µs
     """
-    time.sleep(1e-3)
+    time.sleep(1e-6)
     return True
 
 

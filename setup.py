@@ -90,7 +90,8 @@ setup(name='Imagizer',
     data_files=[
         (installdir, ["selector.glade", execexiftran] +
         [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
-        (os.path.split(ConfFile[0])[0], ['imagizer.conf'])
+        (os.path.split(ConfFile[0])[0], ['imagizer.conf']),
+        ("/usr/lib/xscreensaver", ["screensaver/imagizer"])
     ],
     packages=['imagizer'],
     package_dir={'imagizer': 'imagizer'},
