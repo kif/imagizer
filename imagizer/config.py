@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
 #* $Source$
@@ -66,7 +66,10 @@ class Config:
             self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng", ".pef", ".nef"]
             self.AutoRotate = False
             self.DefaultMode = "664"
-            self.DefaultRepository = os.getcwd()
+            try:
+                self.DefaultRepository = os.getcwd()
+            except OSError:
+                self.DefaultRepository = ""
             self.CommentFile = "index.desc"
             self.Interpolation = 1
             self.DefaultFileMode = int(self.DefaultMode, 8)
@@ -170,7 +173,7 @@ class Config:
             elif j == "WebDirIndexStyle".lower(): self.WebDirIndexStyle = i[1]
             elif j == "DefaultFileMode".lower():
                 self.DefaultFileMode = int(i[1], 8)
-                self.DefaultDirMode = self.DefaultFileMode + 3145 #73 = +111 en octal ... 3145 +s mode octal    
+                self.DefaultDirMode = self.DefaultFileMode + 3145 #73 = +111 en octal ... 3145 +s mode octal
             elif j == "RawExtensions".lower():      self.RawExtensions = i[1].split()
             elif j == "Extensions".lower():         self.Extensions = i[1].split()
             elif j == "DefaultRepository".lower():  self.DefaultRepository = i[1]
@@ -271,7 +274,7 @@ class Config:
     def save(self, filename):
         """
         Saves the default options to file
-        
+
         @param filename: name of the file to save the configuration to
         @type filename: string or unicode
         """
