@@ -33,10 +33,13 @@ class Selected(list):
         else:
             selected_fn = str(filename)
         logger.debug("Saving selection into file %s" % selected_fn)
-        os.remove(selected_fn)
-        with open(selected_fn, "w") as select_file:
-            select_file.write(os.linesep.join(self))
-        os.chmod(selected_fn, config.DefaultFileMode)
+        try:
+            os.remove(selected_fn)
+            with open(selected_fn, "w") as select_file:
+                select_file.write(os.linesep.join(self))
+            os.chmod(selected_fn, config.DefaultFileMode)
+        except Exception as error:
+            logger.warning("Error while saving selection to %s: %s" % (selected_fn, error))
 
     @classmethod
     def load(cls, filename=None):
