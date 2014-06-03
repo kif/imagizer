@@ -34,10 +34,10 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20131226"
+__date__ = "20140603"
 __license__ = "GPL"
 
-import os, locale, random, gc, time, shutil, sys, logging
+import os, locale, random, gc, time, shutil, sys, logging, glob
 import os.path as op
 import weakref
 
@@ -1843,7 +1843,8 @@ if __name__ == '__main__':
                             epilog="Attention selector renomme tous les fichiers")
     parser.add_argument("-d", "--debug", help="mode debug tres verbeux", action="store_true", default=False)
     parser.add_argument("--nowarning", help="desactive l'avertissement", action="store_true", default=False)
-    parser.add_argument("--noautorotate", help="no pas tourner automatiquement les images", action="store_true", default=False)
+    parser.add_argument("--noautorotate", help="ne pas tourner automatiquement les images", action="store_true", default=False)
+    parser.add_argument("-f", "--fast", help="Démarrage rapide", action="store_true", default=False)
     parser.add_argument("path", help="repertoire a traiter", nargs='?')
     args = parser.parse_args()
     if args.debug:
@@ -1870,12 +1871,23 @@ if __name__ == '__main__':
 
     if not op.isfile(selected_fn):
 #        os.remove(selected_fn)
-        f = open(selected_fn, "w")
-        f.close()
+        try:
+            f = open(selected_fn, "w")
+            f.close()
+        except Exception as error:
+            logger.info("Unable to create seleted file %s: %s" % (selected_fn, error))
 
+    if args.fast:
+        l = len(config.DefaultRepository)
+        if not config.DefaultRepository.endswith(os.sep):
+            l += 1
+        all_files = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "????-??-??*/*.jpg"))]
+        all_files.sort()
+        first = len(all_files) - 1
+    else:
+        all_files, first = rangeTout(config.DefaultRepository)
 
-    AF, first = rangeTout(config.DefaultRepository)
-    values = (AF, first, Selected.load(), config.GraphicMode)
+    values = (all_files, first, Selected.load(), config.GraphicMode)
     while config.GraphicMode != "Quit":
         if config.GraphicMode == "Normal":
             ifc = Interface(*values)
