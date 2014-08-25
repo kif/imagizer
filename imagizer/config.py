@@ -30,11 +30,15 @@ Technically it is a Borg (design Pattern) so every instance of Config has exactl
 """
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20120409"
+__date__ = "20140825"
 __license__ = "GPL"
 
 import os, locale, logging, ConfigParser
 installdir = os.path.dirname(os.path.abspath(__file__))
+try:
+    import resource
+except ImportError:
+    resource = None
 
 def float_or_None(inp):
     try:
@@ -46,7 +50,7 @@ def float_or_None(inp):
 ################################################################################################
 ###############  Class Config for storing the cofiguratio in a Borg ############################
 ################################################################################################
-class Config:
+class Config(object):
     """this class is a Borg : always returns the same values regardless to the instance of the object"""
     __shared_state = {}
     def __init__(self):
@@ -213,7 +217,8 @@ class Config:
                 elif j == "Optimize".lower():dico["Optimize"] = configparser.getboolean(k, "Optimize")
                 elif j == "ExifExtraction".lower():dico["ExifExtraction"] = configparser.getboolean(k, "ExifExtraction")
                 elif j == "Quality".lower():dico["Quality"] = int(i[1])
-            exec("self.%s=dico" % k)
+            self.__setattr__(k,dico)
+#            exec("self.%s=dico" % k)
 
         #Read Video options
         try:
@@ -237,7 +242,10 @@ class Config:
                 else: logging.warning(str("Config.load: unknown key %s" % j))
         except ConfigParser.NoSectionError:
             logging.warning("No Video section in configuration file !")
-
+        if resource:
+            max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0]-10
+            if max_files > self.ImageCache:
+                self.ImageCache = max_files
 
     def __repr__(self):
         logging.debug("Config.__repr__")
