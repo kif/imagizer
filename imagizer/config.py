@@ -244,7 +244,7 @@ class Config(object):
             logging.warning("No Video section in configuration file !")
         if resource:
             max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0]-10
-            if max_files > self.ImageCache:
+            if max_files < self.ImageCache:
                 self.ImageCache = max_files
 
     def __repr__(self):

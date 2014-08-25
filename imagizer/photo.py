@@ -56,7 +56,7 @@ gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP
 # gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
 
 
-from config import Config
+from .config import Config
 config = Config()
 if config.ImageCache > 1:
     import imagecache
@@ -64,11 +64,11 @@ if config.ImageCache > 1:
 else:
     imageCache = None
 
-from exif       import Exif
-import pyexiftran
-from fileutils  import mkdir, makedir, smartSize
-from encoding   import unicode2ascii
-import blur
+from .exif       import Exif
+from . import pyexiftran
+from .fileutils  import mkdir, makedir, smartSize
+from .encoding   import unicode2ascii
+from . import blur
 
 # #########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
