@@ -243,7 +243,7 @@ class Config(object):
         except ConfigParser.NoSectionError:
             logging.warning("No Video section in configuration file !")
         if resource:
-            max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0]-10
+            max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0] - 15
             if max_files < self.ImageCache:
                 self.ImageCache = max_files
 
