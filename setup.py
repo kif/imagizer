@@ -32,8 +32,19 @@ from distutils.core import setup
 from distutils.extension import Extension
 import os, sys, distutils.sysconfig, shutil, locale
 sys.path.insert(0, os.path.dirname(__file__))
-import imagizer
-version = imagizer.__version__
+
+def get_version():
+    """
+    return the version string
+    """
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "imagizer", "__init__.py")) as f:
+        for line in f:
+            if line.strip().startswith("__version__"):
+                return eval(line.split("=")[1])
+
+version = get_version()
+
 SCRIPTS = "scripts"
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
