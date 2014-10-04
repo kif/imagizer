@@ -1,0 +1,12 @@
+recursive-include pixmaps *.ico *.png
+recursive-include imagizer *.py
+recursive-include pyexiftran *
+recursive-include screensaver *
+recursive-include scrips *
+
+include README.txt
+include selector.glade
+include  README.txt
+include config.py
+include dirchooser.py
+setup.py
