@@ -6,7 +6,9 @@ recursive-include scrips *
 
 include README.txt
 include selector.glade
-include  README.txt
+include README.txt
 include config.py
 include dirchooser.py
-setup.py
+include setup.py
+include imagizer.conf-unix
+include imagizer.conf-windows
