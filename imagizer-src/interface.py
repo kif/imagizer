@@ -30,45 +30,42 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20141129"
+__date__ = "29/11/2014"
 __license__ = "GPL"
 
-from .imagizer import unifiedglade, copySelected, processSelected, rangeTout, gtkFlush, timer_pass
+from .imagizer import unifiedglade, copySelected, processSelected, rangeTout, timer_pass
 
 ################################################################################
 #  ##### FullScreen Interface #####
 ################################################################################
 
 class FullScreenInterface(object):
-    def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen"):
-        self.image = None
+    def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen", callback=None):
+        self.callback = callback
         self.AllJpegs = AllJpegs
-        self.selected = Selected()
+        self.selected = Selected(i for i in selected if i in self.AllJpegs)
+        self.image = None
         self.RandomList = []
         self.iCurrentImg = first
         self.timestamp = time.time()
-        for i in selected:
-            if i in self.AllJpegs:
-                self.selected.append(i)
         logger.info("Initialization of the fullscreen GUI")
         self.xml = buildUI("FullScreen")
         self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
         self.showImage()
-        gtkFlush()
+        flush()
         self.xml.get_object("FullScreen").maximize()
-        gtkFlush()
+        flush()
         self.showImage()
-        gtkFlush()
+        flush()
         self.xml.connect_signals({'on_FullScreen_destroy': self.destroy,
                                   "on_FullScreen_key_press_event":self.keypressed})
-        if mode == "SlideShow":
+        if mode == "slideshow":
             self.SlideShow()
         self.QuitSlideShow = True
-#        gtk.main()
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
-        gtkFlush()
+        flush()
 
     def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
@@ -118,7 +115,6 @@ class FullScreenInterface(object):
             config.SlideShowDelay -= 1
             if config.SlideShowDelay < 0:config.SlideShowDelay = 0
 
-
     def turnRight(self, *args):
         """rotate the current image clockwise"""
         self.image.rotate(90)
@@ -127,16 +123,15 @@ class FullScreenInterface(object):
         """rotate the current image clockwise"""
         self.image.rotate(270)
         self.showImage()
+
     def destroy(self, *args):
         """destroy clicked by user"""
-        self.selected.save()
-        gtk.main_quit()
-        config.GraphicMode = "Quit"
+        self.close("quit")
+
     def NormalScreen(self, *args):
         """Switch to Normal mode"""
-        self.xml.get_object("FullScreen").destroy()
-        config.GraphicMode = "Normal"
-        gtk.main_quit()
+        self.close("normal")
+
     def next1(self, *args):
         """Switch to the next image"""
         self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
@@ -201,7 +196,12 @@ class FullScreenInterface(object):
             self.flush_event_queue()
             self.timestamp = time.time()
 
-
+    def close(self, what=None):
+        """close the gui and call the call-back"""
+        self.selected.save()
+        self.gui.close()
+        if self.callback:
+            self.callback(what)
 
 ################################################################################
 # ##### Normal Interface #####
@@ -211,12 +211,10 @@ class Interface(object):
     """
     class interface that manages the GUI using Glade-2
     """
-    def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default"):
+    def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default", callback=None):
+        self.callback = callback
         self.AllJpegs = AllJpegs
-        self.selected = Selected()
-        for i in selected:
-            if i in self.AllJpegs:
-                self.selected.append(i)
+        self.selected = Selected(i for i in selected if i in self.AllJpegs)
         self.iCurrentImg = first
         self.Xmin = 350
         self.image = None
@@ -232,7 +230,7 @@ class Interface(object):
         self.xml.get_object("Logo").set_from_pixbuf(gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
         self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
         self.xml.get_object("Rate").set_adjustment(self.adj_Rate)
-        gtkFlush()
+        flush()
         if config.AutoRotate:
             i = 1
         else:
@@ -335,7 +333,7 @@ class Interface(object):
         else:
             logger.error("No such SelectedFilter %s", config.SelectedFilter)
         self.showImage()
-        gtkFlush()
+        flush()
 
         dictHandlers = {
         'on_Principale_destroy': self.destroy,
@@ -439,12 +437,12 @@ class Interface(object):
         }
         self.xml.connect_signals(dictHandlers)
         self.showImage()
-        gtkFlush()
+        flush()
 #        gtk.main()
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
-        gtkFlush()
+        flush()
 
 
     def settitle(self):
@@ -1510,7 +1508,7 @@ class RenameDay(object):
             self.xml.get_object("Renommer").destroy()
         except:
             pass
-        gtkFlush()
+        flush()
 
 
 class AskSlideShowSetup(object):
@@ -1569,7 +1567,7 @@ class AskSlideShowSetup(object):
 
     def destroy(self, *args):
         """destroy clicked by user -> close the window"""
-        gtkFlush()
+        flush()
 
 
     def kill_window(self, *args):
@@ -1607,7 +1605,7 @@ class AskMediaSize:
             self.xml.get_object("TailleCD").destroy()
         except:
             pass
-        gtkFlush()
+        flush()
 
 
 class Synchronize:
@@ -1661,7 +1659,7 @@ class Synchronize:
                        'on_SyncOlder_toggled': self.SetSyncOlder,
                        'on_SyncSelected_toggled': self.SetSyncSelected}
         self.xml.connect_signals(signals)
-        gtkFlush()
+        flush()
 
 
     def SetSyncAll(self, *args):
@@ -1737,7 +1735,7 @@ class Synchronize:
             self.xml.get_object("Synchroniser").destroy()
         except:
             pass
-        gtkFlush()
+        flush()
 
 
 
@@ -1776,4 +1774,4 @@ class SelectDay:
             self.xml.get_object("ChangeDir").destroy()
         except:
             pass
-        gtkFlush()
+        flush()

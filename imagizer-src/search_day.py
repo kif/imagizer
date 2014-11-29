@@ -259,8 +259,7 @@ class SearchDay(object):
         self.destroy()
         return path
 
-if __name__ == "__main__":
-    "test it"
+def test():
     from imagizer import rangeTout
     listConfigurationFiles = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
     config.load(listConfigurationFiles)
@@ -278,3 +277,7 @@ if __name__ == "__main__":
     print len(a.cache)
     gui = SearchDay(files)
     gtk.main()
+
+if __name__ == "__main__":
+    "test it"
+    test()

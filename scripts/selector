@@ -34,17 +34,19 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "29/11/2014"
 __license__ = "GPL"
 
-import os, locale, random, gc, time, shutil, sys, logging, glob
+import os, locale, gc, logging, glob, sys
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("imagizer.selector")
 import os.path as op
 
 import imagizer
+from imagizer.qt import QtGui
 from imagizer.config        import config
 from imagizer.dirchooser    import WarningSc
 from imagizer.selection     import Selected
 from imagizer.argparse      import ArgumentParser
-
+from imagizer.imagizer      import rangeTout
+from imagizer.interface     import Interface, FullScreenInterface
 try:
     from rfoo.utils import rconsole
     rconsole.spawn_server()
@@ -65,6 +67,62 @@ else:
 ################################################################################
 # Main program of selector
 ################################################################################
+
+class Interfaces(object):
+    """
+    Manages the switch between interfaces...
+    """
+    def __init__(self, all_files=[], current=0, warning=True, fast=False):
+        self.interface = None
+        self.all_files = all_files
+        self.current = current
+        self.warning = warning
+        self.selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+        self.fast = fast
+        self.selected = None
+
+    def print_warning(self):
+        if (self.warning) and (not op.isfile(self.selected_fn)):
+            self.interface = WarningSc(config.DefaultRepository, callBack=self.set_root)
+            self.interface.show()
+        else:
+            self.create_selected()
+
+    def set_root(self, path):
+            config.DefaultRepository = path
+            self.selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+            self.interface.close()
+            self.create_selected()
+
+
+    def create_selected(self):
+        if not op.isfile(selected_fn):
+            try:
+                f = open(selected_fn, "w")
+                f.close()
+            except Exception as error:
+                logger.info("Unable to create selected file %s: %s" % (selected_fn, error))
+        self.load_list()
+
+    def load_list(self):
+        self.all_files, self.first = rangeTout(config.DefaultRepository, fast=self.fast)
+
+    def start_interface(self, which="normal"):
+        if self.selected is None:
+            self.selected = Selected.load()
+        if which in ("normal", "default"):
+            self.interface = Interface(self.all_files, self.current, self.selected, callback=self.interface_closed)
+        elif which in ("fullscreen", "slideshow"):
+            self.interface = FullScreenInterface(self.all_files, self.current, self.selected, mode=which, callback=self.interface_closed)
+
+    def interface_closed(self, what="quit"):
+        self.all_files = self.interface.AllJpegs
+        self.first = self.interface.iCurrentImg
+        self.selected = self.interface.selected
+        print("Going to %s" % what)
+        what = what.lower()
+        if what != "quit":
+            self.start_interface(what)
 
 if __name__ == '__main__':
     printWarning = True
@@ -93,45 +151,13 @@ if __name__ == '__main__':
 
     config.printConfig()
     selected_fn = op.join(config.DefaultRepository, config.Selected_save)
-    if (printWarning == True) and (not op.isfile(selected_fn)):
-        W = WarningSc(config.DefaultRepository)
-        config.DefaultRepository = W.directory
-        del W
-        selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+
+    app = QtGui.QApplication([])
+    ifc = Interfaces(warning=printWarning, fast=args.fast)
+    ifc.print_warning()
+    res = app.exec_()
+    print(res)
+    sys.exit(res)
 
 
-    if not op.isfile(selected_fn):
-#        os.remove(selected_fn)
-        try:
-            f = open(selected_fn, "w")
-            f.close()
-        except Exception as error:
-            logger.info("Unable to create seleted file %s: %s" % (selected_fn, error))
-
-    if args.fast:
-        l = len(config.DefaultRepository)
-        if not config.DefaultRepository.endswith(os.sep):
-            l += 1
-        all_files = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "????-??-??*/*.jpg"))]
-        all_files.sort()
-        first = len(all_files) - 1
-    else:
-        all_files, first = rangeTout(config.DefaultRepository)
-
-    values = (all_files, first, Selected.load(), config.GraphicMode)
-    while config.GraphicMode != "Quit":
-        if config.GraphicMode == "Normal":
-            ifc = Interface(*values)
-            gtk.main()
-            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.selected, config.GraphicMode)
-            del ifc
-            gc.collect()
-        elif config.GraphicMode in ["FullScreen", "SlideShow"]:
-            ifc = FullScreenInterface(*values)
-            gtk.main()
-            values = (ifc.AllJpegs, ifc.iCurrentImg, ifc.selected, config.GraphicMode)
-            del ifc
-            gc.collect()
-        if config.DEBUG:
-            print("Switching to mode %s" % config.GraphicMode)
 

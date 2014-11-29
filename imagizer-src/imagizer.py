@@ -596,7 +596,7 @@ class ViewX(object):
         gc.collect()
 
 
-def rangeTout(repository, bUseX=True):
+def rangeTout(repository, bUseX=True, fast=False):
     """moves all the JPEG files to a directory named from their day and with the
     name according to the time
     This is a MVC implementation
@@ -605,16 +605,26 @@ def rangeTout(repository, bUseX=True):
     @type repository: string
     @param bUseX: set to False to disable the use of the graphical splash screen
     @type bUseX: boolean
+    @param fast: just retrieve the list of files.
     @return: 2tuple containing the list of all images and the start-index
     @rtype: (list,integer)
     """
-    model = ModelRangeTout()
-    view = View()
-    Controler(model, view)
-    if bUseX:
-        viewx = ViewX()
-        ControlerX(model, viewx)
-    return model.start(repository)
+    if fast:
+        l = len(config.DefaultRepository)
+        if not config.DefaultRepository.endswith(os.sep):
+            l += 1
+        all_files = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "????-??-??*/*.jpg"))]
+        all_files.sort()
+        first = len(all_files) - 1
+        return (all_files, first)
+    else:
+        model = ModelRangeTout()
+        view = View()
+        Controler(model, view)
+        if bUseX:
+            viewx = ViewX()
+            ControlerX(model, viewx)
+        return model.start(repository)
 
 
 def processSelected(lstSelectedFiles):
