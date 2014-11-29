@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: UTF8 -*-
+# coding: utf-8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
-#* Copyright (C) 2006-2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006-2014,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -81,7 +79,7 @@ class Exiftran(object):
     def _exiftranThread(action, filename):
         """
         actual exiftran launcher
-        @param action: 0 for autorotate, 1 for 180 deg, 2 for 270 deg and 9 for 90 deg reotation clockwise 
+        @param action: 0 for autorotate, 1 for 180 deg, 2 for 270 deg and 9 for 90 deg reotation clockwise
         @type action: integer
         @param filename: name of the jpeg file to process
         @type filename: string
@@ -111,7 +109,7 @@ class Exiftran(object):
     @staticmethod
     def rotate180(filename):
         """
-        rotate the given file by 180 degrees 
+        rotate the given file by 180 degrees
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """
@@ -124,7 +122,7 @@ class Exiftran(object):
     @staticmethod
     def rotate270(filename):
         """
-        rotate the given file by 90 degrees counter-clockwise (270deg clockwise) 
+        rotate the given file by 90 degrees counter-clockwise (270deg clockwise)
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """
@@ -137,7 +135,7 @@ class Exiftran(object):
     @staticmethod
     def autorotate(filename):
         """
-        auto rotate the given file 
+        auto rotate the given file
         @param filename: name of the JPEG file to rotate
         @type filename: python string
         """

@@ -1,8 +1,6 @@
 # !/usr/bin/env python
-# -*- coding: UTF8 -*-
+# coding: utf-8
 # ******************************************************************************\
-# * $Source$
-# * $Id$
 # *
 # * Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
 # * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
@@ -42,6 +40,14 @@ try:
     import Image, ImageStat, ImageChops, ImageFile
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
+
+from .config import Config
+config = Config()
+
+kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
+if kpix > 64:
+    ImageFile.MAXBLOCK = 2 ** 26  # Thats 66 Mpix
+
 try:
     import pygtk ; pygtk.require('2.0')
     import gtk
@@ -56,8 +62,6 @@ gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP
 # gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
 
 
-from .config import Config
-config = Config()
 if config.ImageCache > 1:
     import imagecache
     imageCache = imagecache.ImageCache(maxSize=config.ImageCache)

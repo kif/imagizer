@@ -1,10 +1,8 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
-#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
+#* Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -64,13 +62,13 @@ def findFiles(strRootDir, lstExtentions=None, bFromRoot=False):
     """
     Equivalent to:
     files=os.system('find "%s"  -iname "*.%s"'%(RootDir,suffix)).readlines()
-    
+
     @param strRootDir: path of the root of the search
     @type strRootDir: string
     @param lstExtentions: list of string representing interesting extensions
     @param bFromRoot: start the return path from / instead of the strRootDir
     @return: the list of the files with the given suffix in the given dir
-    @rtype: list of strings 
+    @rtype: list of strings
     """
     if lstExtentions is None:
         lstExtentions = config.Extensions
@@ -123,7 +121,7 @@ def recursive_delete(strDirname):
     CAUTION:  This is dangerous!  For example, if top == '/', it
     could delete all your disk files.
     @param strDirname: top directory to delete
-    @type strDirname: string 
+    @type strDirname: string
     """
     for root, dirs, files in os.walk(strDirname, topdown=False):
         for name in files:

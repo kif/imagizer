@@ -1,5 +1,6 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
+#
 #******************************************************************************\
 #* $Source$
 #* $Id$
@@ -32,12 +33,12 @@ __contact__ = "Jerome.Kieffer@terre-adelie.org"
 def unicode2ascii(_unicrap):
     """
     This takes a UNICODE string and replaces unicode characters with
-    something equivalent in 7-bit ASCII. It returns a plain ASCII string. 
-    This function makes a best effort to convert unicode characters into 
+    something equivalent in 7-bit ASCII. It returns a plain ASCII string.
+    This function makes a best effort to convert unicode characters into
     ASCII equivalents. It does not just strip out the Latin-1 characters.
-    All characters in the standard 7-bit ASCII range are preserved. 
-    In the 8th bit range all the Latin-1 accented letters are converted 
-    to unaccented equivalents. Most symbol characters are converted to 
+    All characters in the standard 7-bit ASCII range are preserved.
+    In the 8th bit range all the Latin-1 accented letters are converted
+    to unaccented equivalents. Most symbol characters are converted to
     something meaningful. Anything not converted is deleted.
     """
     xlate = {0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
@@ -82,7 +83,7 @@ def unicode2ascii(_unicrap):
 def unicode2html(_unicrap):
     """
     Converts an unicode input into a "html" like string
-    
+
     @param _unicrap: input unicode
     @return: html string
     """

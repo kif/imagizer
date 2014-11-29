@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # coding: utf8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
 #* Copyright (C) 2001, Martin Blais <blais@furius.ca>
 #* Copyright (C) 2012, Jerome Kieffer <imagizer@terre-adelie.org>

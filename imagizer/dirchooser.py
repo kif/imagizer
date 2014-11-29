@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: UTF8 -*-
+# coding: utf-8
+#
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
 #* Copyright (C) 2006-2009,  Jérome Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
@@ -38,6 +37,7 @@ from .config import Config
 config = Config()
 from .imagizer import buildUI, gtk
 unifiedglade = os.path.join(os.path.dirname(__file__), "selector.glade")
+
 
 class WarningSc(object):
     """
@@ -101,7 +101,6 @@ class WarningSc(object):
             while gtk.events_pending():
                 gtk.main_iteration()
 
-
     def filer(self, *args):
         """
         Launch the filer GUI to choose the root directory
@@ -111,7 +110,6 @@ class WarningSc(object):
         self.guiFiler.get_object("filer").set_current_folder(self.directory)
         self.guiFiler.signal_connect('on_Open_clicked', self.filerSelect)
         self.guiFiler.signal_connect('on_Cancel_clicked', self.filerDestroy)
-
 
     def filerSelect(self, *args):
         """

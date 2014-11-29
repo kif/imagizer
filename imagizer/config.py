@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: UTF8 -*-
+# coding: utf-8
+#
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
-#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
+#* Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -23,22 +22,31 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
-
+from __future__ import with_statement, division, print_function, absolute_import
 """
 Config is a class containing all the configuration of the imagizer suite.
 Technically it is a Borg (design Pattern) so every instance of Config has exactly the same contents.
 """
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20140825"
+__date__ = "20141129"
 __license__ = "GPL"
 
 import os, locale, logging, ConfigParser
 installdir = os.path.dirname(os.path.abspath(__file__))
+logger = logging.getLogger("imagizer.config")
 try:
     import resource
 except ImportError:
     resource = None
+
+if os.name == 'nt':  # sys.platform == 'win32':
+    listConfigurationFiles = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
+elif os.name == 'posix':
+    listConfigurationFiles = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
+
+
+
 
 def float_or_None(inp):
     try:
@@ -47,13 +55,14 @@ def float_or_None(inp):
         out = None
     return out
 
+
 ################################################################################################
 ###############  Class Config for storing the cofiguratio in a Borg ############################
 ################################################################################################
 class Config(object):
     """this class is a Borg : always returns the same values regardless to the instance of the object"""
     __shared_state = {}
-    def __init__(self):
+    def __init__(self, configuration_files=None):
         """
         This is  a Borg, so the constructor is more or less empty
         """
@@ -140,7 +149,8 @@ class Config(object):
             self.ThumbnailExtensions = [".thm", ".jpg"]
             self.BatchScriptExecutor = "/usr/bin/batch"
             self.BatchUsesPipe = True
-
+            if configuration_files is not None:
+                self.load(configuration_files)
 
     def load(self, filenames):
         """retrieves the the default options, if the filenames does not exist, uses the default instead
@@ -201,7 +211,6 @@ class Config(object):
             elif j == "dcraw".lower():              self.Dcraw = i[1]
             elif j == "SelectedFilter".lower():      self.SelectedFilter = i[1]
             else: logging.warning(str("Config.load: unknown key %s" % j))
-
 
         for k in ["ScaledImages", "Thumbnails"]:
             try:
@@ -265,7 +274,6 @@ class Config(object):
         ]
         return  os.linesep.join(listtxt)
 
-
     def printConfig(self):
         """
         Print out the configuration
@@ -273,11 +281,9 @@ class Config(object):
         logging.debug("Config.printConfig")
         logging.info(self.__repr__())
 
-
     def saveConfig(self, filename):
         """Wrapper for self.config"""
         self.save(filename)
-
 
     def save(self, filename):
         """
@@ -330,7 +336,6 @@ class Config(object):
         if self.ImageHeight is not None:
             lsttxt += ["#Height of the last image displayed ... should not be modified", "ImageHeight:%s" % self.ImageHeight, ""]
 
-
         for i in ["ScaledImages", "Thumbnails"]:
             lsttxt += ["[%s]" % i, ""]
             j = eval("self.%s" % i)
@@ -364,3 +369,5 @@ class Config(object):
         if self.DEBUG:
             logging.info(str("Configuration saved to file %s" % filename))
 
+
+config = Config(listConfigurationFiles)

@@ -1,8 +1,6 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
 #* Copyright (C) 2010 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
@@ -47,7 +45,7 @@ config = imagizer.Config()
 class PyGtkMplayer(gtk.Socket):
     """
     Interface with mplayer
-    
+
     List of available commands: mplayer -input cmdlist
     http://www.mplayerhq.hu/DOCS/tech/slave.txt
     """

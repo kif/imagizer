@@ -1,11 +1,8 @@
+#!/usr/bin/env python
 # coding: utf8
 #
-#
 #******************************************************************************\
-# * $Source$
-# * $Id$
-# *
-# * Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Copyright (C) 2006 - 2014,  Jérôme Kieffer <kieffer@terre-adelie.org>
 # * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 # * Licence GPL v2
 # *
@@ -25,38 +22,28 @@
 # *
 #*****************************************************************************/
 
+from __future__ import with_statement, division, print_function, absolute_import
+
 """
 General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 
 __author__ = "Jérôme Kieffer"
-__version__ = "1.7.0"
+__version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20131226"
+__date__ = "20141129"
 __license__ = "GPL"
 
 import os, logging, sys
 logger = logging.Logger("imagizer", logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
-# formatter = logging.Formatter("%(name)s/%(levelname)s: %(message)s")
-# ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-if os.name == 'nt':  # sys.platform == 'win32':
-    listConfigurationFiles = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
-elif os.name == 'posix':
-    listConfigurationFiles = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
-
-from config import Config
-config = Config()
-config.load(listConfigurationFiles)
-
-# import pyexiftran as Exiftran
-from imagecache import ImageCache
-from parser import AttrFile
-from signals import Signal
-from encoding import unicode2html, unicode2ascii
-from html import Html
+from .imagecache import ImageCache
+from .parser import AttrFile
+from .signals import Signal
+from .encoding import unicode2html, unicode2ascii
+from .html import Html
 installdir = os.path.dirname(__file__)

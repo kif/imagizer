@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: UTF8 -*-
+# coding: utf-8
 #******************************************************************************\
-# * $Source$
-# * $Id$
 # *
 # * Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
 # * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard

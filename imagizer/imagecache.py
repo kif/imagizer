@@ -1,10 +1,8 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
-#* Copyright (C) 2006-2011,  Jérome Kieffer <kieffer@terre-adelie.org>
+#* Copyright (C) 2006-2014,  Jérome Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -24,18 +22,20 @@
 #*
 #*****************************************************************************/
 
+from __future__ import with_statement, division, print_function, absolute_import
+
 """
 ImageCache is a class containing a copy of the bitmap of images .
 Technically it is a Borg (design Pattern) so every instance of ImageCache has exactly the same contents.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20141129"
 __license__ = "GPL"
 
 import logging, os
 logger = logging.getLogger("imagizer.imagecache")
-from config import Config
+from .config import Config
 config = Config()
 
 
@@ -129,7 +129,7 @@ class ImageCache(dict):
 
 
     def keys(self):
-        """ 
+        """
         Returns the list of keys, ordered
         """
         logger.debug("ImageCache.keys")

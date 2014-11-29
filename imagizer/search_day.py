@@ -1,8 +1,6 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
 #* Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
@@ -120,7 +118,7 @@ class Day(object):
     @classmethod
     def get(cls, key):
         """
-        retrieve an instance from the cache   
+        retrieve an instance from the cache
         """
         instance = object.__new__(cls)
         instance.__dict__ = cls.cache[key]
@@ -133,7 +131,7 @@ class SearchDay(object):
     def __init__(self, lst_photo, callback=None):
         """
         @param lst_photo: list of input images...
-        @param callback: callback function wich is called with the selected day/image on quit 
+        @param callback: callback function wich is called with the selected day/image on quit
         """
         logger.info("Initialization of the search GUI")
         if callable(callback):

@@ -1,8 +1,6 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: utf8 -*-
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
 #* Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
@@ -80,7 +78,7 @@ class Video(object):
     @classmethod
     def startProcessing(cls, script):
         """
-        @param script: 
+        @param script:
         @return: jobID which is a sting: Plugin-000001
         """
         if script.strip() == "":
@@ -100,7 +98,7 @@ class Video(object):
     @classmethod
     def processingLoop(cls):
         """
-        Process all jobs in the queue.  
+        Process all jobs in the queue.
         """
         with cls.sem:
             while not cls.queue.empty():
@@ -263,7 +261,7 @@ class Video(object):
             logger.warning("Json failed to load %s with error: %s", file,err)
             self.analyse()
             self.toDisk()
-            return            
+            return
         if ("fastMd5" in red) and (self.fastMd5 == red["fastMd5"]):
             self.__dict__.update(red)
             if "timeStamp" in red:
@@ -277,7 +275,7 @@ class Video(object):
         """
         Return if a video is already encoded (H264, MP3, name according to convention
         @return: True if a video is already encoded
-        @rtype: boolean 
+        @rtype: boolean
         """
         bIsEncoded = self.videoFile.endswith(".avi") and\
                       (self.audioCodec is not None and "mp" in self.audioCodec.lower()) and\
@@ -530,7 +528,7 @@ class Video(object):
         if bDoAudio:
             newSampleRate = 44100
             wavaudio = "audio-%s.wav" % newSampleRate
-            if (self.audioSampleRate == 11024) and (self.audioChannel == 1): #specific Ixus 
+            if (self.audioSampleRate == 11024) and (self.audioChannel == 1): #specific Ixus
                 rawaudio = "audio-%s.raw" % self.audioSampleRate
                 pbsfile.write(config.MPlayer + ' -quiet "%s" -dumpaudio   -dumpfile %s \n' % (self.fullPath, rawaudio))
                 pbsfile.write(config.Sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s \n" % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
@@ -636,7 +634,7 @@ class PairVideo(object):
 
     def __cmp__(self, other):
         """
-        Comparator for two pairs of videos 
+        Comparator for two pairs of videos
         """
         if self.__datetime < other.__datetime:
             return -1
@@ -651,7 +649,7 @@ class PairVideo(object):
         """
         setter for raw file name
         @param rawFile: name of the raw file
-        @type rawFile: string 
+        @type rawFile: string
         """
         self.__rawFile = rawFile
         if self.__datetime is None:
@@ -743,7 +741,7 @@ class PairVideo(object):
 
     #TODO:
     #use python properties to set/read the underlying videos attributes.
-    
+
 ################################################################################
 # END of the class PairVideo
 ################################################################################
@@ -884,16 +882,16 @@ class AllVideos(object):
 
     def next(self):
         """
-        @return: next pair of videos 
-        @rtype: instance of PairVideo 
+        @return: next pair of videos
+        @rtype: instance of PairVideo
         """
         self.current = (self.current + 1) % len(self.__listVideoPairs)
         return self.__listVideoPairs[self.current]
 
     def previous(self):
         """
-        @return: previous pair of videos 
-        @rtype: instance of PairVideo 
+        @return: previous pair of videos
+        @rtype: instance of PairVideo
         """
         self.current = (self.current - 1) % len(self.__listVideoPairs)
         return self.__listVideoPairs[self.current]
@@ -901,15 +899,15 @@ class AllVideos(object):
     def first(self):
         """
         @return: next pair of videos
-        @rtype: instance of PairVideo 
+        @rtype: instance of PairVideo
         """
         self.current = 0
         return self.__listVideoPairs[self.current]
 
     def last(self):
         """
-        @return: last pair of videos 
-        @rtype: instance of PairVideo 
+        @return: last pair of videos
+        @rtype: instance of PairVideo
         """
         self.current = len(self.__listVideoPairs) - 1
         return self.__listVideoPairs[self.current]

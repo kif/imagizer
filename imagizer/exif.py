@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding: utf8
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
@@ -25,13 +26,13 @@ if version_info >= (0, 2, 0):
 else:
     class Exif(pyexiv2.Image):
         """
-        Wrapper for pyexiv2 v0.1.x  
+        Wrapper for pyexiv2 v0.1.x
         """
         def __init__(self, filename):
             """    :
-            Constructor of the class Exif for handling Exif metadata  
+            Constructor of the class Exif for handling Exif metadata
             Wrapper for pyexiv2 v0.1.x
-            
+
             @param filename: path to an image file
             @type filename: string
             """

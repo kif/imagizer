@@ -1,10 +1,8 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
+#
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
+#* Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
 #* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
@@ -25,11 +23,14 @@
 #*****************************************************************************/
 """
 Module contains a class for gaussian blur
+
+TODO: compare performances using
+
 """
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111023"
+__date__ = "20141129"
 __license__ = "GPL"
 
 import numpy, logging, sys, threading
@@ -54,8 +55,8 @@ except (ImportError, WindowsError) as e:
 def gaussian(M, std):
     """
     Return a Gaussian window of length M with standard-deviation std.
-      
-    @param M: size of the function 
+
+    @param M: size of the function
     @param std: sigma value
     """
     if scipy_signal is not None:
@@ -67,7 +68,7 @@ def gaussian(M, std):
 
 def expand(data, sigma, mode="constant", cval=0.0):
     """Expand array a with its reflection on boundaries
-    
+
     @param a: 2D array
     @param sigma: float or 2-tuple of floats
     @param mode:"constant","nearest" or "reflect"
@@ -124,9 +125,9 @@ class Gaussian(object):
 
         @param data:    data array to filter
         @type data: array-like
-        @param sigma: standard deviation for Gaussian kernel. 
+        @param sigma: standard deviation for Gaussian kernel.
             The standard deviations of the Gaussian filter are given for each axis as a sequence,
-            or as a single number, in which case it is equal for all axes. 
+            or as a single number, in which case it is equal for all axes.
         @type sigma: scalar or sequence of scalars
         @param mode: {'reflect','constant','nearest','mirror', 'wrap'}, optional
             The ``mode`` parameter determines how the array borders are

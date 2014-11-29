@@ -1,5 +1,5 @@
-# winpaths.py
-
+#!/usr/bin/env python
+# coding: utf-8
 """Functions for getting system/language/user dependent paths on windows.
 
 All path names returned by the functions of this module are unicode strings.

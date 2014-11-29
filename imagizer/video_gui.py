@@ -1,8 +1,6 @@
-#!/usr/bin/env python 
-# -*- coding: UTF8 -*-
+#!/usr/bin/env python
+# coding: utf-8
 #******************************************************************************\
-#* $Source$
-#* $Id$
 #*
 #* Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
 #* Licence GPL v3+
@@ -53,7 +51,7 @@ DEBUG = False
 class VideoGUI(object):
     """
     class interface that manages the GUI using Glade-2
-    
+
     #This should be a view in the MVC design pattern
     """
     def __init__(self, inFile):
