@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from __future__ import with_statement, division, print_function, absolute_import
 """
 
 Bootstrap helps you to test dahu scripts without installing them
@@ -74,9 +74,10 @@ if (not os.path.isdir(SCRIPTSPATH)) or (not os.path.isdir(LIBPATH)):
     build = subprocess.Popen([sys.executable, "setup.py", "build"],
                      shell=False, cwd=os.path.dirname(__file__))
     print("Build process ended with rc= %s" % build.wait())
+
 # _copy_files("openCL", os.path.join(LIBPATH, "dahu"), ".cl")
 _copy_files("gui", os.path.join(LIBPATH, "imagizer", "gui"), ".ui")
-# _copy_files("calibration", os.path.join(LIBPATH, "dahu", "calibration"), ".D")
+_copy_files("pixmaps", os.path.join(LIBPATH, "imagizer", "pixmaps"), ".png")
 #_copy_files("plugins", os.path.join(LIBPATH, "dahu", "plugins"), ".py")
 
 if __name__ == "__main__":

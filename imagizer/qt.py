@@ -22,6 +22,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from __future__ import with_statement, division, print_function, absolute_import
+
 """
 
 Module to handle matplotlib and the Qt backend
@@ -39,7 +41,7 @@ __status__ = "production"
 import os
 import sys
 import matplotlib
-installdir = os.path.dirname(os.path.abspath(__file__))
+from .utils import get_ui_file
 
 has_Qt = True
 if ('PySide' in sys.modules):
@@ -124,46 +126,6 @@ def update_fig(fig=None):
                                  QtGui.QResizeEvent(fig.canvas.size(),
                                                     fig.canvas.size()))
             flush()
-
-def _get_data_path(filename):
-    """
-    @param filename: the name of the requested data file.
-    @type filename: str
-
-    Can search root of data directory in:
-    - Environment variable PYFAI_DATA
-    - path hard coded into pyFAI.directories.data_dir
-    - where this file is installed.
-
-    In the future ....
-    This method try to find the requested ui-name following the
-    xfreedesktop recommendations. First the source directory then
-    the system locations
-
-    For now, just perform a recursive search
-    """
-    print(filename)
-    resources = [os.environ.get("IMAGIZER_DATA"), installdir, os.path.dirname(installdir)]
-
-    for resource in resources:
-        if not resource:
-            continue
-        real_filename = os.path.join(resource, filename)
-        print(real_filename)
-        if os.path.exists(real_filename):
-            return real_filename
-    else:
-        raise RuntimeError("Can not find the [%s] resource, "
-                        " something went wrong !!!" % (real_filename,))
-
-def get_ui_file(filename):
-    """get the full path of a user-interface file
-
-    @return: the full path of the ui
-    """
-    if filename[-3:] != ".ui":
-        filename = filename + ".ui"
-    return _get_data_path(os.path.join("gui", filename))
 
 def buildUI(ui_file):
     """

@@ -21,7 +21,7 @@
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
 #*****************************************************************************/
-
+from __future__ import with_statement, division, print_function, absolute_import
 """
 General library used by selector and generator.
 It handles images, progress bars and configuration file.
@@ -33,74 +33,20 @@ __license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging
 logger = logging.getLogger("imagizer.imagizer")
 
+from .utils import get_pixmap_file
 
 try:
     import Image  # IGNORE:F0401
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
-try:  # this is for gtk3 but we are not yet there ...
-#     from gi.repository import Gtk as gtk
-#     from gi.repository import GObject as gobject
-#     from gi.repository import Gdk as gdk
-#     from gi.repository import GdkPixbuf
-#     gtkInterpolation = [GdkPixbuf.InterpType.NEAREST, GdkPixbuf.InterpType.TILES,
-#                         GdkPixbuf.InterpType.BILINEAR, GdkPixbuf.InterpType.HYPER]
-    import gtk  # IGNORE:E0601
-    import gobject
-    import gtk.gdk as gdk  # IGNORE:E0601
-    gtkInterpolation = [gdk.INTERP_NEAREST, gdk.INTERP_TILES, gdk.INTERP_BILINEAR, gdk.INTERP_HYPER]
-    GTKglade = None
-except ImportError:
-    try:
-        import pygtk ; pygtk.require('2.0')  # IGNORE:F0401
-        import gtk  # IGNORE:E0601
-        import gtk.gdk as gdk  # IGNORE:E0601
-        import gtk.glade as GTKglade  # IGNORE:E0611
-        gtkInterpolation = [gdk.INTERP_NEAREST, gdk.INTERP_TILES, gdk.INTERP_BILINEAR, gdk.INTERP_HYPER]
-
-    except ImportError:  # GTK3
-            raise ImportError("Selector needs Gtk and glade available from http://www.pygtk.org/")
-
-# About interpolation (from documentation)
-# NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
-# TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
-# BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
-# HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
 
 
-# here we detect the OS runnng the program so that we can call exftran in the right way
-installdir = os.path.dirname(__file__)
-
-unifiedglade = os.path.join(installdir, "selector.glade")
-from signals import Signal
-from encoding import unicode2ascii
-from config import Config
-config = Config()
-import fileutils
-from photo import Photo, Signature
-
-def buildUI(windows_name="Principale"):
-    """
-    Create the glade object compatible with both GTK2 & GTK3 style
-    @param: window name as define  in glade file
-    @return: builder instance
-    """
-    if GTKglade:
-        xml = GTKglade.XML(unifiedglade, root=windows_name)
-        xml.connect_signals = xml.signal_autoconnect
-        xml.get_object = xml.get_widget
-    else:
-        xml = gtk.Builder()
-        xml.add_objects_from_file(unifiedglade, (windows_name,))
-    return xml
-
-def gtkFlush():
-    """
-    Flush all graphics stuff (outside main loop)
-    """
-    while gtk.events_pending():  # IGNORE:E1101
-        gtk.main_iteration()  # IGNORE:E1101
-
+from .signals import Signal
+from .encoding import unicode2ascii
+from .config import config
+from . import fileutils
+from .photo import Photo, Signature
+from .qt import buildUI, flush, QtGui, QtCore
 
 
 # class Model:
@@ -502,6 +448,7 @@ class ModelRangeTout(object):
         else:
             return AllreadyDone, 0
 
+
 class Controler(object):
     """ Implémentation du contrôleur de la vue utilisant la console"""
     def __init__(self, model, view):
@@ -525,7 +472,6 @@ class Controler(object):
     def __NBJCallback(self, NbrJobs):
         """ Callback pour redefinir le nombre de job totaux."""
         self.__view.ProgressBarMax(NbrJobs)
-
 
 
 class ControlerX(object):
@@ -555,7 +501,6 @@ class ControlerX(object):
         self.__viewx.ProgressBarMax(NbrJobs)
 
 
-
 class View(object):
     """ Implémentation de la vue.
     Utilisation de la console.
@@ -581,6 +526,7 @@ class View(object):
         """nothin in text mode"""
         pass
 
+
 class ViewX(object):
     """
     Implementation of the view as a splashscren
@@ -594,26 +540,33 @@ class ViewX(object):
         de l'interface graphique
         """
         self.__nbVal = None
-        self.xml = None
-        self.pb = None
+        self.gui = None
+        self.scene = None
 
     def creatProgressBar(self, label, nbVal):
         """
         Creation of a progress bar.
         """
-        self.xml = GTKglade.XML(unifiedglade, root="splash")
-        self.xml.get_object("image").set_from_pixbuf(gdk.pixbuf_new_from_file(os.path.join(installdir, "Splash.png")))
-        self.pb = self.xml.get_object("progress")
-        self.xml.get_object("splash").set_title(label)
-        self.xml.get_object("splash").show()
-        gtkFlush()
         self.__nbVal = nbVal
+        self.gui = buildUI("splash")
+        splash_image_path = get_pixmap_file("Splash.png")
+        image = QtGui.QImage(splash_image_path)
+        pixmap = QtGui.QPixmap.fromImage(image)
+        w_pix, h_pix = pixmap.width(), pixmap.height()
+
+        self.scene.setSceneRect(0, 0, w_pix, h_pix)
+        self.scene.addPixmap(pixmap)
+        self.gui.image.setScene(self.scene)
+        self.gui.progressBar.setRange(0, nbVal)
+        self.gui.setTitle(label)
+        self.gui.show()
+        flush()
 
     def ProgressBarMax(self, nbVal):
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
 
-    def updateProgressBar(self, h, filename):
+    def updateProgressBar(self, h, filename,):
         """
         Update the progress-bar to the given value with the given filename writen on it
 
@@ -627,18 +580,19 @@ class ViewX(object):
         @type filename: string
         @return: None
         """
-        if h < self.__nbVal:
-            self.pb.set_fraction(float(h + 1) / self.__nbVal)
+        if h <= self.__nbVal:
+            self.pb.setValue(h)
         else:
-            self.pb.set_fraction(1.0)
-        self.pb.set_text(filename)
-        gtkFlush()
+            self.pb.set_fraction(self.__nbVal)
+        self.gui.input_file.setText(filename)
+        self.gui.output_file.setText(filename)
+        flush()
 
     def finish(self):
         """destroys the interface of the splash screen"""
-        self.xml.get_object("splash").destroy()
-        gtkFlush()
-        del self.xml
+        self.gui.close()
+        flush()
+        del self.gui
         gc.collect()
 
 
