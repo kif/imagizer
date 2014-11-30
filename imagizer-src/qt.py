@@ -109,6 +109,8 @@ else:
     QtGui = QtCore = QtUiTools = QtWebKit = loadUi = None
     SIGNAL = Signal = None
 
+transformations = (QtCore.Qt.SmoothTransformation,
+                   QtCore.Qt.FastTransformation)
 
 def flush():
     QtCore.QCoreApplication.processEvents()
@@ -132,3 +134,4 @@ def buildUI(ui_file):
     Retrun a class from a ui descrition file
     """
     return loadUi(get_ui_file(ui_file))
+

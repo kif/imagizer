@@ -48,20 +48,6 @@ kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
     ImageFile.MAXBLOCK = 2 ** 26  # Thats 66 Mpix
 
-try:
-    import pygtk ; pygtk.require('2.0')
-    import gtk
-    import gtk.glade as GTKglade
-except ImportError:
-    raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/")
-# Variables globales qui sont des CONSTANTES !
-gtkInterpolation = [gtk.gdk.INTERP_NEAREST, gtk.gdk.INTERP_TILES, gtk.gdk.INTERP_BILINEAR, gtk.gdk.INTERP_HYPER]
-# gtk.gdk.INTERP_NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
-# gtk.gdk.INTERP_TILES    This is an accurate simulation of the PostScript image operator without any interpolation enabled. Each pixel is rendered as a tiny parallelogram of solid color, the edges of which are implemented with antialiasing. It resembles nearest neighbor for enlargement, and bilinear for reduction.
-# gtk.gdk.INTERP_BILINEAR    Best quality/speed balance; use this mode by default. Bilinear interpolation. For enlargement, it is equivalent to point-sampling the ideal bilinear-interpolated image. For reduction, it is equivalent to laying down small tiles and integrating over the coverage area.
-# gtk.gdk.INTERP_HYPER    This is the slowest and highest quality reconstruction function. It is derived from the hyperbolic filters in Wolberg's "Digital Image Warping", and is formally defined as the hyperbolic-filter sampling the ideal hyperbolic-filter interpolated image (the filter is designed to be idempotent for 1:1 pixel mapping).
-
-
 if config.ImageCache > 1:
     import imagecache
     imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
@@ -69,10 +55,11 @@ else:
     imageCache = None
 
 from .exif       import Exif
-from . import pyexiftran
+from .           import pyexiftran
 from .fileutils  import mkdir, makedir, smartSize
 from .encoding   import unicode2ascii
-from . import blur
+from .           import blur
+from .qt import QtCore, QtGui, transformations
 
 # #########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
@@ -80,6 +67,18 @@ from . import blur
 class Photo(object):
     """class photo that does all the operations available on photos"""
     _gaussian = blur.Gaussian()
+
+    EXIF_KEYS = {'Exif.Image.Make':'make',
+                 'Exif.Image.Model':'model',
+                 'Exif.Photo.DateTimeOriginal':'time',
+                 'Exif.Photo.ExposureTime':'speed',
+                 'Exif.Photo.FNumber':'aperture',
+                 'Exif.Photo.ExposureBiasValue':'bias',
+                 'Exif.Photo.Flash':'flash',
+                 'Exif.Photo.FocalLength':'focal',
+                 'Exif.Photo.ISOSpeedRatings':'iso'
+                }
+
 
     def __init__(self, filename, dontCache=False):
         """
@@ -94,6 +93,7 @@ class Photo(object):
         self._pixelsY = None
         self._pil = None
         self._exif = None
+        self._pixbuf = None
         self.scaledPixbuffer = None
         self.orientation = 1
         if (imageCache is not None) and (filename in imageCache):
@@ -110,7 +110,6 @@ class Photo(object):
             logger.debug("Image %s not in Cache", filename)
             if dontCache is False:
                 imageCache[filename] = self
-        return None
 
     def __repr__(self):
         return "Photo object on filename %s" % self.filename
@@ -136,14 +135,16 @@ class Photo(object):
         if not self._pixelsX:
             self._pixelsX = max(1, self.pil.size[0])
         return self._pixelsX
-    def setPixelsX(self, value): self._pixelsX = value
+    def setPixelsX(self, value):
+        self._pixelsX = value
     pixelsX = property(getPixelsX, setPixelsX, doc="Property to get the size in pixels via PIL")
 
     def getPixelsY(self):
         if not self._pixelsY:
             self._pixelsY = max(1, self.pil.size[1])
         return self._pixelsY
-    def setPixelsY(self, value): self._pixelsY = value
+    def setPixelsY(self, value):
+        self._pixelsY = value
     pixelsY = property(getPixelsY, setPixelsY, doc="Property to get the size in pixels via PIL")
 
     def getExif(self):
@@ -239,7 +240,7 @@ class Photo(object):
                 self.pixelsX = y
                 self.pixelsY = x
                 if self.metadata is not None:
-                    self.metadata["Resolution"] = "%i x % i" % (y, x)
+                    self.metadata["resolution"] = "%i x % i" % (y, x)
             else:
                 pyexiftran.rotate90(self.fn)
                 self.pixelsX = None
@@ -252,7 +253,7 @@ class Photo(object):
                 self.pixelsX = y
                 self.pixelsY = x
                 if self.metadata is not None:
-                    self.metadata["Resolution"] = "%i x % i" % (y, x)
+                    self.metadata["resolution"] = "%i x % i" % (y, x)
             else:
                 pyexiftran.rotate270(self.fn)
                 self.pixelsX = None
@@ -297,45 +298,33 @@ class Photo(object):
         """
         return exif data + title from the photo
         """
-        clef = {'Exif.Image.Make':'Marque',
- 'Exif.Image.Model':'Modele',
- 'Exif.Photo.DateTimeOriginal':'Heure',
- 'Exif.Photo.ExposureTime':'Vitesse',
- 'Exif.Photo.FNumber':'Ouverture',
-# 'Exif.Photo.DateTimeOriginal':'Heure2',
- 'Exif.Photo.ExposureBiasValue':'Bias',
- 'Exif.Photo.Flash':'Flash',
- 'Exif.Photo.FocalLength':'Focale',
- 'Exif.Photo.ISOSpeedRatings':'Iso' ,
-# 'Exif.Image.Orientation':'Orientation'
-}
 
         if self.metadata is None:
             self.metadata = {}
-            self.metadata["Taille"] = "%.2f %s" % smartSize(op.getsize(self.fn))
-            self.metadata["Titre"] = self.exif.comment
+            self.metadata["size"] = "%.2f %s" % smartSize(op.getsize(self.fn))
+            self.metadata["title"] = self.exif.comment
             try:
-                self.metadata["Titre"].encode(config.Coding)
+                self.metadata["title"].encode(config.Coding)
             except Exception as error:
-                logger.error("%s in comment: %s" % (error, self.metadata["Titre"]))
+                logger.error("%s in comment: %s" % (error, self.metadata["title"]))
                 try:
-                    self.metadata["Titre"] = self.metadata["Titre"].decode("latin1")
+                    self.metadata["title"] = self.metadata["title"].decode("latin1")
                 except Exception as error2:
                     logger.error("%s Failed as well in latin1, resetting" % (error2))
-                    self.metadata["Titre"] = u""
+                    self.metadata["title"] = u""
             try:
                 rate = self.exif["Exif.Image.Rating"]
             except KeyError:
-                self.metadata["Rate"] = 0
+                self.metadata["rate"] = 0
                 self.exif["Exif.Image.Rating"] = 0
             else:
                 if "value" in dir(rate):  # pyexiv2 v0.2+
-                    self.metadata["Rate"] = int(rate.value)
+                    self.metadata["rate"] = int(rate.value)
                 else:  # pyexiv2 v0.1
-                    self.metadata["Rate"] = int(float(rate))
+                    self.metadata["rate"] = int(float(rate))
 
             if self._pixelsX and self._pixelsY:
-                self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
+                self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             else:
                 try:
                     self.pixelsX = self.exif["Exif.Photo.PixelXDimension"]
@@ -346,22 +335,21 @@ class Photo(object):
                     if "human_value" in dir(self.pixelsX):
                         self.pixelsX = self.pixelsX.value
                         self.pixelsY = self.pixelsY.value
-                self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
+                self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             if "Exif.Image.Orientation" in self.exif.exif_keys:
                 self.orientation = self.exif["Exif.Image.Orientation"]
                 if "human_value" in dir(self.orientation):
                     self.orientation = self.orientation.value
-            for key in clef:
+            for key, name in self.EXIF_KEYS.items():
                 try:
                     value = self.exif.interpretedExifValue(key)
                     if value:
-                        self.metadata[clef[key]] = value.decode(config.Coding).strip()
+                        self.metadata[name] = value.decode(config.Coding).strip()
                     else:
-                        self.metadata[clef[key]] = u""
+                        self.metadata[name] = u""
                 except (IndexError, KeyError):
-                    self.metadata[clef[key]] = u""
+                    self.metadata[name] = u""
         return self.metadata.copy()
-
 
     def has_title(self):
         """
@@ -369,11 +357,10 @@ class Photo(object):
         """
         if self.metadata == None:
             self.readExif()
-        if  self.metadata["Titre"]:
+        if  self.metadata["title"]:
             return True
         else:
             return False
-
 
     def show(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
         """
@@ -383,7 +370,7 @@ class Photo(object):
         @param Ysize: Height of the image buffer
         @param Xcenter: fraction of image to center on in x
         @param Ycenter: fraction of image to center on in Y
-        @return: a pixbuf to shows the image in a Gtk window
+        @return: a pixbuf to shows the image in a window
         """
 
         scaled_buf = None
@@ -412,15 +399,16 @@ class Photo(object):
 #       Put in Cache the "BIG" image
         if self.scaledPixbuffer is None:
             logger.debug("self.scaledPixbuffer is empty")
-            pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
+
             if Rbig < 1:
-                self.scaledPixbuffer = pixbuf.scale_simple(nxBig, nyBig, gtkInterpolation[config.Interpolation])
+
+                self.scaledPixbuffer = self.pixbuf.scaled(nxBig, nyBig, QtCore.Qt.KeepAspectRatio,
+                                                     transformations[config.Interpolation])
             else :
-                self.scaledPixbuffer = pixbuf
+                self.scaledPixbuffer = self.pixbuf
             logger.debug("To Cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
         if Xcenter and Ycenter:
             logger.debug("zooming to ")
-            pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
             Xcenter *= self.pixelsX
             Ycenter *= self.pixelsY
             xmin = int(Xcenter - Xsize / 2.0)
@@ -436,18 +424,15 @@ class Photo(object):
                 xmin = max(0, self.pixelsX - Xsize)
             if ymin + Ysize > self.pixelsY:
                 ymin = max(0, self.pixelsY - Ysize)
-            pixbuf = gtk.gdk.pixbuf_new_from_file(self.fn)
-            return pixbuf.subpixbuf(xmin, ymin, width, height)
-            if Rbig < 1:
-                self.scaledPixbuffer = pixbuf.scale_simple(nxBig, nyBig, gtkInterpolation[config.Interpolation])
-            else :
-                self.scaledPixbuffer = pixbuf
-        elif (self.scaledPixbuffer.get_width() == nx) and (self.scaledPixbuffer.get_height() == ny):
+            return self.pixbuf.copy(xmin, ymin, width, height)
+        elif (self.scaledPixbuffer.width() == nx) and \
+             (self.scaledPixbuffer.height() == ny):
             scaled_buf = self.scaledPixbuffer
             logger.debug("In cache No resize %s" % self.filename)
         else:
             logger.debug("In cache To resize %s" % self.filename)
-            scaled_buf = self.scaledPixbuffer.scale_simple(nx, ny, gtkInterpolation[config.Interpolation])
+            scaled_buf = self.scaledPixbuffer.scaled(nx, ny, QtCore.Qt.KeepAspectRatio,
+                                                     transformations[config.Interpolation])
         return scaled_buf
 
 
@@ -462,9 +447,9 @@ class Photo(object):
             self.pil = None
         if self.exif.filename != self.filename:
             self._exif = None
-        self.metadata["Titre"] = title
+        self.metadata["title"] = title
         if rate is not None:
-            self.metadata["Rate"] = rate
+            self.metadata["rate"] = rate
             self.exif["Exif.Image.Rating"] = int(rate)
         self.exif.comment = title
         try:
@@ -513,7 +498,7 @@ class Photo(object):
             pyexiftran.autorotate(self.fn)
             if self.orientation > 4:
                 self.pixelsX, self.pixelsY = self.pixelsY, self.pixelsX
-                self.metadata["Resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
+                self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             self.orientation = 1
 
 
@@ -579,6 +564,16 @@ class Photo(object):
         exifJpeg.write()
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
         return Photo(outfile)
+
+    @property
+    def pixbuf(self):
+        if self._pixbuf is None:
+            self._pixbuf = QtGui.QPixmap(self.fn)
+            if self._pixbuf.isNull():
+                err = "Unable to open file %s" % self.fn
+                logger.error(err)
+                raise RuntimeError(err)
+        return self._pixbuf
 
     def autoWB(self, outfile):
         """

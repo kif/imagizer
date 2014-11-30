@@ -134,7 +134,7 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QLineEdit" name="focale"/>
+           <widget class="QLineEdit" name="focal"/>
           </item>
           <item row="6" column="0">
            <widget class="QLabel" name="label_7">
@@ -234,28 +234,28 @@
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <widget class="QPushButton" name="Precedent">
+           <widget class="QPushButton" name="previous">
             <property name="text">
              <string>Précédent</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="Suivant">
+           <widget class="QPushButton" name="next">
             <property name="text">
              <string>suivant</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QPushButton" name="Gauche">
+           <widget class="QPushButton" name="left">
             <property name="text">
              <string>Rotation à gauche</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QPushButton" name="Droite">
+           <widget class="QPushButton" name="right">
             <property name="text">
              <string>Rotation à droite</string>
             </property>

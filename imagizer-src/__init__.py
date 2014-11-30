@@ -36,6 +36,7 @@ __date__ = "20141129"
 __license__ = "GPL"
 
 import os, logging, sys
+#logging.basicConfig()
 logger = logging.Logger("imagizer", logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)

@@ -256,6 +256,12 @@ class Config(object):
             if max_files < self.ImageCache:
                 self.ImageCache = max_files
 
+        if self.Interpolation > 1:
+            self.Interpolation = 1
+        if self.Interpolation < 0:
+            self.Interpolation = 0
+
+
     def __repr__(self):
         logging.debug("Config.__repr__")
         listtxt = ["",
@@ -295,7 +301,7 @@ class Config(object):
         logging.debug("Config.save")
         lsttxt = ["[Selector]",
         "#Size of the image on the Screen, by default", "ScreenSize: %s" % self.ScreenSize, "",
-        "#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]", "Interpolation: %s" % self.Interpolation, "",
+        "#Downsampling quality [0=nearest, 1=bilinear]", "Interpolation: %s" % self.Interpolation, "",
         "#Page prefix (used when there are too many images per day to fit on one web page)", "PagePrefix: %s" % self.PagePrefix, "",
         "#Maximum number of images per web page", "NbrPerPage: %s" % self.NbrPerPage, "",
         "#Trash sub-directory", "TrashDirectory: %s" % self.TrashDirectory, "",

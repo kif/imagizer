@@ -35,12 +35,12 @@ __date__ = "29/11/2014"
 __license__ = "GPL"
 
 import os, locale, gc, logging, glob, sys
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("imagizer.selector")
 import os.path as op
 
 import imagizer
-from imagizer.qt import QtGui
+from imagizer.qt            import QtGui
 from imagizer.config        import config
 from imagizer.dirchooser    import WarningSc
 from imagizer.selection     import Selected
@@ -102,10 +102,11 @@ class Interfaces(object):
                 f.close()
             except Exception as error:
                 logger.info("Unable to create selected file %s: %s" % (selected_fn, error))
-        self.load_list()
 
     def load_list(self):
+        logger.debug("load_list")
         self.all_files, self.first = rangeTout(config.DefaultRepository, fast=self.fast)
+        logger.debug("list loaded")
 
     def start_interface(self, which="normal"):
         if self.selected is None:
@@ -114,6 +115,7 @@ class Interfaces(object):
             self.interface = Interface(self.all_files, self.current, self.selected, callback=self.interface_closed)
         elif which in ("fullscreen", "slideshow"):
             self.interface = FullScreenInterface(self.all_files, self.current, self.selected, mode=which, callback=self.interface_closed)
+        self.interface.gui.show()
 
     def interface_closed(self, what="quit"):
         self.all_files = self.interface.AllJpegs
@@ -121,8 +123,11 @@ class Interfaces(object):
         self.selected = self.interface.selected
         print("Going to %s" % what)
         what = what.lower()
-        if what != "quit":
+        if what == "quit":
+            sys.exit(0)
+        else:
             self.start_interface(what)
+
 
 if __name__ == '__main__':
     printWarning = True
@@ -138,7 +143,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
         logger.debug("We are in debug mode ...First Debug message")
+    else:
+        logging.basicConfig(level=logging.INFO)
+        logger.setLevel(logging.INFO)
     if args.noautorotate:
         config.AutoRotate = False
         logger.debug("Autorotate is disabled")
@@ -155,6 +164,9 @@ if __name__ == '__main__':
     app = QtGui.QApplication([])
     ifc = Interfaces(warning=printWarning, fast=args.fast)
     ifc.print_warning()
+    ifc.create_selected()
+    ifc.load_list()
+    ifc.start_interface()
     res = app.exec_()
     print(res)
     sys.exit(res)

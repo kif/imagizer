@@ -38,7 +38,7 @@ def get_version():
     return the version string
     """
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "imagizer", "__init__.py")) as f:
+                           "imagizer-src", "__init__.py")) as f:
         for line in f:
             if line.strip().startswith("__version__"):
                 return eval(line.split("=")[1])
@@ -105,8 +105,7 @@ setup(name='Imagizer',
         ("/usr/lib/xscreensaver", ["screensaver/imagizer"])
     ],
     packages=['imagizer'],
-    package_dir={'imagizer': 'imagizer'},
-#    package_data={'imagizer': [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
+    package_dir={'imagizer': 'imagizer-src'},
     ext_package="imagizer",
     ext_modules=[
          Extension(

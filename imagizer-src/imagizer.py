@@ -31,6 +31,7 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "20131226"
 __license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging
+import glob
 logger = logging.getLogger("imagizer.imagizer")
 
 from .utils import get_pixmap_file
@@ -387,10 +388,10 @@ class ModelRangeTout(object):
             myPhoto = Photo(i, dontCache=True)
             data = myPhoto.readExif()
             try:
-                datei, heurei = data["Heure"].split()
+                datei, heurei = data["time"].split()
                 date = re.sub(":", "-", datei)
                 heurej = re.sub(":", "h", heurei, 1)
-                model = data["Modele"].split(",")[-1]
+                model = data["model"].split(",")[-1]
                 heure = unicode2ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
             except ValueError:
                 date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(rootDir, i))))
@@ -609,6 +610,7 @@ def rangeTout(repository, bUseX=True, fast=False):
     @return: 2tuple containing the list of all images and the start-index
     @rtype: (list,integer)
     """
+    logger.debug("in rangeTout bUseX=%s fast=%s" % (bUseX, fast))
     if fast:
         l = len(config.DefaultRepository)
         if not config.DefaultRepository.endswith(os.sep):

@@ -33,7 +33,16 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "29/11/2014"
 __license__ = "GPL"
 
-from .imagizer import unifiedglade, copySelected, processSelected, rangeTout, timer_pass
+import gc
+import logging
+logger = logging.getLogger("imagizer.interface")
+
+logger.debug("from core")
+
+from .imagizer import copySelected, processSelected, timer_pass
+from .qt import QtCore, QtGui, buildUI, flush, SIGNAL
+from .selection import Selected
+from .photo import Photo
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -49,16 +58,16 @@ class FullScreenInterface(object):
         self.iCurrentImg = first
         self.timestamp = time.time()
         logger.info("Initialization of the fullscreen GUI")
-        self.xml = buildUI("FullScreen")
+        self.gui = buildUI("FullScreen")
         self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
         self.showImage()
         flush()
-        self.xml.get_object("FullScreen").maximize()
+        self.gui.FullScreen.maximize()
         flush()
         self.showImage()
         flush()
-        self.xml.connect_signals({'on_FullScreen_destroy': self.destroy,
-                                  "on_FullScreen_key_press_event":self.keypressed})
+#        self.gui.connect_signals({self.gui.FullScreen_destroy': self.destroy,
+#                                  "on_FullScreen_key_press_event":self.keypressed})
         if mode == "slideshow":
             self.SlideShow()
         self.QuitSlideShow = True
@@ -70,17 +79,17 @@ class FullScreenInterface(object):
     def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         self.image = Photo(self.AllJpegs[self.iCurrentImg])
-        X, Y = self.xml.get_object("FullScreen").get_size()
+        X, Y = self.gui.FullScreen.get_size()
         logger.debug("Size of image on screen: %sx%s" % (X, Y))
         pixbuf = self.image.show(X, Y)
-        self.xml.get_object("image793").set_from_pixbuf(pixbuf)
+        self.gui.image793.set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
         if self.AllJpegs[self.iCurrentImg] in self.selected:
             sel = "[Selected]"
         else:
             sel = ""
-        self.xml.get_object("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+        self.gui.FullScreen.set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
 
     def keypressed(self, widget, event, *args):
         """keylogger"""
@@ -168,7 +177,7 @@ class FullScreenInterface(object):
             self.selected.remove(self.AllJpegs[self.iCurrentImg])
             sel = ""
         self.selected.sort()
-        self.xml.get_object("FullScreen").set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+        self.gui.FullScreen.setTitle("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
 
     def SlideShow(self):
         """Starts the slide show"""
@@ -186,7 +195,7 @@ class FullScreenInterface(object):
                 self.iCurrentImg = self.RandomList.pop()
             self.image = Photo(self.AllJpegs[self.iCurrentImg])
             self.image.readExif()
-            if self.image.metadata["Rate"] < config.SlideShowMinRating:
+            if self.image.metadata["rate"] < config.SlideShowMinRating:
                 self.flush_event_queue()
                 continue
             now = time.time()
@@ -220,222 +229,227 @@ class Interface(object):
         self.image = None
         self.strCurrentTitle = ""
         self.iCurrentRate = 0
+        self.current_image = AllJpegs[first]
         self.is_zoomed = False
         self.min_mark = 0
+        print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
-        self.xml = buildUI("Principale")
-        self.xml.get_object("Principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
-        self.xml.get_object("Principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
-        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
-        self.xml.get_object("Logo").set_from_pixbuf(gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
-        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
-        self.xml.get_object("Rate").set_adjustment(self.adj_Rate)
+        self.gui = buildUI("principale")
+        self.scene = QtGui.QGraphicsScene(self.gui)
+        #TODO: add icons
+
+#        self.gui.get_object("principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
+#        self.gui.get_object("principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
+#        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
+#        self.gui.logo.set_from_pixbuf(gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
+#        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
+#        self.gui.get_object("rate").set_adjustment(self.adj_Rate)
         flush()
-        if config.AutoRotate:
-            i = 1
-        else:
-            i = 0
-        self.xml.get_object("Autorotate").set_active(i)
-        if config.Filigrane:
-            i = 1
-        else:
-            i = 0
-        self.xml.get_object("Filigrane").set_active(i)
-
-        if config.ScreenSize == 300:
-            self.xml.get_object("t300").set_active(1)
-            self.xml.get_object("t600").set_active(0)
-            self.xml.get_object("t900").set_active(0)
-            self.xml.get_object("tauto").set_active(0)
-        elif config.ScreenSize == 600:
-            self.xml.get_object("t300").set_active(0)
-            self.xml.get_object("t600").set_active(1)
-            self.xml.get_object("t900").set_active(0)
-            self.xml.get_object("tauto").set_active(0)
-        elif config.ScreenSize == 900:
-            self.xml.get_object("t300").set_active(0)
-            self.xml.get_object("t600").set_active(0)
-            self.xml.get_object("t900").set_active(1)
-            self.xml.get_object("tauto").set_active(0)
-        else:
-            self.xml.get_object("t300").set_active(0)
-            self.xml.get_object("t600").set_active(0)
-            self.xml.get_object("t900").set_active(0)
-            self.xml.get_object("tauto").set_active(1)
-
-        if config.NbrPerPage == 9:
-            self.xml.get_object("9PerPage").set_active(1)
-            self.xml.get_object("12PerPage").set_active(0)
-            self.xml.get_object("16PerPage").set_active(0)
-            self.xml.get_object("20PerPage").set_active(0)
-            self.xml.get_object("25PerPage").set_active(0)
-            self.xml.get_object("30PerPage").set_active(0)
-        elif config.NbrPerPage == 12:
-            self.xml.get_object("9PerPage").set_active(0)
-            self.xml.get_object("12PerPage").set_active(1)
-            self.xml.get_object("16PerPage").set_active(0)
-            self.xml.get_object("20PerPage").set_active(0)
-            self.xml.get_object("25PerPage").set_active(0)
-            self.xml.get_object("30PerPage").set_active(0)
-        elif config.NbrPerPage == 16:
-            self.xml.get_object("9PerPage").set_active(0)
-            self.xml.get_object("12PerPage").set_active(0)
-            self.xml.get_object("16PerPage").set_active(1)
-            self.xml.get_object("20PerPage").set_active(0)
-            self.xml.get_object("25PerPage").set_active(0)
-            self.xml.get_object("30PerPage").set_active(0)
-        elif config.NbrPerPage == 20:
-            self.xml.get_object("9PerPage").set_active(0)
-            self.xml.get_object("12PerPage").set_active(0)
-            self.xml.get_object("16PerPage").set_active(0)
-            self.xml.get_object("20PerPage").set_active(1)
-            self.xml.get_object("25PerPage").set_active(0)
-            self.xml.get_object("30PerPage").set_active(0)
-        elif config.NbrPerPage == 25:
-            self.xml.get_object("9PerPage").set_active(0)
-            self.xml.get_object("12PerPage").set_active(0)
-            self.xml.get_object("16PerPage").set_active(0)
-            self.xml.get_object("20PerPage").set_active(0)
-            self.xml.get_object("25PerPage").set_active(1)
-            self.xml.get_object("30PerPage").set_active(0)
-        elif config.NbrPerPage == 30:
-            self.xml.get_object("9PerPage").set_active(0)
-            self.xml.get_object("12PerPage").set_active(0)
-            self.xml.get_object("16PerPage").set_active(0)
-            self.xml.get_object("20PerPage").set_active(0)
-            self.xml.get_object("25PerPage").set_active(0)
-            self.xml.get_object("30PerPage").set_active(1)
-
-        if config.Interpolation == 0:
-            self.xml.get_object("VLowQ").set_active(1)
-            self.xml.get_object("LowQ").set_active(0)
-            self.xml.get_object("HiQ").set_active(0)
-            self.xml.get_object("VHiQ").set_active(0)
-        elif config.Interpolation == 1:
-            self.xml.get_object("VLowQ").set_active(0)
-            self.xml.get_object("LowQ").set_active(1)
-            self.xml.get_object("HiQ").set_active(0)
-            self.xml.get_object("VHiQ").set_active(0)
-        elif config.Interpolation == 2:
-            self.xml.get_object("VLowQ").set_active(0)
-            self.xml.get_object("LowQ").set_active(0)
-            self.xml.get_object("HiQ").set_active(1)
-            self.xml.get_object("VHiQ").set_active(0)
-        elif config.Interpolation == 3:
-            self.xml.get_object("VLowQ").set_active(0)
-            self.xml.get_object("LowQ").set_active(0)
-            self.xml.get_object("HiQ").set_active(0)
-            self.xml.get_object("VHiQ").set_active(1)
-        if config.SelectedFilter == "ContrastMask":
-            self.xml.get_object("ContrastMask").set_active(1)
-        elif config.SelectedFilter == "AutoWB":
-            self.xml.get_object("AutoWB").set_active(1)
-        else:
-            logger.error("No such SelectedFilter %s", config.SelectedFilter)
+#        if config.AutoRotate:
+#            i = 1
+#  .            i = 0
+#        self.gui.get_object("Autorotate").set_active(i)
+#        if config.Filigrane:
+#            i = 1
+#        else:
+#            i = 0
+#        self.gui.get_object("Filigrane").set_active(i)
+#
+#        if config.ScreenSize == 300:
+#            self.gui.get_object("t300").set_active(1)
+#            self.gui.get_object("t600").set_active(0)
+#            self.gui.get_object("t900").set_active(0)
+#            self.gui.get_object("tauto").set_active(0)
+#        elif config.ScreenSize == 600:
+#            self.gui.get_object("t300").set_active(0)
+#            self.gui.get_object("t600").set_active(1)
+#            self.gui.get_object("t900").set_active(0)
+#            self.gui.get_object("tauto").set_active(0)
+#        elif config.ScreenSize == 900:
+#            self.gui.get_object("t300").set_active(0)
+#            self.gui.get_object("t600").set_active(0)
+#            self.gui.get_object("t900").set_active(1)
+#            self.gui.get_object("tauto").set_active(0)
+#        else:
+#            self.gui.get_object("t300").set_active(0)
+#            self.gui.get_object("t600").set_active(0)
+#            self.gui.get_object("t900").set_active(0)
+#            self.gui.get_object("tauto").set_active(1)
+#
+#        if config.NbrPerPage == 9:
+#            self.gui.get_object("9PerPage").set_active(1)
+#            self.gui.get_object("12PerPage").set_active(0)
+#            self.gui.get_object("16PerPage").set_active(0)
+#            self.gui.get_object("20PerPage").set_active(0)
+#            self.gui.get_object("25PerPage").set_active(0)
+#            self.gui.get_object("30PerPage").set_active(0)
+#        elif config.NbrPerPage == 12:
+#            self.gui.get_object("9PerPage").set_active(0)
+#            self.gui.get_object("12PerPage").set_active(1)
+#            self.gui.get_object("16PerPage").set_active(0)
+#            self.gui.get_object("20PerPage").set_active(0)
+#            self.gui.get_object("25PerPage").set_active(0)
+#            self.gui.get_object("30PerPage").set_active(0)
+#        elif config.NbrPerPage == 16:
+#            self.gui.get_object("9PerPage").set_active(0)
+#            self.gui.get_object("12PerPage").set_active(0)
+#            self.gui.get_object("16PerPage").set_active(1)
+#            self.gui.get_object("20PerPage").set_active(0)
+#            self.gui.get_object("25PerPage").set_active(0)
+#            self.gui.get_object("30PerPage").set_active(0)
+#        elif config.NbrPerPage == 20:
+#            self.gui.get_object("9PerPage").set_active(0)
+#            self.gui.get_object("12PerPage").set_active(0)
+#            self.gui.get_object("16PerPage").set_active(0)
+#            self.gui.get_object("20PerPage").set_active(1)
+#            self.gui.get_object("25PerPage").set_active(0)
+#            self.gui.get_object("30PerPage").set_active(0)
+#        elif config.NbrPerPage == 25:
+#            self.gui.get_object("9PerPage").set_active(0)
+#            self.gui.get_object("12PerPage").set_active(0)
+#            self.gui.get_object("16PerPage").set_active(0)
+#            self.gui.get_object("20PerPage").set_active(0)
+#            self.gui.get_object("25PerPage").set_active(1)
+#            self.gui.get_object("30PerPage").set_active(0)
+#        elif config.NbrPerPage == 30:
+#            self.gui.get_object("9PerPage").set_active(0)
+#            self.gui.get_object("12PerPage").set_active(0)
+#            self.gui.get_object("16PerPage").set_active(0)
+#            self.gui.get_object("20PerPage").set_active(0)
+#            self.gui.get_object("25PerPage").set_active(0)
+#            self.gui.get_object("30PerPage").set_active(1)
+#
+#        if config.Interpolation == 0:
+#            self.gui.get_object("VLowQ").set_active(1)
+#            self.gui.get_object("LowQ").set_active(0)
+#            self.gui.get_object("HiQ").set_active(0)
+#            self.gui.get_object("VHiQ").set_active(0)
+#        elif config.Interpolation == 1:
+#            self.gui.get_object("VLowQ").set_active(0)
+#            self.gui.get_object("LowQ").set_active(1)
+#            self.gui.get_object("HiQ").set_active(0)
+#            self.gui.get_object("VHiQ").set_active(0)
+#        elif config.Interpolation == 2:
+#            self.gui.get_object("VLowQ").set_active(0)
+#            self.gui.get_object("LowQ").set_active(0)
+#            self.gui.get_object("HiQ").set_active(1)
+#            self.gui.get_object("VHiQ").set_active(0)
+#        elif config.Interpolation == 3:
+#            self.gui.get_object("VLowQ").set_active(0)
+#            self.gui.get_object("LowQ").set_active(0)
+#            self.gui.get_object("HiQ").set_active(0)
+#            self.gui.get_object("VHiQ").set_active(1)
+#        if config.SelectedFilter == "ContrastMask":
+#            self.gui.get_object("ContrastMask").set_active(1)
+#        elif config.SelectedFilter == "AutoWB":
+#            self.gui.get_object("AutoWB").set_active(1)
+#        else:
+#            logger.error("No such SelectedFilter %s", config.SelectedFilter)
         self.showImage()
         flush()
 
-        dictHandlers = {
-        'on_Principale_destroy': self.destroy,
-        'on_arreter1_activate': self.destroy,
-        'on_suivant_clicked': self.next1,
-        'on_precedant_clicked': self.previous1,
-        'on_droite_clicked': self.turnRight,
-        'on_gauche_clicked': self.turnLeft,
-        'on_selectionner_activate': self.select,
-#        'on_Selection_activate': self.select_shortcut,
-        'on_Selection_toggled':self.select,
+        handlers = (
+#        (self.gui, "destroyed()", self.destroy),
+#        self.gui.arreter1_activate': self.destroy,
+        (self.gui.next, 'clicked()', self.next1),
+        (self.gui.previous, 'clicked()', self.previous1),
+        (self.gui.right, 'clicked()', self.turnRight),
+        (self.gui.left, 'clicked()', self.turnLeft),
+#        self.gui.selectionner_activate': self.select,
+#        self.gui.Selection_activate': self.select_shortcut,
+        (self.gui.selection, "toggled()", self.select),
 
-        'on_photo_client_event': self.next1,
+#        self.gui.photo_client_event': self.next1,
 
-        'on_About_activate': self.about,
-        'on_quitter1_activate': self.die,
-        'on_nommer1_activate': self.renameDay,
-        'on_executer1_activate': self.copyAndResize,
-        'on_Synchronize_activate': self.synchronize,
-        'on_copie_et_grave1_activate': self.burn,
-        'on_vers_page_web2_activate': self.toWeb,
-        'on_vide_selection1_activate': self.emptySelected,
-        'on_copie1_activate': self.copy,
-        'on_importer1_activate': self.importImages,
-        'on_poubelle_activate': self.trash,
-        'on_Poubelle_clicked': self.trash,
-        'on_Gimp_clicked': self.gimp,
-        'on_Reload_clicked': self.reload_img,
-        'on_Filter_clicked': self.filter_im,
+#        self.gui.About_activate': self.about,
+#        self.gui.quitter1_activate': self.die,
+#        self.gui.nommer1_activate': self.renameDay,
+#        self.gui.executer1_activate': self.copyAndResize,
+#        self.gui.Synchronize_activate': self.synchronize,
+#        self.gui.copie_et_grave1_activate': self.burn,
+#        self.gui.vers_page_web2_activate': self.toWeb,
+#        self.gui.vide_selection1_activate': self.emptySelected,
+#        self.gui.copie1_activate': self.copy,
+#        self.gui.importer1_activate': self.importImages,
+#        self.gui.poubelle_activate': self.trash,
+        (self.gui.trash, 'clicked()', self.trash),
+        (self.gui.edit, 'clicked()', self.gimp),
+        (self.gui.reload, 'clicked()', self.reload_img),
+        (self.gui.filter, 'clicked()', self.filter_im),
 
-        'on_enregistrerP_activate': self.savePref,
-        'on_Autorotate_activate': self.setAutoRotate,
-        'on_Filigrane_activate': self.setFiligrane,
-        'on_taille_media_activate': self.defineMediaSize,
-        'on_tauto_activate': self.sizeCurrent,
-        'on_t300_activate': self.setSize300,
-        'on_t600_activate': self.setSize600,
-        'on_t900_activate': self.setSize900,
-        'on_VLowQ_activate': self.setInterpolNearest,
-        'on_LowQ_activate': self.setInterpolTiles,
-        'on_HiQ_activate': self.setInterpolBilin,
-        'on_VHiQ_activate': self.setInterpolHyperbol,
-        'on_9PerPage_activate': self.set9PerPage,
-        'on_12PerPage_activate': self.set12PerPage,
-        'on_16PerPage_activate': self.set16PerPage,
-        'on_20PerPage_activate': self.set20PerPage,
-        'on_25PerPage_activate': self.set25PerPage,
-        'on_30PerPage_activate': self.set30PerPage,
-        'on_configurer_dioporama_activate': self.slideShowSetup,
+#        self.gui.enregistrerP_activate': self.savePref,
+#        self.gui.Autorotate_activate': self.setAutoRotate,
+#        self.gui.Filigrane_activate': self.setFiligrane,
+#        self.gui.taille_media_activate': self.defineMediaSize,
+#        self.gui.tauto_activate': self.sizeCurrent,
+#        self.gui.t300_activate': self.setSize300,
+#        self.gui.t600_activate': self.setSize600,
+#        self.gui.t900_activate': self.setSize900,
+#        self.gui.VLowQ_activate': self.setInterpolNearest,
+#        self.gui.LowQ_activate': self.setInterpolTiles,
+#        self.gui.HiQ_activate': self.setInterpolBilin,
+#        self.gui.VHiQ_activate': self.setInterpolHyperbol,
+#        self.gui.9PerPage_activate': self.set9PerPage,
+#        self.gui.12PerPage_activate': self.set12PerPage,
+#        self.gui.16PerPage_activate': self.set16PerPage,
+#        self.gui.20PerPage_activate': self.set20PerPage,
+#        self.gui.25PerPage_activate': self.set25PerPage,
+#        self.gui.30PerPage_activate': self.set30PerPage,
+#        self.gui.configurer_dioporama_activate': self.slideShowSetup,
+#
+#        self.gui.enregistrerS_activate': self.saveSelection,
+#        self.gui.chargerS_activate': self.loadSelection,
+#        self.gui.inverserS_activate': self.invertSelection,
+#        self.gui.aucun1_activate': self.selectNone,
+#        self.gui.TouS_activate': self.selectAll,
+#        self.gui.taille_selection_activate': self.calculateSize,
+#        self.gui.media_apres_activate': self.selectNewerMedia,
+#        self.gui.media_avant_activate': self.SelectOlderMedia,
+#
+#        self.gui.precedentI_activate': self.previous1,
+#        self.gui.suivantI_activate': self.next1,
+#        self.gui.premierI_activate': self.first,
+#        self.gui.dernierI_activate': self.last,
+#        self.gui.plus_10_activate': self.next10,
+#        self.gui.moins_10_activate': self.previous10,
+#
+#        self.gui.indexJ_activate': self.indexJ,
+#        self.gui.precedentJ_activate': self.previousJ,
+#        self.gui.suivantJ_activate': self.nextJ,
+#        self.gui.premierJ_activate': self.firstJ,
+#        self.gui.dernierJ_activate': self.lastJ,
+#        self.gui.searchJ_activate': self.searchJ,
+#
+#        self.gui.precedentS_activate': self.previousS,
+#        self.gui.suivantS_activate': self.nextS,
+#        self.gui.premierS_activate': self.firstS,
+#        self.gui.dernierS_activate': self.lastS,
+#
+#        self.gui.precedentNS_activate': self.previousNS,
+#        self.gui.suivantNS_activate': self.nextNS,
+#        self.gui.premierNS_activate': self.firstNS,
+#        self.gui.dernierNS_activate': self.lastNS,
+#
+#        self.gui.premierT_activate': self.firstT,
+#        self.gui.precedentT_activate': self.previousT,
+#        self.gui.suivantT_activate': self.nextT,
+#        self.gui.dernierT_activate': self.lastT,
+#        self.gui.premierNT_activate': self.firstNT,
+#        self.gui.precedentNT_activate': self.previousNT,
+#        self.gui.suivantNT_activate': self.nextNT,
+#        self.gui.dernierNT_activate': self.lastNT,
+#
+#        self.gui.fullscreen_activate': self.FullScreen,
+#        self.gui.lance_diaporama_activate': self.SlideShow,
 
-        'on_enregistrerS_activate': self.saveSelection,
-        'on_chargerS_activate': self.loadSelection,
-        'on_inverserS_activate': self.invertSelection,
-        'on_aucun1_activate': self.selectNone,
-        'on_TouS_activate': self.selectAll,
-        'on_taille_selection_activate': self.calculateSize,
-        'on_media_apres_activate': self.selectNewerMedia,
-        'on_media_avant_activate': self.SelectOlderMedia,
-
-        'on_precedentI_activate': self.previous1,
-        'on_suivantI_activate': self.next1,
-        'on_premierI_activate': self.first,
-        'on_dernierI_activate': self.last,
-        'on_plus_10_activate': self.next10,
-        'on_moins_10_activate': self.previous10,
-
-        'on_indexJ_activate': self.indexJ,
-        'on_precedentJ_activate': self.previousJ,
-        'on_suivantJ_activate': self.nextJ,
-        'on_premierJ_activate': self.firstJ,
-        'on_dernierJ_activate': self.lastJ,
-        'on_searchJ_activate': self.searchJ,
-
-        'on_precedentS_activate': self.previousS,
-        'on_suivantS_activate': self.nextS,
-        'on_premierS_activate': self.firstS,
-        'on_dernierS_activate': self.lastS,
-
-        'on_precedentNS_activate': self.previousNS,
-        'on_suivantNS_activate': self.nextNS,
-        'on_premierNS_activate': self.firstNS,
-        'on_dernierNS_activate': self.lastNS,
-
-        'on_premierT_activate': self.firstT,
-        'on_precedentT_activate': self.previousT,
-        'on_suivantT_activate': self.nextT,
-        'on_dernierT_activate': self.lastT,
-        'on_premierNT_activate': self.firstNT,
-        'on_precedentNT_activate': self.previousNT,
-        'on_suivantNT_activate': self.nextNT,
-        'on_dernierNT_activate': self.lastNT,
-
-        'on_fullscreen_activate': self.FullScreen,
-        'on_lance_diaporama_activate': self.SlideShow,
-
-        "on_AutoWB_activate": self.filterAutoWB,
-        "on_ContrastMask_activate": self.filterContrastMask,
-
-        "on_photo_button_press_event": self.image_pressed,
-        "on_note_minimale_activate": self.start_image_mark_window,
-        }
-        self.xml.connect_signals(dictHandlers)
+#        "on_AutoWB_activate": self.filterAutoWB,
+#        "on_ContrastMask_activate": self.filterContrastMask,
+#
+#        "on_photo_button_press_event": self.image_pressed,
+#        "on_note_minimale_activate": self.start_image_mark_window,
+        )
+        for widget, signal, method in handlers:
+            self.gui.connect(widget, SIGNAL(signal), method)
         self.showImage()
         flush()
 #        gtk.main()
@@ -448,8 +462,8 @@ class Interface(object):
     def settitle(self):
         """Set the new title of the image"""
         logger.debug("Interface.settitle")
-        newtitle = self.xml.get_object("Titre").get_text()
-        newRate = float(self.xml.get_object("Rate").get_value())
+        newtitle = str(self.gui.title.text())
+        newRate = float(self.gui.rate.value())
         if (newtitle != self.strCurrentTitle) or (newRate != self.iCurrentRate):
             self.image.name(newtitle, newRate)
 
@@ -457,34 +471,36 @@ class Interface(object):
     def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         logger.debug("Interface.showImage")
-        self.image = Photo(self.AllJpegs[self.iCurrentImg])
-        X, Y = self.xml.get_object("Principale").get_size()
+        self.current_image = self.AllJpegs[self.iCurrentImg]
+        self.image = Photo(self.current_image)
+        X, Y = self.gui.width(), self.gui.height()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
         pixbuf = self.image.show(X - self.Xmin, Y)
 
-        self.xml.get_object("photo").set_from_pixbuf(pixbuf)
+        self.scene = QtGui.QGraphicsScene()
+        self.scene.setSceneRect(0, 0, X - self.Xmin, Y)
+        self.scene.addPixmap(pixbuf)
+        self.gui.photo.setScene(self.scene)
         del pixbuf
         gc.collect()
-        data = self.image.readExif()
-#        if data.has_key("Orientation"): data.pop("Orientation")
-        if "Rate" in data:
-            self.iCurrentRate = int(float(data["Rate"]))
-            self.xml.get_object("Rate").set_value(self.iCurrentRate)
-            data.pop("Rate")
+        metadata = self.image.readExif()
+        if "rate" in metadata:
+            self.iCurrentRate = int(float(metadata["rate"]))
+            self.gui.rate.setValue(self.iCurrentRate)
+            metadata.pop("rate")
         else:
             self.iCurrentRate = 0
 
-
-        for i in data:
+        for key, value in metadata.items():
             try:
-                self.xml.get_object(i).set_text(data[i])
+                self.gui.__getattribute__(key).setText(value)
             except Exception:  # unexcpected error
-                logger.error("unexpected metadata %s: %s" % (i, data[i]))
+                logger.error("unexpected metadata %s: %s" % (key, value))
 
-        self.xml.get_object("Principale").set_title("Selector : %s" % self.AllJpegs[self.iCurrentImg])
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
-        self.strCurrentTitle = data["Titre"]
+        self.gui.setWindowTitle("Selector : %s" % self.current_image)
+        self.gui.selection.setCheckState(self.current_image in self.selected)
+        self.strCurrentTitle = metadata["title"]
 
 
 
@@ -498,8 +514,8 @@ class Interface(object):
             for i in range(self.iCurrentImg + 1, len(self.AllJpegs)):
                 image = Photo(self.AllJpegs[i])
                 data = image.readExif()
-                if "Rate" in data:
-                    rate = int(float(data["Rate"]))
+                if "rate" in data:
+                    rate = int(float(data["rate"]))
                     if rate >= self.min_mark:
                         break
             else:
@@ -525,8 +541,8 @@ class Interface(object):
             for i in range(self.iCurrentImg - 1, -1, -1):
                 image = Photo(self.AllJpegs[i])
                 data = image.readExif()
-                if "Rate" in data:
-                    rate = int(float(data["Rate"]))
+                if "rate" in data:
+                    rate = int(float(data["rate"]))
                     if rate >= self.min_mark:
                         break
             else:
@@ -576,23 +592,26 @@ class Interface(object):
         """Send the current file to the trash"""
         logger.debug("Interface.trash")
         self.settitle()
-        if self.AllJpegs[self.iCurrentImg] in  self.selected:self.selected.remove(self.AllJpegs[self.iCurrentImg])
-        self.AllJpegs.remove(self.AllJpegs[self.iCurrentImg])
+        if self.current_image in  self.selected:
+            self.selected.remove(self.current_image)
+        self.AllJpegs.remove(self.current_image)
         self.image.trash()
         self.iCurrentImg = self.iCurrentImg % len(self.AllJpegs)
+        self.current_image = self.AllJpegs[self.iCurrentImg]
         self.showImage()
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
         logger.debug("Interface.gimp")
         self.settitle()
-        filename = self.AllJpegs[self.iCurrentImg]
+        filename = self.current_image
         base, ext = op.splitext(filename)
         newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
+        self.current_image = newname
         newnamefull = op.join(config.DefaultRepository, newname)
         shutil.copy(op.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
@@ -650,21 +669,21 @@ class Interface(object):
     def select_shortcut(self, *args):
         """Select or unselect the image (not directly clicked on the toggle button)"""
         logger.debug("Interface.select_shortcut")
-        etat = not(self.xml.get_object("Selection").get_active())
-        self.xml.get_object("Selection").set_active(etat)
+        etat = not(self.gui.Selection.active())
+        self.gui.Selection.set_active(etat)
 
     def select(self, *args):
         """Select or unselect the image (directly clicked on the toggle button)"""
         logger.debug("Interface.select")
 #        self.settitle()
-        etat = self.xml.get_object("Selection").get_active()
+        etat = self.gui.selection.get_active()
         if etat and (self.AllJpegs[self.iCurrentImg] not in self.selected): self.selected.append(self.AllJpegs[self.iCurrentImg])
         if not(etat) and (self.AllJpegs[self.iCurrentImg] in self.selected): self.selected.remove(self.AllJpegs[self.iCurrentImg])
         self.selected.sort()
-        self.xml.get_object("Selection").set_active(etat)
-        if (self.image.metadata["Rate"] == 0) and  etat:
-            self.image.metadata["Rate"] = config.DefaultRatingSelectedImage
-            self.xml.get_object("Rate").set_value(config.DefaultRatingSelectedImage)
+        self.gui.selection.set_active(etat)
+        if (self.image.metadata["rate"] == 0) and  etat:
+            self.image.metadata["rate"] = config.DefaultRatingSelectedImage
+            self.gui.rate.setValue(config.DefaultRatingSelectedImage)
         self.settitle()
 
     def destroy(self, *args):
@@ -678,7 +697,7 @@ class Interface(object):
         """Switch to fullscreen mode"""
         logger.debug("Interface.fullscreen")
         self.settitle()
-        self.xml.get_object("Principale").destroy()
+        self.gui.close()
         config.GraphicMode = "FullScreen"
         gtk.main_quit()
 
@@ -686,7 +705,7 @@ class Interface(object):
         """Switch to fullscreen mode and starts the SlideShow"""
         logger.debug("Interface.slideshow")
         self.settitle()
-        self.xml.get_object("Principale").destroy()
+        self.gui.close
         config.GraphicMode = "SlideShow"
         gtk.main_quit()
 
@@ -697,7 +716,7 @@ class Interface(object):
         # TODO: go through MVC
         processSelected(self.selected)
         self.selected = Selected()
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         logger.info("Interface.copyAndResize: Done")
 
     def toWeb(self, *args):
@@ -706,7 +725,7 @@ class Interface(object):
         self.settitle()
         processSelected(self.selected)
         self.selected = Selected()
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
@@ -730,7 +749,7 @@ class Interface(object):
         self.settitle()
         copySelected(self.selected)
         self.selected = Selected()
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         print("Done")
 
     def burn(self, *args):
@@ -740,7 +759,7 @@ class Interface(object):
         copySelected(self.selected)
         self.selected = Selected()
         # TODO : MVC
-        self.xml.get_object("Selection").set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
         SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0:
@@ -776,7 +795,7 @@ class Interface(object):
         for i in self.selected:
             if not(i in self.AllJpegs):
                 self.selected.remove(i)
-        self.xml.get_object("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
+        self.gui.selection.set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
 
 
     def selectAll(self, *args):
@@ -784,14 +803,14 @@ class Interface(object):
         logger.debug("Interface.selectAll")
         self.settitle()
         self.selected = self.AllJpegs
-        self.xml.get_object("Selection").set_active(True)
+        self.gui.selection.set_active(True)
 
     def selectNone(self, *args):
         """Select NO photos and empty selection"""
         logger.debug("Interface.selectNone")
         self.settitle()
         self.selected = Selected()
-        self.xml.get_object("Selection").set_active(False)
+        self.gui.selection.set_active(False)
 
     def invertSelection(self, *args):
         """Invert the selection of photos """
@@ -801,7 +820,7 @@ class Interface(object):
         for i in self.selected:
             temp.remove(i)
         self.selected = temp
-        self.xml.get_object("Selection").set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
+        self.gui.selection.set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
 
 
     def about(self, *args):
@@ -809,8 +828,8 @@ class Interface(object):
         logger.debug("Interface.about clicked")
         self.settitle()
         msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (imagizer.__author__, imagizer.__contact__, imagizer.__version__)
-        MessageError(msg.decode("UTF8"), Message=gtk.MESSAGE_INFO)
-
+#        MessageError(msg.decode("UTF8"), Message=gtk.MESSAGE_INFO)
+        QMessageBox.about(self.gui, "A Propos", msg)
 
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
@@ -1059,36 +1078,36 @@ class Interface(object):
     def setAutoRotate(self, *args):
         """Set the autorotate flag"""
         logger.debug("Interface.setAutoRotate clicked")
-        config.AutoRotate = self.xml.get_object("Autorotate").get_active()
+#        config.AutoRotate = self.gui.Autorotate").get_active()
 
     def setFiligrane(self, *args):
         """Set the Signature/Filigrane flag"""
         logger.debug("Interface.setFiligrane clicked")
-        config.Filigrane = self.xml.get_object("Filigrane").get_active()
+#        config.Filigrane = self.gui.Filigrane").get_active()
 
     def sizeCurrent(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.sizeCurrent clicked")
-        X, Y = self.xml.get_object("Principale").get_size()
+        X, Y = self.gui.width(), self.gui.heigth()
         config.ScreenSize = max(X - self.Xmin, Y)
 
     def setSize300(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.setSize300 clicked")
         config.ScreenSize = 300
-        self.xml.get_object("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
+#        self.gui").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def setSize600(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.setSize600 clicked")
         config.ScreenSize = 600
-        self.xml.get_object("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
+#        self.gui").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def setSize900(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.setSize900 clicked")
         config.ScreenSize = 900
-        self.xml.get_object("Principale").resize(config.ScreenSize + 323, config.ScreenSize)
+#        self.gui").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def setInterpolNearest(self, *args):
         """set interpolation level to nearest"""
@@ -1168,20 +1187,20 @@ class Interface(object):
         logger.debug("Interface.importImages called")
         self.settitle()
         self.guiFiler = buildUI("filer")
-        self.guiFiler.get_object("filer").set_current_folder(config.DefaultRepository)
-        self.guiFiler.connect_signals({'on_Open_clicked': self.filerSelect,
-                                       'on_Cancel_clicked': self.filerDestroy})
+#        self.guiFiler.filer").set_current_folder(config.DefaultRepository)
+#        self.guiFiler.connect_signals({self.gui.Open, 'clicked()', self.filerSelect,
+#                                       self.gui.Cancel, 'clicked()', self.filerDestroy})
 
     def filerSelect(self, *args):
         """Close the filer GUI and update the data"""
         logger.debug("dirchooser.filerSelect called")
-        self.importImageCallBack(self.guiFiler.get_object("filer").get_current_folder())
-        self.guiFiler.get_object("filer").destroy()
+#        self.importImageCallBack(self.guiFiler.filer").get_current_folder())
+        self.guiFiler.filer.close
 
     def filerDestroy(self, *args):
         """Close the filer GUI"""
         logger.debug("dirchooser.filerDestroy called")
-        self.guiFiler.get_object("filer").destroy()
+        self.guiFiler.filer.close
 
     def importImageCallBack(self, path):
         """This is the call back method for launching the import of new images"""
@@ -1226,7 +1245,7 @@ class Interface(object):
         self.settitle()
         AskSlideShowSetup(self)
         if config.GraphicMode == "SlideShow":
-            self.xml.get_object("Principale").destroy()
+            self.gui.close()
             gtk.main_quit()
 
     def indexJ(self, *args):
@@ -1340,7 +1359,7 @@ class Interface(object):
         if event.button == 1:
             if self.is_zoomed:
                 pixbuf = self.image.show(width, height)
-                self.xml.get_object("photo").set_from_pixbuf(pixbuf)
+                self.gui.photo.set_from_pixbuf(pixbuf) #todo
                 del pixbuf
                 gc.collect()
                 self.is_zoomed = False
@@ -1353,7 +1372,7 @@ class Interface(object):
                 pixbuf = self.image.show(width, height,
                                          float(event.x) / width,
                                          float(event.y) / height)
-                self.xml.get_object("photo").set_from_pixbuf(pixbuf)
+                self.gui.photo.set_from_pixbuf(pixbuf)
                 del pixbuf
                 gc.collect()
                 self.is_zoomed = True
@@ -1362,43 +1381,43 @@ class Interface(object):
 # # # # # # # fin de la classe interface graphique # # # # # #
 ################################################################################
 
+#
+#def MessageError(text, Message=gtk.MESSAGE_ERROR):
+#    dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
+#    dialog.set_default_response(gtk.BUTTONS_OK)
+#    dialog.run()
+#    dialog.destroy()
 
-def MessageError(text, Message=gtk.MESSAGE_ERROR):
-    dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
-    dialog.set_default_response(gtk.BUTTONS_OK)
-    dialog.run()
-    dialog.destroy()
-
-
-class MinimumRatingWindow(gtk.Window):
-    def __init__(self, upperIface):
-        gtk.Window.__init__(self)
-        self.set_title("Note minimale")
-        self.upperIface = upperIface
-        layout = gtk.VBox()
-        self.add(layout)
-        self.slider = gtk.HScale()
-        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
-        self.slider.set_adjustment(self.adj_Rate)
-        self.slider.set_value(upperIface.min_mark)
-        self.slider.connect("value_changed", self.mark_changed)
-        layout.pack_start(self.slider, True, True, 0)
-        self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
-        self.close.connect("clicked", self.kill_window)
-        layout.pack_start(self.close, True, True, 0)
-
-    def mark_changed(self, *args):
-        self.upperIface.min_mark = self.slider.get_value()
-
-    def kill_window(self, *args):
-        """
-        send the signal to close the window
-        """
-        self.upperIface.min_mark = 0
-        try:
-            self.destroy()
-        except:
-            pass
+#
+#class MinimumRatingWindow(gtk.Window):
+#    def __init__(self, upperIface):
+#        gtk.Window.__init__(self)
+#        self.set_title("Note minimale")
+#        self.upperIface = upperIface
+#        layout = gtk.VBox()
+#        self.add(layout)
+#        self.slider = gtk.HScale()
+#        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
+#        self.slider.set_adjustment(self.adj_Rate)
+#        self.slider.set_value(upperIface.min_mark)
+#        self.slider.connect("value_changed", self.mark_changed)
+#        layout.pack_start(self.slider, True, True, 0)
+#        self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
+#        self.close.connect("clicked", self.kill_window)
+#        layout.pack_start(self.close, True, True, 0)
+#
+#    def mark_changed(self, *args):
+#        self.upperIface.min_mark = self.slider.value()
+#
+#    def kill_window(self, *args):
+#        """
+#        send the signal to close the window
+#        """
+#        self.upperIface.min_mark = 0
+#        try:
+#            self.destroy()
+#        except:
+#            pass
 
 
 class RenameDay(object):
@@ -1441,21 +1460,21 @@ class RenameDay(object):
             self.comment["comment"] = u""
         self.AllPhotos = AllPhotos
         self.selected = selected
-        self.xml = buildUI("Renommer")
-        signals = {'on_Renommer_destroy': self.destroy,
-                   'on_cancel_clicked': self.destroy,
-                   'on_ok_clicked': self.continu}
-        self.xml.connect_signals(signals)
-        self.xml.get_object("Date").set_text(self.comment["date"].encode("UTF-8"))
-        self.xml.get_object("Commentaire").set_text(self.comment["title"].encode("UTF-8"))
-        self.DescObj = self.xml.get_object("Description").get_buffer()
+        self.gui = buildUI("Renommer")
+#        signals = {self.gui.Renommer_destroy': self.destroy,
+#                   self.gui.cancel, 'clicked()', self.destroy,
+#                   self.gui.ok, 'clicked()', self.continu}
+        self.gui.connect_signals(signals)
+        self.gui.date.setText(self.comment["date"].encode("UTF-8"))
+        self.gui.Commentaire.setText(self.comment["title"].encode("UTF-8"))
+        self.DescObj = self.gui.Description.get_buffer()
         comment = self.comment["comment"].encode("UTF-8").strip().replace("<BR>", "\n",)
-        self.DescObj.set_text(comment)
+        self.DescObj.setText(comment)
 
     def continu(self, *args):
         """just distroy the window and goes on ...."""
 
-        self.newname = self.xml.get_object("Commentaire").get_text().strip().decode("UTF-8")
+        self.newname = self.gui.Commentaire.getText().strip().decode("UTF-8")
         self.comment["title"] = self.newname
         if self.newname == "":
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
@@ -1498,14 +1517,14 @@ class RenameDay(object):
 #                 os.remove(self.commentfile)
             if len(os.listdir(op.join(config.DefaultRepository, self.dayname))) == 0:
                 os.rmdir(op.join(config.DefaultRepository, self.dayname))
-        self.xml.get_object("Renommer").destroy()
+        self.gui.Renommer.close
         if self.callback is not None:
             self.callback(self)
 
     def destroy(self, *args):
         """destroy clicked by user -> quit the program"""
         try:
-            self.xml.get_object("Renommer").destroy()
+            self.gui.Renommer.close
         except:
             pass
         flush()
@@ -1515,67 +1534,63 @@ class AskSlideShowSetup(object):
     """pop up a windows and asks for the setup of the SlideShow"""
     def __init__(self, upperIface):
         self.upperIface = upperIface
-        self.xml = buildUI("Diaporama")
-        signals = {'on_Diaporama_destroy': self.destroy,
-                    'on_cancel_clicked': self.kill_window,
-                    'on_apply_clicked': self.continu,
-                    'on_Lauch_clicked': self.LauchSlideShow,
-                    }
-        self.xml.connect_signals(signals)
+        self.gui = buildUI("Diaporama")
+#        signals = {self.gui.Diaporama_destroy': self.destroy,
+#                    self.gui.cancel, 'clicked()', self.kill_window,
+#                    self.gui.apply, 'clicked()', self.continu,
+#                    self.gui.Lauch, 'clicked()', self.LauchSlideShow,
+#                    }
+#        self.gui.connect_signals(signals)
         self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
-        self.xml.get_object("Rating").set_adjustment(self.adj_Rate)
+        self.gui.Rating.set_adjustment(self.adj_Rate)
         self.adj_delai = gtk.Adjustment(10, 1, 60, 1)
-        self.xml.get_object("delai").set_adjustment(self.adj_delai)
-        self.xml.get_object("delai").set_value(config.SlideShowDelay)
-        self.xml.get_object("Rating").set_value(config.SlideShowMinRating)
+        self.gui.delai.set_adjustment(self.adj_delai)
+        self.gui.delai.set_value(config.SlideShowDelay)
+        self.gui.Rating.set_value(config.SlideShowMinRating)
         if   config.SlideShowType.find("chrono") == 0:
-            self.xml.get_object("radio-chrono").set_active(1)
+            self.gui.radio-chrono.set_active(1)
         elif config.SlideShowType.find("anti") == 0:
-            self.xml.get_object("radio-antichrono").set_active(1)
+            self.gui.radio-antichrono.set_active(1)
         else:
-            self.xml.get_object("radio-random").set_active(1)
-
+            self.gui.radio-random.set_active(1)
 
     def LauchSlideShow(self, *args):
         """retrieves the data, destroy the window and lauch the slideshow"""
-        config.SlideShowDelay = self.xml.get_object("delai").get_value()
-        config.SlideShowMinRating = self.xml.get_object("Rating").get_value()
-        if self.xml.get_object("radio-antichrono").get_active():
+        config.SlideShowDelay = self.gui.delai.value()
+        config.SlideShowMinRating = self.gui.Rating.value()
+        if self.gui.radio-antichrono.get_active():
             config.SlideShowType = "antichronological"
-        elif self.xml.get_object("radio-chrono").get_active():
+        elif self.gui.radio-chrono.get_active():
             config.SlideShowType = "chronological"
         else:
             config.SlideShowType = "random"
         config.GraphicMode = "SlideShow"
-        self.xml.get_object("Diaporama").destroy()
-        self.upperIface.xml.get_object("lance_diaporama").activate()
-#        self.xml.signal_connect('on_lance_diaporama_activate'
-
+        self.gui.Diaporama.close
+        self.upperIface.xml.lance_diaporama.activate()
+#        self.gui.signal_connect(self.gui.lance_diaporama_activate'
 
     def continu(self, *args):
         """retrieves the data, destroy the window and goes on ...."""
-        config.SlideShowDelay = self.xml.get_object("delai").get_value()
-        config.SlideShowMinRating = self.xml.get_object("Rating").get_value()
-        if self.xml.get_object("radio-antichrono").get_active():
+        config.SlideShowDelay = self.gui.delai.value()
+        config.SlideShowMinRating = self.gui.Rating.value()
+        if self.gui.radio-antichrono.get_active():
             config.SlideShowType = "antichronological"
-        elif self.xml.get_object("radio-chrono").get_active():
+        elif self.gui.radio-chrono.get_active():
             config.SlideShowType = "chronological"
         else:
             config.SlideShowType = "random"
-        self.xml.get_object("Diaporama").destroy()
-
+        self.gui.Diaporama.close
 
     def destroy(self, *args):
         """destroy clicked by user -> close the window"""
         flush()
-
 
     def kill_window(self, *args):
         """
         send the signal to close the window
         """
         try:
-            self.xml.get_object("Diaporama").destroy()
+            self.gui.Diaporama.close
         except:
             pass
 
@@ -1583,26 +1598,26 @@ class AskSlideShowSetup(object):
 class AskMediaSize:
     """prompt a windows and asks for the size of the backup media"""
     def __init__(self):
-        self.xml = buildUI("TailleCD")
-        signals = {'on_TailleCD_destroy': self.destroy,
-                   'on_cancel_clicked': self.destroy,
-                   'on_ok_clicked': self.continu}
-        self.xml.connect_signals(signals)
-        self.xml.get_object("TailleMo").set_text(str(config.MediaSize))
+        self.gui = buildUI("TailleCD")
+#        signals = {self.gui.TailleCD_destroy': self.destroy,
+#                   self.gui.cancel, 'clicked()', self.destroy,
+#                   self.gui.ok, 'clicked()', self.continu}
+#        self.gui.connect_signals(signals)
+        self.gui.TailleMo.setText(str(config.MediaSize))
 
     def continu(self, *args):
         """just distroy the window and goes on ...."""
-        txt = self.xml.get_object("TailleMo").get_text().strip().decode("UTF-8").encode(config.Coding)
+        txt = self.gui.TailleMo.text().strip().decode("UTF-8").encode(config.Coding)
         try:
             config.MediaSize = abs(float(txt))
         except:
             print("%s does not seem to be the size of a media" % txt)
-        self.xml.get_object("TailleCD").destroy()
+        self.gui.TailleCD.close()
 
     def destroy(self, *args):
         """destroy clicked by user -> quit the program"""
         try:
-            self.xml.get_object("TailleCD").destroy()
+            self.gui.TailleCD.close()
         except:
             pass
         flush()
@@ -1622,43 +1637,43 @@ class Synchronize:
         self.AllPhotos = AllPhotos
         self.selected = selected
         self.initST = config.SynchronizeType
-        self.xml = buildUI("Synchroniser")
-        signals = {'on_Synchroniser_destroy': self.destroy,
-                   'on_ok4_clicked': self.synchronize,
-                   'on_apply4_clicked': self.apply_conf
-                   }
-        self.xml.connect_signals(signals)
-        self.xml.get_object("SyncCommand").set_text(config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
+        self.gui = buildUI("Synchroniser")
+#        signals = {self.gui.Synchroniser_destroy': self.destroy,
+#                   self.gui.ok4, 'clicked()', self.synchronize,
+#                   self.gui.apply4, 'clicked()', self.apply_conf
+#                   }
+#        self.gui.connect_signals(signals)
+        self.gui.SyncCommand.setText(config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
         if config.SynchronizeType.lower() == "newer":
-            self.xml.get_object("SyncOlder").set_active(0)
-            self.xml.get_object("SyncAll").set_active(0)
-            self.xml.get_object("SyncSelected").set_active(0)
-            self.xml.get_object("SyncNewer").set_active(1)
+            self.gui.SyncOlder.set_active(0)
+            self.gui.SyncAll.set_active(0)
+            self.gui.SyncSelected.set_active(0)
+            self.gui.SyncNewer.set_active(1)
         elif config.SynchronizeType.lower() == "older" :
-            self.xml.get_object("SyncNewer").set_active(0)
-            self.xml.get_object("SyncAll").set_active(0)
-            self.xml.get_object("SyncSelected").set_active(0)
-            self.xml.get_object("SyncOlder").set_active(1)
+            self.gui.SyncNewer.set_active(0)
+            self.gui.SyncAll.set_active(0)
+            self.gui.SyncSelected.set_active(0)
+            self.gui.SyncOlder.set_active(1)
         elif config.SynchronizeType.lower() == "all":
-            self.xml.get_object("SyncSelected").set_active(0)
-            self.xml.get_object("SyncOlder").set_active(0)
-            self.xml.get_object("SyncNewer").set_active(0)
-            self.xml.get_object("SyncAll").set_active(1)
+            self.gui.SyncSelected.set_active(0)
+            self.gui.SyncOlder.set_active(0)
+            self.gui.SyncNewer.set_active(0)
+            self.gui.SyncAll.set_active(1)
         elif config.SynchronizeType.lower() == "selected":
-            self.xml.get_object("SyncOlder").set_active(0)
-            self.xml.get_object("SyncAll").set_active(0)
-            self.xml.get_object("SyncNewer").set_active(0)
-            self.xml.get_object("SyncSelected").set_active(1)
+            self.gui.SyncOlder.set_active(0)
+            self.gui.SyncAll.set_active(0)
+            self.gui.SyncNewer.set_active(0)
+            self.gui.SyncSelected.set_active(1)
         else:
-            self.xml.get_object("SyncAll").set_active(0)
-            self.xml.get_object("SyncOlder").set_active(0)
-            self.xml.get_object("SyncNewer").set_active(0)
-            self.xml.get_object("SyncSelected").set_active(1)
-        signals = {'on_SyncAll_toggled': self.SetSyncAll,
-                       'on_SyncNewer_toggled': self.SetSyncNewer,
-                       'on_SyncOlder_toggled': self.SetSyncOlder,
-                       'on_SyncSelected_toggled': self.SetSyncSelected}
-        self.xml.connect_signals(signals)
+            self.gui.SyncAll.set_active(0)
+            self.gui.SyncOlder.set_active(0)
+            self.gui.SyncNewer.set_active(0)
+            self.gui.SyncSelected.set_active(1)
+#        signals = {self.gui.SyncAll_toggled': self.SetSyncAll,
+#                       self.gui.SyncNewer_toggled': self.SetSyncNewer,
+#                       self.gui.SyncOlder_toggled': self.SetSyncOlder,
+#                       self.gui.SyncSelected_toggled': self.SetSyncSelected}
+#        self.gui.connect_signals(signals)
         flush()
 
 
@@ -1685,7 +1700,7 @@ class Synchronize:
     def read_conf_GUI(self):
         """read config from GUI"""
         logger.debug("Synchronize.Read activated")
-        config.SynchronizeRep = self.xml.get_object("SyncCommand").get_text().strip().decode("UTF-8").encode(config.Coding)
+        config.SynchronizeRep = self.gui.SyncCommand.text().strip().decode("UTF-8").encode(config.Coding)
         self.initST = config.SynchronizeType
 
 
@@ -1732,7 +1747,7 @@ class Synchronize:
         """
         config.SynchronizeType = self.initST
         try:
-            self.xml.get_object("Synchroniser").destroy()
+            self.gui.Synchroniser.close()
         except:
             pass
         flush()
@@ -1742,12 +1757,12 @@ class Synchronize:
 class SelectDay:
     def __init__(self, upperIface):
         self.upperIface = upperIface
-        self.xml = buildUI("ChangeDir")
-        signals = {'on_ChangeDir_destroy': self.destroy,
-                   'on_annuler_clicked': self.destroy,
-                   'on_Ouvrir_clicked': self.continu}
-        self.xml.connect_signals(signals)
-        self.combobox = self.xml.get_object("entry")
+        self.gui = buildUI("ChangeDir")
+#        signals = {self.gui.ChangeDir_destroy': self.destroy,
+#                   self.gui.annuler, 'clicked()', self.destroy,
+#                   self.gui.Ouvrir, 'clicked()', self.continu}
+#        self.gui.connect_signals(signals)
+        self.combobox = self.gui.entry
         self.days = [op.split(self.upperIface.AllJpegs[0])[0]]
         self.combobox.append_text(self.days[0])
         for image in self.upperIface.AllJpegs[1:]:
@@ -1766,12 +1781,12 @@ class SelectDay:
                 break
         self.upperIface.iCurrentImg = i
         self.upperIface.showImage()
-        self.xml.get_object("ChangeDir").destroy()
+        self.gui.ChangeDir.close()
 
     def destroy(self, *args):
         """destroy clicked by user -> quit the program"""
         try:
-            self.xml.get_object("ChangeDir").destroy()
+            self.gui.ChangeDir.close()
         except:
             pass
         flush()

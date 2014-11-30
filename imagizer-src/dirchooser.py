@@ -56,9 +56,8 @@ class WarningSc(object):
         self.callBack = callBack
         self.guiFiler = None
         self.gui = buildUI(self.window)
-        for widget, signal, method in (#(self.gui, "destroyed()", self.destroy),
-                                        (self.gui.select, "clicked()", self.filer),
-                                        (self.gui, "rejected()", self.destroy),
+        for widget, signal, method in ((self.gui.select, "clicked()", self.filer),
+                                        (self.gui, "rejected()", self.close),
                                         (self.gui, "accepted()", self.continu),
 #                                        'on_dirname_editing_done': self.continu}()
                                        ):
@@ -68,18 +67,18 @@ class WarningSc(object):
 
     def continu(self, *args):
         """
-        Just destroy the window and goes on ....
+        Just close the window and goes on ....
         """
         logger.debug("WarningSc.continue")
-        self.destroy()
+        self.close()
         if self.callBack is not None:
             self.callBack(self.get_directory())
 
-    def destroy(self, *args):
+    def close(self, *args):
         """
         Destroy clicked by user -> quit the program
         """
-        logger.debug("WarningSc.destroy called")
+        logger.debug("WarningSc.close called")
         self.gui.close()
 
     def filer(self, *args):
