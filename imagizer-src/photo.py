@@ -230,7 +230,7 @@ class Photo(object):
             del self.pil
         x = self.pixelsX
         y = self.pixelsY
-        logger.debug("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+        logger.debug("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.width(), self.scaledPixbuffer.height()))
 
         if angle == 90:
             if imageCache is not None:
@@ -272,7 +272,7 @@ class Photo(object):
         if imageCache is not None:
             self.scaledPixbuffer = newPixbuffer
             imageCache[self.filename] = self
-        logger.debug("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, self.pixelsX, self.pixelsY, self.scaledPixbuffer.get_width(), self.scaledPixbuffer.get_height()))
+        logger.debug("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, self.pixelsX, self.pixelsY, self.scaledPixbuffer.width(), self.scaledPixbuffer.height()))
 
 
     def removeFromCache(self):

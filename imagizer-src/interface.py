@@ -43,6 +43,8 @@ from .imagizer import copySelected, processSelected, timer_pass
 from .qt import QtCore, QtGui, buildUI, flush, SIGNAL
 from .selection import Selected
 from .photo import Photo
+from .utils import get_pixmap_file
+from .config import config
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -71,6 +73,7 @@ class FullScreenInterface(object):
         if mode == "slideshow":
             self.SlideShow()
         self.QuitSlideShow = True
+        self.gui.show()
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
@@ -236,7 +239,22 @@ class Interface(object):
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
         self.scene = QtGui.QGraphicsScene(self.gui)
-        #TODO: add icons
+
+        # Icons on buttons
+        self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
+        self._set_icons({"contrast": self.gui.filter,
+                         "left":self.gui.left,
+                         "right":self.gui.right,
+                         "reload": self.gui.reload,
+                         "next": self.gui.next,
+                         "previous": self.gui.previous,
+                         "gimp": self.gui.edit,
+                         "trash": self.gui.trash
+                         })
+#        self.gui.right.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+#        self.gui.next.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+
+#        self.gui.right.alignment=Qt.AlignRight)setLayoutDirection(QtGui.QBoxLayout.RightToLeft)
 
 #        self.gui.get_object("principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
 #        self.gui.get_object("principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
@@ -244,7 +262,6 @@ class Interface(object):
 #        self.gui.logo.set_from_pixbuf(gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
 #        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
 #        self.gui.get_object("rate").set_adjustment(self.adj_Rate)
-        flush()
 #        if config.AutoRotate:
 #            i = 1
 #  .            i = 0
@@ -357,7 +374,7 @@ class Interface(object):
         (self.gui.left, 'clicked()', self.turnLeft),
 #        self.gui.selectionner_activate': self.select,
 #        self.gui.Selection_activate': self.select_shortcut,
-        (self.gui.selection, "toggled()", self.select),
+        (self.gui.selection, "stateChanged(int)", self.select),
 
 #        self.gui.photo_client_event': self.next1,
 
@@ -451,8 +468,19 @@ class Interface(object):
         for widget, signal, method in handlers:
             self.gui.connect(widget, SIGNAL(signal), method)
         self.showImage()
-        flush()
-#        gtk.main()
+        self.gui.show()
+
+    def _set_icons(self, kwarg):
+        """
+        @param kwarg: dict with key: name of the image, value: widget
+        """
+        for name, widget in kwarg.items():
+            icon = QtGui.QIcon()
+            fullname = get_pixmap_file(name)
+            pixmap = QtGui.QPixmap(fullname)
+            icon.addPixmap(pixmap, QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            widget.setIcon(icon)
+
 
     def flush_event_queue(self):
         """Updates the GTK GUI before coming back to the gtk.main()"""
@@ -675,12 +703,14 @@ class Interface(object):
     def select(self, *args):
         """Select or unselect the image (directly clicked on the toggle button)"""
         logger.debug("Interface.select")
-#        self.settitle()
-        etat = self.gui.selection.get_active()
-        if etat and (self.AllJpegs[self.iCurrentImg] not in self.selected): self.selected.append(self.AllJpegs[self.iCurrentImg])
-        if not(etat) and (self.AllJpegs[self.iCurrentImg] in self.selected): self.selected.remove(self.AllJpegs[self.iCurrentImg])
+        self.current_image = self.AllJpegs[self.iCurrentImg]
+        etat = bool(self.gui.selection.checkState())
+        if etat and (self.current_image not in self.selected):
+            self.selected.append(self.current_image)
+        if not(etat) and (self.current_image in self.selected):
+            self.selected.remove(self.current_image)
         self.selected.sort()
-        self.gui.selection.set_active(etat)
+#        self.gui.selection.set_active(etat)
         if (self.image.metadata["rate"] == 0) and  etat:
             self.image.metadata["rate"] = config.DefaultRatingSelectedImage
             self.gui.rate.setValue(config.DefaultRatingSelectedImage)

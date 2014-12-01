@@ -115,7 +115,6 @@ class Interfaces(object):
             self.interface = Interface(self.all_files, self.current, self.selected, callback=self.interface_closed)
         elif which in ("fullscreen", "slideshow"):
             self.interface = FullScreenInterface(self.all_files, self.current, self.selected, mode=which, callback=self.interface_closed)
-        self.interface.gui.show()
 
     def interface_closed(self, what="quit"):
         self.all_files = self.interface.AllJpegs

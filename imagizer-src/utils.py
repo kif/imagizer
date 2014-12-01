@@ -58,14 +58,12 @@ def _get_data_path(filename):
 
     For now, just perform a recursive search
     """
-    print(filename)
     resources = [os.environ.get("IMAGIZER_DATA"), installdir, os.path.dirname(installdir)]
 
     for resource in resources:
         if not resource:
             continue
         real_filename = os.path.join(resource, filename)
-        print(real_filename)
         if os.path.exists(real_filename):
             return real_filename
     else:
@@ -88,5 +86,7 @@ def get_pixmap_file(filename):
 
     @return: the full path of the pixmap
     """
+    if filename[-4:] != ".png":
+        filename = filename + ".png"
     return _get_data_path(os.path.join("pixmaps", filename))
 
