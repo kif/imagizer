@@ -40,7 +40,7 @@ logger = logging.getLogger("imagizer.interface")
 logger.debug("from core")
 
 from .imagizer import copySelected, processSelected, timer_pass
-from .qt import QtCore, QtGui, buildUI, flush, SIGNAL
+from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on
 from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
@@ -251,10 +251,10 @@ class Interface(object):
                          "gimp": self.gui.edit,
                          "trash": self.gui.trash
                          })
-#        self.gui.right.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-#        self.gui.next.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-
-#        self.gui.right.alignment=Qt.AlignRight)setLayoutDirection(QtGui.QBoxLayout.RightToLeft)
+        icon_on("left", self.gui.previous)
+        icon_on("left", self.gui.left)
+        icon_on("right", self.gui.next)
+        icon_on("right", self.gui.right)
 
 #        self.gui.get_object("principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
 #        self.gui.get_object("principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
