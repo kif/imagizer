@@ -75,10 +75,6 @@ class FullScreenInterface(object):
         self.QuitSlideShow = True
         self.gui.show()
 
-    def flush_event_queue(self):
-        """Updates the GTK GUI before coming back to the gtk.main()"""
-        flush()
-
     def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
         self.image = Photo(self.AllJpegs[self.iCurrentImg])
@@ -199,13 +195,13 @@ class FullScreenInterface(object):
             self.image = Photo(self.AllJpegs[self.iCurrentImg])
             self.image.readExif()
             if self.image.metadata["rate"] < config.SlideShowMinRating:
-                self.flush_event_queue()
+                flush()
                 continue
             now = time.time()
             if now - self.timestamp < config.SlideShowDelay:
                 time.sleep(config.SlideShowDelay - now + self.timestamp)
             self.showImage()
-            self.flush_event_queue()
+            flush()
             self.timestamp = time.time()
 
     def close(self, what=None):
@@ -238,7 +234,7 @@ class Interface(object):
         print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
-        self.scene = QtGui.QGraphicsScene(self.gui)
+#        self.scene = QtGui.QGraphicsScene(self.gui)
 
         # Icons on buttons
         self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
@@ -365,18 +361,13 @@ class Interface(object):
         self.showImage()
         flush()
 
-        handlers = (
-#        (self.gui, "destroyed()", self.destroy),
-#        self.gui.arreter1_activate': self.destroy,
-        (self.gui.next, 'clicked()', self.next1),
-        (self.gui.previous, 'clicked()', self.previous1),
-        (self.gui.right, 'clicked()', self.turnRight),
-        (self.gui.left, 'clicked()', self.turnLeft),
-#        self.gui.selectionner_activate': self.select,
-#        self.gui.Selection_activate': self.select_shortcut,
-        (self.gui.selection, "stateChanged(int)", self.select),
-
-#        self.gui.photo_client_event': self.next1,
+        handlers = {self.gui.next.clicked:self.next1,
+                    self.gui.previous.clicked: self.previous1,
+                    self.gui.right.clicked:self.turnRight,
+                    self.gui.left.clicked: self.turnLeft,
+                    self.gui.selection.stateChanged: self.select,
+#                    self.gui.selectionner.activated: self.select_shortcut,
+                    #self.gui.photo_client_event': self.next1,
 
 #        self.gui.About_activate': self.about,
 #        self.gui.quitter1_activate': self.die,
@@ -389,10 +380,10 @@ class Interface(object):
 #        self.gui.copie1_activate': self.copy,
 #        self.gui.importer1_activate': self.importImages,
 #        self.gui.poubelle_activate': self.trash,
-        (self.gui.trash, 'clicked()', self.trash),
-        (self.gui.edit, 'clicked()', self.gimp),
-        (self.gui.reload, 'clicked()', self.reload_img),
-        (self.gui.filter, 'clicked()', self.filter_im),
+                    self.gui.trash.clicked: self.trash,
+                    self.gui.edit.clicked:self.gimp,
+                    self.gui.reload.clicked:self.reload_img,
+                    self.gui.filter.clicked:self.filter_im,
 
 #        self.gui.enregistrerP_activate': self.savePref,
 #        self.gui.Autorotate_activate': self.setAutoRotate,
@@ -464,9 +455,9 @@ class Interface(object):
 #
 #        "on_photo_button_press_event": self.image_pressed,
 #        "on_note_minimale_activate": self.start_image_mark_window,
-        )
-        for widget, signal, method in handlers:
-            self.gui.connect(widget, SIGNAL(signal), method)
+        }
+        for signal, callback in handlers.items():
+            signal.connect(callback)
         self.showImage()
         self.gui.show()
 
@@ -480,11 +471,6 @@ class Interface(object):
             pixmap = QtGui.QPixmap(fullname)
             icon.addPixmap(pixmap, QtGui.QIcon.Normal, QtGui.QIcon.Off)
             widget.setIcon(icon)
-
-
-    def flush_event_queue(self):
-        """Updates the GTK GUI before coming back to the gtk.main()"""
-        flush()
 
 
     def settitle(self):
@@ -505,11 +491,11 @@ class Interface(object):
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
         pixbuf = self.image.show(X - self.Xmin, Y)
-
-        self.scene = QtGui.QGraphicsScene()
-        self.scene.setSceneRect(0, 0, X - self.Xmin, Y)
-        self.scene.addPixmap(pixbuf)
-        self.gui.photo.setScene(self.scene)
+        self.gui.photo.setPixmap(pixbuf)
+#        self.scene = QtGui.QGraphicsScene()
+#        self.scene.setSceneRect(0, 0, X - self.Xmin, Y)
+#        self.scene.addPixmap(pixbuf)
+#        self.gui.photo.setScene(self.scene)
         del pixbuf
         gc.collect()
         metadata = self.image.readExif()
@@ -720,8 +706,9 @@ class Interface(object):
         """destroy clicked by user"""
         logger.debug("Interface.destroy")
         self.settitle()
-        gtk.main_quit()
-        config.GraphicMode = "Quit"
+        self.gui.close()
+        config.GraphicMode = "quit"
+        self.c
 
     def FullScreen(self, *args):
         """Switch to fullscreen mode"""

@@ -229,6 +229,9 @@
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
            <widget class="QPushButton" name="previous">
+            <property name="toolTip">
+             <string>Ctrl+Haut</string>
+            </property>
             <property name="text">
              <string>Précédent</string>
             </property>
@@ -264,22 +267,16 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="previous">
-            <property name="toolTip">
-             <string>Ctrl+Haut</string>
-            </property>
-            <property name="text">
-             <string>Précédent</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QGraphicsView" name="photo"/>
+       <widget class="QLabel" name="photo">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -356,7 +353,7 @@
     <addaction name="actionCharger"/>
     <addaction name="actionSauver"/>
     <addaction name="separator"/>
-    <addaction name="action_D_s_lectionner_Ctrl_S"/>
+    <addaction name="selectionner"/>
     <addaction name="actionInverser"/>
     <addaction name="actionAucune"/>
     <addaction name="actionToutes"/>
@@ -467,7 +464,6 @@
    <addaction name="menuFiltre"/>
    <addaction name="menuAide"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Propos">
    <property name="text">
     <string>À Propos</string>
@@ -865,7 +861,7 @@
     <string>Ctrl+Right</string>
    </property>
   </action>
-  <action name="action_D_s_lectionner_Ctrl_S">
+  <action name="selectionner">
    <property name="text">
     <string>(Dé)sélectionner</string>
    </property>
