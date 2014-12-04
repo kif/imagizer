@@ -45,6 +45,7 @@ from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
 from .config import config
+from .imagecache import imageCache
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -80,7 +81,7 @@ class FullScreenInterface(object):
         self.image = Photo(self.AllJpegs[self.iCurrentImg])
         X, Y = self.gui.FullScreen.get_size()
         logger.debug("Size of image on screen: %sx%s" % (X, Y))
-        pixbuf = self.image.show(X, Y)
+        pixbuf = self.image.get_pixbuf(X, Y)
         self.gui.image793.set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
@@ -104,9 +105,9 @@ class FullScreenInterface(object):
             self.destroy()
 
         elif key == "Right":
-            self.turnRight()
+            self.turn_right()
         elif key == "Left":
-            self.turnLeft()
+            self.turn_left()
         elif key == "f":
             self.NormalScreen()
         elif key == "Down":
@@ -123,11 +124,11 @@ class FullScreenInterface(object):
             config.SlideShowDelay -= 1
             if config.SlideShowDelay < 0:config.SlideShowDelay = 0
 
-    def turnRight(self, *args):
+    def turn_right(self, *args):
         """rotate the current image clockwise"""
         self.image.rotate(90)
         self.showImage()
-    def turnLeft(self, *args):
+    def turn_left(self, *args):
         """rotate the current image clockwise"""
         self.image.rotate(270)
         self.showImage()
@@ -363,8 +364,8 @@ class Interface(object):
 
         handlers = {self.gui.next.clicked:self.next1,
                     self.gui.previous.clicked: self.previous1,
-                    self.gui.right.clicked:self.turnRight,
-                    self.gui.left.clicked: self.turnLeft,
+                    self.gui.right.clicked:self.turn_right,
+                    self.gui.left.clicked: self.turn_left,
                     self.gui.selection.stateChanged: self.select,
 #                    self.gui.selectionner.activated: self.select_shortcut,
                     #self.gui.photo_client_event': self.next1,
@@ -476,7 +477,7 @@ class Interface(object):
     def settitle(self):
         """Set the new title of the image"""
         logger.debug("Interface.settitle")
-        newtitle = str(self.gui.title.text())
+        newtitle = unicode(self.gui.title.text())
         newRate = float(self.gui.rate.value())
         if (newtitle != self.strCurrentTitle) or (newRate != self.iCurrentRate):
             self.image.name(newtitle, newRate)
@@ -487,15 +488,11 @@ class Interface(object):
         logger.debug("Interface.showImage")
         self.current_image = self.AllJpegs[self.iCurrentImg]
         self.image = Photo(self.current_image)
-        X, Y = self.gui.width(), self.gui.height()
+        X, Y = self.gui.width(), self.gui.photo.height()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         if X <= self.Xmin : X = self.Xmin + config.ScreenSize
-        pixbuf = self.image.show(X - self.Xmin, Y)
+        pixbuf = self.image.get_pixbuf(X - self.Xmin, Y)
         self.gui.photo.setPixmap(pixbuf)
-#        self.scene = QtGui.QGraphicsScene()
-#        self.scene.setSceneRect(0, 0, X - self.Xmin, Y)
-#        self.scene.addPixmap(pixbuf)
-#        self.gui.photo.setScene(self.scene)
         del pixbuf
         gc.collect()
         metadata = self.image.readExif()
@@ -588,16 +585,16 @@ class Interface(object):
         self.iCurrentImg = len(self.AllJpegs) - 1
         self.showImage()
 
-    def turnRight(self, *args):
+    def turn_right(self, *args):
         """rotate the current image clockwise"""
-        logger.debug("Interface.turnRight")
+        logger.debug("Interface.turn_right")
         self.settitle()
         self.image.rotate(90)
         self.showImage()
 
-    def turnLeft(self, *args):
+    def turn_left(self, *args):
         """rotate the current image counterclockwise"""
-        logger.debug("Interface.turnLeft")
+        logger.debug("Interface.turn_left")
         self.settitle()
         self.image.rotate(270)
         self.showImage()
@@ -1375,7 +1372,7 @@ class Interface(object):
         height = ev_box.allocation.height
         if event.button == 1:
             if self.is_zoomed:
-                pixbuf = self.image.show(width, height)
+                pixbuf = self.image.get_pixbuf(width, height)
                 self.gui.photo.set_from_pixbuf(pixbuf) #todo
                 del pixbuf
                 gc.collect()
@@ -1386,7 +1383,7 @@ class Interface(object):
             if self.is_zoomed:
                 return
             else:
-                pixbuf = self.image.show(width, height,
+                pixbuf = self.image.get_pixbuf(width, height,
                                          float(event.x) / width,
                                          float(event.y) / height)
                 self.gui.photo.set_from_pixbuf(pixbuf)
@@ -1457,7 +1454,6 @@ class RenameDay(object):
                 self.comment.read()
             except:
                 pass
-
         try:
             self.timetuple = time.strptime(self.dayname[:10], "%Y-%m-%d")
         except:

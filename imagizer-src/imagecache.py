@@ -30,13 +30,12 @@ Technically it is a Borg (design Pattern) so every instance of ImageCache has ex
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20141129"
+__date__ = "20141204"
 __license__ = "GPL"
 
 import logging, os
 logger = logging.getLogger("imagizer.imagecache")
-from .config import Config
-config = Config()
+from .config import config
 
 
 ################################################################################################
@@ -161,4 +160,9 @@ class ImageCache(dict):
         self.ordered[index] = newKey
         myData = self.imageDict.pop(oldKey)
         self.imageDict[newKey] = myData
+
+if config.ImageCache > 1:
+    imageCache = ImageCache(maxSize=config.ImageCache)
+else:
+    imageCache = None
 

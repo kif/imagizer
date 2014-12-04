@@ -41,18 +41,11 @@ try:
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 
-from .config import Config
-config = Config()
-
+from .config import config
+from .imagecache import imageCache
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
     ImageFile.MAXBLOCK = 2 ** 26  # Thats 66 Mpix
-
-if config.ImageCache > 1:
-    import imagecache
-    imageCache = imagecache.ImageCache(maxSize=config.ImageCache)
-else:
-    imageCache = None
 
 from .exif       import Exif
 from .           import pyexiftran
@@ -235,7 +228,8 @@ class Photo(object):
         if angle == 90:
             if imageCache is not None:
                 pyexiftran.rotate90(self.fn)
-                newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
+                trans = QtGui.QTransform().rotate(90)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
@@ -248,7 +242,8 @@ class Photo(object):
         elif angle == 270:
             if imageCache is not None:
                 pyexiftran.rotate270(self.fn)
-                newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+                trans = QtGui.QTransform().rotate(270)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
                 logger.debug("rotate 270 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
@@ -261,7 +256,8 @@ class Photo(object):
         elif angle == 180:
             if imageCache is not None:
                 pyexiftran.rotate180(self.fn)
-                newPixbuffer = self.scaledPixbuffer.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
+                trans = QtGui.QTransform().rotate(180)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
                 logger.debug("rotate 270 of %s" % newPixbuffer)
             else:
                 pyexiftran.rotate180(self.fn)
@@ -304,9 +300,9 @@ class Photo(object):
             self.metadata["size"] = "%.2f %s" % smartSize(op.getsize(self.fn))
             self.metadata["title"] = self.exif.comment
             try:
-                self.metadata["title"].encode(config.Coding)
+                self.metadata["title"] = self.metadata["title"].decode(config.Coding)
             except Exception as error:
-                logger.error("%s in comment: %s" % (error, self.metadata["title"]))
+                logger.error("%s in comment: %s, unable to decode in %s" % (error, self.metadata["title"], config.Coding))
                 try:
                     self.metadata["title"] = self.metadata["title"].decode("latin1")
                 except Exception as error2:
@@ -362,9 +358,20 @@ class Photo(object):
         else:
             return False
 
-    def show(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
+#    @property
+#    def pixbuf(self):
+#        if self._pixbuf is None:
+#            self._pixbuf = QtGui.QPixmap(self.fn)
+#            if self._pixbuf.isNull():
+#                err = "Unable to open file %s" % self.fn
+#                logger.error(err)
+#                raise RuntimeError(err)
+#        return self._pixbuf
+
+
+    def get_pixbuf(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
         """
-        Generate a gtk pixbuffer from size and center
+        Generate a pixbuffer from size and center
 
         @param Xsize: Width of the image buffer
         @param Ysize: Height of the image buffer
@@ -397,15 +404,17 @@ class Photo(object):
             ny = self.pixelsY
 
 #       Put in Cache the "BIG" image
+
         if self.scaledPixbuffer is None:
+            pixbuf = QtGui.QPixmap(self.fn)
             logger.debug("self.scaledPixbuffer is empty")
 
             if Rbig < 1:
 
-                self.scaledPixbuffer = self.pixbuf.scaled(nxBig, nyBig, QtCore.Qt.KeepAspectRatio,
-                                                     transformations[config.Interpolation])
+                self.scaledPixbuffer = pixbuf.scaled(nxBig, nyBig, aspectRatioMode=QtCore.Qt.KeepAspectRatio,
+                                                     transformMode=transformations[config.Interpolation])
             else :
-                self.scaledPixbuffer = self.pixbuf
+                self.scaledPixbuffer = pixbuf
             logger.debug("To Cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
         if Xcenter and Ycenter:
             logger.debug("zooming to ")
@@ -424,7 +433,8 @@ class Photo(object):
                 xmin = max(0, self.pixelsX - Xsize)
             if ymin + Ysize > self.pixelsY:
                 ymin = max(0, self.pixelsY - Ysize)
-            return self.pixbuf.copy(xmin, ymin, width, height)
+            pixbuf = QtGui.QPixmap(self.fn)
+            return pixbuf.copy(xmin, ymin, width, height)
         elif (self.scaledPixbuffer.width() == nx) and \
              (self.scaledPixbuffer.height() == ny):
             scaled_buf = self.scaledPixbuffer
@@ -565,15 +575,6 @@ class Photo(object):
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
         return Photo(outfile)
 
-    @property
-    def pixbuf(self):
-        if self._pixbuf is None:
-            self._pixbuf = QtGui.QPixmap(self.fn)
-            if self._pixbuf.isNull():
-                err = "Unable to open file %s" % self.fn
-                logger.error(err)
-                raise RuntimeError(err)
-        return self._pixbuf
 
     def autoWB(self, outfile):
         """
