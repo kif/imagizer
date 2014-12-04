@@ -61,8 +61,13 @@ def _copy_files(source, dest, extn):
         os.makedirs(dest)
     full_src = os.path.join(os.path.dirname(__file__), source)
     for clf in os.listdir(full_src):
-        if clf.endswith(extn) and clf not in os.listdir(dest):
-            _copy(os.path.join(full_src, clf), os.path.join(dest, clf))
+        if clf.endswith(extn):
+            srcf =os.path.join(full_src, clf)
+            dstf = os.path.join(dest, clf)
+            if clf not in os.listdir(dest) or os.stat(srcf).st_mtime > os.stat(dstf).st_mtime:
+                if os.path.exists(dstf):
+                    os.unlink(dstf)
+                _copy(srcf, dstf)
 
 home = os.path.dirname(os.path.abspath(__file__))
 SCRIPTSPATH = os.path.join(home,
