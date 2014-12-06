@@ -88,6 +88,18 @@ for i in ConfFile:
 if len(sys.argv) == 1:
     sys.argv.append("install")
 
+binary_modules = []
+binary_modules.append({"name":'pyexiftran',
+                       "sources":sources,
+                       "define_macros":[],
+                       "include_dirs":[JPEG_DIR],
+                       "libraries":["jpeg", "exif", "m"]})
+binary_modules.append({"name":'down_sampler',
+                       "sources": ["interpolation/down_sampler.c"],
+                       "extra_compile_args": ["-fopenmp"],
+                       "extra_link_args":["-fopenmp"]})
+
+
 
 print execexiftran
 setup(name='Imagizer',
@@ -107,19 +119,11 @@ setup(name='Imagizer',
     packages=['imagizer'],
     package_dir={'imagizer': 'imagizer-src'},
     ext_package="imagizer",
-    ext_modules=[
-         Extension(
-         name='pyexiftran',
-         sources=sources,
-         define_macros=[],
-         include_dirs=[JPEG_DIR],
-         libraries=["jpeg", "exif", "m"],
-         ),
-    ],
+    ext_modules=[Extension(**mode) for mode in binary_modules],
     classifiers=[
           'Development Status :: 5 - production',
           'Environment :: Graphic',
-          'Environment :: GTK',
+          'Environment :: Qt',
           'Intended Audience :: End Users/Desktop',
           'Intended Audience :: Photographs',
           'License :: OSI Approved :: GPL',
