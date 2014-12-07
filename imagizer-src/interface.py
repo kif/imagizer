@@ -233,15 +233,14 @@ class Interface(object):
         self.current_image = AllJpegs[first]
         self.is_zoomed = False
         self.min_mark = 0
+        self.default_filter = None
         print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
 
-        #Drop-down
-
         # Icons on buttons
         self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
-        self._set_icons({#"contrast": self.gui.filter,
+        self._set_icons({"contrast": self.gui.filter,
                          "left":self.gui.left,
                          "right":self.gui.right,
                          "reload": self.gui.reload,
@@ -260,13 +259,9 @@ class Interface(object):
         self.gui.actionSignature_filigrane_web.setChecked(bool(config.Filigrane))
         self.set_images_per_page(config.NbrPerPage)
         self.set_interpolation(config.Interpolation)
-#        if config.SelectedFilter == "ContrastMask":
-#            self.gui.get_object("ContrastMask").set_active(1)
-#        elif config.SelectedFilter == "AutoWB":
-#            self.gui.get_object("AutoWB").set_active(1)
-#        else:
-#            logger.error("No such SelectedFilter %s", config.SelectedFilter)
         self.showImage()
+        flush()
+        self._menu_filtrer()
         flush()
 
         handlers = {self.gui.next.clicked:self.next1,
@@ -366,10 +361,10 @@ class Interface(object):
                     self.gui.actionNav_non_title_last.triggered: self.lastNT,
 
                     #Menu Filtres
-#                    self.gui.actionAuto_whitebalance.triggered:self.
-#                    self.gui.actionContrast_mask.triggered:self.
+                    self.gui.actionAuto_whitebalance.triggered: self.filter_AutoWB,
+                    self.gui.actionContrast_mask.triggered: self.filter_ContrastMask,
                     #Menu Aide
-                    self.gui.action_Propos.triggered: self.about,
+                    self.gui.actionA_propos.triggered: self.about,
 
 #
 #        self.gui.enregistrerS_activate': self.saveSelection,
@@ -462,6 +457,23 @@ class Interface(object):
             pixmap = QtGui.QPixmap(fullname)
             icon.addPixmap(pixmap, QtGui.QIcon.Normal, QtGui.QIcon.Off)
             widget.setIcon(icon)
+
+    def _menu_filtrer(self):
+        #Drop-down filter menu
+        self.filter_menu = QtGui.QMenu("Filtrer")
+
+        icon_contrast = QtGui.QIcon()
+        icon_contrast.addPixmap(QtGui.QPixmap(get_pixmap_file("contrast")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        action_contrast = QtGui.QAction(icon_contrast, "Masque de contrast", self.gui.filter)
+        self.filter_menu.addAction(action_contrast)
+        icon_colors = QtGui.QIcon()
+        icon_colors.addPixmap(QtGui.QPixmap(get_pixmap_file("colors")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        action_color = QtGui.QAction(icon_colors, "Balance des blancs auto", self.gui.filter)
+        self.filter_menu.addAction(action_color)
+        self.gui.filter.setMenu(self.filter_menu)
+        action_color.triggered.connect(self.filter_AutoWB)
+        action_contrast.triggered.connect(self.filter_ContrastMask)
+
 
 
     def update_title(self):
@@ -633,18 +645,19 @@ class Interface(object):
     def filter_im(self, *args):
         """ Apply the selected filter to the current image"""
         logger.debug("Interface.filter_image")
-        self.update_title()
-        if config.SelectedFilter == "ContrastMask":
+        print("do_filter, default=%s" % self.default_filter)
+        if self.default_filter == "ContrastMask":
             self.filter_ContrastMask()
-        elif config.SelectedFilter == "AutoWB":
+        elif self.default_filter == "AutoWB":
             self.filter_AutoWB()
         else:
             logger.error("Unknown filter: %s", config.SelectedFilter)
-        self.showImage()
+
 
     def filter_ContrastMask(self, *args):
         """Filter the current image with a contrast mask"""
         logger.debug("Interface.filter_ContrastMask")
+        self.update_title()
         filename = self.AllJpegs[self.iCurrentImg]
         base, ext = os.path.splitext(filename)
         newname = base + "-ContrastMask" + ext
@@ -653,10 +666,12 @@ class Interface(object):
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
         self.image = self.image.contrastMask(newname)
+        self.showImage()
 
     def filter_AutoWB(self, *args):
         """Filter the current image with Auto White Balance"""
         logger.debug("Interface.filter_AutoWB")
+        self.update_title()
         filename = self.AllJpegs[self.iCurrentImg]
         base, ext = os.path.splitext(filename)
         newname = base + "-AutoWB" + ext
@@ -665,7 +680,7 @@ class Interface(object):
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
         self.image = self.image.autoWB(newname)
-
+        self.showImage()
 
     def select_shortcut(self, *args):
         """Select or unselect the image (not directly clicked on the toggle button)"""
@@ -829,14 +844,15 @@ class Interface(object):
         self.selected = temp
         self.gui.selection.set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
 
-
     def about(self, *args):
         """display a copyright message"""
         logger.debug("Interface.about clicked")
         self.update_title()
-        msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (imagizer.__author__, imagizer.__contact__, imagizer.__version__)
+        msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (__author__, __contact__, __version__)
 #        MessageError(msg.decode("UTF8"), Message=gtk.MESSAGE_INFO)
-        QMessageBox.about(self.gui, "A Propos", msg)
+        print(msg)
+        QMessageBox.about(self.gui, "À Propos", msg)
+
 
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
