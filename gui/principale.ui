@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>635</width>
-    <height>723</height>
+    <width>517</width>
+    <height>561</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -209,6 +209,18 @@
           </item>
           <item>
            <widget class="QSlider" name="rate">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>240</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="maximum">
              <number>5</number>
             </property>
@@ -229,22 +241,46 @@
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="1">
-           <widget class="QPushButton" name="right">
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="previous">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>175</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Ctrl+Droite</string>
+             <string>Ctrl+Haut</string>
             </property>
             <property name="text">
-             <string>Rotation à droite</string>
+             <string>Précédent</string>
             </property>
             <property name="shortcut">
-             <string>Ctrl+Right</string>
+             <string>Ctrl+Up</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
            <widget class="QPushButton" name="next">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>175</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Ctrl+Bas</string>
             </property>
@@ -258,6 +294,18 @@
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="left">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>175</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Ctrl+Gauche</string>
             </property>
@@ -269,16 +317,28 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="previous">
+          <item row="1" column="1">
+           <widget class="QPushButton" name="right">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>175</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Ctrl+Haut</string>
+             <string>Ctrl+Droite</string>
             </property>
             <property name="text">
-             <string>Précédent</string>
+             <string>Rotation à droite</string>
             </property>
             <property name="shortcut">
-             <string>Ctrl+Up</string>
+             <string>Ctrl+Right</string>
             </property>
            </widget>
           </item>
@@ -288,6 +348,18 @@
       </item>
       <item row="0" column="1">
        <widget class="QLabel" name="photo">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -302,7 +374,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>635</width>
+     <width>517</width>
      <height>25</height>
     </rect>
    </property>
@@ -319,13 +391,13 @@
      <addaction name="actionCopier_et_redimensionner"/>
      <addaction name="actionVers_page_web"/>
     </widget>
-    <addaction name="actionNommer_journ_e"/>
+    <addaction name="actionName_day"/>
     <addaction name="actionImporter_Image"/>
     <addaction name="menuEx_cuter"/>
     <addaction name="actionSynchroniser"/>
-    <addaction name="actionVider_le_tampon"/>
+    <addaction name="actionEmpty_selected"/>
     <addaction name="separator"/>
-    <addaction name="actionPoubelle_Ctrl_P"/>
+    <addaction name="actionTrash_Ctrl_Del"/>
     <addaction name="separator"/>
     <addaction name="actionSortir"/>
     <addaction name="actionQuitter"/>
@@ -338,8 +410,9 @@
      <property name="title">
       <string>Interpolation pour le redimensionnement</string>
      </property>
-     <addaction name="actionRapide"/>
-     <addaction name="actionPr_cis"/>
+     <addaction name="actionNearest"/>
+     <addaction name="actionLinear"/>
+     <addaction name="actionLanczos"/>
     </widget>
     <widget class="QMenu" name="menuNombre_de_photos_par_page_web">
      <property name="title">
@@ -352,14 +425,14 @@
      <addaction name="action25"/>
      <addaction name="action30"/>
     </widget>
-    <addaction name="actionTaille_de_CD_DVD"/>
-    <addaction name="actionRotation_automatique"/>
+    <addaction name="actionMedia_size"/>
+    <addaction name="actionAutorotate"/>
     <addaction name="actionSignature_filigrane_web"/>
     <addaction name="menuNombre_de_photos_par_page_web"/>
     <addaction name="menuInterpolation"/>
     <addaction name="actionConfigurer_le_diaporama"/>
     <addaction name="separator"/>
-    <addaction name="actionSauver_les_pr_f_rences"/>
+    <addaction name="actionSave_pref"/>
    </widget>
    <widget class="QMenu" name="menuSelection">
     <property name="title">
@@ -385,57 +458,57 @@
      <property name="title">
       <string>Image</string>
      </property>
-     <addaction name="actionD_but"/>
-     <addaction name="actionMoins_10"/>
-     <addaction name="actionPr_c_dent_Ctrl_Haut"/>
-     <addaction name="actionSuivant_Ctrl_Bas"/>
-     <addaction name="actionPlus_10_Ctrl_PgDn"/>
-     <addaction name="actionFin"/>
+     <addaction name="actionNav_img_first"/>
+     <addaction name="actionNav_img_previous10"/>
+     <addaction name="actionNav_img_previous"/>
+     <addaction name="actionNav_img_next"/>
+     <addaction name="actionNav_img_next10"/>
+     <addaction name="actionNav_img_last"/>
     </widget>
     <widget class="QMenu" name="menuJour">
      <property name="title">
       <string>Jour</string>
      </property>
-     <addaction name="actionD_but_2"/>
-     <addaction name="actionPr_c_dent_PgUp"/>
-     <addaction name="actionSuivant_PgDn"/>
-     <addaction name="actionFin_2"/>
+     <addaction name="actionNav_day_first"/>
+     <addaction name="actionNav_day_previous"/>
+     <addaction name="actionNav_day_next"/>
+     <addaction name="actionNav_day_last"/>
     </widget>
     <widget class="QMenu" name="menuS_lectionn">
      <property name="title">
       <string>Sélectionné</string>
      </property>
-     <addaction name="actionD_but_3"/>
-     <addaction name="actionPr_c_dent_Alt_Haut"/>
-     <addaction name="actionSuivant_Alt_Bas"/>
-     <addaction name="actionFin_3"/>
+     <addaction name="actionNav_sel_first"/>
+     <addaction name="actionNav_sel_previous"/>
+     <addaction name="actionNav_sel_next"/>
+     <addaction name="actionNav_sel_last"/>
     </widget>
     <widget class="QMenu" name="menuNon_s_lectionn">
      <property name="title">
       <string>Non sélectionné</string>
      </property>
-     <addaction name="actionD_but_4"/>
-     <addaction name="actionPr_c_dent"/>
-     <addaction name="actionSuivant"/>
-     <addaction name="actionFin_4"/>
+     <addaction name="actionNav_non_sel_first"/>
+     <addaction name="actionNav_non_sel_previous"/>
+     <addaction name="actionNav_non_sel_next"/>
+     <addaction name="actionNav_non_sel_last"/>
     </widget>
     <widget class="QMenu" name="menuTitr">
      <property name="title">
       <string>Titré</string>
      </property>
-     <addaction name="actionD_but_5"/>
-     <addaction name="actionPr_c_dent_2"/>
-     <addaction name="actionSuivant_2"/>
-     <addaction name="actionFin_5"/>
+     <addaction name="actionNav_title_first"/>
+     <addaction name="actionNav_title_previous"/>
+     <addaction name="actionNav_title_next"/>
+     <addaction name="actionNav_title_last"/>
     </widget>
     <widget class="QMenu" name="menuNon_titr">
      <property name="title">
       <string>Non titré</string>
      </property>
-     <addaction name="actionD_but_6"/>
-     <addaction name="actionPr_c_dent_3"/>
-     <addaction name="actionSuivant_3"/>
-     <addaction name="actionFin_6"/>
+     <addaction name="actionNav_non_title_first"/>
+     <addaction name="actionNav_non_title_previous"/>
+     <addaction name="actionNav_non_title_next"/>
+     <addaction name="actionNav_non_title_last"/>
     </widget>
     <addaction name="menuImage"/>
     <addaction name="menuJour"/>
@@ -450,8 +523,8 @@
     <property name="title">
      <string>Filtre</string>
     </property>
-    <addaction name="actionBalance_des_blancs_auto"/>
-    <addaction name="actionMasque_de_contraste"/>
+    <addaction name="actionAuto_whitebalance"/>
+    <addaction name="actionContrast_mask"/>
    </widget>
    <widget class="QMenu" name="menuAide">
     <property name="title">
@@ -463,13 +536,13 @@
     <property name="title">
      <string>Affichage</string>
     </property>
-    <addaction name="actionRecharger_Ctrl_R"/>
+    <addaction name="actionReload"/>
     <addaction name="actionDiaporama"/>
     <addaction name="actionPlein_cran"/>
     <addaction name="actionNote_minimale"/>
     <addaction name="separator"/>
-    <addaction name="actionRotation_gauche_Alt_Gauche"/>
-    <addaction name="actionRotation_droite_At_Droite"/>
+    <addaction name="actionRotation_left"/>
+    <addaction name="actionRotation_right"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuAffichage"/>
@@ -505,7 +578,7 @@
     <string>Ctrl+F</string>
    </property>
   </action>
-  <action name="actionNommer_journ_e">
+  <action name="actionName_day">
    <property name="text">
     <string>Nommer la journée</string>
    </property>
@@ -523,7 +596,7 @@
     <string>Synchroniser</string>
    </property>
   </action>
-  <action name="actionVider_le_tampon">
+  <action name="actionEmpty_selected">
    <property name="text">
     <string>Vider le tampon</string>
    </property>
@@ -564,64 +637,124 @@
     <string>Vers page web</string>
    </property>
   </action>
-  <action name="actionSauver_les_pr_f_rences">
+  <action name="actionSave_pref">
    <property name="text">
     <string>Sauver les préférences</string>
    </property>
   </action>
-  <action name="actionTaille_de_CD_DVD">
+  <action name="actionMedia_size">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Taille de CD/DVD</string>
    </property>
   </action>
-  <action name="actionRotation_automatique">
+  <action name="actionAutorotate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Rotation automatique</string>
    </property>
   </action>
   <action name="actionSignature_filigrane_web">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Signature / filigrane web</string>
    </property>
   </action>
-  <action name="actionRapide">
+  <action name="actionNearest">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Rapide</string>
    </property>
+   <property name="toolTip">
+    <string>Nearest</string>
+   </property>
   </action>
-  <action name="actionPr_cis">
+  <action name="actionLinear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Précis</string>
    </property>
+   <property name="toolTip">
+    <string>linear</string>
+   </property>
   </action>
   <action name="action9">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>9</string>
    </property>
+   <property name="iconText">
+    <string>9</string>
+   </property>
+   <property name="toolTip">
+    <string>3x3</string>
+   </property>
   </action>
   <action name="action12">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>12</string>
    </property>
+   <property name="toolTip">
+    <string>4x3</string>
+   </property>
   </action>
   <action name="action16">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>16</string>
    </property>
+   <property name="toolTip">
+    <string>4x4</string>
+   </property>
   </action>
   <action name="action20">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>20</string>
    </property>
+   <property name="toolTip">
+    <string>4x5</string>
+   </property>
   </action>
   <action name="action25">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>25</string>
    </property>
+   <property name="toolTip">
+    <string>5x5</string>
+   </property>
   </action>
   <action name="action30">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>30</string>
+   </property>
+   <property name="toolTip">
+    <string>6x5</string>
    </property>
   </action>
   <action name="actionConfigurer_le_diaporama">
@@ -674,7 +807,7 @@
     <string>CD/DVD précédent</string>
    </property>
   </action>
-  <action name="actionD_but">
+  <action name="actionNav_img_first">
    <property name="text">
     <string>Début</string>
    </property>
@@ -682,7 +815,7 @@
     <string>Home</string>
    </property>
   </action>
-  <action name="actionMoins_10">
+  <action name="actionNav_img_previous10">
    <property name="text">
     <string>Moins 10</string>
    </property>
@@ -690,7 +823,7 @@
     <string>Ctrl+PgUp</string>
    </property>
   </action>
-  <action name="actionPr_c_dent_Ctrl_Haut">
+  <action name="actionNav_img_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
@@ -698,7 +831,7 @@
     <string>Ctrl+Up</string>
    </property>
   </action>
-  <action name="actionSuivant_Ctrl_Bas">
+  <action name="actionNav_img_next">
    <property name="text">
     <string>Suivant</string>
    </property>
@@ -706,7 +839,7 @@
     <string>Ctrl+Down</string>
    </property>
   </action>
-  <action name="actionPlus_10_Ctrl_PgDn">
+  <action name="actionNav_img_next10">
    <property name="text">
     <string>Plus 10</string>
    </property>
@@ -714,7 +847,7 @@
     <string>Ctrl+PgDown</string>
    </property>
   </action>
-  <action name="actionFin">
+  <action name="actionNav_img_last">
    <property name="text">
     <string>Fin</string>
    </property>
@@ -722,12 +855,12 @@
     <string>End</string>
    </property>
   </action>
-  <action name="actionD_but_2">
+  <action name="actionNav_day_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionPr_c_dent_PgUp">
+  <action name="actionNav_day_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
@@ -735,7 +868,7 @@
     <string>PgUp</string>
    </property>
   </action>
-  <action name="actionSuivant_PgDn">
+  <action name="actionNav_day_next">
    <property name="text">
     <string>Suivant</string>
    </property>
@@ -743,17 +876,17 @@
     <string>PgDown</string>
    </property>
   </action>
-  <action name="actionFin_2">
+  <action name="actionNav_day_last">
    <property name="text">
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionD_but_3">
+  <action name="actionNav_sel_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionPr_c_dent_Alt_Haut">
+  <action name="actionNav_sel_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
@@ -761,7 +894,7 @@
     <string>Meta+Alt+Up</string>
    </property>
   </action>
-  <action name="actionSuivant_Alt_Bas">
+  <action name="actionNav_sel_next">
    <property name="text">
     <string>Suivant</string>
    </property>
@@ -769,82 +902,82 @@
     <string>Meta+Alt+Down</string>
    </property>
   </action>
-  <action name="actionFin_3">
+  <action name="actionNav_sel_last">
    <property name="text">
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionD_but_4">
+  <action name="actionNav_non_sel_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionPr_c_dent">
+  <action name="actionNav_non_sel_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
   </action>
-  <action name="actionSuivant">
+  <action name="actionNav_non_sel_next">
    <property name="text">
     <string>Suivant</string>
    </property>
   </action>
-  <action name="actionFin_4">
+  <action name="actionNav_non_sel_last">
    <property name="text">
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionD_but_5">
+  <action name="actionNav_title_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionPr_c_dent_2">
+  <action name="actionNav_title_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
   </action>
-  <action name="actionSuivant_2">
+  <action name="actionNav_title_next">
    <property name="text">
     <string>Suivant</string>
    </property>
   </action>
-  <action name="actionFin_5">
+  <action name="actionNav_title_last">
    <property name="text">
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionD_but_6">
+  <action name="actionNav_non_title_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionPr_c_dent_3">
+  <action name="actionNav_non_title_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
   </action>
-  <action name="actionSuivant_3">
+  <action name="actionNav_non_title_next">
    <property name="text">
     <string>Suivant</string>
    </property>
   </action>
-  <action name="actionFin_6">
+  <action name="actionNav_non_title_last">
    <property name="text">
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionBalance_des_blancs_auto">
+  <action name="actionAuto_whitebalance">
    <property name="text">
     <string>Balance des blancs auto</string>
    </property>
   </action>
-  <action name="actionMasque_de_contraste">
+  <action name="actionContrast_mask">
    <property name="text">
     <string>Masque de contraste</string>
    </property>
   </action>
-  <action name="actionPoubelle_Ctrl_P">
+  <action name="actionTrash_Ctrl_Del">
    <property name="text">
     <string>Poubelle</string>
    </property>
@@ -852,7 +985,7 @@
     <string>Ctrl+Del</string>
    </property>
   </action>
-  <action name="actionRecharger_Ctrl_R">
+  <action name="actionReload">
    <property name="text">
     <string>Recharger</string>
    </property>
@@ -860,7 +993,7 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionRotation_gauche_Alt_Gauche">
+  <action name="actionRotation_left">
    <property name="text">
     <string>Rotation à gauche</string>
    </property>
@@ -868,7 +1001,7 @@
     <string>Ctrl+Left</string>
    </property>
   </action>
-  <action name="actionRotation_droite_At_Droite">
+  <action name="actionRotation_right">
    <property name="text">
     <string>Rotation à droite</string>
    </property>
@@ -882,6 +1015,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLanczos">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Très précis</string>
+   </property>
+   <property name="toolTip">
+    <string>Lanczos3</string>
    </property>
   </action>
  </widget>

@@ -269,90 +269,8 @@ class Interface(object):
 #            i = 0
 #        self.gui.get_object("Filigrane").set_active(i)
 #
-#        if config.ScreenSize == 300:
-#            self.gui.get_object("t300").set_active(1)
-#            self.gui.get_object("t600").set_active(0)
-#            self.gui.get_object("t900").set_active(0)
-#            self.gui.get_object("tauto").set_active(0)
-#        elif config.ScreenSize == 600:
-#            self.gui.get_object("t300").set_active(0)
-#            self.gui.get_object("t600").set_active(1)
-#            self.gui.get_object("t900").set_active(0)
-#            self.gui.get_object("tauto").set_active(0)
-#        elif config.ScreenSize == 900:
-#            self.gui.get_object("t300").set_active(0)
-#            self.gui.get_object("t600").set_active(0)
-#            self.gui.get_object("t900").set_active(1)
-#            self.gui.get_object("tauto").set_active(0)
-#        else:
-#            self.gui.get_object("t300").set_active(0)
-#            self.gui.get_object("t600").set_active(0)
-#            self.gui.get_object("t900").set_active(0)
-#            self.gui.get_object("tauto").set_active(1)
-#
-#        if config.NbrPerPage == 9:
-#            self.gui.get_object("9PerPage").set_active(1)
-#            self.gui.get_object("12PerPage").set_active(0)
-#            self.gui.get_object("16PerPage").set_active(0)
-#            self.gui.get_object("20PerPage").set_active(0)
-#            self.gui.get_object("25PerPage").set_active(0)
-#            self.gui.get_object("30PerPage").set_active(0)
-#        elif config.NbrPerPage == 12:
-#            self.gui.get_object("9PerPage").set_active(0)
-#            self.gui.get_object("12PerPage").set_active(1)
-#            self.gui.get_object("16PerPage").set_active(0)
-#            self.gui.get_object("20PerPage").set_active(0)
-#            self.gui.get_object("25PerPage").set_active(0)
-#            self.gui.get_object("30PerPage").set_active(0)
-#        elif config.NbrPerPage == 16:
-#            self.gui.get_object("9PerPage").set_active(0)
-#            self.gui.get_object("12PerPage").set_active(0)
-#            self.gui.get_object("16PerPage").set_active(1)
-#            self.gui.get_object("20PerPage").set_active(0)
-#            self.gui.get_object("25PerPage").set_active(0)
-#            self.gui.get_object("30PerPage").set_active(0)
-#        elif config.NbrPerPage == 20:
-#            self.gui.get_object("9PerPage").set_active(0)
-#            self.gui.get_object("12PerPage").set_active(0)
-#            self.gui.get_object("16PerPage").set_active(0)
-#            self.gui.get_object("20PerPage").set_active(1)
-#            self.gui.get_object("25PerPage").set_active(0)
-#            self.gui.get_object("30PerPage").set_active(0)
-#        elif config.NbrPerPage == 25:
-#            self.gui.get_object("9PerPage").set_active(0)
-#            self.gui.get_object("12PerPage").set_active(0)
-#            self.gui.get_object("16PerPage").set_active(0)
-#            self.gui.get_object("20PerPage").set_active(0)
-#            self.gui.get_object("25PerPage").set_active(1)
-#            self.gui.get_object("30PerPage").set_active(0)
-#        elif config.NbrPerPage == 30:
-#            self.gui.get_object("9PerPage").set_active(0)
-#            self.gui.get_object("12PerPage").set_active(0)
-#            self.gui.get_object("16PerPage").set_active(0)
-#            self.gui.get_object("20PerPage").set_active(0)
-#            self.gui.get_object("25PerPage").set_active(0)
-#            self.gui.get_object("30PerPage").set_active(1)
-#
-#        if config.Interpolation == 0:
-#            self.gui.get_object("VLowQ").set_active(1)
-#            self.gui.get_object("LowQ").set_active(0)
-#            self.gui.get_object("HiQ").set_active(0)
-#            self.gui.get_object("VHiQ").set_active(0)
-#        elif config.Interpolation == 1:
-#            self.gui.get_object("VLowQ").set_active(0)
-#            self.gui.get_object("LowQ").set_active(1)
-#            self.gui.get_object("HiQ").set_active(0)
-#            self.gui.get_object("VHiQ").set_active(0)
-#        elif config.Interpolation == 2:
-#            self.gui.get_object("VLowQ").set_active(0)
-#            self.gui.get_object("LowQ").set_active(0)
-#            self.gui.get_object("HiQ").set_active(1)
-#            self.gui.get_object("VHiQ").set_active(0)
-#        elif config.Interpolation == 3:
-#            self.gui.get_object("VLowQ").set_active(0)
-#            self.gui.get_object("LowQ").set_active(0)
-#            self.gui.get_object("HiQ").set_active(0)
-#            self.gui.get_object("VHiQ").set_active(1)
+        self.set_images_per_page(config.NbrPerPage)
+        self.set_interpolation(config.Interpolation)
 #        if config.SelectedFilter == "ContrastMask":
 #            self.gui.get_object("ContrastMask").set_active(1)
 #        elif config.SelectedFilter == "AutoWB":
@@ -367,44 +285,103 @@ class Interface(object):
                     self.gui.right.clicked:self.turn_right,
                     self.gui.left.clicked: self.turn_left,
                     self.gui.selection.stateChanged: self.select,
-#                    self.gui.selectionner.activated: self.select_shortcut,
-                    #self.gui.photo_client_event': self.next1,
-
-#        self.gui.About_activate': self.about,
-#        self.gui.quitter1_activate': self.die,
-#        self.gui.nommer1_activate': self.renameDay,
-#        self.gui.executer1_activate': self.copyAndResize,
-#        self.gui.Synchronize_activate': self.synchronize,
-#        self.gui.copie_et_grave1_activate': self.burn,
-#        self.gui.vers_page_web2_activate': self.toWeb,
-#        self.gui.vide_selection1_activate': self.emptySelected,
-#        self.gui.copie1_activate': self.copy,
-#        self.gui.importer1_activate': self.importImages,
-#        self.gui.poubelle_activate': self.trash,
                     self.gui.trash.clicked: self.trash,
                     self.gui.edit.clicked:self.gimp,
                     self.gui.reload.clicked:self.reload_img,
                     self.gui.filter.clicked:self.filter_im,
 
-#        self.gui.enregistrerP_activate': self.savePref,
-#        self.gui.Autorotate_activate': self.setAutoRotate,
-#        self.gui.Filigrane_activate': self.setFiligrane,
-#        self.gui.taille_media_activate': self.defineMediaSize,
-#        self.gui.tauto_activate': self.sizeCurrent,
-#        self.gui.t300_activate': self.setSize300,
-#        self.gui.t600_activate': self.setSize600,
-#        self.gui.t900_activate': self.setSize900,
-#        self.gui.VLowQ_activate': self.setInterpolNearest,
-#        self.gui.LowQ_activate': self.setInterpolTiles,
-#        self.gui.HiQ_activate': self.setInterpolBilin,
-#        self.gui.VHiQ_activate': self.setInterpolHyperbol,
-#        self.gui.9PerPage_activate': self.set9PerPage,
-#        self.gui.12PerPage_activate': self.set12PerPage,
-#        self.gui.16PerPage_activate': self.set16PerPage,
-#        self.gui.20PerPage_activate': self.set20PerPage,
-#        self.gui.25PerPage_activate': self.set25PerPage,
-#        self.gui.30PerPage_activate': self.set30PerPage,
-#        self.gui.configurer_dioporama_activate': self.slideShowSetup,
+                    # Menu Fichier
+                    self.gui.actionName_day.triggered: self.renameDay,
+                    #    <string>Ctrl+N</string>
+                    self.gui.actionDiaporama.triggered: self.SlideShow,
+                    #    <string>Ctrl+D</string>
+                    self.gui.actionPlein_cran.triggered: self.FullScreen,
+                    #    <string>Ctrl+F</string>
+                    self.gui.actionTrash_Ctrl_Del.triggered: self.trash,
+                    self.gui.actionImporter_Image.triggered: self.importImages,
+                    self.gui.actionSynchroniser.triggered: self.synchronize,
+                    self.gui.actionEmpty_selected.triggered: self.emptySelected,
+                    self.gui.actionCopier_seulement.triggered: self.copy,
+                    self.gui.actionCopier_et_graver.triggered: self.burn,
+                    self.gui.actionCopier_et_redimensionner.triggered: self.copyAndResize,
+                    self.gui.actionVers_page_web.triggered: self.toWeb,
+                    self.gui.actionSortir.triggered: self.destroy,
+                    #    <string>Ctrl+E</string>
+                    self.gui.actionQuitter.triggered: self.die,
+                    #    <string>Ctrl+Q</string>
+
+                    # Menu Affichage
+                    self.gui.actionNote_minimale.triggered: self.start_image_mark_window,
+                    self.gui.actionReload.triggered: self.reload_img,
+                    self.gui.actionRotation_left.triggered: self.turn_left,
+                    #    <string>Ctrl+Left</string>
+                    self.gui.actionRotation_right.triggered: self.turn_right,
+                    #    <string>Ctrl+Right</string>
+
+
+                    # Menu Preference
+                    self.gui.actionMedia_size.triggered:self.defineMediaSize,
+                    self.gui.actionAutorotate.triggered:self.setAutoRotate,
+                    self.gui.actionSignature_filigrane_web.triggered:self.setFiligrane,
+                    self.gui.actionSave_pref.triggered: self.savePref,
+                    self.gui.actionNearest.triggered:self.setInterpolNearest,
+                    self.gui.actionLinear.triggered: self.setInterpolBilin,
+                    self.gui.actionLanczos.triggered:self.setInterpolLanczos,
+                    self.gui.action9.triggered:  self.set9PerPage,
+                    self.gui.action12.triggered: self.set12PerPage,
+                    self.gui.action16.triggered: self.set16PerPage,
+                    self.gui.action20.triggered: self.set20PerPage,
+                    self.gui.action25.triggered: self.set25PerPage,
+                    self.gui.action30.triggered: self.set30PerPage,
+                    self.gui.actionConfigurer_le_diaporama.triggered:self.slideShowSetup,
+
+                    #Menu Selection
+                    self.gui.selectionner.triggered:self.select_shortcut,
+                    #    <string>Ctrl+S</string>
+
+
+                    #Menu navigation
+                    ##Image
+                    self.gui.actionNav_img_first.triggered: self.first,
+                    self.gui.actionNav_img_previous10.triggered: self.previous10,
+                    self.gui.actionNav_img_previous.triggered: self.previous1,
+                    self.gui.actionNav_img_next.triggered: self.next1,
+                    self.gui.actionNav_img_next10.triggered: self.next10,
+                    self.gui.actionNav_img_last.triggered: self.last,
+                    ##Day
+                    self.gui.actionNav_day_first.triggered: self.firstJ,
+                    self.gui.actionNav_day_previous.triggered: self.previousJ,
+                    self.gui.actionNav_day_next.triggered: self.nextJ,
+                    self.gui.actionNav_day_last.triggered: self.lastJ,
+#        self.gui.indexJ_activate': self.indexJ,
+#        self.gui.searchJ_activate': self.searchJ,
+                    ##Selected:
+                    self.gui.actionNav_sel_first.triggered: self.firstS,
+                    self.gui.actionNav_sel_previous.triggered: self.previousS,
+                    self.gui.actionNav_sel_next.triggered: self.nextS,
+                    self.gui.actionNav_sel_last.triggered: self.lastS,
+                    ##Non-selected:
+                    self.gui.actionNav_non_sel_first.triggered: self.firstNS,
+                    self.gui.actionNav_non_sel_previous.triggered: self.previousNS,
+                    self.gui.actionNav_non_sel_next.triggered: self.nextNS,
+                    self.gui.actionNav_non_sel_last.triggered: self.lastNS,
+                    ##Entitled
+                    self.gui.actionNav_title_first.triggered: self.firstT,
+                    self.gui.actionNav_title_previous.triggered: self.previousT,
+                    self.gui.actionNav_title_next.triggered: self.nextT,
+                    self.gui.actionNav_title_last.triggered: self.lastT,
+                    ##Non entitled
+                    self.gui.actionNav_non_title_first.triggered: self.firstNT,
+                    self.gui.actionNav_non_title_previous.triggered: self.previousNT,
+                    self.gui.actionNav_non_title_next.triggered: self.nextNT,
+                    self.gui.actionNav_non_title_last.triggered: self.lastNT,
+
+                    #Menu Filtres
+#                    self.gui.actionAuto_whitebalance.triggered:self.
+#                    self.gui.actionContrast_mask.triggered:self.
+                    #Menu Aide
+                    self.gui.action_Propos.triggered: self.about,
+
 #
 #        self.gui.enregistrerS_activate': self.saveSelection,
 #        self.gui.chargerS_activate': self.loadSelection,
@@ -415,38 +392,10 @@ class Interface(object):
 #        self.gui.media_apres_activate': self.selectNewerMedia,
 #        self.gui.media_avant_activate': self.SelectOlderMedia,
 #
-#        self.gui.precedentI_activate': self.previous1,
-#        self.gui.suivantI_activate': self.next1,
-#        self.gui.premierI_activate': self.first,
-#        self.gui.dernierI_activate': self.last,
-#        self.gui.plus_10_activate': self.next10,
-#        self.gui.moins_10_activate': self.previous10,
 #
-#        self.gui.indexJ_activate': self.indexJ,
-#        self.gui.precedentJ_activate': self.previousJ,
-#        self.gui.suivantJ_activate': self.nextJ,
-#        self.gui.premierJ_activate': self.firstJ,
-#        self.gui.dernierJ_activate': self.lastJ,
-#        self.gui.searchJ_activate': self.searchJ,
 #
-#        self.gui.precedentS_activate': self.previousS,
-#        self.gui.suivantS_activate': self.nextS,
-#        self.gui.premierS_activate': self.firstS,
-#        self.gui.dernierS_activate': self.lastS,
 #
-#        self.gui.precedentNS_activate': self.previousNS,
-#        self.gui.suivantNS_activate': self.nextNS,
-#        self.gui.premierNS_activate': self.firstNS,
-#        self.gui.dernierNS_activate': self.lastNS,
-#
-#        self.gui.premierT_activate': self.firstT,
-#        self.gui.precedentT_activate': self.previousT,
-#        self.gui.suivantT_activate': self.nextT,
-#        self.gui.dernierT_activate': self.lastT,
-#        self.gui.premierNT_activate': self.firstNT,
-#        self.gui.precedentNT_activate': self.previousNT,
-#        self.gui.suivantNT_activate': self.nextNT,
-#        self.gui.dernierNT_activate': self.lastNT,
+
 #
 #        self.gui.fullscreen_activate': self.FullScreen,
 #        self.gui.lance_diaporama_activate': self.SlideShow,
@@ -455,9 +404,61 @@ class Interface(object):
 #        "on_ContrastMask_activate": self.filterContrastMask,
 #
 #        "on_photo_button_press_event": self.image_pressed,
-#        "on_note_minimale_activate": self.start_image_mark_window,
+
+###################################################################
+
+#        self.gui.actionCharger.triggered
+#        self.gui.actionSauver.triggered
+#        self.gui.actionInverser.triggered
+#        self.gui.actionAucune.triggered
+#        self.gui.actionToutes.triggered
+#        self.gui.actionTaille_de_toute_la_s_lection.triggered
+#        self.gui.actionCD_DVD_suivant.triggered
+#        self.gui.actionCD_DVD_pr_c_dent.triggered
+#        self.gui.actionD_but.triggered
+#        #    <string>Home</string>
+#        self.gui.actionMoins_10.triggered
+#        #    <string>Ctrl+PgUp</string>
+#        self.gui.actionPr_c_dent_Ctrl_Haut.triggered
+#        #    <string>Ctrl+Up</string>
+#        self.gui.actionSuivant_Ctrl_Bas.triggered
+#        #    <string>Ctrl+Down</string>
+#        self.gui.actionPlus_10_Ctrl_PgDn.triggered
+#        #    <string>Ctrl+PgDown</string>
+#        self.gui.actionFin.triggered
+#        #    <string>End</string>
+#        self.gui.actionD_but_2.triggered
+#        self.gui.actionPr_c_dent_PgUp.triggered
+#        #    <string>PgUp</string>
+#        self.gui.actionSuivant_PgDn.triggered
+#        #    <string>PgDown</string>
+#        self.gui.actionFin_2.triggered
+#        self.gui.actionD_but_3.triggered
+#        self.gui.actionPr_c_dent_Alt_Haut.triggered
+#        #    <string>Meta+Alt+Up</string>
+#        self.gui.actionSuivant_Alt_Bas.triggered
+#        #    <string>Meta+Alt+Down</string>
+#        self.gui.actionFin_3.triggered
+#        self.gui.actionD_but_4.triggered
+#        self.gui.actionPr_c_dent.triggered
+#        self.gui.actionSuivant.triggered
+#        self.gui.actionFin_4.triggered
+#        self.gui.actionD_but_5.triggered
+#        self.gui.actionPr_c_dent_2.triggered
+#        self.gui.actionSuivant_2.triggered
+#        self.gui.actionFin_5.triggered
+#        self.gui.actionD_but_6.triggered
+#        self.gui.actionPr_c_dent_3.triggered
+#        self.gui.actionSuivant_3.triggered
+#        self.gui.actionFin_6.triggered
+#        self.gui.actionBalance_des_blancs_auto.triggered
+#        self.gui.actionMasque_de_contraste.triggered
+
+
+
         }
         for signal, callback in handlers.items():
+            print(callback.__name__)
             signal.connect(callback)
         self.showImage()
         self.gui.show()
@@ -704,24 +705,26 @@ class Interface(object):
         logger.debug("Interface.destroy")
         self.settitle()
         self.gui.close()
-        config.GraphicMode = "quit"
-        self.c
+#        config.GraphicMode = "quit"
+        self.callback("quit")
 
     def FullScreen(self, *args):
         """Switch to fullscreen mode"""
         logger.debug("Interface.fullscreen")
         self.settitle()
         self.gui.close()
-        config.GraphicMode = "FullScreen"
-        gtk.main_quit()
+#        config.GraphicMode = "FullScreen"
+#        gtk.main_quit()
+        self.callback("fullscreen")
 
     def SlideShow(self, *args):
         """Switch to fullscreen mode and starts the SlideShow"""
         logger.debug("Interface.slideshow")
         self.settitle()
         self.gui.close
-        config.GraphicMode = "SlideShow"
-        gtk.main_quit()
+#        config.GraphicMode = "SlideShow"
+#        gtk.main_quit()
+        self.callback("slideshow")
 
     def copyAndResize(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
@@ -784,6 +787,7 @@ class Interface(object):
         """you wanna leave the program ??"""
         logger.debug("Interface.die")
         self.settitle()
+        print("TODO: die")
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Voulez vous vraiment quitter ce programme ?")
         result = dialog.run()
         dialog.destroy()
@@ -1109,69 +1113,88 @@ class Interface(object):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.setSize300 clicked")
         config.ScreenSize = 300
-#        self.gui").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def setSize600(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.setSize600 clicked")
         config.ScreenSize = 600
-#        self.gui").resize(config.ScreenSize + 323, config.ScreenSize)
 
     def setSize900(self, *args):
         """reads the current size of the image and defines it as default for next-time"""
         logger.debug("Interface.setSize900 clicked")
         config.ScreenSize = 900
-#        self.gui").resize(config.ScreenSize + 323, config.ScreenSize)
+
+    def set_interpolation(self, value):
+        logger.debug("Interface.set_interpolation")
+        options = (self.gui.actionNearest,
+                    self.gui.actionLinear,
+                    self.gui.actionLanczos)
+
+        value = int(value)
+        config.Interpolation = value
+        for i, name in enumerate(options):
+            name.setChecked(i == value)
 
     def setInterpolNearest(self, *args):
         """set interpolation level to nearest"""
-        logger.debug("Interface.setInterpolNearest clicked (nearest)")
-        config.Interpolation = 0
-
-    def setInterpolTiles(self, *args):
-        """set interpolation level to tiles"""
-        logger.debug("Interface.setInterpolTiles clicked (tiles)")
-        config.Interpolation = 1
+        print("Interface.setInterpolNearest")
+        self.set_interpolation(0)
 
     def setInterpolBilin(self, *args):
         """set interpolation level to bilinear"""
         logger.debug("Interface.setInterpolBilin clicked (bilinear)")
-        config.Interpolation = 2
+        self.set_interpolation(1)
 
-    def setInterpolHyperbol(self, *args):
-        """set interpolation level to hyperbolic"""
-        logger.debug("Interface.setInterpolHyperbol clicked (hyperbolic)")
-        config.Interpolation = 3
+    def setInterpolLanczos(self, *args):
+        """set interpolation level to Lanczos"""
+        logger.debug("Interface.setInterpolLanczos clicked ")
+        self.set_interpolation(2)
+
+    def set_images_per_page(self, value):
+        logger.debug("Interface.set_interpolation")
+        options = {9:self.gui.action9,
+                   12:self.gui.action12,
+                   16:self.gui.action16,
+                   20:self.gui.action20,
+                   25:self.gui.action25,
+                   30:self.gui.action30,
+        }
+
+        value = int(value)
+        config.NbrPerPage = value
+        for i, name in options.items():
+            name.setChecked(i == value)
+
 
     def set30PerPage(self, *args):
         """set 30 images per web-page"""
         logger.debug("Interface.set30PerPage clicked")
-        config.NbrPerPage = 30
+        self.set_images_per_page(30)
 
     def set25PerPage(self, *args):
         """set 25 images per web-page"""
         logger.debug("Interface.set25PerPage clicked")
-        config.NbrPerPage = 25
+        self.set_images_per_page(25)
 
     def set20PerPage(self, *args):
         """set 20 images per web-page"""
         logger.debug("Interface.set20PerPage clicked")
-        config.NbrPerPage = 20
+        self.set_images_per_page(20)
 
     def set16PerPage(self, *args):
         """set 16 images per web-page"""
         logger.debug("Interface.set16PerPage clicked")
-        config.NbrPerPage = 16
+        self.set_images_per_page(16)
 
     def set12PerPage(self, *args):
         """set 12 images per web-page"""
         logger.debug("Interface.set12PerPage clicked")
-        config.NbrPerPage = 12
+        self.set_images_per_page(12)
 
     def set9PerPage(self, *args):
         """set  9 images per web-page"""
         logger.debug("Interface.set9PerPage clicked")
-        config.NbrPerPage = 9
+        self.set_images_per_page(9)
 
     def renameDay(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
