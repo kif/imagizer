@@ -30,10 +30,11 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/11/2014"
+__date__ = "06/12/2014"
 __license__ = "GPL"
 
 import gc
+import os
 import logging
 logger = logging.getLogger("imagizer.interface")
 
@@ -151,19 +152,19 @@ class FullScreenInterface(object):
         self.showImage()
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
-        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg, len(self.AllJpegs)):
-            jc = op.dirname(self.AllJpegs[i])
+            jc = os.path.dirname(self.AllJpegs[i])
             if jc > jour: break
         self.iCurrentImg = i
         self.showImage()
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
         if self.iCurrentImg == 0: return
-        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg - 1, -1, -1):
-            jc = op.dirname(self.AllJpegs[i])
-            jd = op.dirname(self.AllJpegs[i - 1])
+            jc = os.path.dirname(self.AllJpegs[i])
+            jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
         self.showImage()
@@ -177,7 +178,7 @@ class FullScreenInterface(object):
             self.selected.remove(self.AllJpegs[self.iCurrentImg])
             sel = ""
         self.selected.sort()
-        self.gui.FullScreen.setTitle("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+        self.gui.setWindowTitle("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
 
     def SlideShow(self):
         """Starts the slide show"""
@@ -227,19 +228,20 @@ class Interface(object):
         self.iCurrentImg = first
         self.Xmin = 350
         self.image = None
-        self.strCurrentTitle = ""
-        self.iCurrentRate = 0
+        self.current_title = ""
+        self.current_rate = 0
         self.current_image = AllJpegs[first]
         self.is_zoomed = False
         self.min_mark = 0
         print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
-#        self.scene = QtGui.QGraphicsScene(self.gui)
+
+        #Drop-down
 
         # Icons on buttons
         self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
-        self._set_icons({"contrast": self.gui.filter,
+        self._set_icons({#"contrast": self.gui.filter,
                          "left":self.gui.left,
                          "right":self.gui.right,
                          "reload": self.gui.reload,
@@ -253,22 +255,9 @@ class Interface(object):
         icon_on("right", self.gui.next)
         icon_on("right", self.gui.right)
 
-#        self.gui.get_object("principale").set_size_request(config.ScreenSize + self.Xmin, config.ScreenSize)
-#        self.gui.get_object("principale").resize(config.ScreenSize + self.Xmin, config.ScreenSize)
 #        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
-#        self.gui.logo.set_from_pixbuf(gdk.pixbuf_new_from_file(op.join(installdir, "logo.png")))
-#        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
-#        self.gui.get_object("rate").set_adjustment(self.adj_Rate)
-#        if config.AutoRotate:
-#            i = 1
-#  .            i = 0
-#        self.gui.get_object("Autorotate").set_active(i)
-#        if config.Filigrane:
-#            i = 1
-#        else:
-#            i = 0
-#        self.gui.get_object("Filigrane").set_active(i)
-#
+        self.gui.actionAutorotate.setChecked(bool(config.AutoRotate))
+        self.gui.actionSignature_filigrane_web.setChecked(bool(config.Filigrane))
         self.set_images_per_page(config.NbrPerPage)
         self.set_interpolation(config.Interpolation)
 #        if config.SelectedFilter == "ContrastMask":
@@ -475,12 +464,12 @@ class Interface(object):
             widget.setIcon(icon)
 
 
-    def settitle(self):
+    def update_title(self):
         """Set the new title of the image"""
-        logger.debug("Interface.settitle")
+        logger.debug("Interface.update_title")
         newtitle = unicode(self.gui.title.text())
         newRate = float(self.gui.rate.value())
-        if (newtitle != self.strCurrentTitle) or (newRate != self.iCurrentRate):
+        if (newtitle != self.current_title) or (newRate != self.current_rate):
             self.image.name(newtitle, newRate)
 
 
@@ -498,11 +487,11 @@ class Interface(object):
         gc.collect()
         metadata = self.image.readExif()
         if "rate" in metadata:
-            self.iCurrentRate = int(float(metadata["rate"]))
-            self.gui.rate.setValue(self.iCurrentRate)
+            self.current_rate = int(float(metadata["rate"]))
+            self.gui.rate.setValue(self.current_rate)
             metadata.pop("rate")
         else:
-            self.iCurrentRate = 0
+            self.current_rate = 0
 
         for key, value in metadata.items():
             try:
@@ -512,14 +501,14 @@ class Interface(object):
 
         self.gui.setWindowTitle("Selector : %s" % self.current_image)
         self.gui.selection.setCheckState(self.current_image in self.selected)
-        self.strCurrentTitle = metadata["title"]
+        self.current_title = metadata["title"]
 
 
 
     def next1(self, *args):
         """Switch to the next image"""
         logger.debug("Interface.next1")
-        self.settitle()
+        self.update_title()
         if self.min_mark < 1:
             self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
         else:
@@ -538,7 +527,7 @@ class Interface(object):
     def next10(self, *args):
         """Switch forward of 10 images """
         logger.debug("Interface.next10")
-        self.settitle()
+        self.update_title()
         self.iCurrentImg = self.iCurrentImg + 10
         if self.iCurrentImg > len(self.AllJpegs):self.iCurrentImg = len(self.AllJpegs) - 1
         self.showImage()
@@ -546,7 +535,7 @@ class Interface(object):
     def previous1(self, *args):
         """Switch to the previous image"""
         logger.debug("Interface.previous")
-        self.settitle()
+        self.update_title()
         if self.min_mark < 1:
             self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
         else:
@@ -567,7 +556,7 @@ class Interface(object):
     def previous10(self, *args):
         """Switch 10 images backward"""
         logger.debug("Interface.previous10")
-        self.settitle()
+        self.update_title()
         self.iCurrentImg = self.iCurrentImg - 10
         if self.iCurrentImg < 0: self.iCurrentImg = 0
         self.showImage()
@@ -575,35 +564,35 @@ class Interface(object):
     def first(self, *args):
         """switch to the first image"""
         logger.debug("Interface.first")
-        self.settitle()
+        self.update_title()
         self.iCurrentImg = 0
         self.showImage()
 
     def last(self, *args):
         """switch to the last image"""
         logger.debug("Interface.last")
-        self.settitle()
+        self.update_title()
         self.iCurrentImg = len(self.AllJpegs) - 1
         self.showImage()
 
     def turn_right(self, *args):
         """rotate the current image clockwise"""
         logger.debug("Interface.turn_right")
-        self.settitle()
+        self.update_title()
         self.image.rotate(90)
         self.showImage()
 
     def turn_left(self, *args):
         """rotate the current image counterclockwise"""
         logger.debug("Interface.turn_left")
-        self.settitle()
+        self.update_title()
         self.image.rotate(270)
         self.showImage()
 
     def trash(self, *args):
         """Send the current file to the trash"""
         logger.debug("Interface.trash")
-        self.settitle()
+        self.update_title()
         if self.current_image in  self.selected:
             self.selected.remove(self.current_image)
         self.AllJpegs.remove(self.current_image)
@@ -615,17 +604,17 @@ class Interface(object):
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
         logger.debug("Interface.gimp")
-        self.settitle()
+        self.update_title()
         filename = self.current_image
-        base, ext = op.splitext(filename)
+        base, ext = os.path.splitext(filename)
         newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.iCurrentImg = self.AllJpegs.index(newname)
         self.current_image = newname
-        newnamefull = op.join(config.DefaultRepository, newname)
-        shutil.copy(op.join(config.DefaultRepository, filename), newnamefull)
+        newnamefull = os.path.join(config.DefaultRepository, newname)
+        shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
         os.system("%s %s &" % (config.Gimp, newnamefull))
         self.showImage()
@@ -634,7 +623,7 @@ class Interface(object):
     def reload_img(self, *args):
         """Remove image from cache and reloads it"""
         logger.debug("Interface.reload")
-        self.settitle()
+        self.update_title()
         filename = self.AllJpegs[self.iCurrentImg]
         if (imageCache is not None) and (filename in imageCache):
             imageCache.pop(filename)
@@ -644,7 +633,7 @@ class Interface(object):
     def filter_im(self, *args):
         """ Apply the selected filter to the current image"""
         logger.debug("Interface.filter_image")
-        self.settitle()
+        self.update_title()
         if config.SelectedFilter == "ContrastMask":
             self.filter_ContrastMask()
         elif config.SelectedFilter == "AutoWB":
@@ -657,7 +646,7 @@ class Interface(object):
         """Filter the current image with a contrast mask"""
         logger.debug("Interface.filter_ContrastMask")
         filename = self.AllJpegs[self.iCurrentImg]
-        base, ext = op.splitext(filename)
+        base, ext = os.path.splitext(filename)
         newname = base + "-ContrastMask" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
@@ -669,7 +658,7 @@ class Interface(object):
         """Filter the current image with Auto White Balance"""
         logger.debug("Interface.filter_AutoWB")
         filename = self.AllJpegs[self.iCurrentImg]
-        base, ext = op.splitext(filename)
+        base, ext = os.path.splitext(filename)
         newname = base + "-AutoWB" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
@@ -698,12 +687,12 @@ class Interface(object):
         if (self.image.metadata["rate"] == 0) and  etat:
             self.image.metadata["rate"] = config.DefaultRatingSelectedImage
             self.gui.rate.setValue(config.DefaultRatingSelectedImage)
-        self.settitle()
+        self.update_title()
 
     def destroy(self, *args):
         """destroy clicked by user"""
         logger.debug("Interface.destroy")
-        self.settitle()
+        self.update_title()
         self.gui.close()
 #        config.GraphicMode = "quit"
         self.callback("quit")
@@ -711,7 +700,7 @@ class Interface(object):
     def FullScreen(self, *args):
         """Switch to fullscreen mode"""
         logger.debug("Interface.fullscreen")
-        self.settitle()
+        self.update_title()
         self.gui.close()
 #        config.GraphicMode = "FullScreen"
 #        gtk.main_quit()
@@ -720,7 +709,7 @@ class Interface(object):
     def SlideShow(self, *args):
         """Switch to fullscreen mode and starts the SlideShow"""
         logger.debug("Interface.slideshow")
-        self.settitle()
+        self.update_title()
         self.gui.close
 #        config.GraphicMode = "SlideShow"
 #        gtk.main_quit()
@@ -729,7 +718,7 @@ class Interface(object):
     def copyAndResize(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
         logger.debug("Interface.copyAndResize")
-        self.settitle()
+        self.update_title()
         # TODO: go through MVC
         processSelected(self.selected)
         self.selected = Selected()
@@ -739,11 +728,11 @@ class Interface(object):
     def toWeb(self, *args):
         """lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
         logger.debug("Interface.toWeb")
-        self.settitle()
+        self.update_title()
         processSelected(self.selected)
         self.selected = Selected()
         self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
-        SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
             print("Error n° : %i" % out)
@@ -752,10 +741,10 @@ class Interface(object):
     def emptySelected(self, *args):
         """remove all the files in the "Selected" folder"""
 
-        SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         for dirs in os.listdir(SelectedDir):
-            curfile = op.join(SelectedDir, dirs)
-            if op.isdir(curfile):
+            curfile = os.path.join(SelectedDir, dirs)
+            if os.path.isdir(curfile):
                 recursive_delete(curfile)
             else:
                 os.remove(curfile)
@@ -763,7 +752,7 @@ class Interface(object):
 
     def copy(self, *args):
         """lauch the copy of all selected files"""
-        self.settitle()
+        self.update_title()
         copySelected(self.selected)
         self.selected = Selected()
         self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
@@ -772,12 +761,12 @@ class Interface(object):
     def burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
         logger.debug("Interface.burn")
-        self.settitle()
+        self.update_title()
         copySelected(self.selected)
         self.selected = Selected()
         # TODO : MVC
         self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
-        SelectedDir = op.join(config.DefaultRepository, config.SelectedDirectory)
+        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0:
             print("Error n° : %i" % out)
@@ -786,7 +775,7 @@ class Interface(object):
     def die(self, *args):
         """you wanna leave the program ??"""
         logger.debug("Interface.die")
-        self.settitle()
+        self.update_title()
         print("TODO: die")
         dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Voulez vous vraiment quitter ce programme ?")
         result = dialog.run()
@@ -801,14 +790,14 @@ class Interface(object):
     def saveSelection(self, *args):
         """Saves all the selection of photos """
         logger.debug("Interface.saveSelection")
-        self.settitle()
+        self.update_title()
         self.selected.save()
 
 
     def loadSelection(self, *args):
         """Load a previously saved  selection of photos """
         logger.debug("Interface.loadSelection")
-        self.settitle()
+        self.update_title()
         self.selected = Selected.load()
         for i in self.selected:
             if not(i in self.AllJpegs):
@@ -819,21 +808,21 @@ class Interface(object):
     def selectAll(self, *args):
         """Select all photos for processing"""
         logger.debug("Interface.selectAll")
-        self.settitle()
+        self.update_title()
         self.selected = self.AllJpegs
         self.gui.selection.set_active(True)
 
     def selectNone(self, *args):
         """Select NO photos and empty selection"""
         logger.debug("Interface.selectNone")
-        self.settitle()
+        self.update_title()
         self.selected = Selected()
         self.gui.selection.set_active(False)
 
     def invertSelection(self, *args):
         """Invert the selection of photos """
         logger.debug("Interface.invertSelection")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:]
         for i in self.selected:
             temp.remove(i)
@@ -844,7 +833,7 @@ class Interface(object):
     def about(self, *args):
         """display a copyright message"""
         logger.debug("Interface.about clicked")
-        self.settitle()
+        self.update_title()
         msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (imagizer.__author__, imagizer.__contact__, imagizer.__version__)
 #        MessageError(msg.decode("UTF8"), Message=gtk.MESSAGE_INFO)
         QMessageBox.about(self.gui, "A Propos", msg)
@@ -852,10 +841,10 @@ class Interface(object):
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
         logger.debug("Interface.nextJ clicked")
-        self.settitle()
-        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
+        self.update_title()
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg, len(self.AllJpegs)):
-            jc = op.dirname(self.AllJpegs[i])
+            jc = os.path.dirname(self.AllJpegs[i])
             if jc > jour: break
         self.iCurrentImg = i
         self.showImage()
@@ -863,12 +852,12 @@ class Interface(object):
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
         logger.debug("Interface.previousJ clicked")
-        self.settitle()
+        self.update_title()
         if self.iCurrentImg == 0: return
-        jour = op.dirname(self.AllJpegs[self.iCurrentImg])
+        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
         for i in range(self.iCurrentImg - 1, -1, -1):
-            jc = op.dirname(self.AllJpegs[i])
-            jd = op.dirname(self.AllJpegs[i - 1])
+            jc = os.path.dirname(self.AllJpegs[i])
+            jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
         self.iCurrentImg = i
         self.showImage()
@@ -876,18 +865,18 @@ class Interface(object):
     def firstJ(self, *args):
         """switch to the first image of the first day"""
         logger.debug("Interface.firstJ clicked")
-        self.settitle()
+        self.update_title()
         self.iCurrentImg = 0
         self.showImage()
 
     def lastJ(self, *args):
         """switch to the first image of the last day"""
         logger.debug("Interface.lastJ clicked")
-        self.settitle()
-        lastday = op.dirname(self.AllJpegs[-1])
+        self.update_title()
+        lastday = os.path.dirname(self.AllJpegs[-1])
         for i in range(len(self.AllJpegs) - 1, -1, -1):
-            jc = op.dirname(self.AllJpegs[i])
-            jd = op.dirname(self.AllJpegs[i - 1])
+            jc = os.path.dirname(self.AllJpegs[i])
+            jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc == lastday) and (jd < jc): break
         self.iCurrentImg = i
         self.showImage()
@@ -907,7 +896,7 @@ class Interface(object):
     def firstS(self, *args):
         """switch to the first image selected"""
         logger.debug("Interface.firstS clicked")
-        self.settitle()
+        self.update_title()
         if len(self.selected) == 0:
             return
         self.iCurrentImg = self.AllJpegs.index(self.selected[0])
@@ -916,7 +905,7 @@ class Interface(object):
     def lastS(self, *args):
         """switch to the last image selected"""
         logger.debug("Interface.lastS clicked")
-        self.settitle()
+        self.update_title()
         if len(self.selected) == 0:
             return
         self.iCurrentImg = self.AllJpegs.index(self.selected[-1])
@@ -925,7 +914,7 @@ class Interface(object):
     def nextS(self, *args):
         """switch to the next image selected"""
         logger.debug("Interface.nextS clicked")
-        self.settitle()
+        self.update_title()
         if len(self.selected) == 0:return
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i in self.selected:
@@ -936,7 +925,7 @@ class Interface(object):
     def previousS(self, *args):
         """switch to the previous image selected"""
         logger.debug("Interface.previousS clicked")
-        self.settitle()
+        self.update_title()
         if len(self.selected) == 0:return
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
@@ -949,7 +938,7 @@ class Interface(object):
     def firstNS(self, *args):
         """switch to the first image NOT selected"""
         logger.debug("Interface.firstNS clicked")
-        self.settitle()
+        self.update_title()
         for i in self.AllJpegs:
             if i not in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
@@ -959,7 +948,7 @@ class Interface(object):
     def lastNS(self, *args):
         """switch to the last image NOT selected"""
         logger.debug("Interface.lastNS clicked")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
@@ -971,7 +960,7 @@ class Interface(object):
     def nextNS(self, *args):
         """switch to the next image NOT selected"""
         logger.debug("Interface.nextNS clicked")
-        self.settitle()
+        self.update_title()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             if i not in self.selected:
                 self.iCurrentImg = self.AllJpegs.index(i)
@@ -981,7 +970,7 @@ class Interface(object):
     def previousNS(self, *args):
         """switch to the previous image NOT selected"""
         logger.debug("Interface.previousNS clicked")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
@@ -993,7 +982,7 @@ class Interface(object):
     def firstT(self, *args):
         """switch to the first entiteled image"""
         logger.debug("Interface.firstT clicked")
-        self.settitle()
+        self.update_title()
         for i in self.AllJpegs:
             myPhoto = Photo(i)
             if myPhoto.has_title():
@@ -1004,7 +993,7 @@ class Interface(object):
     def    previousT(self, *args):
         """switch to the previous titeled image"""
         logger.debug("Interface.previousT clicked")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
@@ -1017,7 +1006,7 @@ class Interface(object):
     def nextT(self, *args):
         """switch to the next titeled image"""
         logger.debug("Interface.nextT")
-        self.settitle()
+        self.update_title()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             myPhoto = Photo(i)
             if myPhoto.has_title():
@@ -1028,7 +1017,7 @@ class Interface(object):
     def lastT(self, *args):
         """switch to the last titeled image"""
         logger.debug("Interface.lastT clicked")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
@@ -1041,7 +1030,7 @@ class Interface(object):
     def firstNT(self, *args):
         """switch to the first non-titeled image"""
         logger.debug("Interface.firstNT clicked")
-        self.settitle()
+        self.update_title()
         for i in self.AllJpegs:
             myPhoto = Photo(i)
             if not myPhoto.has_title():
@@ -1052,7 +1041,7 @@ class Interface(object):
     def previousNT(self, *args):
         """switch to the previous non-titeled image"""
         logger.debug("Interface.previousNT clicked")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:self.iCurrentImg]
         temp.reverse()
         for i in temp:
@@ -1065,7 +1054,7 @@ class Interface(object):
     def nextNT(self, *args):
         """switch to the next non-titeled image"""
         logger.debug("Interface.nextNT clicked")
-        self.settitle()
+        self.update_title()
         for i in self.AllJpegs[self.iCurrentImg + 1:]:
             myPhoto = Photo(i)
             if not myPhoto.has_title():
@@ -1076,7 +1065,7 @@ class Interface(object):
     def lastNT(self, *args):
         """switch to the last non-titeled image"""
         logger.debug("Interface.lastNT clicked")
-        self.settitle()
+        self.update_title()
         temp = self.AllJpegs[:]
         temp.reverse()
         for i in temp:
@@ -1199,7 +1188,7 @@ class Interface(object):
     def renameDay(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
         logger.debug("Interface.renameDay clicked")
-        self.settitle()
+        self.update_title()
         RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.selected, self.renameDayCallback)
 
     def renameDayCallback(self, renamdayinstance):
@@ -1222,7 +1211,7 @@ class Interface(object):
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         logger.debug("Interface.importImages called")
-        self.settitle()
+        self.update_title()
         self.guiFiler = buildUI("filer")
 #        self.guiFiler.filer").set_current_folder(config.DefaultRepository)
 #        self.guiFiler.connect_signals({self.gui.Open, 'clicked()', self.filerSelect,
@@ -1242,7 +1231,7 @@ class Interface(object):
     def importImageCallBack(self, path):
         """This is the call back method for launching the import of new images"""
         logger.debug("Interface.importImageCallBack with dirname= %s" % path)
-        self.settitle()
+        self.update_title()
         listNew = []
         allJpegsFullPath = []
         for afile in self.AllJpegs[:]:
@@ -1273,13 +1262,13 @@ class Interface(object):
     def defineMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
         logger.debug("Interface.defineMediaSize clicked")
-        self.settitle()
+        self.update_title()
         AskMediaSize()
 
     def slideShowSetup(self, *args):
         """lauch a new window for seting up the slideshow"""
         logger.debug("Interface.slideShowSetup clicked")
-        self.settitle()
+        self.update_title()
         AskSlideShowSetup(self)
         if config.GraphicMode == "SlideShow":
             self.gui.close()
@@ -1288,13 +1277,13 @@ class Interface(object):
     def indexJ(self, *args):
         """lauch a new window for selecting the day of interest"""
         logger.debug("Interface.indexJ clicked")
-        self.settitle()
+        self.update_title()
         SelectDay(self)
 
     def synchronize(self, *args):
         """lauch the synchronization window"""
         logger.debug("Interface.synchronize clicked")
-        self.settitle()
+        self.update_title()
         Synchronize(self.iCurrentImg, self.AllJpegs, self.selected)
 
 
@@ -1302,7 +1291,7 @@ class Interface(object):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD).
         Finally the last selected image is shown and the total size is printed"""
         logger.debug("Interface.selectNewerMedia clicked")
-        self.settitle()
+        self.update_title()
         size = self.selected.get_nbytes()
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
@@ -1310,9 +1299,9 @@ class Interface(object):
         for i in self.AllJpegs[self.iCurrentImg:]:
             if i in self.selected:
                 continue
-            size += op.getsize(op.join(config.DefaultRepository, i))
+            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
             if size >= maxsize:
-                size -= op.getsize(op.join(config.DefaultRepository, i))
+                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
                 break
             else:
                 self.selected.append(i)
@@ -1333,7 +1322,7 @@ class Interface(object):
         """Calculate the size of the selected images then add older images to complete the media (CD or DVD).
         Finally the first selected image is shown and the total size is printed"""
         logger.debug("Interface.SelectOlderMedia clicked")
-        self.settitle()
+        self.update_title()
         size = self.selected.get_nbytes()
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
@@ -1343,9 +1332,9 @@ class Interface(object):
         for i in tmplist:
             if i in self.selected:
                 continue
-            size += op.getsize(op.join(config.DefaultRepository, i))
+            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
             if size >= maxsize:
-                size -= op.getsize(op.join(config.DefaultRepository, i))
+                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
                 break
             else:
                 self.selected.append(i)
@@ -1363,7 +1352,7 @@ class Interface(object):
     def calculateSize(self, *args):
         """Calculate the size of the selection and print it"""
         logger.debug("Interface.calculateSize clicked")
-        self.settitle()
+        self.update_title()
         size = self.selected.get_nbytes()
         t = smartSize(size) + (len(self.selected),)
         txt = "%.2f %s de données dans %i images sélectionnées" % t
@@ -1467,12 +1456,12 @@ class RenameDay(object):
         """
         self.initialFilename = filename
         self.newFilename = self.initialFilename
-        self.dayname = op.dirname(filename)
+        self.dayname = os.path.dirname(filename)
         self.callback = callback
 
-        self.commentfile = op.join(config.DefaultRepository, self.dayname, config.CommentFile)
+        self.commentfile = os.path.join(config.DefaultRepository, self.dayname, config.CommentFile)
         self.comment = AttrFile(self.commentfile)
-        if op.isfile(self.commentfile):
+        if os.path.isfile(self.commentfile):
             try:
                 self.comment.read()
             except:
@@ -1491,7 +1480,7 @@ class RenameDay(object):
         else:
             self.name = u""
             self.comment["title"] = self.name.decode(config.Coding)
-        self.comment["image"] = op.split(filename)[1].decode(config.Coding)
+        self.comment["image"] = os.path.split(filename)[1].decode(config.Coding)
         if not self.comment.has_key("comment"):
             self.comment["comment"] = u""
         self.AllPhotos = AllPhotos
@@ -1516,11 +1505,11 @@ class RenameDay(object):
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
         else:
             self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode2ascii(self.newname.encode("latin1")).replace(" ", "_",)
-        self.newFilename = op.join(self.newdayname, op.basename(self.initialFilename))
+        self.newFilename = os.path.join(self.newdayname, os.path.basename(self.initialFilename))
 
-        self.newcommentfile = op.join(config.DefaultRepository, self.newdayname, config.CommentFile)
-        if not op.isdir(op.join(config.DefaultRepository, self.newdayname)):
-            mkdir(op.join(config.DefaultRepository, self.newdayname))
+        self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
+        if not os.path.isdir(os.path.join(config.DefaultRepository, self.newdayname)):
+            mkdir(os.path.join(config.DefaultRepository, self.newdayname))
         if self.DescObj.get_modified():
             self.comment["comment"] = self.DescObj.get_text(self.DescObj.get_start_iter(), self.DescObj.get_end_iter()).strip().decode("UTF-8").replace("\n", "<BR>")
         self.comment.write()
@@ -1529,30 +1518,30 @@ class RenameDay(object):
         if self.newname != self.name:
             idx = 0
             for photofile in self.AllPhotos:
-                if op.dirname(photofile) == self.dayname:
-                    newphotofile = op.join(self.newdayname, op.split(photofile)[-1])
-                    if op.isfile(op.join(config.DefaultRepository, newphotofile)):
-                        base = op.splitext(op.join(config.DefaultRepository, newphotofile))
+                if os.path.dirname(photofile) == self.dayname:
+                    newphotofile = os.path.join(self.newdayname, os.path.split(photofile)[-1])
+                    if os.path.isfile(os.path.join(config.DefaultRepository, newphotofile)):
+                        base = os.path.splitext(os.path.join(config.DefaultRepository, newphotofile))
                         count = 0
-                        for i in os.listdir(op.join(config.DefaultRepository, self.newdayname)):
+                        for i in os.listdir(os.path.join(config.DefaultRepository, self.newdayname)):
                             if i.find(base) == 0:count += 1
-                        newphotofile = op.splitext(newphotofile) + "-%i.jpg" % count
+                        newphotofile = os.path.splitext(newphotofile) + "-%i.jpg" % count
                     print("%s -> %s" % (photofile, newphotofile))
                     myPhoto = Photo(photofile)
                     myPhoto.renameFile(newphotofile)
                     self.AllPhotos[idx] = newphotofile
 
-#                    os.rename(op.join(config.DefaultRepository, photofile), op.join(config.DefaultRepository, newphotofile))
+#                    os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
                     if photofile in self.selected:
                         self.selected[self.selected.index(photofile)] = newphotofile
                 idx += 1
 # move or remove the comment file if necessary
-            if op.isfile(self.commentfile):  # and not  op.isfile(self.newcommentfile):
+            if os.path.isfile(self.commentfile):  # and not  os.path.isfile(self.newcommentfile):
                 os.rename(self.commentfile, self.newcommentfile)
-#            elif op.isfile(self.commentfile) and op.isfile(self.newcommentfile):
+#            elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
 #                 os.remove(self.commentfile)
-            if len(os.listdir(op.join(config.DefaultRepository, self.dayname))) == 0:
-                os.rmdir(op.join(config.DefaultRepository, self.dayname))
+            if len(os.listdir(os.path.join(config.DefaultRepository, self.dayname))) == 0:
+                os.rmdir(os.path.join(config.DefaultRepository, self.dayname))
         self.gui.Renommer.close
         if self.callback is not None:
             self.callback(self)
@@ -1748,7 +1737,7 @@ class Synchronize:
     def synchronize(self, *args):
         self.read_conf_GUI()
         logger.debug("Synchronize.synchronize with mode %s" % config.SynchronizeType)
-        synchrofile = op.join(config.DefaultRepository, ".synchro")
+        synchrofile = os.path.join(config.DefaultRepository, ".synchro")
         synchro = []
         if config.SynchronizeType.lower() == "selected":
             logger.debug("Synchronize.synchronize: exec selected")
@@ -1765,10 +1754,10 @@ class Synchronize:
         synchro.append(config.Selected_save)
         days = []
         for photo in synchro:
-            day = op.split(photo)[0]
+            day = os.path.split(photo)[0]
             if not day in days:
                 days.append(day)
-                if op.isfile(op.join(config.DefaultRepository, day, config.CommentFile)):synchro.append(op.join(day, config.CommentFile))
+                if os.path.isfile(os.path.join(config.DefaultRepository, day, config.CommentFile)):synchro.append(os.path.join(day, config.CommentFile))
         f = open(synchrofile, "w")
         for i in synchro: f.write(i + "\n")
         f.close()
@@ -1799,21 +1788,21 @@ class SelectDay:
 #                   self.gui.Ouvrir, 'clicked()', self.continu}
 #        self.gui.connect_signals(signals)
         self.combobox = self.gui.entry
-        self.days = [op.split(self.upperIface.AllJpegs[0])[0]]
+        self.days = [os.path.split(self.upperIface.AllJpegs[0])[0]]
         self.combobox.append_text(self.days[0])
         for image in self.upperIface.AllJpegs[1:]:
-            day = op.split(image)[0]
+            day = os.path.split(image)[0]
             if day != self.days[-1]:
                 self.days.append(day)
                 self.combobox.append_text(day)
-        self.curday = self.days.index(op.split(self.upperIface.AllJpegs[self.upperIface.iCurrentImg])[0])
+        self.curday = self.days.index(os.path.split(self.upperIface.AllJpegs[self.upperIface.iCurrentImg])[0])
         self.combobox.set_active(self.curday)
 
     def continu(self, *args):
         """just distroy the window and goes on ...."""
         day = self.days[self.combobox.get_active()]
         for i in range(len(self.upperIface.AllJpegs)):
-            if op.split(self.upperIface.AllJpegs[i])[0] == day:
+            if os.path.split(self.upperIface.AllJpegs[i])[0] == day:
                 break
         self.upperIface.iCurrentImg = i
         self.upperIface.showImage()
