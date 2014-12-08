@@ -59,7 +59,7 @@ class FullScreenInterface(object):
         self.selected = Selected(i for i in selected if i in self.AllJpegs)
         self.image = None
         self.RandomList = []
-        self.iCurrentImg = first
+        self.idx_current = first
         self.timestamp = time.time()
         logger.info("Initialization of the fullscreen GUI")
         self.gui = buildUI("FullScreen")
@@ -79,18 +79,18 @@ class FullScreenInterface(object):
 
     def showImage(self):
         """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        self.image = Photo(self.AllJpegs[self.iCurrentImg])
+        self.image = Photo(self.AllJpegs[self.idx_current])
         X, Y = self.gui.FullScreen.get_size()
         logger.debug("Size of image on screen: %sx%s" % (X, Y))
         pixbuf = self.image.get_pixbuf(X, Y)
         self.gui.image793.set_from_pixbuf(pixbuf)
         del pixbuf
         gc.collect()
-        if self.AllJpegs[self.iCurrentImg] in self.selected:
+        if self.AllJpegs[self.idx_current] in self.selected:
             sel = "[Selected]"
         else:
             sel = ""
-        self.gui.FullScreen.set_title("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+        self.gui.FullScreen.set_title("Selector : %s %s" % (self.AllJpegs[self.idx_current], sel))
 
     def keypressed(self, widget, event, *args):
         """keylogger"""
@@ -144,41 +144,41 @@ class FullScreenInterface(object):
 
     def next1(self, *args):
         """Switch to the next image"""
-        self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
+        self.idx_current = (self.idx_current + 1) % len(self.AllJpegs)
         self.showImage()
     def previous1(self, *args):
         """Switch to the previous image"""
-        self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
+        self.idx_current = (self.idx_current - 1) % len(self.AllJpegs)
         self.showImage()
     def nextJ(self, *args):
         """Switch to the first image of the next day"""
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
-        for i in range(self.iCurrentImg, len(self.AllJpegs)):
+        jour = os.path.dirname(self.AllJpegs[self.idx_current])
+        for i in range(self.idx_current, len(self.AllJpegs)):
             jc = os.path.dirname(self.AllJpegs[i])
             if jc > jour: break
-        self.iCurrentImg = i
+        self.idx_current = i
         self.showImage()
     def previousJ(self, *args):
         """Switch to the first image of the previous day"""
-        if self.iCurrentImg == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
-        for i in range(self.iCurrentImg - 1, -1, -1):
+        if self.idx_current == 0: return
+        jour = os.path.dirname(self.AllJpegs[self.idx_current])
+        for i in range(self.idx_current - 1, -1, -1):
             jc = os.path.dirname(self.AllJpegs[i])
             jd = os.path.dirname(self.AllJpegs[i - 1])
             if (jc < jour) and (jd < jc): break
-        self.iCurrentImg = i
+        self.idx_current = i
         self.showImage()
 
     def select_Shortcut(self, *args):
         """Select or unselect the image"""
-        if self.AllJpegs[self.iCurrentImg] not in self.selected:
-            self.selected.append(self.AllJpegs[self.iCurrentImg])
+        if self.AllJpegs[self.idx_current] not in self.selected:
+            self.selected.append(self.AllJpegs[self.idx_current])
             sel = "[Selected]"
         else:
-            self.selected.remove(self.AllJpegs[self.iCurrentImg])
+            self.selected.remove(self.AllJpegs[self.idx_current])
             sel = ""
         self.selected.sort()
-        self.gui.setWindowTitle("Selector : %s %s" % (self.AllJpegs[self.iCurrentImg], sel))
+        self.gui.setWindowTitle("Selector : %s %s" % (self.AllJpegs[self.idx_current], sel))
 
     def SlideShow(self):
         """Starts the slide show"""
@@ -186,15 +186,15 @@ class FullScreenInterface(object):
         self.RandomList = []
         while not self.QuitSlideShow:
             if config.SlideShowType == "chronological":
-                self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
+                self.idx_current = (self.idx_current + 1) % len(self.AllJpegs)
             elif config.SlideShowType == "antichronological":
-                self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
+                self.idx_current = (self.idx_current - 1) % len(self.AllJpegs)
             elif config.SlideShowType == "random":
                 if len(self.RandomList) == 0:
                     self.RandomList = range(len(self.AllJpegs))
                     random.shuffle(self.RandomList)
-                self.iCurrentImg = self.RandomList.pop()
-            self.image = Photo(self.AllJpegs[self.iCurrentImg])
+                self.idx_current = self.RandomList.pop()
+            self.image = Photo(self.AllJpegs[self.idx_current])
             self.image.readExif()
             if self.image.metadata["rate"] < config.SlideShowMinRating:
                 flush()
@@ -225,7 +225,7 @@ class Interface(object):
         self.callback = callback
         self.AllJpegs = AllJpegs
         self.selected = Selected(i for i in selected if i in self.AllJpegs)
-        self.iCurrentImg = first
+        self.idx_current = first
         self.Xmin = 350
         self.image = None
         self.current_title = ""
@@ -234,13 +234,14 @@ class Interface(object):
         self.is_zoomed = False
         self.min_mark = 0
         self.default_filter = None
+
         print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
 
         # Icons on buttons
         self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
-        self._set_icons({"contrast": self.gui.filter,
+        self._set_icons({"system": self.gui.filter,
                          "left":self.gui.left,
                          "right":self.gui.right,
                          "reload": self.gui.reload,
@@ -255,10 +256,13 @@ class Interface(object):
         icon_on("right", self.gui.right)
 
 #        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
+        self.action_dict_multi = self.action_dict_simple = None
+        self._populate_action_dict()
         self.gui.actionAutorotate.setChecked(bool(config.AutoRotate))
         self.gui.actionSignature_filigrane_web.setChecked(bool(config.Filigrane))
-        self.set_images_per_page(config.NbrPerPage)
-        self.set_interpolation(config.Interpolation)
+
+        self.set_images_per_page(value=config.NbrPerPage)
+        self.set_interpolation(value=config.Interpolation)
         self.showImage()
         flush()
         self._menu_filtrer()
@@ -274,98 +278,7 @@ class Interface(object):
                     self.gui.reload.clicked:self.reload_img,
                     self.gui.filter.clicked:self.filter_im,
 
-                    # Menu Fichier
-                    self.gui.actionName_day.triggered: self.renameDay,
-                    #    <string>Ctrl+N</string>
-                    self.gui.actionDiaporama.triggered: self.SlideShow,
-                    #    <string>Ctrl+D</string>
-                    self.gui.actionPlein_cran.triggered: self.FullScreen,
-                    #    <string>Ctrl+F</string>
-                    self.gui.actionTrash_Ctrl_Del.triggered: self.trash,
-                    self.gui.actionImporter_Image.triggered: self.importImages,
-                    self.gui.actionSynchroniser.triggered: self.synchronize,
-                    self.gui.actionEmpty_selected.triggered: self.emptySelected,
-                    self.gui.actionCopier_seulement.triggered: self.copy,
-                    self.gui.actionCopier_et_graver.triggered: self.burn,
-                    self.gui.actionCopier_et_redimensionner.triggered: self.copyAndResize,
-                    self.gui.actionVers_page_web.triggered: self.toWeb,
-                    self.gui.actionSortir.triggered: self.destroy,
-                    #    <string>Ctrl+E</string>
-                    self.gui.actionQuitter.triggered: self.die,
-                    #    <string>Ctrl+Q</string>
-
-                    # Menu Affichage
-                    self.gui.actionNote_minimale.triggered: self.start_image_mark_window,
-                    self.gui.actionReload.triggered: self.reload_img,
-                    self.gui.actionRotation_left.triggered: self.turn_left,
-                    #    <string>Ctrl+Left</string>
-                    self.gui.actionRotation_right.triggered: self.turn_right,
-                    #    <string>Ctrl+Right</string>
-
-
-                    # Menu Preference
-                    self.gui.actionMedia_size.triggered:self.defineMediaSize,
-                    self.gui.actionAutorotate.triggered:self.setAutoRotate,
-                    self.gui.actionSignature_filigrane_web.triggered:self.setFiligrane,
-                    self.gui.actionSave_pref.triggered: self.savePref,
-                    self.gui.actionNearest.triggered:self.setInterpolNearest,
-                    self.gui.actionLinear.triggered: self.setInterpolBilin,
-                    self.gui.actionLanczos.triggered:self.setInterpolLanczos,
-                    self.gui.action9.triggered:  self.set9PerPage,
-                    self.gui.action12.triggered: self.set12PerPage,
-                    self.gui.action16.triggered: self.set16PerPage,
-                    self.gui.action20.triggered: self.set20PerPage,
-                    self.gui.action25.triggered: self.set25PerPage,
-                    self.gui.action30.triggered: self.set30PerPage,
-                    self.gui.actionConfigurer_le_diaporama.triggered:self.slideShowSetup,
-
-                    #Menu Selection
-                    self.gui.selectionner.triggered:self.select_shortcut,
-                    #    <string>Ctrl+S</string>
-
-
-                    #Menu navigation
-                    ##Image
-                    self.gui.actionNav_img_first.triggered: self.first,
-                    self.gui.actionNav_img_previous10.triggered: self.previous10,
-                    self.gui.actionNav_img_previous.triggered: self.previous1,
-                    self.gui.actionNav_img_next.triggered: self.next1,
-                    self.gui.actionNav_img_next10.triggered: self.next10,
-                    self.gui.actionNav_img_last.triggered: self.last,
-                    ##Day
-                    self.gui.actionNav_day_first.triggered: self.firstJ,
-                    self.gui.actionNav_day_previous.triggered: self.previousJ,
-                    self.gui.actionNav_day_next.triggered: self.nextJ,
-                    self.gui.actionNav_day_last.triggered: self.lastJ,
-#        self.gui.indexJ_activate': self.indexJ,
-#        self.gui.searchJ_activate': self.searchJ,
-                    ##Selected:
-                    self.gui.actionNav_sel_first.triggered: self.firstS,
-                    self.gui.actionNav_sel_previous.triggered: self.previousS,
-                    self.gui.actionNav_sel_next.triggered: self.nextS,
-                    self.gui.actionNav_sel_last.triggered: self.lastS,
-                    ##Non-selected:
-                    self.gui.actionNav_non_sel_first.triggered: self.firstNS,
-                    self.gui.actionNav_non_sel_previous.triggered: self.previousNS,
-                    self.gui.actionNav_non_sel_next.triggered: self.nextNS,
-                    self.gui.actionNav_non_sel_last.triggered: self.lastNS,
-                    ##Entitled
-                    self.gui.actionNav_title_first.triggered: self.firstT,
-                    self.gui.actionNav_title_previous.triggered: self.previousT,
-                    self.gui.actionNav_title_next.triggered: self.nextT,
-                    self.gui.actionNav_title_last.triggered: self.lastT,
-                    ##Non entitled
-                    self.gui.actionNav_non_title_first.triggered: self.firstNT,
-                    self.gui.actionNav_non_title_previous.triggered: self.previousNT,
-                    self.gui.actionNav_non_title_next.triggered: self.nextNT,
-                    self.gui.actionNav_non_title_last.triggered: self.lastNT,
-
-                    #Menu Filtres
-                    self.gui.actionAuto_whitebalance.triggered: self.filter_AutoWB,
-                    self.gui.actionContrast_mask.triggered: self.filter_ContrastMask,
-                    #Menu Aide
-                    self.gui.actionA_propos.triggered: self.about,
-
+                    self.gui.menubar.triggered: self._action_handler,
 #
 #        self.gui.enregistrerS_activate': self.saveSelection,
 #        self.gui.chargerS_activate': self.loadSelection,
@@ -388,57 +301,6 @@ class Interface(object):
 #        "on_ContrastMask_activate": self.filterContrastMask,
 #
 #        "on_photo_button_press_event": self.image_pressed,
-
-###################################################################
-
-#        self.gui.actionCharger.triggered
-#        self.gui.actionSauver.triggered
-#        self.gui.actionInverser.triggered
-#        self.gui.actionAucune.triggered
-#        self.gui.actionToutes.triggered
-#        self.gui.actionTaille_de_toute_la_s_lection.triggered
-#        self.gui.actionCD_DVD_suivant.triggered
-#        self.gui.actionCD_DVD_pr_c_dent.triggered
-#        self.gui.actionD_but.triggered
-#        #    <string>Home</string>
-#        self.gui.actionMoins_10.triggered
-#        #    <string>Ctrl+PgUp</string>
-#        self.gui.actionPr_c_dent_Ctrl_Haut.triggered
-#        #    <string>Ctrl+Up</string>
-#        self.gui.actionSuivant_Ctrl_Bas.triggered
-#        #    <string>Ctrl+Down</string>
-#        self.gui.actionPlus_10_Ctrl_PgDn.triggered
-#        #    <string>Ctrl+PgDown</string>
-#        self.gui.actionFin.triggered
-#        #    <string>End</string>
-#        self.gui.actionD_but_2.triggered
-#        self.gui.actionPr_c_dent_PgUp.triggered
-#        #    <string>PgUp</string>
-#        self.gui.actionSuivant_PgDn.triggered
-#        #    <string>PgDown</string>
-#        self.gui.actionFin_2.triggered
-#        self.gui.actionD_but_3.triggered
-#        self.gui.actionPr_c_dent_Alt_Haut.triggered
-#        #    <string>Meta+Alt+Up</string>
-#        self.gui.actionSuivant_Alt_Bas.triggered
-#        #    <string>Meta+Alt+Down</string>
-#        self.gui.actionFin_3.triggered
-#        self.gui.actionD_but_4.triggered
-#        self.gui.actionPr_c_dent.triggered
-#        self.gui.actionSuivant.triggered
-#        self.gui.actionFin_4.triggered
-#        self.gui.actionD_but_5.triggered
-#        self.gui.actionPr_c_dent_2.triggered
-#        self.gui.actionSuivant_2.triggered
-#        self.gui.actionFin_5.triggered
-#        self.gui.actionD_but_6.triggered
-#        self.gui.actionPr_c_dent_3.triggered
-#        self.gui.actionSuivant_3.triggered
-#        self.gui.actionFin_6.triggered
-#        self.gui.actionBalance_des_blancs_auto.triggered
-#        self.gui.actionMasque_de_contraste.triggered
-
-
 
         }
         for signal, callback in handlers.items():
@@ -475,6 +337,136 @@ class Interface(object):
         action_contrast.triggered.connect(self.filter_ContrastMask)
 
 
+    def _action_handler(self, act):
+        """
+        Generic action handler
+        @param act: QAction
+        """
+        print("Action %s" % act.text(), )
+        meth = self.action_dict_simple.get(act)
+        if meth:
+            meth()
+        else:
+            meth = self.action_dict_multi.get(act)
+            if meth:
+                meth(act)
+            else:
+                logger.warning("Unhandeled menubar event on %s" % act.text())
+
+
+    def _populate_action_dict(self):
+        """
+        Initialize a dict with all action 1<->1 registered and another with more complicated stuff
+        """
+        self.action_dict_simple = {
+            # Menu Fichier
+            self.gui.actionName_day: self.renameDay,
+            #    <string>Ctrl+N</string>
+            self.gui.actionDiaporama: self.SlideShow,
+            #    <string>Ctrl+D</string>
+            self.gui.actionPlein_cran: self.FullScreen,
+            #    <string>Ctrl+F</string>
+            self.gui.actionTrash_Ctrl_Del: self.trash,
+            self.gui.actionImporter_Image: self.importImages,
+            self.gui.actionSynchroniser: self.synchronize,
+            self.gui.actionEmpty_selected: self.emptySelected,
+            self.gui.actionCopier_seulement: self.copy,
+            self.gui.actionCopier_et_graver: self.burn,
+            self.gui.actionCopier_et_redimensionner: self.copyAndResize,
+            self.gui.actionVers_page_web: self.toWeb,
+            self.gui.actionSortir: self.destroy,
+            #    <string>Ctrl+E</string>
+            self.gui.actionQuitter: self.die,
+            #    <string>Ctrl+Q</string>
+
+            # Menu Affichage
+#                    self.gui.actionNote_minimale: self.start_image_mark_window,
+            self.gui.actionReload: self.reload_img,
+            self.gui.actionRotation_left: self.turn_left,
+            #    <string>Ctrl+Left</string>
+            self.gui.actionRotation_right: self.turn_right,
+            #    <string>Ctrl+Right</string>
+
+
+            # Menu Preference
+            self.gui.actionMedia_size:self.defineMediaSize,
+            self.gui.actionAutorotate:self.setAutoRotate,
+            self.gui.actionSignature_filigrane_web:self.setFiligrane,
+            self.gui.actionSave_pref: self.savePref,
+            self.gui.actionConfigurer_le_diaporama:self.slideShowSetup,
+
+            #Menu Selection
+            self.gui.selectionner:self.select_shortcut,
+            #    <string>Ctrl+S</string>
+
+
+#        self.gui.indexJ_activate': self.indexJ,
+#        self.gui.searchJ_activate': self.searchJ,
+            ##Selected:
+            self.gui.actionNav_sel_first: self.firstS,
+            self.gui.actionNav_sel_previous: self.previousS,
+            self.gui.actionNav_sel_next: self.nextS,
+            self.gui.actionNav_sel_last: self.lastS,
+            ##Non-selected:
+            self.gui.actionNav_unsel_first: self.firstNS,
+            self.gui.actionNav_unsel_previous: self.previousNS,
+            self.gui.actionNav_unsel_next: self.nextNS,
+            self.gui.actionNav_unsel_last: self.lastNS,
+            ##Entitled
+            self.gui.actionNav_title_first: self.firstT,
+            self.gui.actionNav_title_previous: self.previousT,
+            self.gui.actionNav_title_next: self.nextT,
+            self.gui.actionNav_title_last: self.lastT,
+            ##Non entitled
+            self.gui.actionNav_untitle_first: self.firstNT,
+            self.gui.actionNav_untitle_previous: self.previousNT,
+            self.gui.actionNav_untitle_next: self.nextNT,
+            self.gui.actionNav_untitle_last: self.lastNT,
+
+            #Menu Filtres
+            self.gui.actionAuto_whitebalance: self.filter_AutoWB,
+            self.gui.actionContrast_mask: self.filter_ContrastMask,
+            #Menu Aide
+            self.gui.actionA_propos: self.about,
+
+            }
+        self.action_dict_multi = {
+            # Menu Preference
+            self.gui.actionNearest:self.set_interpolation,
+            self.gui.actionLinear: self.set_interpolation,
+            self.gui.actionLanczos:self.set_interpolation,
+            self.gui.action9:  self.set_images_per_page,
+            self.gui.action12: self.set_images_per_page,
+            self.gui.action16: self.set_images_per_page,
+            self.gui.action20: self.set_images_per_page,
+            self.gui.action25: self.set_images_per_page,
+            self.gui.action30: self.set_images_per_page,
+            self.gui.action0: self.set_min_rate,
+            self.gui.action1: self.set_min_rate,
+            self.gui.action2: self.set_min_rate,
+            self.gui.action3: self.set_min_rate,
+            self.gui.action4: self.set_min_rate,
+            self.gui.action5: self.set_min_rate,
+            #Menu navigation
+            ##Image
+            self.gui.actionNav_img_first: self.navigate,
+            self.gui.actionNav_img_previous10: self.navigate,
+            self.gui.actionNav_img_previous: self.navigate,
+            self.gui.actionNav_img_next: self.navigate,
+            self.gui.actionNav_img_next10: self.navigate,
+            self.gui.actionNav_img_last: self.navigate,
+            ##Day
+            self.gui.actionNav_day_first: self.navigate,
+            self.gui.actionNav_day_previous: self.navigate,
+            self.gui.actionNav_day_next: self.navigate,
+            self.gui.actionNav_day_last: self.navigate,
+
+            }
+        #assign as data the name of the widget for book keeping
+        for k, v in self.gui.__dict__.items():
+            print(k)
+            if k.startswith("actionNav"):
+                v.setData(k)
 
     def update_title(self):
         """Set the new title of the image"""
@@ -485,10 +477,16 @@ class Interface(object):
             self.image.name(newtitle, newRate)
 
 
-    def showImage(self):
-        """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+    def showImage(self, new_idx=None):
+        """Show the image in the given widget and set up the exif tags in the GUI
+        @param new_idx: index of the new image
+        """
         logger.debug("Interface.showImage")
-        self.current_image = self.AllJpegs[self.iCurrentImg]
+        if new_idx is not None:
+            self.idx_current = new_idx
+        else:
+            new_idx = self.idx_current
+        self.current_image = self.AllJpegs[new_idx]
         self.image = Photo(self.current_image)
         X, Y = self.gui.width(), self.gui.photo.height()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
@@ -516,15 +514,95 @@ class Interface(object):
         self.current_title = metadata["title"]
 
 
+    def calc_index(self, what="next", menu="image"):
+        """
+        @param what: can be "next, "next10","last", "previous10", "last" ...
+        @param menu: can be "image", "selected", "titled", ....
+        @return: image index
+        """
+        new_idx = current_idx = self.idx_current
+
+        if menu == "image":
+            if what == "next":
+                new_idx = current_idx + 1
+            elif what == "last":
+                new_idx = current_idx - 1
+            elif what == "next10":
+                new_idx = current_idx + 10
+            elif what == "previous10":
+                new_idx = current_idx - 10
+            elif what == "last":
+                new_idx = len(self.AllJpegs) - 1
+            elif what == "first":
+                new_idx = 0
+
+        elif menu == "day":
+            day = os.path.dirname(self.AllJpegs[current_idx])
+            if what == "next":
+                for img in self.AllJpegs[current_idx:]:
+                    if os.path.dirname(img) > day:
+                        return  self.AllJpegs.index(img)
+                else:
+                    new_idx = len(self.AllJpegs) - 1
+            elif what == "last":
+                if current_idx == 0:
+                    return 0
+                last = os.path.dirname(current_idx - 1)
+                for img in self.AllJpegs[current_idx - 1:-1, -1]:
+                    jc = os.path.dirname(img)
+                    if (jc < day) and (jc < last):
+                        return self.AllJpegs.index(img) + 1
+                    last = jc
+                new_idx = 0
+            elif what == "first":
+                return 0
+            elif what == "last":
+                lastday = os.path.dirname(self.AllJpegs[-1])
+                last = lastday
+                for img in self.AllJpegs[-1 :-1:-1]:
+                    jc = os.path.dirname(img)
+                    if (jc == lastday) and (jc < last):
+                        return self.AllJpegs.index(img) + 1
+                    last = jc
+                else:
+                    return len(self.AllJpegs) - 1
+        #TODO:#
+        #tile
+        #untilte
+        #selected
+        #unselected
+        # final sanitization
+        if new_idx >= len(self.AllJpegs):
+            new_idx = len(self.AllJpegs) - 1
+        if new_idx <= 0:
+            new_idx = 0
+        return new_idx
+
+    def navigate(self, act):
+        """
+        Generic navigation
+        """
+        name = unicode(act.text())
+        ref = act.data().toString()
+        w = str(ref).split("_")
+        if len(w) == 3:
+            what = w[2]
+            menu = w[1]
+        else:
+            logger.warning(u"Interface.navigate unknown action %s: %s " % (name, ref))
+            return
+        logger.warning(u"Interface.navigate with action %s: %s %s" % (name, what, menu))
+        self.update_title()
+        self.showImage(self.calc_index(what, menu))
 
     def next1(self, *args):
         """Switch to the next image"""
         logger.debug("Interface.next1")
         self.update_title()
         if self.min_mark < 1:
-            self.iCurrentImg = (self.iCurrentImg + 1) % len(self.AllJpegs)
+            self.idx_current = (self.idx_current + 1) % len(self.AllJpegs)
         else:
-            for i in range(self.iCurrentImg + 1, len(self.AllJpegs)):
+            for i in range(self.idx_current + 1, len(self.AllJpegs)):
                 image = Photo(self.AllJpegs[i])
                 data = image.readExif()
                 if "rate" in data:
@@ -533,25 +611,18 @@ class Interface(object):
                         break
             else:
                 print("No image found with rating > %s" % self.min_mark)
-            self.iCurrentImg = i
+            self.idx_current = i
         self.showImage()
 
-    def next10(self, *args):
-        """Switch forward of 10 images """
-        logger.debug("Interface.next10")
-        self.update_title()
-        self.iCurrentImg = self.iCurrentImg + 10
-        if self.iCurrentImg > len(self.AllJpegs):self.iCurrentImg = len(self.AllJpegs) - 1
-        self.showImage()
 
     def previous1(self, *args):
         """Switch to the previous image"""
         logger.debug("Interface.previous")
         self.update_title()
         if self.min_mark < 1:
-            self.iCurrentImg = (self.iCurrentImg - 1) % len(self.AllJpegs)
+            self.idx_current = (self.idx_current - 1) % len(self.AllJpegs)
         else:
-            for i in range(self.iCurrentImg - 1, -1, -1):
+            for i in range(self.idx_current - 1, -1, -1):
                 image = Photo(self.AllJpegs[i])
                 data = image.readExif()
                 if "rate" in data:
@@ -561,31 +632,10 @@ class Interface(object):
             else:
                 i = 0
                 print("No image found with rating > %s" % self.min_mark)
-            self.iCurrentImg = i
+            self.idx_current = i
 
         self.showImage()
 
-    def previous10(self, *args):
-        """Switch 10 images backward"""
-        logger.debug("Interface.previous10")
-        self.update_title()
-        self.iCurrentImg = self.iCurrentImg - 10
-        if self.iCurrentImg < 0: self.iCurrentImg = 0
-        self.showImage()
-
-    def first(self, *args):
-        """switch to the first image"""
-        logger.debug("Interface.first")
-        self.update_title()
-        self.iCurrentImg = 0
-        self.showImage()
-
-    def last(self, *args):
-        """switch to the last image"""
-        logger.debug("Interface.last")
-        self.update_title()
-        self.iCurrentImg = len(self.AllJpegs) - 1
-        self.showImage()
 
     def turn_right(self, *args):
         """rotate the current image clockwise"""
@@ -609,8 +659,8 @@ class Interface(object):
             self.selected.remove(self.current_image)
         self.AllJpegs.remove(self.current_image)
         self.image.trash()
-        self.iCurrentImg = self.iCurrentImg % len(self.AllJpegs)
-        self.current_image = self.AllJpegs[self.iCurrentImg]
+        self.idx_current = self.idx_current % len(self.AllJpegs)
+        self.current_image = self.AllJpegs[self.idx_current]
         self.showImage()
 
     def gimp(self, *args):
@@ -623,7 +673,7 @@ class Interface(object):
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.iCurrentImg = self.AllJpegs.index(newname)
+        self.idx_current = self.AllJpegs.index(newname)
         self.current_image = newname
         newnamefull = os.path.join(config.DefaultRepository, newname)
         shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
@@ -636,7 +686,7 @@ class Interface(object):
         """Remove image from cache and reloads it"""
         logger.debug("Interface.reload")
         self.update_title()
-        filename = self.AllJpegs[self.iCurrentImg]
+        filename = self.AllJpegs[self.idx_current]
         if (imageCache is not None) and (filename in imageCache):
             imageCache.pop(filename)
         self.image = Photo(filename)
@@ -658,13 +708,13 @@ class Interface(object):
         """Filter the current image with a contrast mask"""
         logger.debug("Interface.filter_ContrastMask")
         self.update_title()
-        filename = self.AllJpegs[self.iCurrentImg]
+        filename = self.AllJpegs[self.idx_current]
         base, ext = os.path.splitext(filename)
         newname = base + "-ContrastMask" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.iCurrentImg = self.AllJpegs.index(newname)
+        self.idx_current = self.AllJpegs.index(newname)
         self.image = self.image.contrastMask(newname)
         self.showImage()
 
@@ -672,13 +722,13 @@ class Interface(object):
         """Filter the current image with Auto White Balance"""
         logger.debug("Interface.filter_AutoWB")
         self.update_title()
-        filename = self.AllJpegs[self.iCurrentImg]
+        filename = self.AllJpegs[self.idx_current]
         base, ext = os.path.splitext(filename)
         newname = base + "-AutoWB" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.iCurrentImg = self.AllJpegs.index(newname)
+        self.idx_current = self.AllJpegs.index(newname)
         self.image = self.image.autoWB(newname)
         self.showImage()
 
@@ -691,7 +741,7 @@ class Interface(object):
     def select(self, *args):
         """Select or unselect the image (directly clicked on the toggle button)"""
         logger.debug("Interface.select")
-        self.current_image = self.AllJpegs[self.iCurrentImg]
+        self.current_image = self.AllJpegs[self.idx_current]
         etat = bool(self.gui.selection.checkState())
         if etat and (self.current_image not in self.selected):
             self.selected.append(self.current_image)
@@ -737,7 +787,7 @@ class Interface(object):
         # TODO: go through MVC
         processSelected(self.selected)
         self.selected = Selected()
-        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
         logger.info("Interface.copyAndResize: Done")
 
     def toWeb(self, *args):
@@ -746,7 +796,7 @@ class Interface(object):
         self.update_title()
         processSelected(self.selected)
         self.selected = Selected()
-        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
@@ -770,7 +820,7 @@ class Interface(object):
         self.update_title()
         copySelected(self.selected)
         self.selected = Selected()
-        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
         print("Done")
 
     def burn(self, *args):
@@ -780,7 +830,7 @@ class Interface(object):
         copySelected(self.selected)
         self.selected = Selected()
         # TODO : MVC
-        self.gui.selection.set_active((self.AllJpegs[self.iCurrentImg] in self.selected))
+        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0:
@@ -817,7 +867,7 @@ class Interface(object):
         for i in self.selected:
             if not(i in self.AllJpegs):
                 self.selected.remove(i)
-        self.gui.selection.set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
+        self.gui.selection.set_active(self.AllJpegs[self.idx_current] in  self.selected)
 
 
     def selectAll(self, *args):
@@ -842,7 +892,7 @@ class Interface(object):
         for i in self.selected:
             temp.remove(i)
         self.selected = temp
-        self.gui.selection.set_active(self.AllJpegs[self.iCurrentImg] in  self.selected)
+        self.gui.selection.set_active(self.AllJpegs[self.idx_current] in  self.selected)
 
     def about(self, *args):
         """display a copyright message"""
@@ -854,48 +904,6 @@ class Interface(object):
         QMessageBox.about(self.gui, "À Propos", msg)
 
 
-    def nextJ(self, *args):
-        """Switch to the first image of the next day"""
-        logger.debug("Interface.nextJ clicked")
-        self.update_title()
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
-        for i in range(self.iCurrentImg, len(self.AllJpegs)):
-            jc = os.path.dirname(self.AllJpegs[i])
-            if jc > jour: break
-        self.iCurrentImg = i
-        self.showImage()
-
-    def previousJ(self, *args):
-        """Switch to the first image of the previous day"""
-        logger.debug("Interface.previousJ clicked")
-        self.update_title()
-        if self.iCurrentImg == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.iCurrentImg])
-        for i in range(self.iCurrentImg - 1, -1, -1):
-            jc = os.path.dirname(self.AllJpegs[i])
-            jd = os.path.dirname(self.AllJpegs[i - 1])
-            if (jc < jour) and (jd < jc): break
-        self.iCurrentImg = i
-        self.showImage()
-
-    def firstJ(self, *args):
-        """switch to the first image of the first day"""
-        logger.debug("Interface.firstJ clicked")
-        self.update_title()
-        self.iCurrentImg = 0
-        self.showImage()
-
-    def lastJ(self, *args):
-        """switch to the first image of the last day"""
-        logger.debug("Interface.lastJ clicked")
-        self.update_title()
-        lastday = os.path.dirname(self.AllJpegs[-1])
-        for i in range(len(self.AllJpegs) - 1, -1, -1):
-            jc = os.path.dirname(self.AllJpegs[i])
-            jd = os.path.dirname(self.AllJpegs[i - 1])
-            if (jc == lastday) and (jd < jc): break
-        self.iCurrentImg = i
-        self.showImage()
 
     def searchJ(self, *args):
         """start the searching widget"""
@@ -904,18 +912,19 @@ class Interface(object):
 
     def setDay(self, path):
         try:
-            self.iCurrentImg = self.AllJpegs.index(path)
+            self.idx_current = self.AllJpegs.index(path)
         except ValueError:
             logger.error("%s not in AllJpegs" % path)
         else:
             self.showImage()
+
     def firstS(self, *args):
         """switch to the first image selected"""
         logger.debug("Interface.firstS clicked")
         self.update_title()
         if len(self.selected) == 0:
             return
-        self.iCurrentImg = self.AllJpegs.index(self.selected[0])
+        self.idx_current = self.AllJpegs.index(self.selected[0])
         self.showImage()
 
     def lastS(self, *args):
@@ -924,7 +933,7 @@ class Interface(object):
         self.update_title()
         if len(self.selected) == 0:
             return
-        self.iCurrentImg = self.AllJpegs.index(self.selected[-1])
+        self.idx_current = self.AllJpegs.index(self.selected[-1])
         self.showImage()
 
     def nextS(self, *args):
@@ -932,9 +941,9 @@ class Interface(object):
         logger.debug("Interface.nextS clicked")
         self.update_title()
         if len(self.selected) == 0:return
-        for i in self.AllJpegs[self.iCurrentImg + 1:]:
+        for i in self.AllJpegs[self.idx_current + 1:]:
             if i in self.selected:
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -943,11 +952,11 @@ class Interface(object):
         logger.debug("Interface.previousS clicked")
         self.update_title()
         if len(self.selected) == 0:return
-        temp = self.AllJpegs[:self.iCurrentImg]
+        temp = self.AllJpegs[:self.idx_current]
         temp.reverse()
         for i in temp:
             if i in self.selected:
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -957,7 +966,7 @@ class Interface(object):
         self.update_title()
         for i in self.AllJpegs:
             if i not in self.selected:
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -969,7 +978,7 @@ class Interface(object):
         temp.reverse()
         for i in temp:
             if i not in self.selected:
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -977,9 +986,9 @@ class Interface(object):
         """switch to the next image NOT selected"""
         logger.debug("Interface.nextNS clicked")
         self.update_title()
-        for i in self.AllJpegs[self.iCurrentImg + 1:]:
+        for i in self.AllJpegs[self.idx_current + 1:]:
             if i not in self.selected:
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -987,11 +996,11 @@ class Interface(object):
         """switch to the previous image NOT selected"""
         logger.debug("Interface.previousNS clicked")
         self.update_title()
-        temp = self.AllJpegs[:self.iCurrentImg]
+        temp = self.AllJpegs[:self.idx_current]
         temp.reverse()
         for i in temp:
             if i not in self.selected:
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1002,7 +1011,7 @@ class Interface(object):
         for i in self.AllJpegs:
             myPhoto = Photo(i)
             if myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1010,12 +1019,12 @@ class Interface(object):
         """switch to the previous titeled image"""
         logger.debug("Interface.previousT clicked")
         self.update_title()
-        temp = self.AllJpegs[:self.iCurrentImg]
+        temp = self.AllJpegs[:self.idx_current]
         temp.reverse()
         for i in temp:
             myPhoto = Photo(i)
             if myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1023,10 +1032,10 @@ class Interface(object):
         """switch to the next titeled image"""
         logger.debug("Interface.nextT")
         self.update_title()
-        for i in self.AllJpegs[self.iCurrentImg + 1:]:
+        for i in self.AllJpegs[self.idx_current + 1:]:
             myPhoto = Photo(i)
             if myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1039,7 +1048,7 @@ class Interface(object):
         for i in temp:
             myPhoto = Photo(i)
             if myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1050,7 +1059,7 @@ class Interface(object):
         for i in self.AllJpegs:
             myPhoto = Photo(i)
             if not myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1058,12 +1067,12 @@ class Interface(object):
         """switch to the previous non-titeled image"""
         logger.debug("Interface.previousNT clicked")
         self.update_title()
-        temp = self.AllJpegs[:self.iCurrentImg]
+        temp = self.AllJpegs[:self.idx_current]
         temp.reverse()
         for i in temp:
             myPhoto = Photo(i)
             if not myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1071,10 +1080,10 @@ class Interface(object):
         """switch to the next non-titeled image"""
         logger.debug("Interface.nextNT clicked")
         self.update_title()
-        for i in self.AllJpegs[self.iCurrentImg + 1:]:
+        for i in self.AllJpegs[self.idx_current + 1:]:
             myPhoto = Photo(i)
             if not myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1087,7 +1096,7 @@ class Interface(object):
         for i in temp:
             myPhoto = Photo(i)
             if not myPhoto.has_title():
-                self.iCurrentImg = self.AllJpegs.index(i)
+                self.idx_current = self.AllJpegs.index(i)
                 self.showImage()
                 return
 
@@ -1106,106 +1115,81 @@ class Interface(object):
     def setFiligrane(self, *args):
         """Set the Signature/Filigrane flag"""
         logger.debug("Interface.setFiligrane clicked")
-#        config.Filigrane = self.gui.Filigrane").get_active()
 
-    def sizeCurrent(self, *args):
-        """reads the current size of the image and defines it as default for next-time"""
-        logger.debug("Interface.sizeCurrent clicked")
-        X, Y = self.gui.width(), self.gui.heigth()
-        config.ScreenSize = max(X - self.Xmin, Y)
 
-    def setSize300(self, *args):
-        """reads the current size of the image and defines it as default for next-time"""
-        logger.debug("Interface.setSize300 clicked")
-        config.ScreenSize = 300
-
-    def setSize600(self, *args):
-        """reads the current size of the image and defines it as default for next-time"""
-        logger.debug("Interface.setSize600 clicked")
-        config.ScreenSize = 600
-
-    def setSize900(self, *args):
-        """reads the current size of the image and defines it as default for next-time"""
-        logger.debug("Interface.setSize900 clicked")
-        config.ScreenSize = 900
-
-    def set_interpolation(self, value):
+    def set_interpolation(self, act=None, value=None):
+        """
+        @param act: Qaction
+        """
         logger.debug("Interface.set_interpolation")
         options = (self.gui.actionNearest,
-                    self.gui.actionLinear,
-                    self.gui.actionLanczos)
+                   self.gui.actionLinear,
+                   self.gui.actionLanczos)
+        if act:
+            config.Interpolation = options.index(act)
+        elif value is not None:
+            config.Interpolation = value
+            act = options[value]
+        else:
+            return
 
-        value = int(value)
-        config.Interpolation = value
-        for i, name in enumerate(options):
-            name.setChecked(i == value)
-
-    def setInterpolNearest(self, *args):
-        """set interpolation level to nearest"""
-        print("Interface.setInterpolNearest")
-        self.set_interpolation(0)
-
-    def setInterpolBilin(self, *args):
-        """set interpolation level to bilinear"""
-        logger.debug("Interface.setInterpolBilin clicked (bilinear)")
-        self.set_interpolation(1)
-
-    def setInterpolLanczos(self, *args):
-        """set interpolation level to Lanczos"""
-        logger.debug("Interface.setInterpolLanczos clicked ")
-        self.set_interpolation(2)
-
-    def set_images_per_page(self, value):
-        logger.debug("Interface.set_interpolation")
-        options = {9:self.gui.action9,
-                   12:self.gui.action12,
-                   16:self.gui.action16,
-                   20:self.gui.action20,
-                   25:self.gui.action25,
-                   30:self.gui.action30,
-        }
-
-        value = int(value)
-        config.NbrPerPage = value
-        for i, name in options.items():
-            name.setChecked(i == value)
+        for name in options:
+            name.setChecked(name == act)
 
 
-    def set30PerPage(self, *args):
-        """set 30 images per web-page"""
-        logger.debug("Interface.set30PerPage clicked")
-        self.set_images_per_page(30)
+    def set_images_per_page(self, act=None, value=None):
+        """
+        @param act: Qaction
+        @param value: numerical value
+        """
+        logger.debug("Interface.set_images_per_page")
+        options = {9:  self.gui.action9,
+                   12: self.gui.action12,
+                   16: self.gui.action16,
+                   20: self.gui.action20,
+                   25: self.gui.action25,
+                   30: self.gui.action30,
+                   }
+        if value is not None:
+            config.NbrPerPage = value
+            act = options.get(value)
+        elif act is not None:
+            config.NbrPerPage = int(str(act.text()))
+        else:
+            return
 
-    def set25PerPage(self, *args):
-        """set 25 images per web-page"""
-        logger.debug("Interface.set25PerPage clicked")
-        self.set_images_per_page(25)
+        for name in options.values():
+            name.setChecked(act == name)
 
-    def set20PerPage(self, *args):
-        """set 20 images per web-page"""
-        logger.debug("Interface.set20PerPage clicked")
-        self.set_images_per_page(20)
+    def set_min_rate(self, act=None, value=None):
+        """
+        @param act: Qaction
+        @param value: numerical value
+        """
+        logger.debug("Interface.set_min_rate")
+        options = (self.gui.action0,
+                   self.gui.action1,
+                   self.gui.action2,
+                   self.gui.action3,
+                   self.gui.action4,
+                   self.gui.action5)
 
-    def set16PerPage(self, *args):
-        """set 16 images per web-page"""
-        logger.debug("Interface.set16PerPage clicked")
-        self.set_images_per_page(16)
+        if value is not None:
+            act = options[value]
+        elif act is not None:
+            value = int(str(act.text())[-1])
+        else:
+            return
+        self.min_mark = value
+        for name in options:
+            name.setChecked(act == name)
 
-    def set12PerPage(self, *args):
-        """set 12 images per web-page"""
-        logger.debug("Interface.set12PerPage clicked")
-        self.set_images_per_page(12)
-
-    def set9PerPage(self, *args):
-        """set  9 images per web-page"""
-        logger.debug("Interface.set9PerPage clicked")
-        self.set_images_per_page(9)
 
     def renameDay(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
         logger.debug("Interface.renameDay clicked")
         self.update_title()
-        RenameDay(self.AllJpegs[self.iCurrentImg], self.AllJpegs, self.selected, self.renameDayCallback)
+        RenameDay(self.AllJpegs[self.idx_current], self.AllJpegs, self.selected, self.renameDayCallback)
 
     def renameDayCallback(self, renamdayinstance):
         logger.debug("Interface.renameDayCallback")
@@ -1216,7 +1200,7 @@ class Interface(object):
         self.image.fn = os.path.join(config.DefaultRepository, newFilename)
         self.image._exif = None
         self.image._pil = None
-        self.iCurrentImg = self.AllJpegs.index(newFilename)
+        self.idx_current = self.AllJpegs.index(newFilename)
         self.showImage()
 
     def start_image_mark_window(self, *args):
@@ -1271,7 +1255,7 @@ class Interface(object):
             first = listNew[0]
             self.AllJpegs += listNew
             self.AllJpegs.sort()
-            self.iCurrentImg = self.AllJpegs.index(first)
+            self.idx_current = self.AllJpegs.index(first)
             self.showImage()
 
 
@@ -1300,7 +1284,7 @@ class Interface(object):
         """lauch the synchronization window"""
         logger.debug("Interface.synchronize clicked")
         self.update_title()
-        Synchronize(self.iCurrentImg, self.AllJpegs, self.selected)
+        Synchronize(self.idx_current, self.AllJpegs, self.selected)
 
 
     def selectNewerMedia(self, *args):
@@ -1312,7 +1296,7 @@ class Interface(object):
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
         init = len(self.selected)
-        for i in self.AllJpegs[self.iCurrentImg:]:
+        for i in self.AllJpegs[self.idx_current:]:
             if i in self.selected:
                 continue
             size += os.path.getsize(os.path.join(config.DefaultRepository, i))
@@ -1323,7 +1307,7 @@ class Interface(object):
                 self.selected.append(i)
         self.selected.sort()
         if len(self.selected) == 0:return
-        self.iCurrentImg = self.AllJpegs.index(self.selected[-1])
+        self.idx_current = self.AllJpegs.index(self.selected[-1])
         self.showImage()
         t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
@@ -1343,7 +1327,7 @@ class Interface(object):
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
         init = len(self.selected)
-        tmplist = self.AllJpegs[:self.iCurrentImg]
+        tmplist = self.AllJpegs[:self.idx_current]
         tmplist.reverse()
         for i in tmplist:
             if i in self.selected:
@@ -1356,7 +1340,7 @@ class Interface(object):
                 self.selected.append(i)
         self.selected.sort()
         if len(self.selected) == 0:return
-        self.iCurrentImg = self.AllJpegs.index(self.selected[0])
+        self.idx_current = self.AllJpegs.index(self.selected[0])
         self.showImage()
         t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
         txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
@@ -1795,7 +1779,7 @@ class Synchronize:
 
 
 
-class SelectDay:
+class SelectDay(object):
     def __init__(self, upperIface):
         self.upperIface = upperIface
         self.gui = buildUI("ChangeDir")

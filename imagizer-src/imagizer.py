@@ -31,6 +31,7 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "20131226"
 __license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging
+import random
 import glob
 logger = logging.getLogger("imagizer.imagizer")
 
@@ -50,28 +51,33 @@ from .photo import Photo, Signature
 from .qt import buildUI, flush, QtGui, QtCore
 
 
-# class Model:
-#    """ Implémentation de l'applicatif
-#    """
-#    def __init__(self, label):
-#        """
-#        """
-#        self.__label = label
-#        self.startSignal = Signal()
-#        self.refreshSignal = Signal()
-#
-#    def start(self):
-#        """ Lance les calculs
-#        """
-#        self.startSignal.emit(self.__label, NBVALUES)
-#        for i in xrange(NBVALUES):
-#            time.sleep(0.5)
-#
-#            # On lève le signal de rafraichissement des vues éventuelles
-#            # Note qu'ici on ne sait absolument pas si quelque chose s'affiche ou non
-#            # ni de quelle façon c'est affiché.
-#            self.refreshSignal.emit(i)
+class ModelTest(object):
+    """ Implémentation de l'applicatif
 
+    Demo version
+    """
+    def __init__(self):
+        """
+        """
+        self.startSignal = Signal()
+        self.refreshSignal = Signal()
+        self.finishSignal = Signal()
+        self.NbrJobsSignal = Signal()
+
+    def start(self, NBVALUES):
+        """ Lance les calculs
+        """
+        self.startSignal.emit(NBVALUES)
+        for i in xrange(NBVALUES):
+            time.sleep(0.5)
+
+            # On lève le signal de rafraichissement des vues éventuelles
+            # Note qu'ici on ne sait absolument pas si quelque chose s'affiche ou non
+            # ni de quelle façon c'est affiché.
+            input_str = "".join([chr(random.randint(65, 90)) for i in range(10)])
+            output_str = "".join([chr(random.randint(65, 90)) for i in range(20)])
+            self.refreshSignal.emit(i, input_str, output_str)
+        self.finishSignal.emit()
 
 
 class ModelProcessSelected(object):
@@ -461,18 +467,18 @@ class Controler(object):
         model.refreshSignal.connect(self.__refreshCallback)
         model.finishSignal.connect(self.__stopCallback)
         model.NbrJobsSignal.connect(self.__NBJCallback)
-    def __startCallback(self, label, nbVal):
+    def __startCallback(self, *arg, **kwarg):
         """ Callback pour le signal de début de progressbar."""
-        self.__view.creatProgressBar(label, nbVal)
-    def __refreshCallback(self, i, filename):
+        self.__view.create_pb(*arg, **kwarg)
+    def __refreshCallback(self, *arg, **kwarg):
         """ Mise à jour de la progressbar."""
-        self.__view.updateProgressBar(i, filename)
-    def __stopCallback(self):
+        self.__view.update_pb(i, filename)
+    def __stopCallback(self, *arg, **kwarg):
         """ Callback pour le signal de fin de splashscreen."""
-        self.__view.finish()
-    def __NBJCallback(self, NbrJobs):
+        self.__view.finish(*arg, **kwarg)
+    def __NBJCallback(self, *arg, **kwarg):
         """ Callback pour redefinir le nombre de job totaux."""
-        self.__view.ProgressBarMax(NbrJobs)
+        self.__view.set_pb_max(*arg, **kwarg)
 
 
 class ControlerX(object):
@@ -488,18 +494,18 @@ class ControlerX(object):
         model.refreshSignal.connect(self.__refreshCallback)
         model.finishSignal.connect(self.__stopCallback)
         model.NbrJobsSignal.connect(self.__NBJCallback)
-    def __startCallback(self, label, nbVal):
+    def __startCallback(self, *arg, **kwarg):
         """ Callback pour le signal de début de progressbar."""
-        self.__viewx.creatProgressBar(label, nbVal)
-    def __refreshCallback(self, i, filename):
+        self.__viewx.create_pb(*arg, **kwarg)
+    def __refreshCallback(self, *arg, **kwarg):
         """ Mise à jour de la progressbar.    """
-        self.__viewx.updateProgressBar(i, filename)
+        self.__viewx.update_pb(*arg, **kwarg)
     def __stopCallback(self):
         """ ferme la fenetre. Callback pour le signal de fin de splashscreen."""
         self.__viewx.finish()
-    def __NBJCallback(self, NbrJobs):
+    def __NBJCallback(self, *arg, **kwarg):
         """ Callback pour redefinir le nombre de job totaux."""
-        self.__viewx.ProgressBarMax(NbrJobs)
+        self.__viewx.set_pb_max(*arg, **kwarg)
 
 
 class View(object):
@@ -509,19 +515,18 @@ class View(object):
     def __init__(self):
         """ On initialise la vue."""
         self.__nbVal = None
-    def creatProgressBar(self, label, nbVal):
+    def create_pb(self, nbVal):
         """ Création de la progressbar.        """
         self.__nbVal = nbVal
-        logger.info(label)
 
-    def ProgressBarMax(self, nbVal):
+    def set_pb_max(self, nbVal):
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
 
-    def updateProgressBar(self, h, filename):
+    def update_pb(self, h, str_in, str_out):
         """ Mise à jour de la progressbar
         """
-        logger.info("%5.1f %% processing  ... %s" , 100.0 * (h + 1) / self.__nbVal, filename)
+        logger.info("%5.1f %% processing  ... %s->%s" , 100.0 * (h + 1) / self.__nbVal, str_in, str_out)
 
     def finish(self):
         """nothin in text mode"""
@@ -543,31 +548,24 @@ class ViewX(object):
         self.__nbVal = None
         self.gui = None
         self.scene = None
+        self.gui = buildUI("splash")
+        splash_image_path = get_pixmap_file("Splash")
+        image = QtGui.QPixmap(splash_image_path)
+        self.gui.image.setPixmap(QtGui.QPixmap(get_pixmap_file("Splash")))
+        self.gui.arrow.setPixmap(QtGui.QPixmap(get_pixmap_file("down")))
 
-    def creatProgressBar(self, label, nbVal):
+    def create_pb(self, nbVal):
         """
         Creation of a progress bar.
         """
-        self.__nbVal = nbVal
-        self.gui = buildUI("splash")
-        splash_image_path = get_pixmap_file("Splash.png")
-        image = QtGui.QImage(splash_image_path)
-        pixmap = QtGui.QPixmap.fromImage(image)
-        w_pix, h_pix = pixmap.width(), pixmap.height()
+        self.set_pb_max(nbVal)
 
-        self.scene.setSceneRect(0, 0, w_pix, h_pix)
-        self.scene.addPixmap(pixmap)
-        self.gui.image.setScene(self.scene)
-        self.gui.progressBar.setRange(0, nbVal)
-        self.gui.setTitle(label)
-        self.gui.show()
-        flush()
-
-    def ProgressBarMax(self, nbVal):
+    def set_pb_max(self, nbVal):
         """re-definit le nombre maximum de la progress-bar"""
         self.__nbVal = nbVal
+        self.gui.progressBar.setRange(0, self.__nbVal)
 
-    def updateProgressBar(self, h, filename,):
+    def update_pb(self, h, str_in, str_out):
         """
         Update the progress-bar to the given value with the given filename writen on it
 
@@ -581,12 +579,9 @@ class ViewX(object):
         @type filename: string
         @return: None
         """
-        if h <= self.__nbVal:
-            self.pb.setValue(h)
-        else:
-            self.pb.set_fraction(self.__nbVal)
-        self.gui.input_file.setText(filename)
-        self.gui.output_file.setText(filename)
+        self.pb.setValue(min(h, self.__nbVal))
+        self.gui.input_file.setText(str_in)
+        self.gui.output_file.setText(str_out)
         flush()
 
     def finish(self):
@@ -703,9 +698,22 @@ def timer_pass():
     time.sleep(1e-6)
     return True
 
-
-
 ############################################################################################################
+
+def test():
+    logger.info("test splash screen")
+    model = ModelTest()
+    view = View()
+    Controler(model, view)
+    viewx = ViewX()
+    viewx.gui.show()
+    ControlerX(model, viewx)
+    model.start(100)
+
+def demo():
+    app = QtGui.QApplication([])
+    test()
+    app.exec_()
 
 
 

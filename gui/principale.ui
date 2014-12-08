@@ -487,10 +487,10 @@
      <property name="title">
       <string>Non sélectionné</string>
      </property>
-     <addaction name="actionNav_non_sel_first"/>
-     <addaction name="actionNav_non_sel_previous"/>
-     <addaction name="actionNav_non_sel_next"/>
-     <addaction name="actionNav_non_sel_last"/>
+     <addaction name="actionNav_unsel_first"/>
+     <addaction name="actionNav_unsel_previous"/>
+     <addaction name="actionNav_unsel_next"/>
+     <addaction name="actionNav_unsel_last"/>
     </widget>
     <widget class="QMenu" name="menuTitr">
      <property name="title">
@@ -505,10 +505,10 @@
      <property name="title">
       <string>Non titré</string>
      </property>
-     <addaction name="actionNav_non_title_first"/>
-     <addaction name="actionNav_non_title_previous"/>
-     <addaction name="actionNav_non_title_next"/>
-     <addaction name="actionNav_non_title_last"/>
+     <addaction name="actionNav_untitle_first"/>
+     <addaction name="actionNav_untitle_previous"/>
+     <addaction name="actionNav_untitle_next"/>
+     <addaction name="actionNav_untitle_last"/>
     </widget>
     <addaction name="menuImage"/>
     <addaction name="menuJour"/>
@@ -916,22 +916,22 @@
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionNav_non_sel_first">
+  <action name="actionNav_unsel_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionNav_non_sel_previous">
+  <action name="actionNav_unsel_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
   </action>
-  <action name="actionNav_non_sel_next">
+  <action name="actionNav_unsel_next">
    <property name="text">
     <string>Suivant</string>
    </property>
   </action>
-  <action name="actionNav_non_sel_last">
+  <action name="actionNav_unsel_last">
    <property name="text">
     <string>Fin</string>
    </property>
@@ -956,22 +956,22 @@
     <string>Fin</string>
    </property>
   </action>
-  <action name="actionNav_non_title_first">
+  <action name="actionNav_untitle_first">
    <property name="text">
     <string>Début</string>
    </property>
   </action>
-  <action name="actionNav_non_title_previous">
+  <action name="actionNav_untitle_previous">
    <property name="text">
     <string>Précédent</string>
    </property>
   </action>
-  <action name="actionNav_non_title_next">
+  <action name="actionNav_untitle_next">
    <property name="text">
     <string>Suivant</string>
    </property>
   </action>
-  <action name="actionNav_non_title_last">
+  <action name="actionNav_untitle_last">
    <property name="text">
     <string>Fin</string>
    </property>
