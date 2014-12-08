@@ -436,7 +436,7 @@
    </widget>
    <widget class="QMenu" name="menuSelection">
     <property name="title">
-     <string>Selection</string>
+     <string>Sélection</string>
     </property>
     <addaction name="actionCharger"/>
     <addaction name="actionSauver"/>
@@ -518,6 +518,9 @@
     <addaction name="separator"/>
     <addaction name="menuTitr"/>
     <addaction name="menuNon_titr"/>
+    <addaction name="separator"/>
+    <addaction name="actionVoir_l_arborescence"/>
+    <addaction name="actionRechercher"/>
    </widget>
    <widget class="QMenu" name="menuFiltre">
     <property name="title">
@@ -536,10 +539,21 @@
     <property name="title">
      <string>Affichage</string>
     </property>
+    <widget class="QMenu" name="menuNote_minimale">
+     <property name="title">
+      <string>Note minimale</string>
+     </property>
+     <addaction name="action0"/>
+     <addaction name="action1"/>
+     <addaction name="action2"/>
+     <addaction name="action3"/>
+     <addaction name="action4"/>
+     <addaction name="action5"/>
+    </widget>
     <addaction name="actionReload"/>
     <addaction name="actionDiaporama"/>
     <addaction name="actionPlein_cran"/>
-    <addaction name="actionNote_minimale"/>
+    <addaction name="menuNote_minimale"/>
     <addaction name="separator"/>
     <addaction name="actionRotation_left"/>
     <addaction name="actionRotation_right"/>
@@ -760,11 +774,6 @@
   <action name="actionConfigurer_le_diaporama">
    <property name="text">
     <string>Configurer le diaporama</string>
-   </property>
-  </action>
-  <action name="actionNote_minimale">
-   <property name="text">
-    <string>Note minimale</string>
    </property>
   </action>
   <action name="actionCharger">
@@ -1026,6 +1035,67 @@
    </property>
    <property name="toolTip">
     <string>Lanczos3</string>
+   </property>
+  </action>
+  <action name="action0">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="action2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="action3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3</string>
+   </property>
+  </action>
+  <action name="action4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>4</string>
+   </property>
+  </action>
+  <action name="action5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>5</string>
+   </property>
+  </action>
+  <action name="actionVoir_l_arborescence">
+   <property name="text">
+    <string>Voir l'arborescence</string>
+   </property>
+  </action>
+  <action name="actionRechercher">
+   <property name="text">
+    <string>Rechercher</string>
    </property>
   </action>
  </widget>
