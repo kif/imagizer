@@ -430,7 +430,7 @@
      <x>0</x>
      <y>0</y>
      <width>1095</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -612,6 +612,8 @@
     <addaction name="separator"/>
     <addaction name="actionRotation_left"/>
     <addaction name="actionRotation_right"/>
+    <addaction name="separator"/>
+    <addaction name="actionHide_toolbar"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuAffichage"/>
@@ -1151,6 +1153,14 @@
   <action name="actionRechercher">
    <property name="text">
     <string>Rechercher</string>
+   </property>
+  </action>
+  <action name="actionHide_toolbar">
+   <property name="text">
+    <string>Cacher le menu</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
  </widget>

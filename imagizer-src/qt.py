@@ -110,8 +110,7 @@ else:
     QtGui = QtCore = QtUiTools = QtWebKit = loadUi = None
     SIGNAL = Signal = None
 
-transformations = (QtCore.Qt.SmoothTransformation,
-                   QtCore.Qt.FastTransformation)
+transformations = (QtCore.Qt.FastTransformation, QtCore.Qt.SmoothTransformation)
 
 def flush():
     """
