@@ -226,11 +226,11 @@ class Interface(object):
         self.AllJpegs = AllJpegs
         self.selected = Selected(i for i in selected if i in self.AllJpegs)
         self.idx_current = first
-        self.Xmin = 350
+        self.left_tab_width = 350
         self.image = None
         self.current_title = ""
         self.current_rate = 0
-        self.current_image = AllJpegs[first]
+        self.current_image = None
         self.is_zoomed = False
         self.min_mark = 0
         self.default_filter = None
@@ -306,8 +306,13 @@ class Interface(object):
         for signal, callback in handlers.items():
             print(callback.__name__)
             signal.connect(callback)
-        self.showImage()
+        
         self.gui.show()
+        flush()
+        width = sum(self.gui.splitter.sizes())
+        print(width)
+        self.gui.splitter.setSizes([self.left_tab_width,width-self.left_tab_width])
+        self.showImage(first)
 
     def _set_icons(self, kwarg):
         """
@@ -490,8 +495,9 @@ class Interface(object):
         self.image = Photo(self.current_image)
         X, Y = self.gui.width(), self.gui.photo.height()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
-        if X <= self.Xmin : X = self.Xmin + config.ScreenSize
-        pixbuf = self.image.get_pixbuf(X - self.Xmin, Y)
+        if X <= self.left_tab_width : 
+            X = self.left_tab_width + config.ScreenSize
+        pixbuf = self.image.get_pixbuf(X - self.left_tab_width, Y)
         self.gui.photo.setPixmap(pixbuf)
         del pixbuf
         gc.collect()

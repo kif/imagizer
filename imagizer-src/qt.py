@@ -48,6 +48,7 @@ if ('PySide' in sys.modules):
     from PySide import QtGui, QtCore, QtUiTools, QtWebKit
     from PySide.QtCore import SIGNAL, Signal
 
+#TODO: see https://github.com/lunaryorn/snippets/blob/master/qt4/designer/pyside_dynamic.py
 
     #we need to handle uic !!!
     """
@@ -113,7 +114,13 @@ transformations = (QtCore.Qt.SmoothTransformation,
                    QtCore.Qt.FastTransformation)
 
 def flush():
-    QtCore.QCoreApplication.processEvents()
+    """
+    Enforce the flush of the graphical application
+    """
+    if QtCore.QCoreApplication.hasPendingEvents():
+        QtCore.QCoreApplication.flush ()
+#         for evt in QtCore.QCoreApplication.p
+#     QtCore.QCoreApplication.processEvents()
 
 def update_fig(fig=None):
     """
