@@ -40,6 +40,16 @@ from PyQt4 import QtCore as qtc
 import os
 
 class TreeItem(object):
+    """
+    Node of a tree ...
+    TODO:
+    add order: depth from root
+    add name: reconstitute the full name
+    add comment field for dirname and filenames
+    add reorder command which will sort all sub-trees
+    add size property which calculate the size of the subtree
+    add a next/previous method
+    """
     def __init__(self, label=None, parent=None):
         self.children = []
         self.parent = parent
