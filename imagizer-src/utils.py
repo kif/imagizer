@@ -38,8 +38,26 @@ __date__ = "29/11/2014"
 __status__ = "production"
 
 
-import os
+import os, time, logging
 installdir = os.path.dirname(os.path.abspath(__file__))
+timelog = logging.getLogger("timeit")
+
+def timeit(func):
+    def wrapper(*arg, **kw):
+        '''This is the docstring of timeit:
+        a decorator that logs the execution time'''
+        t1 = time.time()
+        res = func(*arg, **kw)
+        t2 = time.time()
+        if "func_name" in dir(func):
+            name = func.func_name
+        else:
+            name = str(func)
+        timelog.warning("%s took %.3fs" % (name, t2 - t1))
+        return res
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
 
 def _get_data_path(filename):
     """

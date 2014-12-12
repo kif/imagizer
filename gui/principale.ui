@@ -574,7 +574,7 @@
     <addaction name="menuTitr"/>
     <addaction name="menuNon_titr"/>
     <addaction name="separator"/>
-    <addaction name="actionVoir_l_arborescence"/>
+    <addaction name="actionNav_tree"/>
     <addaction name="actionRechercher"/>
    </widget>
    <widget class="QMenu" name="menuFiltre">
@@ -1145,7 +1145,7 @@
     <string>5</string>
    </property>
   </action>
-  <action name="actionVoir_l_arborescence">
+  <action name="actionNav_tree">
    <property name="text">
     <string>Voir l'arborescence</string>
    </property>

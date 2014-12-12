@@ -95,9 +95,13 @@ binary_modules.append({"name":'pyexiftran',
                        "include_dirs":[JPEG_DIR],
                        "libraries":["jpeg", "exif", "m"]})
 binary_modules.append({"name":'down_sampler',
-                       "sources": ["interpolation/down_sampler.c"],
+                       "sources": ["src/down_sampler.c"],
                        "extra_compile_args": ["-fopenmp"],
                        "extra_link_args":["-fopenmp"]})
+binary_modules.append({"name":'_tree',
+                       "sources": ["src/_tree.c"],
+                       "extra_compile_args": [],
+                       "extra_link_args":[]})
 
 
 

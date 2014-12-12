@@ -47,6 +47,7 @@ from .photo import Photo
 from .utils import get_pixmap_file
 from .config import config
 from .imagecache import imageCache
+from . import tree
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -236,7 +237,7 @@ class Interface(object):
         self.min_mark = 0
         self.default_filter = None
         self.menubar_isvisible = True
-        self.menubar_height = None
+        self.treeview = None
         print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
@@ -497,6 +498,8 @@ class Interface(object):
             self.gui.actionNav_untitle_previous: "navigate",
             self.gui.actionNav_untitle_next: "navigate",
             self.gui.actionNav_untitle_last: "navigate",
+
+            self.gui.actionNav_tree: "show_treeview",
 
             }
         #assign as data the name of the method to be called as callback
@@ -1319,6 +1322,28 @@ class Interface(object):
                 gc.collect()
                 self.is_zoomed = True
 
+
+    def show_treeview(self, *arg):
+        """
+        """
+        if self.treeview is None:
+            tree_rep = tree.build_tree(self.AllJpegs)
+            self.treeview = tree.TreeWidget(tree_rep)
+            self.treeview.callback = self.goto_image
+        self.treeview.show()
+
+    def goto_image(self, name=None):
+        """
+        Callback for show_treeview
+        """
+        try:
+            idx = self.AllJpegs.index(name)
+        except:
+            logger.warning("Unknown image in base %s"%name)
+        else:
+            self.show_image(idx)
+
+
     def toggle_toolbar(self, *arg):
         """
         Set toolbar visible/not
@@ -1332,7 +1357,6 @@ class Interface(object):
         else:
             print("Set size to 0")
             self.gui.menubar.setGeometry(0, 0, self.gui.width(), 0)
-
 
         #self.gui.menubar.setVisible(self.toolbar_isvisible)
         #TODO:
