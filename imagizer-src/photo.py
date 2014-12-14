@@ -461,7 +461,7 @@ class Photo(object):
         if rate is not None:
             self.metadata["rate"] = rate
             self.exif["Exif.Image.Rating"] = int(rate)
-        self.exif.comment = title
+        self.exif.comment = title.encode(config.Coding)
         try:
             self.exif.write()
         except IOError as error:

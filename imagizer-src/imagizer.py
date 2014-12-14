@@ -592,7 +592,7 @@ class ViewX(object):
         gc.collect()
 
 
-def rangeTout(repository, bUseX=True, fast=False):
+def rangeTout(repository=None, bUseX=True, fast=False):
     """moves all the JPEG files to a directory named from their day and with the
     name according to the time
     This is a MVC implementation
@@ -606,11 +606,15 @@ def rangeTout(repository, bUseX=True, fast=False):
     @rtype: (list,integer)
     """
     logger.debug("in rangeTout bUseX=%s fast=%s" % (bUseX, fast))
+    if not repository:
+        repository = config.DefaultRepository
+    else:
+        config.DefaultRepository = repository
     if fast:
-        l = len(config.DefaultRepository)
-        if not config.DefaultRepository.endswith(os.sep):
+        l = len(repository)
+        if not repository.endswith(os.sep):
             l += 1
-        all_files = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "????-??-??*/*.jpg"))]
+        all_files = [i[l:] for i in glob.glob(os.path.join(repository, "????-??-??*/*.jpg"))]
         all_files.sort()
         first = len(all_files) - 1
         return (all_files, first)

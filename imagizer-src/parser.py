@@ -20,16 +20,18 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
+from __future__ import with_statement, division, print_function, absolute_import
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
+
 __authors__ = ["Martin Blais", "Jérôme Kieffer"]
 __contact = "imagizer@terre-adelie.org"
 __date__ = "20120415"
 __license__ = "GPL"
+
 import re, os, sys, logging
 logger = logging.getLogger("imagizer.parser")
-import config
-config = config.Config()
+from .config import config
 
 class AttrFile(object):
     """Attributes file representation and trivial parser."""
@@ -47,9 +49,8 @@ class AttrFile(object):
         """Read the file and parse it."""
         logger.debug("AttrFile.read file %s" % self._path)
         try:
-            f = open(self._path, "rb")
-            self._lines = f.read()
-            f.close()
+            with  open(self._path, "rb") as f:
+                self._lines = f.read()
         except IOError as error:
             logger.error("Cannot open attributes file %s: %s", self._path, error)
             self._lines = ''
@@ -80,13 +81,12 @@ class AttrFile(object):
                 os.unlink(self._path)
                 return
 
-            f = open(self._path, "w")
-            for k in self._attrmap.keys():
-                f.write(k)
-                f.write(": ")
-                f.write(self._attrmap[k].encode(coding))
-                f.write("\n\n")
-            f.close()
+            with open(self._path, "wb") as f:
+                for k in self._attrmap.keys():
+                    f.write(k)
+                    f.write(": ")
+                    f.write(self._attrmap[k].encode(coding))
+                    f.write("\n\n")
         except IOError as e:
             sys.stderr.write("Error: cannot open attributes file %s: %s%s"\
                              % (self._path, e, os.linesep))

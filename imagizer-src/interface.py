@@ -37,9 +37,6 @@ import gc
 import os
 import logging
 logger = logging.getLogger("imagizer.interface")
-
-logger.debug("from core")
-
 from .imagizer import copySelected, processSelected, timer_pass
 from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on
 from .selection import Selected
@@ -48,6 +45,7 @@ from .utils import get_pixmap_file
 from .config import config
 from .imagecache import imageCache
 from . import tree
+from .dialogs import rename_day
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -232,7 +230,7 @@ class Interface(object):
         self.image = None
         self.current_title = ""
         self.current_rate = 0
-        self.current_image = None
+        self.fn_current = None
         self.is_zoomed = False
         self.min_mark = 0
         self.default_filter = None
@@ -397,7 +395,7 @@ class Interface(object):
         """
         action_dict = {
             # Menu Fichier
-            self.gui.actionName_day: "renameDay",
+            self.gui.actionName_day: "rename_day",
             #    <string>Ctrl+N</string>
             self.gui.actionDiaporama: "SlideShow",
             #    <string>Ctrl+D</string>
@@ -525,8 +523,8 @@ class Interface(object):
             self.idx_current = new_idx
         else:
             new_idx = self.idx_current
-        self.current_image = self.AllJpegs[new_idx]
-        self.image = Photo(self.current_image)
+        self.fn_current = self.AllJpegs[new_idx]
+        self.image = Photo(self.fn_current)
         X, Y = self.gui.photo.width(), self.gui.photo.height()
         logger.debug("Size of the image on screen: %sx%s" % (X, Y))
         pixbuf = self.image.get_pixbuf(X, Y)
@@ -550,8 +548,8 @@ class Interface(object):
             except Exception:  # unexcpected error
                 logger.error("unexpected metadata %s: %s" % (key, value))
 
-        self.gui.setWindowTitle("Selector : %s" % self.current_image)
-        self.gui.selection.setCheckState(self.current_image in self.selected)
+        self.gui.setWindowTitle("Selector : %s" % self.fn_current)
+        self.gui.selection.setCheckState(self.fn_current in self.selected)
         self.current_title = metadata["title"]
 
 
@@ -754,26 +752,26 @@ class Interface(object):
         """Send the current file to the trash"""
         logger.debug("Interface.trash")
         self.update_title()
-        if self.current_image in  self.selected:
-            self.selected.remove(self.current_image)
-        self.AllJpegs.remove(self.current_image)
+        if self.fn_current in  self.selected:
+            self.selected.remove(self.fn_current)
+        self.AllJpegs.remove(self.fn_current)
         self.image.trash()
         self.idx_current = self.idx_current % len(self.AllJpegs)
-        self.current_image = self.AllJpegs[self.idx_current]
+        self.fn_current = self.AllJpegs[self.idx_current]
         self.show_image()
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
         logger.debug("Interface.gimp")
         self.update_title()
-        filename = self.current_image
+        filename = self.fn_current
         base, ext = os.path.splitext(filename)
         newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
         self.idx_current = self.AllJpegs.index(newname)
-        self.current_image = newname
+        self.fn_current = newname
         newnamefull = os.path.join(config.DefaultRepository, newname)
         shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
@@ -840,12 +838,12 @@ class Interface(object):
     def select(self, *args):
         """Select or unselect the image (directly clicked on the toggle button)"""
         logger.debug("Interface.select")
-        self.current_image = self.AllJpegs[self.idx_current]
+        self.fn_current = self.AllJpegs[self.idx_current]
         etat = bool(self.gui.selection.checkState())
-        if etat and (self.current_image not in self.selected):
-            self.selected.append(self.current_image)
-        if not(etat) and (self.current_image in self.selected):
-            self.selected.remove(self.current_image)
+        if etat and (self.fn_current not in self.selected):
+            self.selected.append(self.fn_current)
+        if not(etat) and (self.fn_current in self.selected):
+            self.selected.remove(self.fn_current)
         self.selected.sort()
 #        self.gui.selection.set_active(etat)
         if (self.image.metadata["rate"] == 0) and  etat:
@@ -860,6 +858,23 @@ class Interface(object):
         self.gui.close()
 #        config.GraphicMode = "quit"
         self.callback("quit")
+
+    def die(self, *args):
+        """you want to leave the program ??"""
+        logger.debug("Interface.die")
+        self.update_title()
+        dialog = QtGui.QDialog()#self.gui)
+        lay = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom, dialog)
+        lab = QtGui.QLabel("Voulez vous vraiment quitter ce programme ?", dialog)
+        lay.addWidget(lab)
+        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, dialog)
+        lay.addWidget(buttonBox)
+        buttonBox.accepted.connect(dialog.accept)
+        buttonBox.rejected.connect(dialog.reject)
+        result = dialog.exec_()
+        if result == QtGui.QDialog.Accepted:
+            self.selected.save()
+            self.destroy()
 
     def FullScreen(self, *args):
         """Switch to fullscreen mode"""
@@ -935,20 +950,6 @@ class Interface(object):
         if out != 0:
             print("Error n° : %i" % out)
         logger.info("Interface.burn: Done")
-
-    def die(self, *args):
-        """you wanna leave the program ??"""
-        logger.debug("Interface.die")
-        self.update_title()
-        print("TODO: die")
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, "Voulez vous vraiment quitter ce programme ?")
-        result = dialog.run()
-        dialog.destroy()
-        if result == gtk.RESPONSE_OK:
-            self.selected.save()
-            config.GraphicMode = "Quit"
-            gtk.main_quit()
-            config.GraphicMode = "Quit"
 
 
     def save_selection(self, *args):
@@ -1103,24 +1104,26 @@ class Interface(object):
         for name in options:
             name.setChecked(act == name)
 
-
-    def renameDay(self, *args):
+    def rename_day(self, *args):
         """Launch a new window and ask for anew name for the current directory"""
-        logger.debug("Interface.renameDay clicked")
+        logger.debug("Interface.rename_day clicked")
         self.update_title()
-        RenameDay(self.AllJpegs[self.idx_current], self.AllJpegs, self.selected, self.renameDayCallback)
+        res = rename_day(self.fn_current, self.AllJpegs, self.selected)
+        if res is not None:
+            if self.treeview is not None:
+                self.treeview.close()
+            self.image.filename = res
+            self.image.fn = os.path.join(config.DefaultRepository, res)
+            self.image._exif = None
+            self.image._pil = None
+            self.idx_current = self.AllJpegs.index(res)
+            self.show_image()
 
     def renameDayCallback(self, renamdayinstance):
         logger.debug("Interface.renameDayCallback")
         self.AllJpegs = renamdayinstance.AllPhotos
         self.selected = renamdayinstance.selected
         newFilename = renamdayinstance.newFilename
-        self.image.filename = newFilename
-        self.image.fn = os.path.join(config.DefaultRepository, newFilename)
-        self.image._exif = None
-        self.image._pil = None
-        self.idx_current = self.AllJpegs.index(newFilename)
-        self.show_image()
 
     def start_image_mark_window(self, *args):
         """display widget to select minimum mark"""
@@ -1404,114 +1407,6 @@ class Interface(object):
 #        except:
 #            pass
 
-
-class RenameDay(object):
-    """prompt a windows and asks for a name for the day"""
-    def __init__(self, filename, AllPhotos, selected, callback=None):
-        """
-        @param filename: name of the currenty displayed image
-        @param AllPhotos: list of all photos filenames
-        @param selected: list of selected photos.
-        """
-        self.initialFilename = filename
-        self.newFilename = self.initialFilename
-        self.dayname = os.path.dirname(filename)
-        self.callback = callback
-
-        self.commentfile = os.path.join(config.DefaultRepository, self.dayname, config.CommentFile)
-        self.comment = AttrFile(self.commentfile)
-        if os.path.isfile(self.commentfile):
-            try:
-                self.comment.read()
-            except:
-                pass
-        try:
-            self.timetuple = time.strptime(self.dayname[:10], "%Y-%m-%d")
-        except:
-            print("something is wrong with this name : %s" % self.dayname)
-            return
-        self.comment["date"] = time.strftime("%A, %d %B %Y", self.timetuple).capitalize().decode(config.Coding)
-        if self.comment.has_key("title"):
-            self.name = self.comment["title"]
-        elif len(self.dayname) > 10:
-            self.name = self.dayname[11:].decode(config.Coding)
-            self.comment["title"] = self.name.decode(config.Coding)
-        else:
-            self.name = u""
-            self.comment["title"] = self.name.decode(config.Coding)
-        self.comment["image"] = os.path.split(filename)[1].decode(config.Coding)
-        if not self.comment.has_key("comment"):
-            self.comment["comment"] = u""
-        self.AllPhotos = AllPhotos
-        self.selected = selected
-        self.gui = buildUI("Renommer")
-#        signals = {self.gui.Renommer_destroy': self.destroy,
-#                   self.gui.cancel, 'clicked()', self.destroy,
-#                   self.gui.ok, 'clicked()', self.continu}
-        self.gui.connect_signals(signals)
-        self.gui.date.setText(self.comment["date"].encode("UTF-8"))
-        self.gui.Commentaire.setText(self.comment["title"].encode("UTF-8"))
-        self.DescObj = self.gui.Description.get_buffer()
-        comment = self.comment["comment"].encode("UTF-8").strip().replace("<BR>", "\n",)
-        self.DescObj.setText(comment)
-
-    def continu(self, *args):
-        """just distroy the window and goes on ...."""
-
-        self.newname = self.gui.Commentaire.getText().strip().decode("UTF-8")
-        self.comment["title"] = self.newname
-        if self.newname == "":
-            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple)
-        else:
-            self.newdayname = time.strftime("%Y-%m-%d", self.timetuple) + "-" + unicode2ascii(self.newname.encode("latin1")).replace(" ", "_",)
-        self.newFilename = os.path.join(self.newdayname, os.path.basename(self.initialFilename))
-
-        self.newcommentfile = os.path.join(config.DefaultRepository, self.newdayname, config.CommentFile)
-        if not os.path.isdir(os.path.join(config.DefaultRepository, self.newdayname)):
-            mkdir(os.path.join(config.DefaultRepository, self.newdayname))
-        if self.DescObj.get_modified():
-            self.comment["comment"] = self.DescObj.get_text(self.DescObj.get_start_iter(), self.DescObj.get_end_iter()).strip().decode("UTF-8").replace("\n", "<BR>")
-        self.comment.write()
-
-
-        if self.newname != self.name:
-            idx = 0
-            for photofile in self.AllPhotos:
-                if os.path.dirname(photofile) == self.dayname:
-                    newphotofile = os.path.join(self.newdayname, os.path.split(photofile)[-1])
-                    if os.path.isfile(os.path.join(config.DefaultRepository, newphotofile)):
-                        base = os.path.splitext(os.path.join(config.DefaultRepository, newphotofile))
-                        count = 0
-                        for i in os.listdir(os.path.join(config.DefaultRepository, self.newdayname)):
-                            if i.find(base) == 0:count += 1
-                        newphotofile = os.path.splitext(newphotofile) + "-%i.jpg" % count
-                    print("%s -> %s" % (photofile, newphotofile))
-                    myPhoto = Photo(photofile)
-                    myPhoto.renameFile(newphotofile)
-                    self.AllPhotos[idx] = newphotofile
-
-#                    os.rename(os.path.join(config.DefaultRepository, photofile), os.path.join(config.DefaultRepository, newphotofile))
-                    if photofile in self.selected:
-                        self.selected[self.selected.index(photofile)] = newphotofile
-                idx += 1
-# move or remove the comment file if necessary
-            if os.path.isfile(self.commentfile):  # and not  os.path.isfile(self.newcommentfile):
-                os.rename(self.commentfile, self.newcommentfile)
-#            elif os.path.isfile(self.commentfile) and os.path.isfile(self.newcommentfile):
-#                 os.remove(self.commentfile)
-            if len(os.listdir(os.path.join(config.DefaultRepository, self.dayname))) == 0:
-                os.rmdir(os.path.join(config.DefaultRepository, self.dayname))
-        self.gui.Renommer.close
-        if self.callback is not None:
-            self.callback(self)
-
-    def destroy(self, *args):
-        """destroy clicked by user -> quit the program"""
-        try:
-            self.gui.Renommer.close
-        except:
-            pass
-        flush()
 
 
 class AskSlideShowSetup(object):

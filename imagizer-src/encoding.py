@@ -35,7 +35,7 @@ __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
 import sys
-PY3 = (sys.version[0] > "2")
+PY3 = (sys.version_info[0] > 2)
 if PY3:
     unicode = str
     def u(s):
@@ -44,6 +44,8 @@ else:
     bytes = str
     def u(s):
         return unicode(s, "unicode_escape")
+
+
 
 LATIN_TO_ASCII = {0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
                  0xc6:'Ae', 0xc7:'C',

@@ -118,7 +118,7 @@ class Interfaces(object):
 
     def interface_closed(self, what="quit"):
         self.all_files = self.interface.AllJpegs
-        self.first = self.interface.iCurrentImg
+        self.first = self.interface.idx_current
         self.selected = self.interface.selected
         print("Going to %s" % what)
         what = what.lower()

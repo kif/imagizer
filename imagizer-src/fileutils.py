@@ -21,12 +21,14 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
+from __future__ import with_statement, division, print_function, absolute_import
+
 """
 Module containing most classes for handling files
 """
 
 __author__ = "Jérôme Kieffer"
-__date__ = "20110901"
+__date__ = "14/12/2014"
 __licence__ = "GPLv2"
 __contact__ = "imagizer@terre-adelie.org"
 
@@ -35,10 +37,7 @@ import os, logging
 import os.path as op
 installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.fileutils")
-
-from config import Config
-config = Config()
-
+from .config import config
 
 def makedir(filen):
     """creates the tree structure for the file"""
@@ -49,6 +48,7 @@ def makedir(filen):
         makedir(dire)
         mkdir(filen)
 
+
 def mkdir(filename):
     """create an empty directory with the given rights is not yet existing"""
     if not os.path.exists(filename):
@@ -57,6 +57,7 @@ def mkdir(filename):
             os.chmod(filename, config.DefaultDirMode)
         except OSError:
             logger.warning("Unable to chmod %s" % filename)
+
 
 def findFiles(strRootDir, lstExtentions=None, bFromRoot=False):
     """
@@ -87,10 +88,6 @@ def findFiles(strRootDir, lstExtentions=None, bFromRoot=False):
                     assert len(fullPath) > lenRoot
                     listFiles.append(fullPath[lenRoot:])
     return listFiles
-
-
-
-
 
 
 def smartSize(size):

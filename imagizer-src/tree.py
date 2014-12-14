@@ -192,8 +192,10 @@ class TreeModel(QtCore.QAbstractItemModel):
         if midx.column() == 1 and role == QtCore.Qt.DisplayRole:
             leaf = midx.internalPointer()
             if leaf.order == 4:
-                data = Photo(leaf.name).readExif()
-                return  data["title"]
+                if leaf.extra is None:
+                    data = Photo(leaf.name).readExif()
+                    leaf.extra = data["title"]
+                return leaf.extra
 
     def headerData(self, section, orientation, role):
         if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
