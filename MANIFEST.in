@@ -1,8 +1,9 @@
 recursive-include pixmaps *.ico *.png
-recursive-include imagizer *.py
+recursive-include gui *.ui
+recursive-include imagizer-src *.py
 recursive-include pyexiftran *
 recursive-include screensaver *
-recursive-include scrips *
+recursive-include scripts *
 
 include README.txt
 include selector.glade
