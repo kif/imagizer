@@ -256,6 +256,9 @@
             <property name="text">
              <string>Selectionner</string>
             </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -501,9 +504,9 @@
     <addaction name="actionAucune"/>
     <addaction name="actionToutes"/>
     <addaction name="separator"/>
-    <addaction name="actionTaille_de_toute_la_s_lection"/>
+    <addaction name="actionTaille_de_toute_la_selection"/>
     <addaction name="actionCD_DVD_suivant"/>
-    <addaction name="actionCD_DVD_pr_c_dent"/>
+    <addaction name="actionCD_DVD_precedent"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -858,7 +861,7 @@
     <string>Toutes</string>
    </property>
   </action>
-  <action name="actionTaille_de_toute_la_s_lection">
+  <action name="actionTaille_de_toute_la_selection">
    <property name="text">
     <string>Taille de toute la sélection</string>
    </property>
@@ -868,7 +871,7 @@
     <string>CD/DVD suivant</string>
    </property>
   </action>
-  <action name="actionCD_DVD_pr_c_dent">
+  <action name="actionCD_DVD_precedent">
    <property name="text">
     <string>CD/DVD précédent</string>
    </property>

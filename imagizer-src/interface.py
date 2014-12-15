@@ -45,7 +45,8 @@ from .utils import get_pixmap_file
 from .config import config
 from .imagecache import imageCache
 from . import tree
-from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog
+from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box
+from .fileutils import smartSize
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -236,10 +237,8 @@ class Interface(object):
         self.default_filter = None
         self.menubar_isvisible = True
         self.treeview = None
-        print("Initialization of the windowed graphical interface ...")
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
-
         # Icons on buttons
         self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
         self._set_icons({"system": self.gui.filter,
@@ -318,7 +317,7 @@ class Interface(object):
 #        self.gui.inverserS_activate': self.invert_selection,
 #        self.gui.aucun1_activate': self.select_none,
 #        self.gui.TouS_activate': self.select_all,
-#        self.gui.taille_selection_activate': self.calculateSize,
+#        self.gui.taille_selection_activate': self.display_selected_size,
 #        self.gui.media_apres_activate': self.selectNewerMedia,
 #        self.gui.media_avant_activate': self.SelectOlderMedia,
 #
@@ -436,6 +435,14 @@ class Interface(object):
             #Menu Selection
             self.gui.selectionner: "select_shortcut",
             #    <string>Ctrl+S</string>
+            self.gui.actionCharger: "load_selection",
+            self.gui.actionSauver: "save_selection",
+            self.gui.actionInverser: "invert_selection",
+            self.gui.actionAucune: "select_none",
+            self.gui.actionToutes: "select_all",
+            self.gui.actionTaille_de_toute_la_selection: "display_selected_size",
+            self.gui.actionCD_DVD_suivant: "selectMedia",
+            self.gui.actionCD_DVD_precedent:"selectMedia",
 
 
 #        self.gui.indexJ_activate': self.indexJ,
@@ -549,7 +556,7 @@ class Interface(object):
                 logger.error("unexpected metadata %s: %s" % (key, value))
 
         self.gui.setWindowTitle("Selector : %s" % self.fn_current)
-        self.gui.selection.setCheckState(self.fn_current in self.selected)
+        self.gui.selection.setChecked(self.fn_current in self.selected)
         self.current_title = metadata["title"]
 
 
@@ -831,8 +838,8 @@ class Interface(object):
     def select_shortcut(self, *args):
         """Select or unselect the image (not directly clicked on the toggle button)"""
         logger.debug("Interface.select_shortcut")
-        etat = not(self.gui.Selection.active())
-        self.gui.Selection.set_active(etat)
+        etat = not(self.gui.selection.isChecked())
+        self.gui.selection.setChecked(etat)
 
     def select(self, *args):
         """Select or unselect the image (directly clicked on the toggle button)"""
@@ -963,15 +970,15 @@ class Interface(object):
         """Select all photos for processing"""
         logger.debug("Interface.select_all")
         self.update_title()
-        self.selected = self.AllJpegs
-        self.gui.selection.set_active(True)
+        self.selected = Selected(self.AllJpegs)
+        self.gui.selection.setChecked(True)
 
     def select_none(self, *args):
         """Select NO photos and empty selection"""
         logger.debug("Interface.select_none")
         self.update_title()
         self.selected = Selected()
-        self.gui.selection.set_active(False)
+        self.gui.selection.setChecked(False)
 
     def invert_selection(self, *args):
         """Invert the selection of photos """
@@ -980,15 +987,15 @@ class Interface(object):
         temp = self.AllJpegs[:]
         for i in self.selected:
             temp.remove(i)
-        self.selected = temp
-        self.gui.selection.set_active(self.AllJpegs[self.idx_current] in  self.selected)
+        self.selected = Selected(i for i in self.AllJpegs if i not in self.selected)
+        self.gui.selection.setChecked(not self.gui.selection.isChecked())
 
     def about(self, *args):
         """display a copyright message"""
         logger.debug("Interface.about clicked")
         self.update_title()
         msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (__author__, __contact__, __version__)
-        QMessageBox.about(self.gui, "À Propos", msg)
+        message_box(self.gui, "À Propos", msg)
 
     def searchJ(self, *args):
         """start the searching widget"""
@@ -1100,21 +1107,11 @@ class Interface(object):
             self.idx_current = self.AllJpegs.index(res)
             self.show_image()
 
-    def renameDayCallback(self, renamdayinstance):
-        logger.debug("Interface.renameDayCallback")
-        self.AllJpegs = renamdayinstance.AllPhotos
-        self.selected = renamdayinstance.selected
-        newFilename = renamdayinstance.newFilename
-
-    def start_image_mark_window(self, *args):
-        """display widget to select minimum mark"""
-        self.mark_window = MinimumRatingWindow(self)
-        self.mark_window.show_all()
-
     def importImages(self, *args):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         logger.debug("Interface.importImages called")
         self.update_title()
+        #TODO
         self.guiFiler = buildUI("filer")
 #        self.guiFiler.filer").set_current_folder(config.DefaultRepository)
 #        self.guiFiler.connect_signals({self.gui.Open, 'clicked()', self.filerSelect,
@@ -1189,48 +1186,24 @@ class Interface(object):
         self.update_title()
         synchronize_dialog(self.idx_current, self.AllJpegs, self.selected)
 
-    def selectNewerMedia(self, *args):
+    def selectMedia(self, *args):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD).
         Finally the last selected image is shown and the total size is printed"""
-        logger.debug("Interface.selectNewerMedia clicked")
+        logger.debug("Interface.selectMedia clicked with "+str(args))
         self.update_title()
         size = self.selected.get_nbytes()
         initsize = size
         maxsize = config.MediaSize * 1024 * 1024
         init = len(self.selected)
-        for i in self.AllJpegs[self.idx_current:]:
-            if i in self.selected:
-                continue
-            size += os.path.getsize(os.path.join(config.DefaultRepository, i))
-            if size >= maxsize:
-                size -= os.path.getsize(os.path.join(config.DefaultRepository, i))
-                break
-            else:
-                self.selected.append(i)
-        self.selected.sort()
-        if len(self.selected) == 0:return
-        self.idx_current = self.AllJpegs.index(self.selected[-1])
-        self.show_image()
-        t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
-        txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
-        dialog.run()
-        dialog.destroy()
-#        result = dialog.run()
-#        dialog.destroy()
 
-
-    def SelectOlderMedia(self, *args):
-        """Calculate the size of the selected images then add older images to complete the media (CD or DVD).
-        Finally the first selected image is shown and the total size is printed"""
-        logger.debug("Interface.SelectOlderMedia clicked")
-        self.update_title()
-        size = self.selected.get_nbytes()
-        initsize = size
-        maxsize = config.MediaSize * 1024 * 1024
-        init = len(self.selected)
-        tmplist = self.AllJpegs[:self.idx_current]
-        tmplist.reverse()
+        if args[0] == self.gui.actionCD_DVD_suivant:
+            tmplist = self.AllJpegs[self.idx_current:]
+        elif args[0] == self.gui.actionCD_DVD_precedent:
+            tmplist = self.AllJpegs[:self.idx_current+1]
+            tmplist.reverse()
+        else:
+            logger.warning("unknown action: "+str(args))
+            return
         for i in tmplist:
             if i in self.selected:
                 continue
@@ -1241,26 +1214,28 @@ class Interface(object):
             else:
                 self.selected.append(i)
         self.selected.sort()
-        if len(self.selected) == 0:return
-        self.idx_current = self.AllJpegs.index(self.selected[0])
-        self.show_image()
+        if len(self.selected) == 0:
+            return
+        if args[0] == self.gui.actionCD_DVD_suivant:
+            idx = self.AllJpegs.index(self.selected[-1])
+        elif args[0] == self.gui.actionCD_DVD_precedent:
+            idx = self.AllJpegs.index(self.selected[0])
+        else:
+            logger.warning("unknown action: "+str(args))
+            return
+        self.show_image(idx)
         t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
-        txt = "%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
-        dialog.run()
-        dialog.destroy()
+        txt = u"%.2f %s de données dans %i images sélectionnées dont\n%.2f %s de données dans %i images précédement sélectionnées " % t
+        message_box(self.gui, "taille selectionnée", txt)
 
-
-    def calculateSize(self, *args):
+    def display_selected_size(self, *args):
         """Calculate the size of the selection and print it"""
-        logger.debug("Interface.calculateSize clicked")
+        logger.debug("Interface.display_selected_size clicked")
         self.update_title()
         size = self.selected.get_nbytes()
         t = smartSize(size) + (len(self.selected),)
-        txt = "%.2f %s de données dans %i images sélectionnées" % t
-        dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, txt.decode("UTF8"))
-        dialog.run()
-        dialog.destroy()
+        txt = u"%.2f %s de données dans %i images sélectionnées" % t
+        message_box(self.gui, "taille selectionnée", txt)
 
     def filterAutoWB(self, *args):
         """
