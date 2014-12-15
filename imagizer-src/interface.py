@@ -45,7 +45,7 @@ from .utils import get_pixmap_file
 from .config import config
 from .imagecache import imageCache
 from . import tree
-from .dialogs import rename_day, quit_dialog, ask_media_size
+from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -1187,8 +1187,7 @@ class Interface(object):
         """lauch the synchronization window"""
         logger.debug("Interface.synchronize clicked")
         self.update_title()
-        Synchronize(self.idx_current, self.AllJpegs, self.selected)
-
+        synchronize_dialog(self.idx_current, self.AllJpegs, self.selected)
 
     def selectNewerMedia(self, *args):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD).
@@ -1417,134 +1416,7 @@ class AskSlideShowSetup(object):
 
 
 
-class Synchronize:
-    """
-    Class for file synchronization between different repositories
-    """
-    def __init__(self, current, AllPhotos, selected):
-        """
 
-        """
-        logger.debug("Synchronize.init(%i,%i,%i)" % (current, len(AllPhotos), len(selected)))
-        logger.debug("Recorded Synchronize type: %s" % config.SynchronizeType)
-        self.current = current
-        self.AllPhotos = AllPhotos
-        self.selected = selected
-        self.initST = config.SynchronizeType
-        self.gui = buildUI("Synchroniser")
-#        signals = {self.gui.Synchroniser_destroy': self.destroy,
-#                   self.gui.ok4, 'clicked()', self.synchronize,
-#                   self.gui.apply4, 'clicked()', self.apply_conf
-#                   }
-#        self.gui.connect_signals(signals)
-        self.gui.SyncCommand.setText(config.SynchronizeRep.decode(config.Coding).encode("UTF-8"))
-        if config.SynchronizeType.lower() == "newer":
-            self.gui.SyncOlder.set_active(0)
-            self.gui.SyncAll.set_active(0)
-            self.gui.SyncSelected.set_active(0)
-            self.gui.SyncNewer.set_active(1)
-        elif config.SynchronizeType.lower() == "older" :
-            self.gui.SyncNewer.set_active(0)
-            self.gui.SyncAll.set_active(0)
-            self.gui.SyncSelected.set_active(0)
-            self.gui.SyncOlder.set_active(1)
-        elif config.SynchronizeType.lower() == "all":
-            self.gui.SyncSelected.set_active(0)
-            self.gui.SyncOlder.set_active(0)
-            self.gui.SyncNewer.set_active(0)
-            self.gui.SyncAll.set_active(1)
-        elif config.SynchronizeType.lower() == "selected":
-            self.gui.SyncOlder.set_active(0)
-            self.gui.SyncAll.set_active(0)
-            self.gui.SyncNewer.set_active(0)
-            self.gui.SyncSelected.set_active(1)
-        else:
-            self.gui.SyncAll.set_active(0)
-            self.gui.SyncOlder.set_active(0)
-            self.gui.SyncNewer.set_active(0)
-            self.gui.SyncSelected.set_active(1)
-#        signals = {self.gui.SyncAll_toggled': self.SetSyncAll,
-#                       self.gui.SyncNewer_toggled': self.SetSyncNewer,
-#                       self.gui.SyncOlder_toggled': self.SetSyncOlder,
-#                       self.gui.SyncSelected_toggled': self.SetSyncSelected}
-#        self.gui.connect_signals(signals)
-        flush()
-
-
-    def SetSyncAll(self, *args):
-        logger.debug("Synchronize.SetSyncAll activated")
-        config.SynchronizeType = "All"
-
-
-    def SetSyncOlder(self, *args):
-        logger.debug("Synchronize.SetSyncOld activated")
-        config.SynchronizeType = "Older"
-
-
-    def SetSyncNewer(self, *args):
-        logger.debug("Synchronize.SetSyncNew activated")
-        config.SynchronizeType = "Newer"
-
-
-    def SetSyncSelected(self, *args):
-        logger.debug("Synchronize.SetSyncSel activated")
-        config.SynchronizeType = "Selected"
-
-
-    def read_conf_GUI(self):
-        """read config from GUI"""
-        logger.debug("Synchronize.Read activated")
-        config.SynchronizeRep = self.gui.SyncCommand.text().strip().decode("UTF-8").encode(config.Coding)
-        self.initST = config.SynchronizeType
-
-
-    def apply_conf(self, *args):
-        self.read_conf_GUI()
-        self.destroy()
-
-
-    def synchronize(self, *args):
-        self.read_conf_GUI()
-        logger.debug("Synchronize.synchronize with mode %s" % config.SynchronizeType)
-        synchrofile = os.path.join(config.DefaultRepository, ".synchro")
-        synchro = []
-        if config.SynchronizeType.lower() == "selected":
-            logger.debug("Synchronize.synchronize: exec selected")
-            synchro = self.selected
-        elif config.SynchronizeType.lower() == "newer":
-            logger.debug("Synchronize.synchronize: exec newer")
-            synchro = self.AllPhotos[self.current:]
-        elif config.SynchronizeType.lower() == "older":
-            logger.debug("Synchronize.synchronize: exec older")
-            synchro = self.AllPhotos[:self.current + 1]
-        else:
-            logger.debug("Synchronize.synchronize: exec all")
-            synchro = self.AllPhotos
-        synchro.append(config.Selected_save)
-        days = []
-        for photo in synchro:
-            day = os.path.split(photo)[0]
-            if not day in days:
-                days.append(day)
-                if os.path.isfile(os.path.join(config.DefaultRepository, day, config.CommentFile)):synchro.append(os.path.join(day, config.CommentFile))
-        f = open(synchrofile, "w")
-        for i in synchro: f.write(i + "\n")
-        f.close()
-        # TODO: MVC
-        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, config.DefaultRepository, config.SynchronizeRep))
-        self.destroy()
-
-
-    def destroy(self, *args):
-        """
-        destroy clicked by user -> quit the program
-        """
-        config.SynchronizeType = self.initST
-        try:
-            self.gui.Synchroniser.close()
-        except:
-            pass
-        flush()
 
 
 

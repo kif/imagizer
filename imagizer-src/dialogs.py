@@ -37,6 +37,7 @@ import os
 import logging
 import time
 import sys
+import subprocess
 logger = logging.getLogger("imagizer.dialogs")
 from .config import config
 from .qt import QtCore, QtGui, buildUI
@@ -147,6 +148,7 @@ def rename_day(filename, all_photos, selected):
                 os.rmdir(os.path.join(config.DefaultRepository, dayname))
             return new_fname
 
+
 def quit_dialog(parent=None):
     """
     Simple dialog asking for leavind the program
@@ -165,6 +167,7 @@ def quit_dialog(parent=None):
     result = dialog.exec_()
     return result == QtGui.QDialog.Accepted
 
+
 def ask_media_size():
     """
     @return: the size of the media in MB
@@ -179,6 +182,72 @@ def ask_media_size():
         except Exception as err:
             logger.warning("%s does not seem to be the size of a media: err" % (txt, err))
 
+
+def synchronize_dialog(current, AllPhotos, selected):
+    """
+    @param current: index of current image
+    @param AllPhotos: list of all photos
+    @param selected: list of selected photos
+    """
+    logger.debug("synchronize_dialog(%i,%i,%i)" % (current, len(AllPhotos), len(selected)))
+    logger.debug("Recorded Synchronize type: %s" % config.SynchronizeType)
+    gui = buildUI("dialog_synchro")
+    PERFORM_SYNCRO = 3
+    #Note that accept and reject are already coded into the GUI
+    gui.synchoniser.clicked.connect(lambda: gui.done(PERFORM_SYNCRO))
+    gui.SyncCommand.setText(config.SynchronizeRep)
+    param = {"newer":gui.SyncNewer,
+             "older":gui.SyncOlder,
+             "all":  gui.SyncAll,
+             "selected": gui.SyncSelected}
+    what = config.SynchronizeType.lower()
+    for key, widget in param.items():
+        widget.setChecked(key == what)
+
+    res = gui.exec_()
+    print(res)
+    if res in (QtGui.QDialog.Accepted, PERFORM_SYNCRO):
+        config.SynchronizeRep = to_unicode(gui.SyncCommand.text()).strip()
+        for key, widget in param.items():
+            if widget.isChecked():
+                config.SynchronizeType = key
+    if res == PERFORM_SYNCRO:
+        synchrofile = os.path.join(config.DefaultRepository, ".synchro")
+        synchro = []
+        if config.SynchronizeType == "selected":
+            logger.debug("Synchronize.synchronize: exec selected")
+            synchro = selected
+        elif config.SynchronizeType == "newer":
+            logger.debug("Synchronize.synchronize: exec newer")
+            synchro = AllPhotos[current:]
+        elif config.SynchronizeType.lower() == "older":
+            logger.debug("Synchronize.synchronize: exec older")
+            synchro = AllPhotos[:current + 1]
+        else:
+            logger.debug("Synchronize.synchronize: exec all")
+            synchro = AllPhotos
+        synchro.append(config.Selected_save)
+        days = set([os.path.dirname(photo) for photo in synchro])
+        for day in days:
+            dest = os.path.join(config.DefaultRepository, day, config.CommentFile)
+            if os.path.isfile(dest):
+                synchro.append(os.path.join(day, config.CommentFile))
+
+        with open(synchrofile, "w") as f:
+            for fn in synchro:
+                f.write(fn + "\n")
+        # TODO: MVC
+        if logger.getEffectiveLevel() <= logging.INFO:
+            stdout = subprocess.PIPE
+            stderr = subprocess.STDOUT
+        else:
+            stdout = stderr = None
+        p = subprocess.Popen(["rsync", "-v", "--files-from=" + synchrofile, config.DefaultRepository + "/", config.SynchronizeRep ],
+                     bufsize=4096, stdout=stdout, stderr=stderr)
+#        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, config.DefaultRepository, config.SynchronizeRep))
+        if logger.getEffectiveLevel() <= logging.INFO:
+            while p.returncode is None:
+                logger.info(p.stdout.readline())
 
 def test():
     import imagizer.imagizer, imagizer.dialogs
