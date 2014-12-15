@@ -115,8 +115,9 @@ setup(name='Imagizer',
     license='GNU GPL v2',
     scripts=scripts,
     data_files=[
-        (installdir, ["selector.glade", execexiftran] +
-        [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
+        (installdir, ["selector.glade", execexiftran]),
+        (os.path.join(installdir, "gui"), glob.glob("gui/*.ui")),
+        (os.path.join(installdir, "pixmaps"), glob.glob("pixmaps/*.png") + glob.glob("pixmaps/*.ico")),
         (os.path.split(ConfFile[0])[0], ['imagizer.conf']),
         ("/usr/lib/xscreensaver", ["screensaver/imagizer"])
     ],

@@ -45,7 +45,7 @@ from .utils import get_pixmap_file
 from .config import config
 from .imagecache import imageCache
 from . import tree
-from .dialogs import rename_day
+from .dialogs import rename_day, quit_dialog, ask_media_size
 
 ################################################################################
 #  ##### FullScreen Interface #####
@@ -800,7 +800,6 @@ class Interface(object):
         else:
             logger.error("Unknown filter: %s", config.SelectedFilter)
 
-
     def filter_ContrastMask(self, *args):
         """Filter the current image with a contrast mask"""
         logger.debug("Interface.filter_ContrastMask")
@@ -863,16 +862,7 @@ class Interface(object):
         """you want to leave the program ??"""
         logger.debug("Interface.die")
         self.update_title()
-        dialog = QtGui.QDialog()#self.gui)
-        lay = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom, dialog)
-        lab = QtGui.QLabel("Voulez vous vraiment quitter ce programme ?", dialog)
-        lay.addWidget(lab)
-        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, dialog)
-        lay.addWidget(buttonBox)
-        buttonBox.accepted.connect(dialog.accept)
-        buttonBox.rejected.connect(dialog.reject)
-        result = dialog.exec_()
-        if result == QtGui.QDialog.Accepted:
+        if quit_dialog(self.gui):
             self.selected.save()
             self.destroy()
 
@@ -969,7 +959,6 @@ class Interface(object):
                 self.selected.remove(i)
         self.gui.selection.set_active(self.AllJpegs[self.idx_current] in  self.selected)
 
-
     def select_all(self, *args):
         """Select all photos for processing"""
         logger.debug("Interface.select_all")
@@ -999,11 +988,7 @@ class Interface(object):
         logger.debug("Interface.about clicked")
         self.update_title()
         msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (__author__, __contact__, __version__)
-#        MessageError(msg.decode("UTF8"), Message=gtk.MESSAGE_INFO)
-        print(msg)
         QMessageBox.about(self.gui, "À Propos", msg)
-
-
 
     def searchJ(self, *args):
         """start the searching widget"""
@@ -1017,10 +1002,6 @@ class Interface(object):
             logger.error("%s not in AllJpegs" % path)
         else:
             self.show_image()
-
-
-
-
 
     def savePref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
@@ -1185,7 +1166,7 @@ class Interface(object):
         """lauch a new window and ask for the size of the backup media"""
         logger.debug("Interface.defineMediaSize clicked")
         self.update_title()
-        AskMediaSize()
+        ask_media_size()
 
     def slideShowSetup(self, *args):
         """lauch a new window for seting up the slideshow"""
@@ -1369,45 +1350,6 @@ class Interface(object):
 # # # # # # # fin de la classe interface graphique # # # # # #
 ################################################################################
 
-#
-#def MessageError(text, Message=gtk.MESSAGE_ERROR):
-#    dialog = gtk.MessageDialog(None, 0, Message, gtk.BUTTONS_OK, text)
-#    dialog.set_default_response(gtk.BUTTONS_OK)
-#    dialog.run()
-#    dialog.destroy()
-
-#
-#class MinimumRatingWindow(gtk.Window):
-#    def __init__(self, upperIface):
-#        gtk.Window.__init__(self)
-#        self.set_title("Note minimale")
-#        self.upperIface = upperIface
-#        layout = gtk.VBox()
-#        self.add(layout)
-#        self.slider = gtk.HScale()
-#        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
-#        self.slider.set_adjustment(self.adj_Rate)
-#        self.slider.set_value(upperIface.min_mark)
-#        self.slider.connect("value_changed", self.mark_changed)
-#        layout.pack_start(self.slider, True, True, 0)
-#        self.close = gtk.Button(stock=gtk.STOCK_CLOSE)
-#        self.close.connect("clicked", self.kill_window)
-#        layout.pack_start(self.close, True, True, 0)
-#
-#    def mark_changed(self, *args):
-#        self.upperIface.min_mark = self.slider.value()
-#
-#    def kill_window(self, *args):
-#        """
-#        send the signal to close the window
-#        """
-#        self.upperIface.min_mark = 0
-#        try:
-#            self.destroy()
-#        except:
-#            pass
-
-
 
 class AskSlideShowSetup(object):
     """pop up a windows and asks for the setup of the SlideShow"""
@@ -1473,33 +1415,6 @@ class AskSlideShowSetup(object):
         except:
             pass
 
-
-class AskMediaSize:
-    """prompt a windows and asks for the size of the backup media"""
-    def __init__(self):
-        self.gui = buildUI("TailleCD")
-#        signals = {self.gui.TailleCD_destroy': self.destroy,
-#                   self.gui.cancel, 'clicked()', self.destroy,
-#                   self.gui.ok, 'clicked()', self.continu}
-#        self.gui.connect_signals(signals)
-        self.gui.TailleMo.setText(str(config.MediaSize))
-
-    def continu(self, *args):
-        """just distroy the window and goes on ...."""
-        txt = self.gui.TailleMo.text().strip().decode("UTF-8").encode(config.Coding)
-        try:
-            config.MediaSize = abs(float(txt))
-        except:
-            print("%s does not seem to be the size of a media" % txt)
-        self.gui.TailleCD.close()
-
-    def destroy(self, *args):
-        """destroy clicked by user -> quit the program"""
-        try:
-            self.gui.TailleCD.close()
-        except:
-            pass
-        flush()
 
 
 class Synchronize:

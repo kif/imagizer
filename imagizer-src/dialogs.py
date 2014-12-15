@@ -147,6 +147,39 @@ def rename_day(filename, all_photos, selected):
                 os.rmdir(os.path.join(config.DefaultRepository, dayname))
             return new_fname
 
+def quit_dialog(parent=None):
+    """
+    Simple dialog asking for leavind the program
+
+    @param parent: parent window
+    @return: True if accepted
+    """
+    dialog = QtGui.QDialog(parent)
+    lay = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom, dialog)
+    lab = QtGui.QLabel("Voulez vous vraiment quitter ce programme ?", dialog)
+    lay.addWidget(lab)
+    buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, dialog)
+    lay.addWidget(buttonBox)
+    buttonBox.accepted.connect(dialog.accept)
+    buttonBox.rejected.connect(dialog.reject)
+    result = dialog.exec_()
+    return result == QtGui.QDialog.Accepted
+
+def ask_media_size():
+    """
+    @return: the size of the media in MB
+    """
+    gui = buildUI("dialog_tailleCD")
+    gui.TailleMo.setText(str(config.MediaSize))
+    result = gui.exec_()
+    if result == QtGui.QDialog.Accepted:
+        txt = str(gui.TailleMo.text()).strip()
+        try:
+            config.MediaSize = abs(float(txt))
+        except Exception as err:
+            logger.warning("%s does not seem to be the size of a media: err" % (txt, err))
+
+
 def test():
     import imagizer.imagizer, imagizer.dialogs
     all = imagizer.imagizer.rangeTout("/tmp", fast=True)[0]
