@@ -38,7 +38,7 @@ import os
 import logging
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copySelected, processSelected, timer_pass
-from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on
+from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel
 from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
@@ -311,7 +311,7 @@ class Interface(object):
                     self.gui.filter.clicked:self.filter_im,
 
                     self.gui.menubar.triggered: self._action_handler,
-#
+                    self.gui.photo.zoom: self.image_zoom,
 #        self.gui.enregistrerS_activate': self.save_selection,
 #        self.gui.chargerS_activate': self.load_selection,
 #        self.gui.inverserS_activate': self.invert_selection,
@@ -532,12 +532,9 @@ class Interface(object):
             new_idx = self.idx_current
         self.fn_current = self.AllJpegs[new_idx]
         self.image = Photo(self.fn_current)
-        X, Y = self.gui.photo.width(), self.gui.photo.height()
-        logger.debug("Size of the image on screen: %sx%s" % (X, Y))
-        pixbuf = self.image.get_pixbuf(X, Y)
-#        if X <= self.left_tab_width :
-#            X = self.left_tab_width + config.ScreenSize
-#        pixbuf = self.image.get_pixbuf(X - self.left_tab_width, Y)
+        width, height = self.gui.photo.width(), self.gui.photo.height()
+        logger.debug("Size of the image on screen: %sx%s" % (width, height))
+        pixbuf = self.image.get_pixbuf(width, height)
         self.gui.photo.setPixmap(pixbuf)
         del pixbuf
         gc.collect()
@@ -1251,35 +1248,33 @@ class Interface(object):
         logger.debug("Interface.ContrastMask clicked")
         config.SelectedFilter = "ContrastMask"
 
-    def image_pressed(self, *args):
+    def image_zoom(self, ev):
         """
-        mouse button pressed on image
+        mouse scroll on the image to zoom
         """
-        logger.info("Interface.image_pressed")
-        ev_box, event = args
-        width = ev_box.allocation.width
-        height = ev_box.allocation.height
-        if event.button == 1:
-            if self.is_zoomed:
-                pixbuf = self.image.get_pixbuf(width, height)
-                self.gui.photo.set_from_pixbuf(pixbuf) #todo
-                del pixbuf
-                gc.collect()
-                self.is_zoomed = False
-            else:
-                return
-        elif event.button == 3:
-            if self.is_zoomed:
-                return
-            else:
-                pixbuf = self.image.get_pixbuf(width, height,
-                                         float(event.x) / width,
-                                         float(event.y) / height)
-                self.gui.photo.set_from_pixbuf(pixbuf)
-                del pixbuf
-                gc.collect()
-                self.is_zoomed = True
-
+        logger.info("Interface.image_zoom ")
+        zoom = ev.delta()
+        w_width = self.gui.photo.width()
+        w_height = self.gui.photo.height()
+        p_width = self.gui.photo.pixmap().width()
+        p_height = self.gui.photo.pixmap().height()
+        x = ev.x()
+        y = ev.y()
+        if zoom>0 and not self.is_zoomed:
+            nx = x - (w_width - p_width) / 2.0
+            ny = y - (w_height - p_height) / 2.0
+            pixbuf = self.image.get_pixbuf(w_width, w_height,
+                                     nx / p_width,
+                                     ny / p_height)
+            self.gui.photo.setPixmap(pixbuf)
+            del pixbuf
+            self.is_zoomed = True
+        elif zoom < 0 and self.is_zoomed:
+            pixbuf = self.image.get_pixbuf(w_width, w_height)
+            self.gui.photo.setPixmap(pixbuf)
+            del pixbuf
+            self.is_zoomed = False
+        gc.collect()
 
     def show_treeview(self, *arg):
         """

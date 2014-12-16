@@ -176,3 +176,20 @@ def icon_on(target="right", button=None, icon_name=None,):
     else:
         widget.layout().addRow(lab_ico, lab_txt)
 
+class ExtendedQLabel(QtGui.QLabel):
+    zoom = Signal(QtGui.QWheelEvent, name="zoom")
+    def __init(self, parent):
+        QtGui.QLabel.__init__(self, parent)
+
+
+    def mouseReleaseEvent(self, ev):
+#        print("Released %s" % ev)
+        self.emit(SIGNAL('clicked()'))
+
+    def mousePressEvent(self, ev):
+#        print("Pressed %s" % ev)
+        self.emit(SIGNAL('clicked()'))
+
+    def wheelEvent(self, ev):
+#        print("Scroll %s at %s,%s %s" % (ev, ev.x(), ev.y(), ev.delta()))
+        self.zoom.emit(ev)

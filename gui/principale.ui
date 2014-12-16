@@ -403,7 +403,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QLabel" name="photo">
+      <widget class="ExtendedQLabel" name="photo">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -1167,6 +1167,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ExtendedQLabel</class>
+   <extends>QLabel</extends>
+   <header>imagizer.qt</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
