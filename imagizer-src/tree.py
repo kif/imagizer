@@ -34,7 +34,19 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "20141212"
 __license__ = "GPL"
 
-
+MONTH = {"01": u"Janvier",
+         "02": u"Février",
+         "03": u"Mars",
+         "04": u"Avril",
+         "05": u"Mai",
+         "06": u"Juin",
+         "07": u"Juillet",
+         "08": u"Août",
+         "09": u"Septembre",
+         "10": u"Octobre",
+         "11": u"Novembre",
+         "12": u"Décembre",
+         }
 from .qt import QtCore, QtGui
 import os
 from .utils import timeit
@@ -187,10 +199,19 @@ class TreeModel(QtCore.QAbstractItemModel):
         return self.createIndex(row,column,item)
 
     def data(self, midx, role):
+        """
+        What to display depending on model_index and role
+        """
+        leaf = midx.internalPointer()
         if midx.column() == 0 and role == QtCore.Qt.DisplayRole:
-            return midx.internalPointer().label
+            if leaf.order == 2:
+                if leaf.extra is None:
+                    leaf.extra = MONTH.get(leaf.label)
+                return leaf.extra
+            else:
+                return leaf.label
+
         if midx.column() == 1 and role == QtCore.Qt.DisplayRole:
-            leaf = midx.internalPointer()
             if leaf.order == 4:
                 if leaf.extra is None:
                     data = Photo(leaf.name).readExif()
