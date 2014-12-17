@@ -632,7 +632,7 @@ class Interface(object):
                 last = lastday
                 for img in self.AllJpegs[-1 ::-1]:
                     jc = os.path.dirname(img)
-                    if (jc == lastday) and (jc < last):
+                    if (last == lastday) and (jc < last):
                         return self.AllJpegs.index(img) + 1
                     last = jc
                 else:
