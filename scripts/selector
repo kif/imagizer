@@ -105,7 +105,7 @@ class Interfaces(object):
 
     def load_list(self):
         logger.debug("load_list")
-        self.all_files, self.first = rangeTout(config.DefaultRepository, fast=self.fast)
+        self.all_files, self.current = rangeTout(config.DefaultRepository, fast=self.fast)
         logger.debug("list loaded")
 
     def start_interface(self, which="normal"):
@@ -118,7 +118,7 @@ class Interfaces(object):
 
     def interface_closed(self, what="quit"):
         self.all_files = self.interface.AllJpegs
-        self.first = self.interface.idx_current
+        self.current = self.interface.idx_current
         self.selected = self.interface.selected
         print("Going to %s" % what)
         what = what.lower()
