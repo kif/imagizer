@@ -760,9 +760,7 @@ class Interface(object):
             self.selected.remove(self.fn_current)
         self.AllJpegs.remove(self.fn_current)
         self.image.trash()
-        self.idx_current = self.idx_current % len(self.AllJpegs)
-        self.fn_current = self.AllJpegs[self.idx_current]
-        self.show_image()
+        self.show_image(min(self.idx_current, len(self.AllJpegs)-1))
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
@@ -787,7 +785,7 @@ class Interface(object):
         """Remove image from cache and reloads it"""
         logger.debug("Interface.reload")
         self.update_title()
-        filename = self.AllJpegs[self.idx_current]
+        filename = self.fn_current
         if (imageCache is not None) and (filename in imageCache):
             imageCache.pop(filename)
         self.image = Photo(filename)
@@ -808,29 +806,27 @@ class Interface(object):
         """Filter the current image with a contrast mask"""
         logger.debug("Interface.filter_ContrastMask")
         self.update_title()
-        filename = self.AllJpegs[self.idx_current]
+        filename = self.fn_current
         base, ext = os.path.splitext(filename)
         newname = base + "-ContrastMask" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.idx_current = self.AllJpegs.index(newname)
         self.image = self.image.contrastMask(newname)
-        self.show_image()
+        self.show_image(self.AllJpegs.index(newname))
 
     def filter_AutoWB(self, *args):
         """Filter the current image with Auto White Balance"""
         logger.debug("Interface.filter_AutoWB")
         self.update_title()
-        filename = self.AllJpegs[self.idx_current]
+        filename = self.fn_current
         base, ext = os.path.splitext(filename)
         newname = base + "-AutoWB" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort()
-        self.idx_current = self.AllJpegs.index(newname)
         self.image = self.image.autoWB(newname)
-        self.show_image()
+        self.show_image(self.AllJpegs.index(newname))
 
     def select_shortcut(self, *args):
         """Select or unselect the image (not directly clicked on the toggle button)"""
@@ -841,14 +837,12 @@ class Interface(object):
     def select(self, *args):
         """Select or unselect the image (directly clicked on the toggle button)"""
         logger.debug("Interface.select")
-        self.fn_current = self.AllJpegs[self.idx_current]
-        etat = bool(self.gui.selection.checkState())
+        etat = bool(self.gui.selection.isChecked())
         if etat and (self.fn_current not in self.selected):
             self.selected.append(self.fn_current)
         if not(etat) and (self.fn_current in self.selected):
             self.selected.remove(self.fn_current)
         self.selected.sort()
-#        self.gui.selection.set_active(etat)
         if (self.image.metadata["rate"] == 0) and  etat:
             self.image.metadata["rate"] = config.DefaultRatingSelectedImage
             self.gui.rate.setValue(config.DefaultRatingSelectedImage)
@@ -895,7 +889,7 @@ class Interface(object):
         # TODO: go through MVC
         processSelected(self.selected)
         self.selected = Selected()
-        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
+        self.gui.selection.setChecked(self.fn_current in self.selected)
         logger.info("Interface.copy_resize: Done")
 
     def to_web(self, *args):
@@ -904,7 +898,7 @@ class Interface(object):
         self.update_title()
         processSelected(self.selected)
         self.selected = Selected()
-        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
+        self.gui.selection.setChecked((self.fn_current in self.selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
@@ -928,7 +922,7 @@ class Interface(object):
         self.update_title()
         copySelected(self.selected)
         self.selected = Selected()
-        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
+        self.gui.selection.setChecked((self.fn_current in self.selected))
         print("Done")
 
     def burn(self, *args):
@@ -938,7 +932,7 @@ class Interface(object):
         copySelected(self.selected)
         self.selected = Selected()
         # TODO : MVC
-        self.gui.selection.set_active((self.AllJpegs[self.idx_current] in self.selected))
+        self.gui.selection.setChecked((self.fn_current in self.selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0:
@@ -961,7 +955,7 @@ class Interface(object):
         for i in self.selected:
             if not(i in self.AllJpegs):
                 self.selected.remove(i)
-        self.gui.selection.set_active(self.AllJpegs[self.idx_current] in  self.selected)
+        self.gui.selection.setChecked(self.fn_current in  self.selected)
 
     def select_all(self, *args):
         """Select all photos for processing"""

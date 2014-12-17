@@ -960,7 +960,7 @@
     <string>Précédent</string>
    </property>
    <property name="shortcut">
-    <string>Meta+Alt+Up</string>
+    <string>Shift+Up</string>
    </property>
   </action>
   <action name="actionNav_sel_next">
@@ -968,7 +968,7 @@
     <string>Suivant</string>
    </property>
    <property name="shortcut">
-    <string>Meta+Alt+Down</string>
+    <string>Shift+Down</string>
    </property>
   </action>
   <action name="actionNav_sel_last">
