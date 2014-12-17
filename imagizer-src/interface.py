@@ -46,7 +46,7 @@ from .config import config
 from .imagecache import imageCache
 from . import tree
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box
-from .fileutils import smartSize
+from .fileutils import smartSize, recursive_delete
 
 ################################################################################
 #  ##### FullScreen Interface #####
