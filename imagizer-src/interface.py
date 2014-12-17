@@ -648,7 +648,7 @@ class Interface(object):
                     if i in self.selected:
                         return self.AllJpegs.index(i)
             elif what == "next":
-                for i in self.AllJpegs[self.idx_current + 1]:
+                for i in self.AllJpegs[self.idx_current + 1:]:
                     if i in self.selected:
                         return self.AllJpegs.index(i)
             elif what == "last":
