@@ -236,6 +236,8 @@ class Interface(object):
         self.min_mark = 0
         self.default_filter = None
         self.menubar_isvisible = True
+        self.is_fullscreen = False
+        self.is_slideshow = False
         self.treeview = None
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
@@ -266,39 +268,39 @@ class Interface(object):
         flush()
         self._menu_filtrer()
         flush()
-        self.navigation_dict= {
-         ##Image
+        self.navigation_dict = {
+         # #Image
             self.gui.actionNav_img_first: ("image", "first"),
-            self.gui.actionNav_img_previous10: ("image","previous10"),
-            self.gui.actionNav_img_previous: ("image","previous"),
-            self.gui.actionNav_img_next: ("image","next"),
-            self.gui.actionNav_img_next10: ("image","next10"),
-            self.gui.actionNav_img_last: ("image","last"),
-            ##Day
-            self.gui.actionNav_day_first: ("day","first"),
-            self.gui.actionNav_day_previous: ("day","previous"),
-            self.gui.actionNav_day_next: ("day","next"),
-            self.gui.actionNav_day_last: ("day","last"),
-            ##Selected:
-            self.gui.actionNav_sel_first: ("sel","first"),
-            self.gui.actionNav_sel_previous:("sel","previous"),
-            self.gui.actionNav_sel_next: ("sel","next"),
-            self.gui.actionNav_sel_last: ("sel","last"),
-            ##Non-selected:
-            self.gui.actionNav_unsel_first: ("unsel","first"),
-            self.gui.actionNav_unsel_previous: ("unsel","previous"),
-            self.gui.actionNav_unsel_next: ("unsel","next"),
-            self.gui.actionNav_unsel_last: ("unsel","last"),
-            ##Entitled
-            self.gui.actionNav_title_first: ("title","first"),
-            self.gui.actionNav_title_previous: ("title","previous"),
-            self.gui.actionNav_title_next: ("title","next"),
-            self.gui.actionNav_title_last: ("title","last"),
-            ##Non entitled
-            self.gui.actionNav_untitle_first: ("untitle","first"),
-            self.gui.actionNav_untitle_previous: ("untitle","previous"),
-            self.gui.actionNav_untitle_next: ("untitle","next"),
-            self.gui.actionNav_untitle_last: ("untitle","last"),
+            self.gui.actionNav_img_previous10: ("image", "previous10"),
+            self.gui.actionNav_img_previous: ("image", "previous"),
+            self.gui.actionNav_img_next: ("image", "next"),
+            self.gui.actionNav_img_next10: ("image", "next10"),
+            self.gui.actionNav_img_last: ("image", "last"),
+            # #Day
+            self.gui.actionNav_day_first: ("day", "first"),
+            self.gui.actionNav_day_previous: ("day", "previous"),
+            self.gui.actionNav_day_next: ("day", "next"),
+            self.gui.actionNav_day_last: ("day", "last"),
+            # #Selected:
+            self.gui.actionNav_sel_first: ("sel", "first"),
+            self.gui.actionNav_sel_previous:("sel", "previous"),
+            self.gui.actionNav_sel_next: ("sel", "next"),
+            self.gui.actionNav_sel_last: ("sel", "last"),
+            # #Non-selected:
+            self.gui.actionNav_unsel_first: ("unsel", "first"),
+            self.gui.actionNav_unsel_previous: ("unsel", "previous"),
+            self.gui.actionNav_unsel_next: ("unsel", "next"),
+            self.gui.actionNav_unsel_last: ("unsel", "last"),
+            # #Entitled
+            self.gui.actionNav_title_first: ("title", "first"),
+            self.gui.actionNav_title_previous: ("title", "previous"),
+            self.gui.actionNav_title_next: ("title", "next"),
+            self.gui.actionNav_title_last: ("title", "last"),
+            # #Non entitled
+            self.gui.actionNav_untitle_first: ("untitle", "first"),
+            self.gui.actionNav_untitle_previous: ("untitle", "previous"),
+            self.gui.actionNav_untitle_next: ("untitle", "next"),
+            self.gui.actionNav_untitle_last: ("untitle", "last"),
             }
         handlers = {self.gui.next.clicked:self.next1,
                     self.gui.previous.clicked: self.previous1,
@@ -320,13 +322,7 @@ class Interface(object):
 #        self.gui.taille_selection_activate': self.display_selected_size,
 #        self.gui.media_apres_activate': self.selectNewerMedia,
 #        self.gui.media_avant_activate': self.SelectOlderMedia,
-#
-#
-#
-#
 
-#
-#        self.gui.fullscreen_activate': self.FullScreen,
 #        self.gui.lance_diaporama_activate': self.SlideShow,
 
 #        "on_AutoWB_activate": self.filterAutoWB,
@@ -342,7 +338,7 @@ class Interface(object):
         self.gui.show()
         flush()
         width = sum(self.gui.splitter.sizes())
-        self.gui.splitter.setSizes([self.left_tab_width,width-self.left_tab_width])
+        self.gui.splitter.setSizes([self.left_tab_width, width - self.left_tab_width])
         self.show_image(first)
 
     def _set_icons(self, kwarg):
@@ -357,7 +353,7 @@ class Interface(object):
             widget.setIcon(icon)
 
     def _menu_filtrer(self):
-        #Drop-down filter menu
+        # Drop-down filter menu
         self.filter_menu = QtGui.QMenu("Filtrer")
 
         icon_contrast = QtGui.QIcon()
@@ -372,7 +368,6 @@ class Interface(object):
         action_color.triggered.connect(self.filter_AutoWB)
         action_contrast.triggered.connect(self.filter_ContrastMask)
 
-
     def _action_handler(self, act):
         """
         Generic action handler
@@ -384,7 +379,7 @@ class Interface(object):
         try:
             callback = self.__getattribute__(meth_name)
         except AttributeError:
-              logger.warning("Unhandeled menubar event on %s: no method %s" % (act.text(),meth_name))
+              logger.warning("Unhandeled menubar event on %s: no method %s" % (act.text(), meth_name))
         else:
             callback(act)
 
@@ -398,7 +393,7 @@ class Interface(object):
             #    <string>Ctrl+N</string>
             self.gui.actionDiaporama: "SlideShow",
             #    <string>Ctrl+D</string>
-            self.gui.actionPlein_cran: "FullScreen",
+            self.gui.actionPlein_cran: "toggle_fullscreen",
             #    <string>Ctrl+F</string>
             self.gui.actionTrash_Ctrl_Del: "trash",
             self.gui.actionImporter_Image: "importImages",
@@ -432,7 +427,7 @@ class Interface(object):
             self.gui.actionSave_pref: "savePref",
             self.gui.actionConfigurer_le_diaporama:"slideShowSetup",
 
-            #Menu Selection
+            # Menu Selection
             self.gui.selectionner: "select_shortcut",
             #    <string>Ctrl+S</string>
             self.gui.actionCharger: "load_selection",
@@ -448,10 +443,10 @@ class Interface(object):
 #        self.gui.indexJ_activate': self.indexJ,
 #        self.gui.searchJ_activate': self.searchJ,
 
-            #Menu Filtres
+            # Menu Filtres
             self.gui.actionAuto_whitebalance: "filter_AutoWB",
             self.gui.actionContrast_mask: "filter_ContrastMask",
-            #Menu Aide
+            # Menu Aide
             self.gui.actionA_propos: "about",
 
             # Menu Preference
@@ -470,35 +465,35 @@ class Interface(object):
             self.gui.action3: "set_min_rate",
             self.gui.action4: "set_min_rate",
             self.gui.action5: "set_min_rate",
-            #Menu navigation
-            ##Image
+            # Menu navigation
+            # #Image
             self.gui.actionNav_img_first: "navigate",
             self.gui.actionNav_img_previous10: "navigate",
             self.gui.actionNav_img_previous: "navigate",
             self.gui.actionNav_img_next: "navigate",
             self.gui.actionNav_img_next10: "navigate",
             self.gui.actionNav_img_last: "navigate",
-            ##Day
+            # #Day
             self.gui.actionNav_day_first: "navigate",
             self.gui.actionNav_day_previous: "navigate",
             self.gui.actionNav_day_next: "navigate",
             self.gui.actionNav_day_last: "navigate",
-            ##Selected:
+            # #Selected:
             self.gui.actionNav_sel_first: "navigate",
             self.gui.actionNav_sel_previous: "navigate",
             self.gui.actionNav_sel_next: "navigate",
             self.gui.actionNav_sel_last: "navigate",
-            ##Non-selected:
+            # #Non-selected:
             self.gui.actionNav_unsel_first: "navigate",
             self.gui.actionNav_unsel_previous: "navigate",
             self.gui.actionNav_unsel_next: "navigate",
             self.gui.actionNav_unsel_last: "navigate",
-            ##Entitled
+            # #Entitled
             self.gui.actionNav_title_first: "navigate",
             self.gui.actionNav_title_previous: "navigate",
             self.gui.actionNav_title_next: "navigate",
             self.gui.actionNav_title_last: "navigate",
-            ##Non entitled
+            # #Non entitled
             self.gui.actionNav_untitle_first: "navigate",
             self.gui.actionNav_untitle_previous: "navigate",
             self.gui.actionNav_untitle_next: "navigate",
@@ -507,9 +502,10 @@ class Interface(object):
             self.gui.actionNav_tree: "show_treeview",
 
             }
-        #assign as data the name of the method to be called as callback
+        # assign as data the name of the method to be called as callback
         for k, v in action_dict.items():
             k.setData(v)
+            self.gui.addAction(k)
 
     def update_title(self):
         """Set the new title of the image"""
@@ -760,7 +756,7 @@ class Interface(object):
             self.selected.remove(self.fn_current)
         self.AllJpegs.remove(self.fn_current)
         self.image.trash()
-        self.show_image(min(self.idx_current, len(self.AllJpegs)-1))
+        self.show_image(min(self.idx_current, len(self.AllJpegs) - 1))
 
     def gimp(self, *args):
         """Edit the current file with the Gimp"""
@@ -863,15 +859,6 @@ class Interface(object):
         if quit_dialog(self.gui):
             self.selected.save()
             self.destroy()
-
-    def FullScreen(self, *args):
-        """Switch to fullscreen mode"""
-        logger.debug("Interface.fullscreen")
-        self.update_title()
-        self.gui.close()
-#        config.GraphicMode = "FullScreen"
-#        gtk.main_quit()
-        self.callback("fullscreen")
 
     def SlideShow(self, *args):
         """Switch to fullscreen mode and starts the SlideShow"""
@@ -1102,7 +1089,7 @@ class Interface(object):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         logger.debug("Interface.importImages called")
         self.update_title()
-        #TODO
+        # TODO
         self.guiFiler = buildUI("filer")
 #        self.guiFiler.filer").set_current_folder(config.DefaultRepository)
 #        self.guiFiler.connect_signals({self.gui.Open, 'clicked()', self.filerSelect,
@@ -1180,7 +1167,7 @@ class Interface(object):
     def selectMedia(self, *args):
         """Calculate the size of the selected images then add newer images to complete the media (CD or DVD).
         Finally the last selected image is shown and the total size is printed"""
-        logger.debug("Interface.selectMedia clicked with "+str(args))
+        logger.debug("Interface.selectMedia clicked with " + str(args))
         self.update_title()
         size = self.selected.get_nbytes()
         initsize = size
@@ -1190,10 +1177,10 @@ class Interface(object):
         if args[0] == self.gui.actionCD_DVD_suivant:
             tmplist = self.AllJpegs[self.idx_current:]
         elif args[0] == self.gui.actionCD_DVD_precedent:
-            tmplist = self.AllJpegs[:self.idx_current+1]
+            tmplist = self.AllJpegs[:self.idx_current + 1]
             tmplist.reverse()
         else:
-            logger.warning("unknown action: "+str(args))
+            logger.warning("unknown action: " + str(args))
             return
         for i in tmplist:
             if i in self.selected:
@@ -1212,7 +1199,7 @@ class Interface(object):
         elif args[0] == self.gui.actionCD_DVD_precedent:
             idx = self.AllJpegs.index(self.selected[0])
         else:
-            logger.warning("unknown action: "+str(args))
+            logger.warning("unknown action: " + str(args))
             return
         self.show_image(idx)
         t = smartSize(size) + (len(self.selected),) + smartSize(initsize) + (init,)
@@ -1254,7 +1241,7 @@ class Interface(object):
         p_height = self.gui.photo.pixmap().height()
         x = ev.x()
         y = ev.y()
-        if zoom>0 and not self.is_zoomed:
+        if zoom > 0 and not self.is_zoomed:
             nx = x - (w_width - p_width) / 2.0
             ny = y - (w_height - p_height) / 2.0
             pixbuf = self.image.get_pixbuf(w_width, w_height,
@@ -1286,7 +1273,7 @@ class Interface(object):
         try:
             idx = self.AllJpegs.index(name)
         except:
-            logger.warning("Unknown image in base %s"%name)
+            logger.warning("Unknown image in base %s" % name)
         else:
             self.show_image(idx)
 
@@ -1295,19 +1282,30 @@ class Interface(object):
         """
         Set toolbar visible/not
         """
-        if  self.menubar_isvisible:
-            self.menubar_height = self.gui.menubar.height()
         self.menubar_isvisible = not(self.menubar_isvisible)
-        if self.menubar_isvisible:
-            print("Set size to %s" % self.menubar_height)
-            self.gui.menubar.setGeometry(0, 0, self.gui.width(), self.menubar_height)
-        else:
-            print("Set size to 0")
-            self.gui.menubar.setGeometry(0, 0, self.gui.width(), 0)
+        self.gui.menubar.setVisible(self.menubar_isvisible)
 
-        #self.gui.menubar.setVisible(self.toolbar_isvisible)
-        #TODO:
-        # create a toolbar and copy all sensible action to it
+    def toggle_fullscreen(self, *arg):
+        if self.is_fullscreen:
+            self.gui.setWindowState(QtCore.Qt.WindowNoState | QtCore.Qt.WindowActive)
+            self.gui.menubar.setVisible(True)
+            self.menubar_isvisible = True
+            self.is_fullscreen = False
+            flush()
+            width = sum(self.gui.splitter.sizes())
+            self.gui.splitter.setSizes([self.left_tab_width, width - self.left_tab_width])
+        else:
+            self.gui.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+            self.gui.menubar.setVisible(False)
+            self.menubar_isvisible = False
+            self.is_fullscreen = True
+            flush()
+            width = sum(self.gui.splitter.sizes())
+            self.gui.splitter.setSizes([0, width])
+        flush()
+        self.show_image()
+
+
 
 ################################################################################
 # # # # # # # fin de la classe interface graphique # # # # # #
@@ -1332,19 +1330,19 @@ class AskSlideShowSetup(object):
         self.gui.delai.set_value(config.SlideShowDelay)
         self.gui.Rating.set_value(config.SlideShowMinRating)
         if   config.SlideShowType.find("chrono") == 0:
-            self.gui.radio-chrono.set_active(1)
+            self.gui.radio - chrono.set_active(1)
         elif config.SlideShowType.find("anti") == 0:
-            self.gui.radio-antichrono.set_active(1)
+            self.gui.radio - antichrono.set_active(1)
         else:
-            self.gui.radio-random.set_active(1)
+            self.gui.radio - random.set_active(1)
 
     def LauchSlideShow(self, *args):
         """retrieves the data, destroy the window and lauch the slideshow"""
         config.SlideShowDelay = self.gui.delai.value()
         config.SlideShowMinRating = self.gui.Rating.value()
-        if self.gui.radio-antichrono.get_active():
+        if self.gui.radio - antichrono.get_active():
             config.SlideShowType = "antichronological"
-        elif self.gui.radio-chrono.get_active():
+        elif self.gui.radio - chrono.get_active():
             config.SlideShowType = "chronological"
         else:
             config.SlideShowType = "random"
@@ -1357,9 +1355,9 @@ class AskSlideShowSetup(object):
         """retrieves the data, destroy the window and goes on ...."""
         config.SlideShowDelay = self.gui.delai.value()
         config.SlideShowMinRating = self.gui.Rating.value()
-        if self.gui.radio-antichrono.get_active():
+        if self.gui.radio - antichrono.get_active():
             config.SlideShowType = "antichronological"
-        elif self.gui.radio-chrono.get_active():
+        elif self.gui.radio - chrono.get_active():
             config.SlideShowType = "chronological"
         else:
             config.SlideShowType = "random"
