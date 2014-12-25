@@ -1,3 +1,5 @@
+from __future__ import with_statement, division, print_function, absolute_import
+
 try:  # this is for gtk3 but we are not yet there ...
 #     from gi.repository import Gtk as gtk
 #     from gi.repository import GObject as gobject
@@ -11,15 +13,16 @@ try:  # this is for gtk3 but we are not yet there ...
     gtkInterpolation = [gdk.INTERP_NEAREST, gdk.INTERP_TILES, gdk.INTERP_BILINEAR, gdk.INTERP_HYPER]
     GTKglade = None
 except ImportError:
-    try:
+#     try:
         import pygtk ; pygtk.require('2.0')  # IGNORE:F0401
         import gtk  # IGNORE:E0601
-        import gtk.gdk as gdk  # IGNORE:E0601
+#         print(gtk)
+        gdk = gtk.gdk  # IGNORE:E0601
         import gtk.glade as GTKglade  # IGNORE:E0611
         gtkInterpolation = [gdk.INTERP_NEAREST, gdk.INTERP_TILES, gdk.INTERP_BILINEAR, gdk.INTERP_HYPER]
 
-    except ImportError:  # GTK3
-            raise ImportError("Selector needs Gtk and glade available from http://www.pygtk.org/")
+#     except ImportError:  # GTK3
+#             raise ImportError("Selector needs Gtk and glade available from http://www.pygtk.org/")
 
 # About interpolation (from documentation)
 # NEAREST    Nearest neighbor sampling; this is the fastest and lowest quality mode. Quality is normally unacceptable when scaling down, but may be OK when scaling up.
