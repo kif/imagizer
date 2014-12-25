@@ -30,7 +30,7 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "06/12/2014"
+__date__ = "25/12/2014"
 __license__ = "GPL"
 
 import gc
@@ -42,7 +42,7 @@ from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel
 from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
-from .config import config
+from .config import config, listConfigurationFiles
 from .imagecache import imageCache
 from . import tree
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box
@@ -424,7 +424,7 @@ class Interface(object):
             self.gui.actionMedia_size: "defineMediaSize",
             self.gui.actionAutorotate: "setAutoRotate",
             self.gui.actionSignature_filigrane_web:"setFiligrane",
-            self.gui.actionSave_pref: "savePref",
+            self.gui.actionSave_pref: "save_pref",
             self.gui.actionConfigurer_le_diaporama:"slideShowSetup",
 
             # Menu Selection
@@ -988,9 +988,9 @@ class Interface(object):
         else:
             self.show_image()
 
-    def savePref(self, *args):
+    def save_pref(self, *args):
         """Preferences,save clicked. now we save the preferences in the file"""
-        logger.debug("Interface.savePref clicked")
+        logger.debug("Interface.save_pref clicked")
         config.save(listConfigurationFiles[-1])
 
     def setAutoRotate(self, *args):
