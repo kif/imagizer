@@ -6,17 +6,16 @@ from __future__ import division, print_function, with_statement
 import sys, os, gc, logging, time, glob, random
 from math                   import exp
 from argparse               import ArgumentParser
-from imagizer.imagizer      import gtk, gdk, gtkFlush, gobject
+from imagizer.gtk           import gtk, gdk, gtkFlush, gobject
 from imagizer.photo         import Photo
-from imagizer.config        import Config
+from imagizer.config        import config
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("imagizer.screensaver")
-config = Config()
 
-#try:
+# try:
 #    from rfoo.utils import rconsole
 #    rconsole.spawn_server()
-#except ImportError:
+# except ImportError:
 #    logger.debug("No socket opened for debugging -> please install rfoo")
 
 
@@ -291,7 +290,7 @@ class ScreeenSaver(object):
             photo = Photo(self.all_jpg[index], True)
             photo.readExif()
             rate = photo.metadata["Rate"]
-            treshold = exp(-rate) - exp(-5) #0  for 5, 0.05 for 3 and almost 1 for 0
+            treshold = exp(-rate) - exp(-5)  # 0  for 5, 0.05 for 3 and almost 1 for 0
             found = random.random() >= treshold
             if found and self.args.landscape:
                 found = found and photo.pixelsX > photo.pixelsY
