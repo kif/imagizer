@@ -160,7 +160,8 @@ class Photo(object):
         self.getPIL()
 
 
-    def saveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False, Optimize=False, ExifExtraction=False):
+    def saveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False,
+                  Optimize=False, ExifExtraction=False):
         """save a thumbnail of the given name, with the given size and the interpolation methode (quality)
         resampling filters :
         NONE = 0
@@ -168,12 +169,16 @@ class Photo(object):
         ANTIALIAS = 1 # 3-lobed lanczos
         LINEAR = BILINEAR = 2
         CUBIC = BICUBIC = 3
+        Optimized/parallel 3-lobed lanczos = 4
+        
+        @return: rescaled image instance
         """
+        rescaled = None
         if  op.isfile(strThumbFile):
             logger.warning("Thumbnail %s exists" % strThumbFile)
         else:
             extract = False
-            print("process file %s exists" % strThumbFile)
+            print("Rescale image to %s" % strThumbFile)
             if ExifExtraction:
                 try:
                     self.exif.dumpThumbnailToFile(strThumbFile[:-4])
@@ -206,16 +211,23 @@ class Photo(object):
                         if box is not None:
                             thumbImag.pil.crop(box).save(strThumbFile)
 
-
             if not extract:
-                copyOfImage = self.pil.copy()
-                copyOfImage.thumbnail((Size, Size), Interpolation)
+                if Interpolation < 4:
+                    copyOfImage = self.pil.copy()
+                    copyOfImage.thumbnail((Size, Size), Interpolation)
+                else:
+                    ary = numpy.asarray(self.pil).copy()
+                    scale = min([float(i) / Size for i in ary.shape[:2]])
+                    out = self.DS.scale(ary, scale)
+                    copyOfImage = Image.fromarray(out)
                 copyOfImage.save(strThumbFile, quality=Quality, progressive=Progressive, optimize=Optimize)
+                rescaled = self.__class__(strThumbFile, dontCache=True)
+                rescaled.pil = copyOfImage
             try:
                 os.chmod(strThumbFile, config.DefaultFileMode)
             except OSError:
                 print("Warning: unable to chmod %s" % strThumbFile)
-
+        return rescaled
 
     def rotate(self, angle=0):
         """does a looseless rotation of the given jpeg file"""

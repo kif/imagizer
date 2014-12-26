@@ -682,11 +682,13 @@ def scaleImage(filename, filigrane=None):
     param = config.ScaledImages.copy()
     param.pop("Suffix")
     param["strThumbFile"] = os.path.join(scaledir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.ScaledImages["Suffix"]
-    photo.saveThumb(**param)
+    new_photo = photo.saveThumb(**param)
+    if new_photo is None:
+        new_photo = photo
     param = config.Thumbnails.copy()
     param.pop("Suffix")
     param["strThumbFile"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
-    photo.saveThumb(**param)
+    new_photo.saveThumb(**param)
     if filigrane is not None:
         filigrane.substract(photo.pil).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
         try:
