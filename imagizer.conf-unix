@@ -2,7 +2,7 @@
 #Size of the image on the Screen, by default
 ScreenSize: 500 
 
-#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]
+#Downsampling quality [0=nearest, 1=bilinear]
 Interpolation: 1 
 
 #Page prefix (used when there are too many images per day to fit on one web page)
@@ -115,7 +115,7 @@ Size: 800
 Suffix: scaled 
 
 #ScaledImages downsampling quality [0=nearest, 1=antialias 2=bilinear, 3=bicubic]
-Interpolation: 2 
+Interpolation: 1
 
 #ScaledImages progressive JPEG files
 Progressive: True 
@@ -140,7 +140,7 @@ Suffix: thumb
 Interpolation: 1 
 
 #Thumbnails progressive JPEG files
-Progressive: False 
+Progressive: True
 
 #Thumbnails optimized JPEG (2 pass encoding)
 Optimize: True 
@@ -149,5 +149,5 @@ Optimize: True
 Quality: 50 
 
 #Thumbnails image can be obtained by Exif extraction ?
-ExifExtraction: True 
+ExifExtraction: False 
 
