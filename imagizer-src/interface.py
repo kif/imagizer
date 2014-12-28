@@ -35,6 +35,7 @@ __license__ = "GPL"
 
 import gc
 import os
+import shutil
 import logging
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copySelected, processSelected, timer_pass
