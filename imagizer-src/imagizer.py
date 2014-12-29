@@ -115,12 +115,12 @@ class ModelProcessSelected(object):
                 if os.path.splitext(i)[1] in config.Extensions:files.append(i)
             files.sort()
             if  len(files) > config.NbrPerPage:
-                pages = 1 + (len(files) - 1) / config.NbrPerPage
+                pages = 1 + (len(files) - 1) // config.NbrPerPage
                 for i in range(1, pages + 1):
                     folder = os.path.join(pathday, config.PagePrefix + str(i))
                     fileutils.mkdir(folder)
                 for j in range(len(files)):
-                    i = 1 + (j) / config.NbrPerPage
+                    i = 1 + (j) // config.NbrPerPage
                     filename = os.path.join(pathday, config.PagePrefix + str(i), files[j])
                     self.refreshSignal.emit(globalCount, files[j])
                     globalCount += 1
