@@ -126,7 +126,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="make"/>
+           <widget class="QLineEdit" name="make">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
@@ -136,7 +140,11 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="model"/>
+           <widget class="QLineEdit" name="model">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_3">
@@ -146,7 +154,11 @@
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="resolution"/>
+           <widget class="QLineEdit" name="resolution">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_4">
@@ -156,7 +168,11 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="size"/>
+           <widget class="QLineEdit" name="size">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_5">
@@ -166,7 +182,11 @@
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QLineEdit" name="time"/>
+           <widget class="QLineEdit" name="time">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="5" column="0">
            <widget class="QLabel" name="label_6">
@@ -176,7 +196,11 @@
            </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QLineEdit" name="focal"/>
+           <widget class="QLineEdit" name="focal">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="6" column="0">
            <widget class="QLabel" name="label_7">
@@ -186,7 +210,11 @@
            </widget>
           </item>
           <item row="6" column="1">
-           <widget class="QLineEdit" name="aperture"/>
+           <widget class="QLineEdit" name="aperture">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="7" column="0">
            <widget class="QLabel" name="label_8">
@@ -196,7 +224,11 @@
            </widget>
           </item>
           <item row="7" column="1">
-           <widget class="QLineEdit" name="speed"/>
+           <widget class="QLineEdit" name="speed">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="8" column="0">
            <widget class="QLabel" name="label_9">
@@ -206,7 +238,11 @@
            </widget>
           </item>
           <item row="8" column="1">
-           <widget class="QLineEdit" name="flash"/>
+           <widget class="QLineEdit" name="flash">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="9" column="0">
            <widget class="QLabel" name="label_10">
@@ -216,7 +252,11 @@
            </widget>
           </item>
           <item row="9" column="1">
-           <widget class="QLineEdit" name="iso"/>
+           <widget class="QLineEdit" name="iso">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="10" column="0">
            <widget class="QLabel" name="label_11">
@@ -226,7 +266,11 @@
            </widget>
           </item>
           <item row="10" column="1">
-           <widget class="QLineEdit" name="bias"/>
+           <widget class="QLineEdit" name="bias">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item row="11" column="0">
            <widget class="QLabel" name="label_12">
@@ -236,7 +280,11 @@
            </widget>
           </item>
           <item row="11" column="1">
-           <widget class="QLineEdit" name="title"/>
+           <widget class="QLineEdit" name="title">
+            <property name="dragEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -433,7 +481,7 @@
      <x>0</x>
      <y>0</y>
      <width>1095</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
