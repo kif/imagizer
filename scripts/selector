@@ -35,8 +35,6 @@ __date__ = "29/11/2014"
 __license__ = "GPL"
 
 import os, locale, gc, logging, glob, sys
-#logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("imagizer.selector")
 import os.path as op
 
 import imagizer
@@ -46,7 +44,9 @@ from imagizer.dirchooser    import WarningSc
 from imagizer.selection     import Selected
 from imagizer.argparse      import ArgumentParser
 from imagizer.imagizer      import rangeTout
-from imagizer.interface     import Interface, FullScreenInterface
+from imagizer.interface     import Interface
+logger = logging.getLogger("imagizer.selector")
+
 try:
     from rfoo.utils import rconsole
     rconsole.spawn_server()
@@ -108,25 +108,10 @@ class Interfaces(object):
         self.all_files, self.current = rangeTout(config.DefaultRepository, fast=self.fast)
         logger.debug("list loaded")
 
-    def start_interface(self, which="normal"):
+    def start_interface(self):
         if self.selected is None:
             self.selected = Selected.load()
-        if which in ("normal", "default"):
-            self.interface = Interface(self.all_files, self.current, self.selected, callback=self.interface_closed)
-        elif which in ("fullscreen", "slideshow"):
-            self.interface = FullScreenInterface(self.all_files, self.current, self.selected, mode=which, callback=self.interface_closed)
-
-    def interface_closed(self, what="quit"):
-        self.all_files = self.interface.AllJpegs
-        self.current = self.interface.idx_current
-        self.selected = self.interface.selected
-        print("Going to %s" % what)
-        what = what.lower()
-        if what == "quit":
-            sys.exit(0)
-        else:
-            self.start_interface(what)
-
+        self.interface = Interface(self.all_files, self.current, self.selected)
 
 if __name__ == '__main__':
     printWarning = True
@@ -141,11 +126,11 @@ if __name__ == '__main__':
     parser.add_argument("path", help="repertoire a traiter", nargs='?')
     args = parser.parse_args()
     if args.debug:
+        logging.root.setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
-        logging.basicConfig(level=logging.DEBUG)
         logger.debug("We are in debug mode ...First Debug message")
     else:
-        logging.basicConfig(level=logging.INFO)
+        logging.root.setLevel(logging.INFO)
         logger.setLevel(logging.INFO)
     if args.noautorotate:
         config.AutoRotate = False
@@ -167,8 +152,7 @@ if __name__ == '__main__':
     ifc.load_list()
     ifc.start_interface()
     res = app.exec_()
-    print(res)
-    sys.exit(res)
+    sys.exit(0)
 
 
 

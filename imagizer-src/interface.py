@@ -30,13 +30,14 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "25/12/2014"
+__date__ = "04/01/2015"
 __license__ = "GPL"
 
 import gc
 import os
 import shutil
 import logging
+import random
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copySelected, processSelected, timer_pass
 from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel
@@ -46,178 +47,9 @@ from .utils import get_pixmap_file
 from .config import config, listConfigurationFiles
 from .imagecache import imageCache
 from . import tree
-from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box
+from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
 from .fileutils import smartSize, recursive_delete
 
-################################################################################
-#  ##### FullScreen Interface #####
-################################################################################
-
-class FullScreenInterface(object):
-    def __init__(self, AllJpegs=[], first=0, selected=[], mode="FullScreen", callback=None):
-        self.callback = callback
-        self.AllJpegs = AllJpegs
-        self.selected = Selected(i for i in selected if i in self.AllJpegs)
-        self.image = None
-        self.RandomList = []
-        self.idx_current = first
-        self.timestamp = time.time()
-
-        logger.info("Initialization of the fullscreen GUI")
-        self.gui = buildUI("FullScreen")
-        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
-        self.show_image()
-        flush()
-        self.gui.FullScreen.maximize()
-        flush()
-        self.show_image()
-        flush()
-#        self.gui.connect_signals({self.gui.FullScreen_destroy': self.destroy,
-#                                  "on_FullScreen_key_press_event":self.keypressed})
-        if mode == "slideshow":
-            self.SlideShow()
-        self.QuitSlideShow = True
-        self.gui.show()
-
-    def show_image(self):
-        """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
-        self.image = Photo(self.AllJpegs[self.idx_current])
-        X, Y = self.gui.FullScreen.get_size()
-        logger.debug("Size of image on screen: %sx%s" % (X, Y))
-        pixbuf = self.image.get_pixbuf(X, Y)
-        self.gui.image793.set_from_pixbuf(pixbuf)
-        del pixbuf
-        gc.collect()
-        if self.AllJpegs[self.idx_current] in self.selected:
-            sel = "[Selected]"
-        else:
-            sel = ""
-        self.gui.FullScreen.set_title("Selector : %s %s" % (self.AllJpegs[self.idx_current], sel))
-
-    def keypressed(self, widget, event, *args):
-        """keylogger"""
-        key = gdk.keyval_name (event.keyval)
-        if key == "Page_Up":
-            self.previousJ()
-        elif key == "Page_Down":
-            self.nextJ()
-        elif key == "d":
-            self.SlideShow()
-        elif key == "e":
-            self.QuitSlideShow = True
-            self.destroy()
-
-        elif key == "Right":
-            self.turn_right()
-        elif key == "Left":
-            self.turn_left()
-        elif key == "f":
-            self.NormalScreen()
-        elif key == "Down":
-            self.next1()
-        elif key == "Up":
-            self.previous1()
-        elif key == "s":
-            self.select_Shortcut()
-        elif key in ["Escape", "Q"]:
-            self.QuitSlideShow = True
-        elif key in ["KP_Add", "plus"]:
-            config.SlideShowDelay += 1
-        elif key in ["KP_Subtract", "minus"]:
-            config.SlideShowDelay -= 1
-            if config.SlideShowDelay < 0:config.SlideShowDelay = 0
-
-    def turn_right(self, *args):
-        """rotate the current image clockwise"""
-        self.image.rotate(90)
-        self.show_image()
-    def turn_left(self, *args):
-        """rotate the current image clockwise"""
-        self.image.rotate(270)
-        self.show_image()
-
-    def destroy(self, *args):
-        """destroy clicked by user"""
-        self.close("quit")
-
-    def NormalScreen(self, *args):
-        """Switch to Normal mode"""
-        self.close("normal")
-
-    def next1(self, *args):
-        """Switch to the next image"""
-        self.idx_current = (self.idx_current + 1) % len(self.AllJpegs)
-        self.show_image()
-    def previous1(self, *args):
-        """Switch to the previous image"""
-        self.idx_current = (self.idx_current - 1) % len(self.AllJpegs)
-        self.show_image()
-    def nextJ(self, *args):
-        """Switch to the first image of the next day"""
-        jour = os.path.dirname(self.AllJpegs[self.idx_current])
-        for i in range(self.idx_current, len(self.AllJpegs)):
-            jc = os.path.dirname(self.AllJpegs[i])
-            if jc > jour: break
-        self.idx_current = i
-        self.show_image()
-    def previousJ(self, *args):
-        """Switch to the first image of the previous day"""
-        if self.idx_current == 0: return
-        jour = os.path.dirname(self.AllJpegs[self.idx_current])
-        for i in range(self.idx_current - 1, -1, -1):
-            jc = os.path.dirname(self.AllJpegs[i])
-            jd = os.path.dirname(self.AllJpegs[i - 1])
-            if (jc < jour) and (jd < jc): break
-        self.idx_current = i
-        self.show_image()
-
-    def select_Shortcut(self, *args):
-        """Select or unselect the image"""
-        if self.AllJpegs[self.idx_current] not in self.selected:
-            self.selected.append(self.AllJpegs[self.idx_current])
-            sel = "[Selected]"
-        else:
-            self.selected.remove(self.AllJpegs[self.idx_current])
-            sel = ""
-        self.selected.sort()
-        self.gui.setWindowTitle("Selector : %s %s" % (self.AllJpegs[self.idx_current], sel))
-
-    def SlideShow(self):
-        """Starts the slide show"""
-        self.QuitSlideShow = False
-        self.RandomList = []
-        while not self.QuitSlideShow:
-            if config.SlideShowType == "chronological":
-                self.idx_current = (self.idx_current + 1) % len(self.AllJpegs)
-            elif config.SlideShowType == "antichronological":
-                self.idx_current = (self.idx_current - 1) % len(self.AllJpegs)
-            elif config.SlideShowType == "random":
-                if len(self.RandomList) == 0:
-                    self.RandomList = range(len(self.AllJpegs))
-                    random.shuffle(self.RandomList)
-                self.idx_current = self.RandomList.pop()
-            self.image = Photo(self.AllJpegs[self.idx_current])
-            self.image.readExif()
-            if self.image.metadata["rate"] < config.SlideShowMinRating:
-                flush()
-                continue
-            now = time.time()
-            if now - self.timestamp < config.SlideShowDelay:
-                time.sleep(config.SlideShowDelay - now + self.timestamp)
-            self.show_image()
-            flush()
-            self.timestamp = time.time()
-
-    def close(self, what=None):
-        """close the gui and call the call-back"""
-        self.selected.save()
-        self.gui.close()
-        if self.callback:
-            self.callback(what)
-
-################################################################################
-# ##### Normal Interface #####
-################################################################################
 
 class Interface(object):
     """
@@ -238,8 +70,9 @@ class Interface(object):
         self.default_filter = None
         self.menubar_isvisible = True
         self.is_fullscreen = False
-        self.is_slideshow = False
+        self.in_slideshow = False
         self.treeview = None
+        self.rnd_lst = []
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
         # Icons on buttons
@@ -258,7 +91,7 @@ class Interface(object):
         icon_on("right", self.gui.next)
         icon_on("right", self.gui.right)
 
-#        self.timeout_handler_id = gobject.timeout_add(1000, timer_pass)
+        self.timer = None
         self._populate_action_data()
         self.gui.actionAutorotate.setChecked(bool(config.AutoRotate))
         self.gui.actionSignature_filigrane_web.setChecked(bool(config.Filigrane))
@@ -333,9 +166,8 @@ class Interface(object):
 
         }
         for signal, callback in handlers.items():
-            print(callback.__name__)
+            logger.debug(callback.__name__)
             signal.connect(callback)
-
         self.gui.show()
         flush()
         width = sum(self.gui.splitter.sizes())
@@ -375,7 +207,7 @@ class Interface(object):
         @param act: QAction
         """
         meth_name = str(act.data().toString())
-        print("Action %s => %s" % (act.text(), meth_name))
+        logger.debug("Action %s => %s" % (act.text(), meth_name))
 
         try:
             callback = self.__getattribute__(meth_name)
@@ -392,7 +224,7 @@ class Interface(object):
             # Menu Fichier
             self.gui.actionName_day: "rename_day",
             #    <string>Ctrl+N</string>
-            self.gui.actionDiaporama: "SlideShow",
+            self.gui.actionDiaporama: "toggle_slideshow",
             #    <string>Ctrl+D</string>
             self.gui.actionPlein_cran: "toggle_fullscreen",
             #    <string>Ctrl+F</string>
@@ -426,7 +258,7 @@ class Interface(object):
             self.gui.actionAutorotate: "setAutoRotate",
             self.gui.actionSignature_filigrane_web:"setFiligrane",
             self.gui.actionSave_pref: "save_pref",
-            self.gui.actionConfigurer_le_diaporama:"slideShowSetup",
+            self.gui.actionConfigurer_le_diaporama:"config_slideshow",
 
             # Menu Selection
             self.gui.selectionner: "select_shortcut",
@@ -557,10 +389,10 @@ class Interface(object):
     def calc_index(self, what="next", menu="image"):
         """
         @param what: can be "next, "next10","last", "previous10", "last" ...
-        @param menu: can be "image", "day", "sel", "unsel", "title", "untitle"
+        @param menu: can be "image", "day", "sel", "unsel", "title", "untitle", random
         @return: image index
         """
-        print("calc_index %s %s %s" % (self.idx_current, what, menu))
+        logger.debug("calc_index %s %s %s" % (self.idx_current, what, menu))
         new_idx = current_idx = self.idx_current
         size = len(self.AllJpegs)
         if menu == "image":
@@ -711,6 +543,23 @@ class Interface(object):
                     myPhoto = Photo(i)
                     if not myPhoto.has_title():
                         return self.AllJpegs.index(i)
+        elif menu == "random":
+            if what == "last":
+                new_idx = len(self.AllJpegs) - 1
+            elif what == "first":
+                new_idx = 0
+            else:
+                while True:
+                    if not self.rnd_lst:
+                        self.rnd_lst = list(range(len(self.AllJpegs)))
+                        random.shuffle(self.rnd_lst)
+                    new_idx = self.rnd_lst.pop()
+                    image = Photo(self.AllJpegs[new_idx])
+                    data = image.readExif()
+                    if "rate" in data:
+                        rate = int(float(data["rate"]))
+                        if rate >= self.min_mark:
+                            break
         else:
             logger.warning("Unrecognized menu in navigate %s %s" % (menu, what))
         # final sanitization
@@ -720,11 +569,11 @@ class Interface(object):
         """
         Generic navigation
         """
+        self.update_title()
         if act in self.navigation_dict:
             menu, what = self.navigation_dict[act]
-            self.update_title()
             new_idx = self.calc_index(what, menu)
-            logger.warning("Image %i -> %i" % (self.idx_current, new_idx))
+            logger.debug("Image %i -> %i" % (self.idx_current, new_idx))
             self.show_image(new_idx)
         else:
             logger.warning(u"Interface.navigate unknown action %s %s: %s " % (act.text(), act.data(), act))
@@ -791,7 +640,7 @@ class Interface(object):
     def filter_im(self, *args):
         """ Apply the selected filter to the current image"""
         logger.debug("Interface.filter_image")
-        print("do_filter, default=%s" % self.default_filter)
+        logger.debug("do_filter, default=%s" % self.default_filter)
         if self.default_filter == "ContrastMask":
             self.filter_ContrastMask()
         elif self.default_filter == "AutoWB":
@@ -850,8 +699,8 @@ class Interface(object):
         logger.debug("Interface.destroy")
         self.update_title()
         self.gui.close()
-#        config.GraphicMode = "quit"
-        self.callback("quit")
+        if callable(self.callback):
+            self.callback("quit")
 
     def die(self, *args):
         """you want to leave the program ??"""
@@ -861,14 +710,6 @@ class Interface(object):
             self.selected.save()
             self.destroy()
 
-    def SlideShow(self, *args):
-        """Switch to fullscreen mode and starts the SlideShow"""
-        logger.debug("Interface.slideshow")
-        self.update_title()
-        self.gui.close
-#        config.GraphicMode = "SlideShow"
-#        gtk.main_quit()
-        self.callback("slideshow")
 
     def copy_resize(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
@@ -890,7 +731,7 @@ class Interface(object):
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
-            print("Error n° : %i" % out)
+            logger.error("Error n° : %i" % out)
         logger.info("Interface.to_web: Done")
 
     def empty_selected(self, *args):
@@ -903,7 +744,7 @@ class Interface(object):
                 recursive_delete(curfile)
             else:
                 os.remove(curfile)
-        print("Done")
+        logger.info("Done")
 
     def copy(self, *args):
         """lauch the copy of all selected files"""
@@ -911,7 +752,7 @@ class Interface(object):
         copySelected(self.selected)
         self.selected = Selected()
         self.gui.selection.setChecked((self.fn_current in self.selected))
-        print("Done")
+        logger.info("Done")
 
     def burn(self, *args):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
@@ -924,7 +765,7 @@ class Interface(object):
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
         if out != 0:
-            print("Error n° : %i" % out)
+            logger.error("Error n° : %i" % out)
         logger.info("Interface.burn: Done")
 
 
@@ -1144,14 +985,67 @@ class Interface(object):
         self.update_title()
         ask_media_size()
 
-    def slideShowSetup(self, *args):
+    def toggle_slideshow(self, *args):
+        if self.in_slideshow:
+            self.stop_slideshow()
+        else:
+            self.start_slideshow()
+
+    def config_slideshow(self, *args):
         """lauch a new window for seting up the slideshow"""
-        logger.debug("Interface.slideShowSetup clicked")
+        logger.debug("Interface.config_slideshow clicked")
         self.update_title()
-        AskSlideShowSetup(self)
-        if config.GraphicMode == "SlideShow":
-            self.gui.close()
-            gtk.main_quit()
+        self.in_slideshow = slideshow_dialog()
+        if self.in_slideshow:
+            self.start_slideshow()
+
+    def start_slideshow(self, *args):
+        """Switch to fullscreen mode and starts the SlideShow"""
+        logger.debug("Interface.start_slideshow")
+
+        self.update_title()
+        self.in_slideshow = True
+        self.set_min_rate(value=config.SlideShowMinRating)
+        #goto full screen mode
+        self.gui.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+        self.gui.menubar.setVisible(False)
+        self.menubar_isvisible = False
+        self.is_fullscreen = True
+        flush()
+        width = sum(self.gui.splitter.sizes())
+        self.gui.splitter.setSizes([0, width])
+        flush()
+        self.show_image()
+        #start timer
+        self.timer = QtCore.QTimer(self.gui)
+        self.timer.setInterval(1000.0 * config.SlideShowDelay)
+        self.timer.timeout.connect(self.new_slide)
+        self.timer.start(1000.0 * config.SlideShowDelay)
+
+    def stop_slideshow(self, *args):
+        """quit slideshow mode"""
+        logger.debug("Interface.stop_slideshow")
+        self.in_slideshow = False
+        self.set_min_rate(value=config.SlideShowMinRating)
+        if self.timer:
+            self.timer.stop()
+            self.timer = None
+
+    def new_slide(self):
+        """
+        Slideshow slot to display next image
+        """
+        if not self.in_slideshow:
+            self.stop_slideshow()
+            return
+        next_img = self.idx_current
+        if config.SlideShowType == "chronological":
+            next_img = self.calc_index("next", "image")
+        elif config.SlideShowType == "antichronological":
+            next_img = self.calc_index("previous", "image")
+        elif config.SlideShowType == "random":
+            next_img = self.calc_index("next", "random")
+        self.show_image(next_img)
 
     def indexJ(self, *args):
         """lauch a new window for selecting the day of interest"""
@@ -1311,73 +1205,6 @@ class Interface(object):
 ################################################################################
 # # # # # # # fin de la classe interface graphique # # # # # #
 ################################################################################
-
-
-class AskSlideShowSetup(object):
-    """pop up a windows and asks for the setup of the SlideShow"""
-    def __init__(self, upperIface):
-        self.upperIface = upperIface
-        self.gui = buildUI("Diaporama")
-#        signals = {self.gui.Diaporama_destroy': self.destroy,
-#                    self.gui.cancel, 'clicked()', self.kill_window,
-#                    self.gui.apply, 'clicked()', self.continu,
-#                    self.gui.Lauch, 'clicked()', self.LauchSlideShow,
-#                    }
-#        self.gui.connect_signals(signals)
-        self.adj_Rate = gtk.Adjustment(0, 0, 5, 1)
-        self.gui.Rating.set_adjustment(self.adj_Rate)
-        self.adj_delai = gtk.Adjustment(10, 1, 60, 1)
-        self.gui.delai.set_adjustment(self.adj_delai)
-        self.gui.delai.set_value(config.SlideShowDelay)
-        self.gui.Rating.set_value(config.SlideShowMinRating)
-        if   config.SlideShowType.find("chrono") == 0:
-            self.gui.radio - chrono.set_active(1)
-        elif config.SlideShowType.find("anti") == 0:
-            self.gui.radio - antichrono.set_active(1)
-        else:
-            self.gui.radio - random.set_active(1)
-
-    def LauchSlideShow(self, *args):
-        """retrieves the data, destroy the window and lauch the slideshow"""
-        config.SlideShowDelay = self.gui.delai.value()
-        config.SlideShowMinRating = self.gui.Rating.value()
-        if self.gui.radio - antichrono.get_active():
-            config.SlideShowType = "antichronological"
-        elif self.gui.radio - chrono.get_active():
-            config.SlideShowType = "chronological"
-        else:
-            config.SlideShowType = "random"
-        config.GraphicMode = "SlideShow"
-        self.gui.Diaporama.close
-        self.upperIface.xml.lance_diaporama.activate()
-#        self.gui.signal_connect(self.gui.lance_diaporama_activate'
-
-    def continu(self, *args):
-        """retrieves the data, destroy the window and goes on ...."""
-        config.SlideShowDelay = self.gui.delai.value()
-        config.SlideShowMinRating = self.gui.Rating.value()
-        if self.gui.radio - antichrono.get_active():
-            config.SlideShowType = "antichronological"
-        elif self.gui.radio - chrono.get_active():
-            config.SlideShowType = "chronological"
-        else:
-            config.SlideShowType = "random"
-        self.gui.Diaporama.close
-
-    def destroy(self, *args):
-        """destroy clicked by user -> close the window"""
-        flush()
-
-    def kill_window(self, *args):
-        """
-        send the signal to close the window
-        """
-        try:
-            self.gui.Diaporama.close
-        except:
-            pass
-
-
 
 
 

@@ -36,12 +36,8 @@ __date__ = "20141129"
 __license__ = "GPL"
 
 import os, logging, sys
-#logging.basicConfig()
-logger = logging.Logger("imagizer", logging.DEBUG)
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-logger.addHandler(ch)
-
+logging.basicConfig()
+logger = logging.getLogger("imagizer")
 from .imagecache import ImageCache
 from .parser import AttrFile
 from .signals import Signal

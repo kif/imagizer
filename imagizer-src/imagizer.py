@@ -419,7 +419,7 @@ class ModelRangeTout(object):
                     if "human_value" in dir(originalName):
                         originalName = originalName.human_value
                     if os.path.basename(originalName) == os.path.basename(i):
-                        logger.info("File already in repository, leaving as it is")
+                        logger.debug("File already in repository, leaving as it is")
                         bSkipFile = True
                         continue  # to next file, i.e. leave the existing one
             if bSkipFile:

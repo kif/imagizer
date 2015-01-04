@@ -26,7 +26,7 @@
     <item>
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Délai entre les images (1-60s)</string>
+       <string>Délai entre les images (0-60s)</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -35,8 +35,20 @@
     </item>
     <item>
      <widget class="QSlider" name="delai">
+      <property name="maximum">
+       <number>60</number>
+      </property>
+      <property name="value">
+       <number>1</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="tickPosition">
+       <enum>QSlider::TicksBelow</enum>
+      </property>
+      <property name="tickInterval">
+       <number>10</number>
       </property>
      </widget>
     </item>
@@ -58,9 +70,21 @@
      </widget>
     </item>
     <item>
-     <widget class="QSlider" name="Rating">
+     <widget class="QSlider" name="rating">
+      <property name="maximum">
+       <number>5</number>
+      </property>
+      <property name="pageStep">
+       <number>5</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="tickPosition">
+       <enum>QSlider::TicksBelow</enum>
+      </property>
+      <property name="tickInterval">
+       <number>1</number>
       </property>
      </widget>
     </item>
@@ -131,5 +155,38 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>apply</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>227</x>
+     <y>275</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cancel3</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>275</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

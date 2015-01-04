@@ -213,7 +213,7 @@ def synchronize_dialog(current, AllPhotos, selected):
         widget.setChecked(key == what)
 
     res = gui.exec_()
-    print(res)
+    logger.debug(res)
     if res in (QtGui.QDialog.Accepted, PERFORM_SYNCRO):
         config.SynchronizeRep = to_unicode(gui.SyncCommand.text()).strip()
         for key, widget in param.items():
@@ -256,6 +256,37 @@ def synchronize_dialog(current, AllPhotos, selected):
         if logger.getEffectiveLevel() <= logging.INFO:
             while p.returncode is None:
                 logger.info(p.stdout.readline())
+
+
+def slideshow_dialog():
+    """pop up a windows and asks for the setup of the slide show
+    @return True if the slideshow should start immediately
+    """
+    START_DIAPO = 3
+    gui = buildUI("dialog_diaporama")
+    gui.startdiapo.clicked.connect(lambda: gui.done(START_DIAPO))
+    MODES = {"chronological":gui.radiochrono,
+             "antichronological":gui.radioantichrono,
+             "random":gui.radiorandom}
+    if config.SlideShowType not in MODES:
+        config.SlideShowType = MODES.keys()[0]
+    for key, widget in MODES.items():
+        widget.setChecked(key == config.SlideShowType)
+
+    gui.delai.setValue(float(config.SlideShowDelay))
+    gui.rating.setValue(float(config.SlideShowMinRating))
+
+    res = gui.exec_()
+    logger.debug(res)
+
+    if res in (QtGui.QDialog.Accepted, START_DIAPO):
+        config.SlideShowDelay = gui.delai.value()
+        config.SlideShowMinRating = gui.rating.value()
+        for key, widget in MODES.items():
+            if widget.isChecked():
+                config.SlideShowType = key
+    return res == START_DIAPO
+
 
 def test():
     import imagizer.imagizer, imagizer.dialogs
