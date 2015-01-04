@@ -1,24 +1,24 @@
 [Selector]
 #Size of the image on the Screen, by default
-ScreenSize: 500 
+ScreenSize: 500
 
 #Downsampling quality [0=nearest, 1=bilinear]
-Interpolation: 1 
+Interpolation: 1
 
 #Page prefix (used when there are too many images per day to fit on one web page)
-PagePrefix: page 
+PagePrefix: page
 
 #Maximum number of images per web page
 NbrPerPage: 20
 
 #Trash sub-directory
-TrashDirectory: Trash 
+TrashDirectory: Trash
 
 #Selected/processed images sub-directory
-SelectedDirectory: Selected 
+SelectedDirectory: Selected
 
 #File containing the list of selected but unprocessed images
-Selected_save: .selected-photos 
+Selected_save: .selected-photos
 
 #Use Exif data for auto-rotation of the images (canon cameras mainly)
 AutoRotate: True
@@ -27,16 +27,16 @@ AutoRotate: True
 DefaultFileMode: 664
 
 #Default JPEG extensions
-Extensions: .jpg .jpeg .jpe .jfif 
+Extensions: .jpg .jpeg .jpe .jfif
 
 #Default photo repository
-DefaultRepository: /home/jerome/Images 
+DefaultRepository: /home/jerome/Images
 
 #Size of the backup media (in MegaByte)
-MediaSize:	680.0 
+MediaSize:	680.0
 
 #Add signature to web published images
-Filigrane: False 
+Filigrane: False
 
 #File containing the image of the signature for the filigrane
 FiligraneSource: ~/imagizer/imagizer/pixmaps/signature.png
@@ -80,10 +80,10 @@ Coding: UTF-8
 #All selected photos should be exported in a single directory
 ExportSingleDir: False
 
-#Where should the dirindex page start-up ? [begin/end] 
+#Where should the dirindex page start-up ? [begin/end]
 WebPageAnchor: end
 
-#Delay between imges in the slideshow? 
+#Delay between imges in the slideshow?
 SlideShowDelay: 5.0
 
 #Type of slideshow : chronological, anti-chronological or random ?
@@ -109,45 +109,87 @@ Gimp: gimp
 
 [ScaledImages]
 #ScaledImages size
-Size: 800 
+Size: 800
 
 #ScaledImages suffix
-Suffix: scaled 
+Suffix: scaled
 
 #ScaledImages downsampling quality [0=nearest, 1=antialias 2=bilinear, 3=bicubic]
 Interpolation: 1
 
 #ScaledImages progressive JPEG files
-Progressive: True 
+Progressive: True
 
 #ScaledImages optimized JPEG (2 pass encoding)
-Optimize: True 
+Optimize: True
 
 #ScaledImages quality (in percent)
-Quality: 75 
+Quality: 75
 
 #ScaledImages image can be obtained by Exif extraction ?
-ExifExtraction: False 
+ExifExtraction: False
 
 [Thumbnails]
 #Thumbnails size
-Size: 160 
+Size: 160
 
 #Thumbnails suffix
-Suffix: thumb 
+Suffix: thumb
 
 #Thumbnails downsampling quality [0=nearest, 1=antialias 2=bilinear, 3=bicubic]
-Interpolation: 1 
+Interpolation: 1
 
 #Thumbnails progressive JPEG files
 Progressive: True
 
 #Thumbnails optimized JPEG (2 pass encoding)
-Optimize: True 
+Optimize: True
 
 #Thumbnails quality (in percent)
-Quality: 50 
+Quality: 50
 
 #Thumbnails image can be obtained by Exif extraction ?
-ExifExtraction: False 
+ExifExtraction: False
 
+[Video]
+#Directory where you want PBS to work? (/tmp)
+ScratchDir: /tmp
+
+#Video bit rate Higher is better but bigger (600)
+VideoBitRate: 600
+
+#audio bit rate per ausio channel (x2 for stereo), default=64
+AudioBitRatePerChannel: 64
+
+#Options to be used for the X264 encoder (man mencoder)
+X264Options: subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:bframes=3:frameref=5
+
+#Number of Frames per secondes in the video (25):
+FramesPerSecond: 25.0
+
+#Path to the mplayer (mplayer package) executable
+MPlayer: /usr/bin/mplayer
+
+#Path to the mencoder (mplayer package) executable
+MEncoder: /usr/bin/mencoder
+
+#Path to the sox (Sound processing) executable
+Sox: /usr/bin/sox
+
+#Path to the convert (imagemagick package) executable
+Convert: /usr/bin/convert
+
+#Path to the avimerge (transcode package) executable
+AviMerge: /usr/bin/avimerge
+
+#List of video extensions
+VideoExtensions: .avi .mpeg .mpg .mp4 .divx .mov .webm .mkv .m2ts
+
+#list of thumbnail extension related to videos
+ThumbnailExtensions: .thm .jpg
+
+#Batch queueing system launcher (/bin/sh if none present)
+BatchScriptExecutor: /usr/bin/batch
+
+#Batch queuing needs a pipe (like batch) or not (like PBS)
+BatchUsesPipe: True
