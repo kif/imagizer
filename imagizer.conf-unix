@@ -152,7 +152,7 @@ Quality: 50
 ExifExtraction: False
 
 [Video]
-#Directory where you want PBS to work? (/tmp)
+#Directory where you want the batch queueing system to work? (/tmp)
 ScratchDir: /tmp
 
 #Video bit rate Higher is better but bigger (600)
@@ -164,7 +164,7 @@ AudioBitRatePerChannel: 64
 #Options to be used for the X264 encoder (man mencoder)
 X264Options: subq=7:nr=100:me=umh:partitions=all:direct_pred=auto:bframes=3:frameref=5
 
-#Number of Frames per secondes in the video (25):
+#Number of Frames per seconde in the video (25):
 FramesPerSecond: 25.0
 
 #Path to the mplayer (mplayer package) executable
