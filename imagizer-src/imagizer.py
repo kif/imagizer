@@ -366,6 +366,7 @@ class ModelRangeTout(object):
         @rtype: (list,integer)
         """
         config.DefaultRepository = rootDir
+        trashDir = os.path.join(rootDir, config.TrashDirectory)
         AllJpegs = fileutils.findFiles(rootDir)
         AllFilesToProcess = []
         AllreadyDone = []
@@ -388,14 +389,13 @@ class ModelRangeTout(object):
         AllFilesToProcess.sort()
         NumFiles = len(AllFilesToProcess)
         self.startSignal.emit(self.__label, NumFiles)
-        for h in range(NumFiles):
-            i = AllFilesToProcess[h]
+        for h, i in enumerate(AllFilesToProcess):
             self.refreshSignal.emit(h, i)
             myPhoto = Photo(i, dontCache=True)
             data = myPhoto.readExif()
             try:
                 datei, heurei = data["time"].split()
-                date = re.sub(":", "-", datei)
+                date = re.sub(":", "-", unicode2ascii(datei))
                 heurej = re.sub(":", "h", heurei, 1)
                 model = data["model"].split(",")[-1]
                 heure = unicode2ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
@@ -404,11 +404,10 @@ class ModelRangeTout(object):
                 heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(rootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
             if not (os.path.isdir(os.path.join(rootDir, date))) :
                 fileutils.mkdir(os.path.join(rootDir, date))
-#            strImageFile = os.path.join(rootDir, date, heure)
             ToProcess = os.path.join(date, heure)
             bSkipFile = False
-            for strImageFile in fileutils.list_files_in_named_dir(rootDir, date, heure):
-                logger.warning("%s -x-> %s", i, strImageFile)
+            for strImageFile in fileutils.list_files_in_named_dir(rootDir, date, heure)+fileutils.list_files_in_named_dir(trashDir, date, heure):
+                logger.debug("%s <-?-> %s", i, strImageFile)
                 existing = Photo(strImageFile, dontCache=True)
                 try:
                     existing.readExif()
@@ -420,9 +419,10 @@ class ModelRangeTout(object):
                         originalName = originalName.human_value
                     if os.path.basename(originalName) == os.path.basename(i):
                         logger.debug("File already in repository, leaving as it is")
-                        bSkipFile = True
+                        bSkipFile = strImageFile
                         continue  # to next file, i.e. leave the existing one
             if bSkipFile:
+                logger.warning("%s -x-> %s", i, bSkipFile)
                 continue
             else:
                 strImageFile = os.path.join(rootDir, date, heure)
@@ -438,7 +438,7 @@ class ModelRangeTout(object):
                 os.chmod(strImageFile, config.DefaultFileMode)
             except OSError:
                 logger.warning("in ModelRangeTout: unable to chown ot chmod  %s" , strImageFile)
-            myPhoto = Photo(strImageFile, dontCache=True)
+            myPhoto = Photo(strImageFile)
 #            Save the old image name in exif tag
             myPhoto.storeOriginalName(i)
 

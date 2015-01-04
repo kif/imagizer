@@ -136,11 +136,12 @@ def list_files_in_named_dir(root, dirname, filename):
     @return: None is so such file exists or the list of filenames
     """
     ret = []
-    for adir in os.listdir(root):
-        if adir.startswith(dirname):
-            fullpath = os.path.join(root, adir)
-            if os.path.isdir(fullpath):
-                fullname = os.path.join(fullpath, filename)
-                if os.path.isfile(fullname):
-                    ret.append(fullname)
+    if os.path.isdir(root):
+        for adir in os.listdir(root):
+            if adir.startswith(dirname):
+                fullpath = os.path.join(root, adir)
+                if os.path.isdir(fullpath):
+                    fullname = os.path.join(fullpath, filename)
+                    if os.path.isfile(fullname):
+                        ret.append(fullname)
     return ret
