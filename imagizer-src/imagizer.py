@@ -389,9 +389,9 @@ class ModelRangeTout(object):
         AllFilesToProcess.sort()
         NumFiles = len(AllFilesToProcess)
         self.startSignal.emit(self.__label, NumFiles)
-        for h, i in enumerate(AllFilesToProcess):
-            self.refreshSignal.emit(h, i)
-            myPhoto = Photo(i, dontCache=True)
+        for idx, fname in enumerate(AllFilesToProcess):
+            self.refreshSignal.emit(idx, fname)
+            myPhoto = Photo(fname, dontCache=True)
             data = myPhoto.readExif()
             try:
                 datei, heurei = data["time"].split()
@@ -400,27 +400,27 @@ class ModelRangeTout(object):
                 model = data["model"].split(",")[-1]
                 heure = unicode2ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
             except ValueError:
-                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(rootDir, i))))
-                heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(rootDir, i)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(i)[0]))))
+                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(rootDir, fname))))
+                heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(rootDir, fname)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
             if not (os.path.isdir(os.path.join(rootDir, date))) :
                 fileutils.mkdir(os.path.join(rootDir, date))
-            ToProcess = os.path.join(date, heure)
+            new_fname = os.path.join(date, heure)
             bSkipFile = False
             for strImageFile in fileutils.list_files_in_named_dir(rootDir, date, heure)+fileutils.list_files_in_named_dir(trashDir, date, heure):
-                logger.debug("%s <-?-> %s", i, strImageFile)
+                logger.debug("%s <-?-> %s", fname, strImageFile)
                 existing = Photo(strImageFile, dontCache=True)
                 try:
                     existing.readExif()
                     originalName = existing.exif["Exif.Photo.UserComment"]
                 except:
-                    logger.error("in ModelRangeTout: reading Exif for %s", i)
+                    logger.error("in ModelRangeTout: reading Exif for %s", fname)
                 else:
                     if "human_value" in dir(originalName):
                         originalName = originalName.human_value
-                    if os.path.basename(originalName) == os.path.basename(i):
+                    if os.path.basename(originalName) == os.path.basename(fname):
                         logger.debug("File already in repository, leaving as it is")
                         bSkipFile = strImageFile
-                        continue  # to next file, i.e. leave the existing one
+                        break
             if bSkipFile:
                 logger.warning("%s -x-> %s", i, bSkipFile)
                 continue
@@ -429,9 +429,10 @@ class ModelRangeTout(object):
             if os.path.isfile(strImageFile):
                 s = 0
                 for j in os.listdir(os.path.join(rootDir, date)):
-                    if j.find(heure[:-4]) == 0:s += 1
-                ToProcess = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
-                strImageFile = os.path.join(rootDir, ToProcess)
+                    if j.find(heure[:-4]) == 0:
+                        s += 1
+                new_fname = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
+                strImageFile = os.path.join(rootDir, new_fname)
             shutil.move(os.path.join(rootDir, i), strImageFile)
             try:
                 os.chown(strImageFile, uid, gid)
@@ -444,8 +445,8 @@ class ModelRangeTout(object):
 
             if config.AutoRotate:
                 myPhoto.autorotate()
-            AllreadyDone.append(ToProcess)
-            NewFiles.append(ToProcess)
+            AllreadyDone.append(new_fname)
+            NewFiles.append(new_fname)
         AllreadyDone.sort()
         self.finishSignal.emit()
 
