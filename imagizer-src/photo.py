@@ -101,7 +101,7 @@ class Photo(object):
             self.orientation = fromCache.orientation
         else:
             logger.debug("Image %s not in Cache", filename)
-            if dontCache is False:
+            if not dontCache:
                 imageCache[filename] = self
 
     def __repr__(self):
@@ -170,7 +170,7 @@ class Photo(object):
         LINEAR = BILINEAR = 2
         CUBIC = BICUBIC = 3
         Optimized/parallel 3-lobed lanczos = 4
-        
+
         @return: rescaled image instance
         """
         rescaled = None

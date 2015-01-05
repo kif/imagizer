@@ -1,7 +1,14 @@
 #!/usr/bin/python
+# coding: utf-8
 
+#Screensaver for imagizer
 
 from __future__ import division, print_function, with_statement
+__author__ = "Jérôme Kieffer"
+__date__ = "05/01/2015"
+__copyright__ = "Jerome Kieffer"
+__license__ = "GPLv3+"
+__contact__ = "Jerome.Kieffer@terre-adelie.org"
 
 import sys, os, gc, logging, time, glob, random
 from math                   import exp
@@ -192,6 +199,7 @@ class GsThemeWindow(gtk.Window):
         self.style.attach(self.window)
         self.set_flags(self.flags() | gtk.REALIZED)
 
+
 class ScreeenSaver(object):
 
     def __init__(self):
@@ -239,7 +247,8 @@ class ScreeenSaver(object):
 
         self.screen_size = self.window.get_size()
 
-    def scan(self):
+    @staticmethod
+    def scan():
         """
         Scan the repository for all valid files
         """
@@ -247,8 +256,9 @@ class ScreeenSaver(object):
             l = len(config.DefaultRepository)
         else:
             l = len(config.DefaultRepository) + 1
-        self.all_jpg = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "*", "*.jpg"))]
-        logger.debug("Scanned directory %s and found %i images" % (config.DefaultRepository, len(self.all_jpg)))
+        all_jpg = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "*", "*.jpg"))]
+        logger.debug("Scanned directory %s and found %i images" % (config.DefaultRepository, len(all_jpg)))
+        return all_jpg
 
     def parse(self):
         """
@@ -280,7 +290,7 @@ class ScreeenSaver(object):
         Finds the next image to display
         """
         if not self.all_jpg:
-            self.scan()
+            self.all_jpg = self.scan()
         found = False
         while not found:
             if not self.random_list:
@@ -288,13 +298,13 @@ class ScreeenSaver(object):
                 random.shuffle(self.random_list)
             index = self.random_list.pop()
             photo = Photo(self.all_jpg[index], True)
-            photo.readExif()
-            rate = photo.metadata["Rate"]
-            treshold = exp(-rate) - exp(-5)  # 0  for 5, 0.05 for 3 and almost 1 for 0
-            found = random.random() >= treshold
+            data = photo.readExif()
+            rate = data.get("rate", 0)
+            # 0 for x=5, 0.5 for x=3 and 0.99 for x=0
+            treshold = -0.01733333 * rate * rate + -0.11133333 * rate + 0.99
+            found = (random.random() >= treshold)
             if found and self.args.landscape:
-                found = found and photo.pixelsX > photo.pixelsY
-
+                found = found and (photo.pixelsX > photo.pixelsY)
         return self.all_jpg[index]
 
     def __repr__(self):
@@ -356,6 +366,7 @@ class ScreeenSaver(object):
 
     def destroy(self):
         gtk.main_quit()
+
 
 if __name__ == "__main__":
     scs = ScreeenSaver()
