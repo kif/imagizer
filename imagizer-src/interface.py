@@ -62,8 +62,8 @@ class Interface(object):
         self.idx_current = first
         self.left_tab_width = 350
         self.image = None
-        self.current_title = ""
-        self.current_rate = 0
+#        self.current_title = ""
+#        self.current_rate = 0
         self.fn_current = None
         self.is_zoomed = False
         self.min_mark = 0
@@ -343,10 +343,11 @@ class Interface(object):
     def update_title(self):
         """Set the new title of the image"""
         logger.debug("Interface.update_title")
-        newtitle = unicode(self.gui.title.text())
-        newRate = float(self.gui.rate.value())
-        if (newtitle != self.current_title) or (newRate != self.current_rate):
-            self.image.name(newtitle, newRate)
+        new_title = unicode(self.gui.title.text())
+        new_rate = float(self.gui.rate.value())
+        metadata = self.image.metadata
+        if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
+            self.image.name(new_title, new_rate)
 
 
     def show_image(self, new_idx=None):
@@ -369,11 +370,10 @@ class Interface(object):
         gc.collect()
         metadata = self.image.readExif()
         if "rate" in metadata:
-            self.current_rate = int(float(metadata["rate"]))
-            self.gui.rate.setValue(self.current_rate)
+            self.gui.rate.setValue(int(float(metadata["rate"])))
             metadata.pop("rate")
         else:
-            self.current_rate = 0
+            self.gui.rate.setValue(0)
 
         for key, value in metadata.items():
             try:
@@ -383,7 +383,6 @@ class Interface(object):
 
         self.gui.setWindowTitle("Selector : %s" % self.fn_current)
         self.gui.selection.setChecked(self.fn_current in self.selected)
-        self.current_title = metadata["title"]
 
 
     def calc_index(self, what="next", menu="image"):

@@ -422,7 +422,7 @@ class ModelRangeTout(object):
                         bSkipFile = strImageFile
                         break
             if bSkipFile:
-                logger.warning("%s -x-> %s", i, bSkipFile)
+                logger.warning("%s -x-> %s", fname, bSkipFile)
                 continue
             else:
                 strImageFile = os.path.join(rootDir, date, heure)
@@ -433,7 +433,7 @@ class ModelRangeTout(object):
                         s += 1
                 new_fname = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
                 strImageFile = os.path.join(rootDir, new_fname)
-            shutil.move(os.path.join(rootDir, i), strImageFile)
+            shutil.move(os.path.join(rootDir, fname), strImageFile)
             try:
                 os.chown(strImageFile, uid, gid)
                 os.chmod(strImageFile, config.DefaultFileMode)
@@ -441,7 +441,7 @@ class ModelRangeTout(object):
                 logger.warning("in ModelRangeTout: unable to chown ot chmod  %s" , strImageFile)
             myPhoto = Photo(strImageFile)
 #            Save the old image name in exif tag
-            myPhoto.storeOriginalName(i)
+            myPhoto.storeOriginalName(fname)
 
             if config.AutoRotate:
                 myPhoto.autorotate()
