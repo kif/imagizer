@@ -1,0 +1,217 @@
+#!/usr/bin/python
+# coding: utf-8
+
+#Screensaver for imagizer
+
+from __future__ import division, print_function, with_statement
+__author__ = "Jérôme Kieffer"
+__date__ = "13/01/2015"
+__copyright__ = "Jerome Kieffer"
+__license__ = "GPLv3+"
+__contact__ = "Jerome.Kieffer@terre-adelie.org"
+
+import sys, os, gc, logging, time, glob, random
+from math                   import exp
+from argparse               import ArgumentParser
+#from imagizer.gtk           import gtk, gdk, gtkFlush, gobject
+from imagizer.qt            import QtGui, QtCore, flush
+from imagizer.photo         import Photo
+from imagizer.config        import config
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("imagizer.screensaver")
+
+
+class FullScreenWidget(QtGui.QX11EmbedWidget):
+    def __init__(self, wid=None):
+        super(FullScreenWidget, self).__init__()
+        if wid is not None:
+            self.embedInto(wid)
+        self.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+        self.image = QtGui.QLabel(self)
+        self.layout = QtGui.QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.layout.addWidget(self.image)
+        self.setLayout(self.layout)
+
+    def keyPressEvent(self, e):
+#        if e.key() == QtCore.Qt.Key_Escape:
+            self.close()
+
+
+class ScreeenSaver(object):
+
+    def __init__(self):
+        self.window = None
+        self.photo = None
+        self.args = None
+        self.current = None
+        self.all_jpg = []
+        self.random_list = []
+        self.filename = os.path.join(os.environ.get("HOME"), ".screensaver.imagizer")
+        self.timer = None
+
+    def init_window(self):
+        """initialize the window, if needed"""
+        if self.window:
+            return
+        wid = None
+        for i in os.environ:
+            if "XSCREENSAVER" in i:
+                logger.debug("%s: %s" % (i, os.environ[i]))
+        if self.args.window_id:
+            try:
+                wid = int(self.args.window_id)
+            except ValueError:
+                wid = int(self.args.window_id, 16)
+        elif "XSCREENSAVER_WINDOW" in os.environ:
+            try:
+                wid = int(os.environ["XSCREENSAVER_WINDOW"])
+            except ValueError:
+                wid = int(os.environ["XSCREENSAVER_WINDOW"], 16)
+
+        if wid and not self.args.window:
+            self.window = FullScreenWidget(wid)
+        else:
+            self.window = FullScreenWidget()
+        self.window.show()
+        screen_geometry = app.desktop().screenGeometry(self.window)
+        self.screensize = screen_geometry.width(), screen_geometry.height()
+
+
+    @staticmethod
+    def scan():
+        """
+        Scan the repository for all valid files
+        """
+        if config.DefaultRepository.endswith(os.sep):
+            l = len(config.DefaultRepository)
+        else:
+            l = len(config.DefaultRepository) + 1
+        all_jpg = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "*", "*.jpg"))]
+        logger.debug("Scanned directory %s and found %i images" % (config.DefaultRepository, len(all_jpg)))
+        return all_jpg
+
+    def parse(self):
+        """
+        Parse command line argument: old style single "-"
+        """
+
+        parser = ArgumentParser(description='Imagizer screen-saver')
+        parser.add_argument('-display', dest='display', help='host:display.screen')
+        parser.add_argument('-window', dest='window', help="Draw on a newly-created window.  This is the default.", action="store_true", default=False)
+        parser.add_argument('-root', dest='root', action="store_true", default=False, help="Draw on the root window.")
+        parser.add_argument('-delay', dest="delay", default=20, type=int, help="Per-frame  delay,  in  seconds.  Default: 20 seconds.")
+        parser.add_argument("-window-id", dest="window_id", help="Identifier of the window to display.")
+        parser.add_argument("-landscape", dest="landscape", action="store_true", default=False, help="Restrict slideshow to landscape images")
+        parser.add_argument("-verbose", dest="debug", action="store_true", default=False, help="print debugging informations")
+        self.args = parser.parse_args()
+        if self.args.debug:
+            logger.setLevel(logging.DEBUG)
+        logger.debug("args: %s" % self.args)
+
+    def show(self):
+        """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+        if not self.current:
+            return
+        if self.photo is None:
+            self.photo = Photo(self.current, True)
+        logger.debug("Showing image %s in size %sx%s" % ((self.current,) + self.screensize))
+        pixbuf = self.photo.get_pixbuf(*self.screensize)
+        self.window.image.setPixmap(pixbuf)
+        del pixbuf
+        gc.collect()
+
+    def next(self):
+        """
+        Finds the next image to display
+        """
+        if not self.all_jpg:
+            self.all_jpg = self.scan()
+        found = False
+        while not found:
+            if not self.random_list:
+                self.random_list = range(len(self.all_jpg))
+                random.shuffle(self.random_list)
+            index = self.random_list.pop()
+            self.photo = Photo(self.all_jpg[index], True)
+            data = self.photo.readExif()
+            rate = data.get("rate", 0)
+            # 0 for x=5, 0.5 for x=3 and 0.99 for x=0
+            treshold = -0.01733333 * rate * rate + -0.11133333 * rate + 0.99
+            found = (random.random() >= treshold)
+            if found and self.args.landscape:
+                found = found and (self.photo.pixelsX > self.photo.pixelsY)
+        return self.all_jpg[index]
+
+    def __repr__(self):
+        return "screensaver instance"
+
+    def save(self):
+        """
+        saves the current image path for next restart
+        """
+        logger.debug("Saving filename")
+        with open(self.filename, "w") as f:
+            f.write(self.current)
+
+    def load(self):
+        """
+        Load the last image from a file
+        """
+        if os.path.isfile(self.filename):
+            current = open(self.filename, "r").read()
+            current = current.strip()
+            if current.startswith(os.sep):
+                current2 = current
+            else:
+                current2 = os.path.join(config.DefaultRepository, current)
+            if os.path.exists(current2):
+                self.current = current
+
+#    def on_keypressed(self, widget, event, *args):
+#        """keylogger"""
+#        key = gdk.keyval_name(event.keyval)
+#        if key in ["Escape", "Q"]:
+#            self.quit = True
+#            self.destroy()
+
+    def on_tick(self):
+        """
+        Skip to another picture.
+
+        """
+        self.current = self.next()
+        self.save()
+        self.show()
+
+    def start(self):
+        """
+        Actually start the slideshow
+        """
+        if not self.args:
+            self.parse()
+        if not self.timer:
+            if self.args.debug:
+                delay = int(self.args.delay * 100)
+            else:
+                delay = int(self.args.delay * 1000)
+            self.timer = QtCore.QTimer(self.window)
+            self.timer.setInterval(delay)
+            self.timer.timeout.connect(self.on_tick)
+            self.timer.start(delay)
+        else:
+            logger.warning("timer already started")
+
+
+
+if __name__ == "__main__":
+    app = QtGui.QApplication([])
+    scs = ScreeenSaver()
+    scs.parse()
+    scs.load()
+    scs.init_window()
+    scs.show()
+    scs.start()
+    res = app.exec_()
+    sys.exit(0)
