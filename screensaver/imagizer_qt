@@ -5,7 +5,7 @@
 
 from __future__ import division, print_function, with_statement
 __author__ = "Jérôme Kieffer"
-__date__ = "13/01/2015"
+__date__ = "14/01/2015"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -13,21 +13,27 @@ __contact__ = "Jerome.Kieffer@terre-adelie.org"
 import sys, os, gc, logging, time, glob, random
 from math                   import exp
 from argparse               import ArgumentParser
-#from imagizer.gtk           import gtk, gdk, gtkFlush, gobject
+logging.basicConfig(level=logging.INFO)
+#, filename="/tmp/imagizer_screensaver_%s.log" % uuid.uuid1())
+logger = logging.getLogger("imagizer.screensaver")
+
 from imagizer.qt            import QtGui, QtCore, flush
 from imagizer.photo         import Photo
 from imagizer.config        import config
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("imagizer.screensaver")
 
 
 class FullScreenWidget(QtGui.QX11EmbedWidget):
+
     def __init__(self, wid=None):
         super(FullScreenWidget, self).__init__()
         if wid is not None:
             self.embedInto(wid)
         self.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+        pal = QtGui.QPalette()
+        pal.setColor(QtGui.QPalette.Window, QtCore.Qt.black);
         self.image = QtGui.QLabel(self)
+        self.setAutoFillBackground(True)
+        self.setPalette(pal)
         self.layout = QtGui.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
@@ -50,34 +56,33 @@ class ScreeenSaver(object):
         self.random_list = []
         self.filename = os.path.join(os.environ.get("HOME"), ".screensaver.imagizer")
         self.timer = None
+        self.desktop = app.desktop()
+        self.wid = None
 
     def init_window(self):
         """initialize the window, if needed"""
         if self.window:
             return
-        wid = None
         for i in os.environ:
             if "XSCREENSAVER" in i:
                 logger.debug("%s: %s" % (i, os.environ[i]))
         if self.args.window_id:
             try:
-                wid = int(self.args.window_id)
+                self.wid = int(self.args.window_id)
             except ValueError:
-                wid = int(self.args.window_id, 16)
+                self.wid = int(self.args.window_id, 16)
         elif "XSCREENSAVER_WINDOW" in os.environ:
             try:
-                wid = int(os.environ["XSCREENSAVER_WINDOW"])
+                self.wid = int(os.environ["XSCREENSAVER_WINDOW"])
             except ValueError:
-                wid = int(os.environ["XSCREENSAVER_WINDOW"], 16)
+                self.wid = int(os.environ["XSCREENSAVER_WINDOW"], 16)
 
-        if wid and not self.args.window:
-            self.window = FullScreenWidget(wid)
+        logger.debug("Working on wid %s screen %s/%s" % (self.wid, self.desktop.screenNumber(self.window), self.desktop.screenCount()))
+        if self.wid and not self.args.window:
+            self.window = FullScreenWidget(self.wid)
         else:
             self.window = FullScreenWidget()
         self.window.show()
-        screen_geometry = app.desktop().screenGeometry(self.window)
-        self.screensize = screen_geometry.width(), screen_geometry.height()
-
 
     @staticmethod
     def scan():
@@ -107,6 +112,7 @@ class ScreeenSaver(object):
         parser.add_argument("-verbose", dest="debug", action="store_true", default=False, help="print debugging informations")
         self.args = parser.parse_args()
         if self.args.debug:
+            logging.root.setLevel(logging.DEBUG)
             logger.setLevel(logging.DEBUG)
         logger.debug("args: %s" % self.args)
 
@@ -116,8 +122,13 @@ class ScreeenSaver(object):
             return
         if self.photo is None:
             self.photo = Photo(self.current, True)
-        logger.debug("Showing image %s in size %sx%s" % ((self.current,) + self.screensize))
-        pixbuf = self.photo.get_pixbuf(*self.screensize)
+        if self.wid:
+            screen_geometry = self.desktop.screenGeometry(self.window)
+            width, height = screen_geometry.width(), screen_geometry.height()
+        else:
+            width, height = self.window.width(), self.window.height()
+        logger.debug("Showing image %s in size %sx%s on screen %s/%s" % (self.current, width, height, self.desktop.screenNumber(self.window), self.desktop.screenCount()))
+        pixbuf = self.photo.get_pixbuf(width, height)
         self.window.image.setPixmap(pixbuf)
         del pixbuf
         gc.collect()
@@ -169,13 +180,6 @@ class ScreeenSaver(object):
             if os.path.exists(current2):
                 self.current = current
 
-#    def on_keypressed(self, widget, event, *args):
-#        """keylogger"""
-#        key = gdk.keyval_name(event.keyval)
-#        if key in ["Escape", "Q"]:
-#            self.quit = True
-#            self.destroy()
-
     def on_tick(self):
         """
         Skip to another picture.
@@ -202,7 +206,6 @@ class ScreeenSaver(object):
             self.timer.start(delay)
         else:
             logger.warning("timer already started")
-
 
 
 if __name__ == "__main__":
