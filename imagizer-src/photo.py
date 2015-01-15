@@ -89,19 +89,19 @@ class Photo(object):
         self._pixbuf = None
         self.scaledPixbuffer = None
         self.orientation = 1
-        if (imageCache is not None) and (filename in imageCache):
-            logger.debug("Image %s found in Cache", filename)
-            fromCache = imageCache[filename]
-            self.metadata = fromCache.metadata
-            self._pixelsX = fromCache.pixelsX
-            self._pixelsY = fromCache.pixelsY
-            self._pil = fromCache.pil
-            self._exif = fromCache.exif
-            self.scaledPixbuffer = fromCache.scaledPixbuffer
-            self.orientation = fromCache.orientation
-        else:
-            logger.debug("Image %s not in Cache", filename)
-            if not dontCache:
+        if imageCache: 
+            if filename in imageCache:
+                logger.debug("Image %s found in Cache", filename)
+                fromCache = imageCache[filename]
+                self.metadata = fromCache.metadata
+                self._pixelsX = fromCache.pixelsX
+                self._pixelsY = fromCache.pixelsY
+                self._pil = fromCache.pil
+                self._exif = fromCache.exif
+                self.scaledPixbuffer = fromCache.scaledPixbuffer
+                self.orientation = fromCache.orientation
+            elif not dontCache:
+                logger.debug("Image %s not in Cache", filename)
                 imageCache[filename] = self
 
     def __repr__(self):
