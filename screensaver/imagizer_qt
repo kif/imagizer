@@ -83,6 +83,7 @@ class ScreeenSaver(object):
         else:
             self.window = FullScreenWidget()
         self.window.show()
+        flush()
 
     @staticmethod
     def scan():
@@ -125,9 +126,11 @@ class ScreeenSaver(object):
         if self.wid:
             screen_geometry = self.desktop.screenGeometry(self.window)
             width, height = screen_geometry.width(), screen_geometry.height()
+#            self.window.setGeometry(0, 0, width, height)
         else:
             width, height = self.window.width(), self.window.height()
         logger.debug("Showing image %s in size %sx%s on screen %s/%s" % (self.current, width, height, self.desktop.screenNumber(self.window), self.desktop.screenCount()))
+
         pixbuf = self.photo.get_pixbuf(width, height)
         self.window.image.setPixmap(pixbuf)
         del pixbuf
