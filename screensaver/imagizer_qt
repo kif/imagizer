@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # coding: utf-8
 
-#Screensaver for imagizer
+# Screensaver for imagizer
 
 from __future__ import division, print_function, with_statement
 __author__ = "Jérôme Kieffer"
-__date__ = "14/01/2015"
+__date__ = "15/01/2015"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -14,7 +14,7 @@ import sys, os, gc, logging, time, glob, random
 from math                   import exp
 from argparse               import ArgumentParser
 logging.basicConfig(level=logging.INFO)
-#, filename="/tmp/imagizer_screensaver_%s.log" % uuid.uuid1())
+# , filename="/tmp/imagizer_screensaver_%s.log" % uuid.uuid1())
 logger = logging.getLogger("imagizer.screensaver")
 
 from imagizer.qt            import QtGui, QtCore, flush
@@ -29,9 +29,11 @@ class FullScreenWidget(QtGui.QX11EmbedWidget):
         if wid is not None:
             self.embedInto(wid)
         self.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+        self.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
         pal = QtGui.QPalette()
         pal.setColor(QtGui.QPalette.Window, QtCore.Qt.black);
         self.image = QtGui.QLabel(self)
+        self.image.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
         self.setAutoFillBackground(True)
         self.setPalette(pal)
         self.layout = QtGui.QVBoxLayout(self)
