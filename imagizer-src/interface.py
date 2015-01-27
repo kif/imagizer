@@ -344,7 +344,7 @@ class Interface(object):
         """Set the new title of the image"""
         logger.debug("Interface.update_title")
         new_title = unicode(self.gui.title.text())
-        new_rate = float(self.gui.rate.value())
+        new_rate = int(self.gui.rate.value())
         metadata = self.image.metadata
         if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
             self.image.name(new_title, new_rate)
@@ -689,7 +689,6 @@ class Interface(object):
             self.selected.remove(self.fn_current)
         self.selected.sort()
         if (self.image.metadata["rate"] == 0) and  etat:
-            self.image.metadata["rate"] = config.DefaultRatingSelectedImage
             self.gui.rate.setValue(config.DefaultRatingSelectedImage)
         self.update_title()
 
