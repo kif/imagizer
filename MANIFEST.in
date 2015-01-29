@@ -1,0 +1,15 @@
+recursive-include pixmaps *.ico *.png
+recursive-include gui *.ui
+recursive-include imagizer-src *.py
+recursive-include pyexiftran *
+recursive-include screensaver *
+recursive-include scripts *
+
+include README.txt
+include selector.glade
+include README.txt
+include config.py
+include dirchooser.py
+include setup.py
+include imagizer.conf-unix
+include imagizer.conf-windows

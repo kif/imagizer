@@ -32,8 +32,19 @@ from distutils.core import setup
 from distutils.extension import Extension
 import os, sys, distutils.sysconfig, shutil, locale
 sys.path.insert(0, os.path.dirname(__file__))
-import imagizer
-version = imagizer.__version__
+
+def get_version():
+    """
+    return the version string
+    """
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "imagizer-src", "__init__.py")) as f:
+        for line in f:
+            if line.strip().startswith("__version__"):
+                return eval(line.split("=")[1])
+
+version = get_version()
+
 SCRIPTS = "scripts"
 
 #here we detect the OS runnng the program so that we can call exftran in the right way
@@ -78,6 +89,22 @@ for i in ConfFile:
 if len(sys.argv) == 1:
     sys.argv.append("install")
 
+binary_modules = []
+binary_modules.append({"name":'pyexiftran',
+                       "sources":sources,
+                       "define_macros":[],
+                       "include_dirs":[JPEG_DIR],
+                       "libraries":["jpeg", "exif", "m"]})
+binary_modules.append({"name":'down_sampler',
+                       "sources": ["src/down_sampler.c"],
+                       "extra_compile_args": ["-fopenmp"],
+                       "extra_link_args":["-fopenmp"]})
+binary_modules.append({"name":'_tree',
+                       "sources": ["src/_tree.c"],
+                       "extra_compile_args": [],
+                       "extra_link_args":[]})
+
+
 
 print execexiftran
 setup(name='Imagizer',
@@ -89,27 +116,20 @@ setup(name='Imagizer',
     license='GNU GPL v2',
     scripts=scripts,
     data_files=[
-        (installdir, ["selector.glade", execexiftran] +
-        [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
-        (os.path.split(ConfFile[0])[0], ['imagizer.conf'])
+        (installdir, ["selector.glade", execexiftran]),
+        (os.path.join(installdir, "gui"), glob.glob("gui/*.ui")),
+        (os.path.join(installdir, "pixmaps"), glob.glob("pixmaps/*.png") + glob.glob("pixmaps/*.ico")),
+        (os.path.split(ConfFile[0])[0], ['imagizer.conf']),
+        ("/usr/lib/xscreensaver", ["screensaver/imagizer", "screensaver/imagizer_qt"])
     ],
     packages=['imagizer'],
-    package_dir={'imagizer': 'imagizer'},
-#    package_data={'imagizer': [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
+    package_dir={'imagizer': 'imagizer-src'},
     ext_package="imagizer",
-    ext_modules=[
-         Extension(
-         name='pyexiftran',
-         sources=sources,
-         define_macros=[],
-         include_dirs=[JPEG_DIR],
-         libraries=["jpeg", "exif", "m"],
-         ),
-    ],
+    ext_modules=[Extension(**mode) for mode in binary_modules],
     classifiers=[
           'Development Status :: 5 - production',
           'Environment :: Graphic',
-          'Environment :: GTK',
+          'Environment :: Qt',
           'Intended Audience :: End Users/Desktop',
           'Intended Audience :: Photographs',
           'License :: OSI Approved :: GPL',

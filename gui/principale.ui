@@ -1,0 +1,1227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1095</width>
+    <height>833</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="handleWidth">
+       <number>4</number>
+      </property>
+      <widget class="QWidget" name="left_tab" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>350</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="logo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>logo</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="edit">
+              <property name="text">
+               <string>Éditer</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QPushButton" name="filter">
+              <property name="text">
+               <string>Filtrer</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="reload">
+              <property name="toolTip">
+               <string>Ctrl+R</string>
+              </property>
+              <property name="text">
+               <string>Recharger</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="trash">
+              <property name="toolTip">
+               <string>Ctrl+Suppr</string>
+              </property>
+              <property name="text">
+               <string>Poubelle</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Marque</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="make">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Modèle</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="model">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Résolution</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="resolution">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Taille</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="size">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Date/Heure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="time">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Focale</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="focal">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Ouverture</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="aperture">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Vitesse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QLineEdit" name="speed">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Flash</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QLineEdit" name="flash">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Iso</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QLineEdit" name="iso">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Correction</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLineEdit" name="bias">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Titre</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QLineEdit" name="title">
+            <property name="dragEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="selection">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::RightToLeft</enum>
+            </property>
+            <property name="text">
+             <string>Selectionner</string>
+            </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="rate">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>230</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>5</number>
+            </property>
+            <property name="pageStep">
+             <number>3</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBelow</enum>
+            </property>
+            <property name="tickInterval">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QFormLayout" name="formLayout_2">
+          <property name="margin">
+           <number>2</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="previous">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Ctrl+Haut</string>
+            </property>
+            <property name="text">
+             <string>Précédent</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Up</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="next">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Ctrl+Bas</string>
+            </property>
+            <property name="text">
+             <string>Suivant</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Down</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="left">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Ctrl+Gauche</string>
+            </property>
+            <property name="text">
+             <string>Rotation à gauche</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Left</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="right">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Ctrl+Droite</string>
+            </property>
+            <property name="text">
+             <string>Rotation à droite</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Right</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="ExtendedQLabel" name="photo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1095</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFichier">
+    <property name="title">
+     <string>Fichier</string>
+    </property>
+    <widget class="QMenu" name="menuEx_cuter">
+     <property name="title">
+      <string>Exécuter</string>
+     </property>
+     <addaction name="actionCopier_seulement"/>
+     <addaction name="actionCopier_et_graver"/>
+     <addaction name="actionCopier_et_redimensionner"/>
+     <addaction name="actionVers_page_web"/>
+    </widget>
+    <addaction name="actionName_day"/>
+    <addaction name="actionImporter_Image"/>
+    <addaction name="menuEx_cuter"/>
+    <addaction name="actionSynchroniser"/>
+    <addaction name="actionEmpty_selected"/>
+    <addaction name="separator"/>
+    <addaction name="actionTrash_Ctrl_Del"/>
+    <addaction name="separator"/>
+    <addaction name="actionSortir"/>
+    <addaction name="actionQuitter"/>
+   </widget>
+   <widget class="QMenu" name="menuPr_f_rences">
+    <property name="title">
+     <string>Préférences</string>
+    </property>
+    <widget class="QMenu" name="menuInterpolation">
+     <property name="title">
+      <string>Interpolation pour le redimensionnement</string>
+     </property>
+     <addaction name="actionNearest"/>
+     <addaction name="actionLinear"/>
+     <addaction name="actionLanczos"/>
+    </widget>
+    <widget class="QMenu" name="menuNombre_de_photos_par_page_web">
+     <property name="title">
+      <string>Nombre de photos par page web</string>
+     </property>
+     <addaction name="action9"/>
+     <addaction name="action12"/>
+     <addaction name="action16"/>
+     <addaction name="action20"/>
+     <addaction name="action25"/>
+     <addaction name="action30"/>
+    </widget>
+    <addaction name="actionMedia_size"/>
+    <addaction name="actionAutorotate"/>
+    <addaction name="actionSignature_filigrane_web"/>
+    <addaction name="menuNombre_de_photos_par_page_web"/>
+    <addaction name="menuInterpolation"/>
+    <addaction name="actionConfigurer_le_diaporama"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_pref"/>
+   </widget>
+   <widget class="QMenu" name="menuSelection">
+    <property name="title">
+     <string>Sélection</string>
+    </property>
+    <addaction name="actionCharger"/>
+    <addaction name="actionSauver"/>
+    <addaction name="separator"/>
+    <addaction name="selectionner"/>
+    <addaction name="actionInverser"/>
+    <addaction name="actionAucune"/>
+    <addaction name="actionToutes"/>
+    <addaction name="separator"/>
+    <addaction name="actionTaille_de_toute_la_selection"/>
+    <addaction name="actionCD_DVD_suivant"/>
+    <addaction name="actionCD_DVD_precedent"/>
+   </widget>
+   <widget class="QMenu" name="menuNavigation">
+    <property name="title">
+     <string>Navigation</string>
+    </property>
+    <widget class="QMenu" name="menuImage">
+     <property name="title">
+      <string>Image</string>
+     </property>
+     <addaction name="actionNav_img_first"/>
+     <addaction name="actionNav_img_previous10"/>
+     <addaction name="actionNav_img_previous"/>
+     <addaction name="actionNav_img_next"/>
+     <addaction name="actionNav_img_next10"/>
+     <addaction name="actionNav_img_last"/>
+    </widget>
+    <widget class="QMenu" name="menuJour">
+     <property name="title">
+      <string>Jour</string>
+     </property>
+     <addaction name="actionNav_day_first"/>
+     <addaction name="actionNav_day_previous"/>
+     <addaction name="actionNav_day_next"/>
+     <addaction name="actionNav_day_last"/>
+    </widget>
+    <widget class="QMenu" name="menuS_lectionn">
+     <property name="title">
+      <string>Sélectionné</string>
+     </property>
+     <addaction name="actionNav_sel_first"/>
+     <addaction name="actionNav_sel_previous"/>
+     <addaction name="actionNav_sel_next"/>
+     <addaction name="actionNav_sel_last"/>
+    </widget>
+    <widget class="QMenu" name="menuNon_s_lectionn">
+     <property name="title">
+      <string>Non sélectionné</string>
+     </property>
+     <addaction name="actionNav_unsel_first"/>
+     <addaction name="actionNav_unsel_previous"/>
+     <addaction name="actionNav_unsel_next"/>
+     <addaction name="actionNav_unsel_last"/>
+    </widget>
+    <widget class="QMenu" name="menuTitr">
+     <property name="title">
+      <string>Titré</string>
+     </property>
+     <addaction name="actionNav_title_first"/>
+     <addaction name="actionNav_title_previous"/>
+     <addaction name="actionNav_title_next"/>
+     <addaction name="actionNav_title_last"/>
+    </widget>
+    <widget class="QMenu" name="menuNon_titr">
+     <property name="title">
+      <string>Non titré</string>
+     </property>
+     <addaction name="actionNav_untitle_first"/>
+     <addaction name="actionNav_untitle_previous"/>
+     <addaction name="actionNav_untitle_next"/>
+     <addaction name="actionNav_untitle_last"/>
+    </widget>
+    <addaction name="menuImage"/>
+    <addaction name="menuJour"/>
+    <addaction name="separator"/>
+    <addaction name="menuS_lectionn"/>
+    <addaction name="menuNon_s_lectionn"/>
+    <addaction name="separator"/>
+    <addaction name="menuTitr"/>
+    <addaction name="menuNon_titr"/>
+    <addaction name="separator"/>
+    <addaction name="actionNav_tree"/>
+    <addaction name="actionRechercher"/>
+   </widget>
+   <widget class="QMenu" name="menuFiltre">
+    <property name="title">
+     <string>Filtre</string>
+    </property>
+    <addaction name="actionAuto_whitebalance"/>
+    <addaction name="actionContrast_mask"/>
+   </widget>
+   <widget class="QMenu" name="menuAide">
+    <property name="title">
+     <string>Aide</string>
+    </property>
+    <addaction name="actionA_propos"/>
+   </widget>
+   <widget class="QMenu" name="menuAffichage">
+    <property name="title">
+     <string>Affichage</string>
+    </property>
+    <widget class="QMenu" name="menuNote_minimale">
+     <property name="title">
+      <string>Note minimale</string>
+     </property>
+     <addaction name="action0"/>
+     <addaction name="action1"/>
+     <addaction name="action2"/>
+     <addaction name="action3"/>
+     <addaction name="action4"/>
+     <addaction name="action5"/>
+    </widget>
+    <addaction name="actionReload"/>
+    <addaction name="actionDiaporama"/>
+    <addaction name="actionPlein_cran"/>
+    <addaction name="menuNote_minimale"/>
+    <addaction name="separator"/>
+    <addaction name="actionRotation_left"/>
+    <addaction name="actionRotation_right"/>
+    <addaction name="separator"/>
+    <addaction name="actionHide_toolbar"/>
+   </widget>
+   <addaction name="menuFichier"/>
+   <addaction name="menuAffichage"/>
+   <addaction name="menuPr_f_rences"/>
+   <addaction name="menuSelection"/>
+   <addaction name="menuNavigation"/>
+   <addaction name="menuFiltre"/>
+   <addaction name="menuAide"/>
+  </widget>
+  <action name="action_Propos">
+   <property name="text">
+    <string>À Propos</string>
+   </property>
+  </action>
+  <action name="actionDiaporama">
+   <property name="text">
+    <string>Diaporama</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionA_propos">
+   <property name="text">
+    <string>A propos</string>
+   </property>
+  </action>
+  <action name="actionPlein_cran">
+   <property name="text">
+    <string>Plein écran</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionName_day">
+   <property name="text">
+    <string>Nommer la journée</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionImporter_Image">
+   <property name="text">
+    <string>Importer des images</string>
+   </property>
+  </action>
+  <action name="actionSynchroniser">
+   <property name="text">
+    <string>Synchroniser</string>
+   </property>
+  </action>
+  <action name="actionEmpty_selected">
+   <property name="text">
+    <string>Vider le tampon</string>
+   </property>
+  </action>
+  <action name="actionSortir">
+   <property name="text">
+    <string>Quitter sans sauver</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionQuitter">
+   <property name="text">
+    <string>Quitter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionCopier_seulement">
+   <property name="text">
+    <string>Copier seulement</string>
+   </property>
+  </action>
+  <action name="actionCopier_et_graver">
+   <property name="text">
+    <string>Copier et graver</string>
+   </property>
+  </action>
+  <action name="actionCopier_et_redimensionner">
+   <property name="text">
+    <string>Copier et redimensionner</string>
+   </property>
+  </action>
+  <action name="actionVers_page_web">
+   <property name="text">
+    <string>Vers page web</string>
+   </property>
+  </action>
+  <action name="actionSave_pref">
+   <property name="text">
+    <string>Sauver les préférences</string>
+   </property>
+  </action>
+  <action name="actionMedia_size">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Taille de CD/DVD</string>
+   </property>
+  </action>
+  <action name="actionAutorotate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Rotation automatique</string>
+   </property>
+  </action>
+  <action name="actionSignature_filigrane_web">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Signature / filigrane web</string>
+   </property>
+  </action>
+  <action name="actionNearest">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Rapide</string>
+   </property>
+   <property name="toolTip">
+    <string>Nearest</string>
+   </property>
+  </action>
+  <action name="actionLinear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Précis</string>
+   </property>
+   <property name="toolTip">
+    <string>linear</string>
+   </property>
+  </action>
+  <action name="action9">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>9</string>
+   </property>
+   <property name="iconText">
+    <string>9</string>
+   </property>
+   <property name="toolTip">
+    <string>3x3</string>
+   </property>
+  </action>
+  <action name="action12">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>12</string>
+   </property>
+   <property name="toolTip">
+    <string>4x3</string>
+   </property>
+  </action>
+  <action name="action16">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>16</string>
+   </property>
+   <property name="toolTip">
+    <string>4x4</string>
+   </property>
+  </action>
+  <action name="action20">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>20</string>
+   </property>
+   <property name="toolTip">
+    <string>4x5</string>
+   </property>
+  </action>
+  <action name="action25">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>25</string>
+   </property>
+   <property name="toolTip">
+    <string>5x5</string>
+   </property>
+  </action>
+  <action name="action30">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>30</string>
+   </property>
+   <property name="toolTip">
+    <string>6x5</string>
+   </property>
+  </action>
+  <action name="actionConfigurer_le_diaporama">
+   <property name="text">
+    <string>Configurer le diaporama</string>
+   </property>
+  </action>
+  <action name="actionCharger">
+   <property name="text">
+    <string>Charger</string>
+   </property>
+  </action>
+  <action name="actionSauver">
+   <property name="text">
+    <string>Sauver</string>
+   </property>
+  </action>
+  <action name="actionInverser">
+   <property name="text">
+    <string>Inverser</string>
+   </property>
+  </action>
+  <action name="actionAucune">
+   <property name="text">
+    <string>Aucune</string>
+   </property>
+  </action>
+  <action name="actionToutes">
+   <property name="text">
+    <string>Toutes</string>
+   </property>
+  </action>
+  <action name="actionTaille_de_toute_la_selection">
+   <property name="text">
+    <string>Taille de toute la sélection</string>
+   </property>
+  </action>
+  <action name="actionCD_DVD_suivant">
+   <property name="text">
+    <string>CD/DVD suivant</string>
+   </property>
+  </action>
+  <action name="actionCD_DVD_precedent">
+   <property name="text">
+    <string>CD/DVD précédent</string>
+   </property>
+  </action>
+  <action name="actionNav_img_first">
+   <property name="text">
+    <string>Début</string>
+   </property>
+   <property name="shortcut">
+    <string>Home</string>
+   </property>
+  </action>
+  <action name="actionNav_img_previous10">
+   <property name="text">
+    <string>Moins 10</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+PgUp</string>
+   </property>
+  </action>
+  <action name="actionNav_img_previous">
+   <property name="text">
+    <string>Précédent</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionNav_img_next">
+   <property name="text">
+    <string>Suivant</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionNav_img_next10">
+   <property name="text">
+    <string>Plus 10</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+PgDown</string>
+   </property>
+  </action>
+  <action name="actionNav_img_last">
+   <property name="text">
+    <string>Fin</string>
+   </property>
+   <property name="shortcut">
+    <string>End</string>
+   </property>
+  </action>
+  <action name="actionNav_day_first">
+   <property name="text">
+    <string>Début</string>
+   </property>
+  </action>
+  <action name="actionNav_day_previous">
+   <property name="text">
+    <string>Précédent</string>
+   </property>
+   <property name="shortcut">
+    <string>PgUp</string>
+   </property>
+  </action>
+  <action name="actionNav_day_next">
+   <property name="text">
+    <string>Suivant</string>
+   </property>
+   <property name="shortcut">
+    <string>PgDown</string>
+   </property>
+  </action>
+  <action name="actionNav_day_last">
+   <property name="text">
+    <string>Fin</string>
+   </property>
+  </action>
+  <action name="actionNav_sel_first">
+   <property name="text">
+    <string>Début</string>
+   </property>
+  </action>
+  <action name="actionNav_sel_previous">
+   <property name="text">
+    <string>Précédent</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Up</string>
+   </property>
+  </action>
+  <action name="actionNav_sel_next">
+   <property name="text">
+    <string>Suivant</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Down</string>
+   </property>
+  </action>
+  <action name="actionNav_sel_last">
+   <property name="text">
+    <string>Fin</string>
+   </property>
+  </action>
+  <action name="actionNav_unsel_first">
+   <property name="text">
+    <string>Début</string>
+   </property>
+  </action>
+  <action name="actionNav_unsel_previous">
+   <property name="text">
+    <string>Précédent</string>
+   </property>
+  </action>
+  <action name="actionNav_unsel_next">
+   <property name="text">
+    <string>Suivant</string>
+   </property>
+  </action>
+  <action name="actionNav_unsel_last">
+   <property name="text">
+    <string>Fin</string>
+   </property>
+  </action>
+  <action name="actionNav_title_first">
+   <property name="text">
+    <string>Début</string>
+   </property>
+  </action>
+  <action name="actionNav_title_previous">
+   <property name="text">
+    <string>Précédent</string>
+   </property>
+  </action>
+  <action name="actionNav_title_next">
+   <property name="text">
+    <string>Suivant</string>
+   </property>
+  </action>
+  <action name="actionNav_title_last">
+   <property name="text">
+    <string>Fin</string>
+   </property>
+  </action>
+  <action name="actionNav_untitle_first">
+   <property name="text">
+    <string>Début</string>
+   </property>
+  </action>
+  <action name="actionNav_untitle_previous">
+   <property name="text">
+    <string>Précédent</string>
+   </property>
+  </action>
+  <action name="actionNav_untitle_next">
+   <property name="text">
+    <string>Suivant</string>
+   </property>
+  </action>
+  <action name="actionNav_untitle_last">
+   <property name="text">
+    <string>Fin</string>
+   </property>
+  </action>
+  <action name="actionAuto_whitebalance">
+   <property name="text">
+    <string>Balance des blancs auto</string>
+   </property>
+  </action>
+  <action name="actionContrast_mask">
+   <property name="text">
+    <string>Masque de contraste</string>
+   </property>
+  </action>
+  <action name="actionTrash_Ctrl_Del">
+   <property name="text">
+    <string>Poubelle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Del</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="text">
+    <string>Recharger</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionRotation_left">
+   <property name="text">
+    <string>Rotation à gauche</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Left</string>
+   </property>
+  </action>
+  <action name="actionRotation_right">
+   <property name="text">
+    <string>Rotation à droite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Right</string>
+   </property>
+  </action>
+  <action name="selectionner">
+   <property name="text">
+    <string>(Dé)sélectionner</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionLanczos">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Très précis</string>
+   </property>
+   <property name="toolTip">
+    <string>Lanczos3</string>
+   </property>
+  </action>
+  <action name="action0">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="action2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2</string>
+   </property>
+  </action>
+  <action name="action3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3</string>
+   </property>
+  </action>
+  <action name="action4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>4</string>
+   </property>
+  </action>
+  <action name="action5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>5</string>
+   </property>
+  </action>
+  <action name="actionNav_tree">
+   <property name="text">
+    <string>Voir l'arborescence</string>
+   </property>
+  </action>
+  <action name="actionRechercher">
+   <property name="text">
+    <string>Rechercher</string>
+   </property>
+  </action>
+  <action name="actionHide_toolbar">
+   <property name="text">
+    <string>Cacher le menu</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ExtendedQLabel</class>
+   <extends>QLabel</extends>
+   <header>imagizer.qt</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

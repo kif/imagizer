@@ -1,0 +1,378 @@
+#!/usr/bin/python
+# coding: utf-8
+
+#Screensaver for imagizer
+
+from __future__ import division, print_function, with_statement
+__author__ = "Jérôme Kieffer"
+__date__ = "05/01/2015"
+__copyright__ = "Jerome Kieffer"
+__license__ = "GPLv3+"
+__contact__ = "Jerome.Kieffer@terre-adelie.org"
+
+import sys, os, gc, logging, time, glob, random
+from math                   import exp
+from argparse               import ArgumentParser
+from imagizer.gtk           import gtk, gdk, gtkFlush, gobject
+from imagizer.photo         import Photo
+from imagizer.config        import config
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("imagizer.screensaver")
+
+# try:
+#    from rfoo.utils import rconsole
+#    rconsole.spawn_server()
+# except ImportError:
+#    logger.debug("No socket opened for debugging -> please install rfoo")
+
+
+def resizeToFit(image, frame, aspect=True, enlarge=False):
+    """Resizes a rectangle to fit within another.
+
+    Parameters:
+    image -- A tuple of the original dimensions (width, height).
+    frame -- A tuple of the target dimensions (width, height).
+    aspect -- Maintain aspect ratio?
+    enlarge -- Allow image to be scaled up?
+
+    """
+    if aspect:
+        return scaleToFit(image, frame, enlarge)
+    else:
+        return stretchToFit(image, frame, enlarge)
+
+
+def scaleToFit(image, frame, enlarge=False):
+    image_width, image_height = image
+    frame_width, frame_height = frame
+    image_aspect = float(image_width) / image_height
+    frame_aspect = float(frame_width) / frame_height
+    # Determine maximum width/height (prevent up-scaling).
+    if not enlarge:
+        max_width = min(frame_width, image_width)
+        max_height = min(frame_height, image_height)
+    else:
+        max_width = frame_width
+        max_height = frame_height
+    # Frame is wider than image.
+    if frame_aspect > image_aspect:
+        height = max_height
+        width = int(height * image_aspect)
+    # Frame is taller than image.
+    else:
+        width = max_width
+        height = int(width / image_aspect)
+    return (width, height)
+
+
+def stretchToFit(image, frame, enlarge=False):
+    image_width, image_height = image
+    frame_width, frame_height = frame
+    # Stop image from being blown up.
+    if not enlarge:
+        width = min(frame_width, image_width)
+        height = min(frame_height, image_height)
+    else:
+        width = frame_width
+        height = frame_height
+    return (width, height)
+
+
+class ResizableImage(gtk.DrawingArea):
+
+    def __init__(self, aspect=True, enlarge=False,
+            interp=gdk.INTERP_BILINEAR, backcolor=(0, 0, 0), max=(1920, 1200)):
+        """Construct a ResizableImage control.
+
+        Parameters:
+        aspect -- Maintain aspect ratio?
+        enlarge -- Allow image to be scaled up?
+        interp -- Method of interpolation to be used.
+        backcolor -- Tuple (R, G, B) with values ranging from 0 to 1,
+            or None for transparent.
+        max -- Max dimensions for internal image (width, height).
+
+        """
+        super(ResizableImage, self).__init__()
+        self.pixbuf = None
+        self.aspect = aspect
+        self.enlarge = enlarge
+        self.interp = interp
+        self.backcolor = backcolor
+        self.max = max
+        self.connect('expose_event', self.expose)
+        self.connect('realize', self.on_realize)
+
+    def on_realize(self, widget):
+        if self.backcolor is None:
+            color = gdk.Color()
+        else:
+            color = gdk.Color(*self.backcolor)
+
+        self.window.set_background(color)
+
+    def expose(self, widget, event):
+        # Load Cairo drawing context.
+        self.context = self.window.cairo_create()
+        # Set a clip region.
+        self.context.rectangle(
+            event.area.x, event.area.y,
+            event.area.width, event.area.height)
+        self.context.clip()
+        # Render image.
+        self.draw(self.context)
+        return False
+
+    def draw(self, context):
+        # Get dimensions.
+        rect = self.get_allocation()
+        x, y = rect.x, rect.y
+        # Remove parent offset, if any.
+        parent = self.get_parent()
+        if parent:
+            offset = parent.get_allocation()
+            x -= offset.x
+            y -= offset.y
+        # Fill background color.
+        if self.backcolor:
+            context.rectangle(x, y, rect.width, rect.height)
+            context.set_source_rgb(*self.backcolor)
+            context.fill_preserve()
+        # Check if there is an image.
+        if not self.pixbuf:
+            return
+        width, height = resizeToFit(
+            (self.pixbuf.get_width(), self.pixbuf.get_height()),
+            (rect.width, rect.height),
+            self.aspect,
+            self.enlarge)
+        x = x + (rect.width - width) // 2
+        y = y + (rect.height - height) // 2
+        context.set_source_pixbuf(
+            self.pixbuf.scale_simple(width, height, self.interp), x, y)
+        context.paint()
+
+    def set_from_pixbuf(self, pixbuf):
+        width, height = pixbuf.get_width(), pixbuf.get_height()
+        # Limit size of internal pixbuf to increase speed.
+        if not self.max or (width < self.max[0] and height < self.max[1]):
+            self.pixbuf = pixbuf
+        else:
+            width, height = resizeToFit((width, height), self.max)
+            self.pixbuf = pixbuf.scale_simple(width, height, gdk.INTERP_BILINEAR)
+        self.invalidate()
+
+    def set_from_file(self, filename):
+        self.set_from_pixbuf(gdk.pixbuf_new_from_file(filename))
+
+    def invalidate(self):
+        self.queue_draw()
+
+
+class GsThemeWindow(gtk.Window):
+    __gtype_name__ = 'GsThemeWindow'
+
+    def __init__(self, wid):
+        super(GsThemeWindow, self).__init__()
+        self.wid = wid
+        self.connect("destroy", gtk.main_quit)
+
+    def do_realize(self):
+
+        if self.wid is not None:
+            self.window = gdk.window_foreign_new(self.wid)
+            self.window.set_events(gdk.EXPOSURE_MASK |
+                                   gdk.STRUCTURE_MASK)
+            x, y, w, h, depth = self.window.get_geometry()
+            self.size_allocate(gdk.Rectangle(x, y, w, h))
+            self.set_default_size(w, h)
+            self.set_decorated(False)
+        else:
+            self.window = gdk.Window(
+                self.get_parent_window(),
+                width=self.allocation.width,
+                height=self.allocation.height,
+                window_type=gdk.WINDOW_TOPLEVEL,
+                wclass=gdk.INPUT_OUTPUT,
+                event_mask=self.get_events() | gdk.EXPOSURE_MASK)
+        self.window.set_user_data(self)
+        self.style.attach(self.window)
+        self.set_flags(self.flags() | gtk.REALIZED)
+
+
+class ScreeenSaver(object):
+
+    def __init__(self):
+        self.window = None
+        self.image = None
+        self.args = None
+        self.current = None
+        self.all_jpg = []
+        self.random_list = []
+        self.filename = os.path.join(os.environ.get("HOME"), ".screensaver.imagizer")
+        self.timer = None
+        self.quit = False
+
+
+    def init_window(self):
+        """initialize the window, if needed"""
+        if self.window:
+            return
+        wid = None
+        for i in os.environ:
+            if "XSCREENSAVER" in i:
+                logger.debug("%s: %s" % (i, os.environ[i]))
+        if self.args.window_id:
+            try:
+                wid = int(self.args.window_id)
+            except ValueError:
+                wid = int(self.args.window_id, 16)
+        elif "XSCREENSAVER_WINDOW" in os.environ:
+            try:
+                wid = int(os.environ["XSCREENSAVER_WINDOW"])
+            except ValueError:
+                wid = int(os.environ["XSCREENSAVER_WINDOW"], 16)
+
+        if wid and not self.args.window:
+            self.window = GsThemeWindow(wid)
+
+        else:
+            self.window = gtk.Window()
+        self.window.fullscreen()
+        self.window.connect('key_press_event', self.on_keypressed)
+        self.window.connect('destroy', gtk.main_quit)
+        self.image = ResizableImage(True, True, gdk.INTERP_BILINEAR)
+        self.window.add(self.image)
+        self.window.show_all()
+
+        self.screen_size = self.window.get_size()
+
+    @staticmethod
+    def scan():
+        """
+        Scan the repository for all valid files
+        """
+        if config.DefaultRepository.endswith(os.sep):
+            l = len(config.DefaultRepository)
+        else:
+            l = len(config.DefaultRepository) + 1
+        all_jpg = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "*", "*.jpg"))]
+        logger.debug("Scanned directory %s and found %i images" % (config.DefaultRepository, len(all_jpg)))
+        return all_jpg
+
+    def parse(self):
+        """
+        Parse command line argument: old style single "-"
+        """
+
+        parser = ArgumentParser(description='Imagizer screen-saver')
+        parser.add_argument('-display', dest='display', help='host:display.screen')
+        parser.add_argument('-window', dest='window', help="Draw on a newly-created window.  This is the default.", action="store_true", default=False)
+        parser.add_argument('-root', dest='root', action="store_true", default=False, help="Draw on the root window.")
+        parser.add_argument('-delay', dest="delay", default=20, type=int, help="Per-frame  delay,  in  seconds.  Default: 20 seconds.")
+        parser.add_argument("-window-id", dest="window_id", help="Identifier of the window to display.")
+        parser.add_argument("-landscape", dest="landscape", action="store_true", default=False, help="Restrict slideshow to landscape images")
+        parser.add_argument("-verbose", dest="debug", action="store_true", default=False, help="print debugging informations")
+        self.args = parser.parse_args()
+        if self.args.debug:
+            logger.setLevel(logging.DEBUG)
+        logger.debug("args: %s" % self.args)
+
+    def show(self):
+        """Show the image in the given GtkImage widget and set up the exif tags in the GUI"""
+        if not self.current:
+            return
+        logger.debug("Showing image %s" % self.current)
+        self.image.set_from_file(os.path.join(config.DefaultRepository, self.current))
+
+    def next(self):
+        """
+        Finds the next image to display
+        """
+        if not self.all_jpg:
+            self.all_jpg = self.scan()
+        found = False
+        while not found:
+            if not self.random_list:
+                self.random_list = range(len(self.all_jpg))
+                random.shuffle(self.random_list)
+            index = self.random_list.pop()
+            photo = Photo(self.all_jpg[index], True)
+            data = photo.readExif()
+            rate = data.get("rate", 0)
+            # 0 for x=5, 0.5 for x=3 and 0.99 for x=0
+            treshold = -0.01733333 * rate * rate + -0.11133333 * rate + 0.99
+            found = (random.random() >= treshold)
+            if found and self.args.landscape:
+                found = found and (photo.pixelsX > photo.pixelsY)
+        return self.all_jpg[index]
+
+    def __repr__(self):
+        return "screensaver instance"
+
+    def save(self):
+        """
+        saves the current image path for next restart
+        """
+        logger.debug("Saving filename")
+        with open(self.filename, "w") as f:
+            f.write(self.current)
+
+    def load(self):
+        """
+        Load the last image from a file
+        """
+        if os.path.isfile(self.filename):
+            current = open(self.filename, "r").read()
+            current = current.strip()
+            if current.startswith(os.sep):
+                current2 = current
+            else:
+                current2 = os.path.join(config.DefaultRepository, current)
+            if os.path.exists(current2):
+                self.current = current
+
+    def on_keypressed(self, widget, event, *args):
+        """keylogger"""
+        key = gdk.keyval_name(event.keyval)
+        if key in ["Escape", "Q"]:
+            self.quit = True
+            self.destroy()
+
+    def on_tick(self):
+        """
+        Skip to another picture.
+
+        """
+        self.current = self.next()
+        self.save()
+        self.show()
+        return not self.quit
+
+    def start(self):
+        """
+        Actually start the slideshow
+        """
+        if not self.args:
+            self.parse()
+        if not self.timer:
+            if self.args.debug:
+                delay = int(self.args.delay * 100)
+            else:
+                delay = int(self.args.delay * 1000)
+            self.timer = gobject.timeout_add(delay, self.on_tick)
+        else:
+            logger.warning("timer already started")
+
+    def destroy(self):
+        gtk.main_quit()
+
+
+if __name__ == "__main__":
+    scs = ScreeenSaver()
+    scs.parse()
+    scs.load()
+    scs.init_window()
+    scs.show()
+    scs.start()
+    gtk.main()

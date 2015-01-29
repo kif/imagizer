@@ -1,0 +1,120 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import with_statement, division, print_function, absolute_import
+"""
+
+Bootstrap helps you to test dahu scripts without installing them
+by patching your PYTONPATH on the fly
+
+example: ./bootstrap.py  dahu_server gpu1
+
+"""
+
+__authors__ = ["Frédéric-Emmanuel Picca", "Jérôme Kieffer"]
+__contact__ = "jerome.kieffer@esrf.eu"
+__license__ = "GPLv3+"
+__date__ = "2014-06-11"
+
+import sys
+import os
+import shutil
+import distutils.util
+import subprocess
+
+def _copy(infile, outfile):
+    "link or copy file according to the OS. Nota those are HARD_LINKS"
+    if "link" in dir(os):
+        os.link(infile, outfile)
+    else:
+        shutil.copy(infile, outfile)
+
+def _distutils_dir_name(dname="lib"):
+    """
+    Returns the name of a distutils build directory
+    """
+    platform = distutils.util.get_platform()
+    architecture = "%s.%s-%i.%i" % (dname, platform,
+                                    sys.version_info[0], sys.version_info[1])
+    return architecture
+
+
+def _distutils_scripts_name():
+    """Return the name of the distrutils scripts sirectory"""
+    f = "scripts-{version[0]}.{version[1]}"
+    return f.format(version=sys.version_info)
+
+
+def _get_available_scripts(path):
+    res = []
+    try:
+        res = " ".join([s.rstrip('.py') for s in os.listdir(path)])
+    except OSError:
+        res = ["no script available, did you ran "
+               "'python setup.py build' before bootstrapping ?"]
+    return res
+
+def _copy_files(source, dest, extn):
+    """
+    copy all files with a given extension from source to destination
+    """
+    if not os.path.isdir(dest):
+        os.makedirs(dest)
+    full_src = os.path.join(os.path.dirname(__file__), source)
+    for clf in os.listdir(full_src):
+        if clf.endswith(extn):
+            srcf =os.path.join(full_src, clf)
+            dstf = os.path.join(dest, clf)
+            if clf not in os.listdir(dest) or os.stat(srcf).st_mtime > os.stat(dstf).st_mtime:
+                if os.path.exists(dstf):
+                    os.unlink(dstf)
+                _copy(srcf, dstf)
+
+home = os.path.dirname(os.path.abspath(__file__))
+SCRIPTSPATH = os.path.join(home,
+                           'build', _distutils_scripts_name())
+LIBPATH = (os.path.join(home,
+                       'build', _distutils_dir_name('lib')))
+
+if (not os.path.isdir(SCRIPTSPATH)) or (not os.path.isdir(LIBPATH)):
+    build = subprocess.Popen([sys.executable, "setup.py", "build"],
+                     shell=False, cwd=os.path.dirname(__file__))
+    print("Build process ended with rc= %s" % build.wait())
+
+# _copy_files("openCL", os.path.join(LIBPATH, "dahu"), ".cl")
+_copy_files("gui", os.path.join(LIBPATH, "imagizer", "gui"), ".ui")
+_copy_files("pixmaps", os.path.join(LIBPATH, "imagizer", "pixmaps"), ".png")
+#_copy_files("plugins", os.path.join(LIBPATH, "dahu", "plugins"), ".py")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("usage: ./bootstrap.py <script>\n")
+        print("Available scripts : %s\n" %
+              _get_available_scripts(SCRIPTSPATH))
+        sys.exit(1)
+    os.system("cd %s;python setup.py build; cd -" % home)
+    print("Executing %s from source checkout" % (sys.argv[1]))
+
+    sys.path.insert(0, LIBPATH)
+    print("01. Patched sys.path with %s" % LIBPATH)
+
+    sys.path.insert(0, SCRIPTSPATH)
+    print("02. Patched sys.path with %s" % SCRIPTSPATH)
+
+    script = sys.argv[1]
+    sys.argv = sys.argv[1:]
+    print("03. patch the sys.argv : ", sys.argv)
+
+    print("04. Executing %s.main()" % (script,))
+    fullpath = os.path.join(SCRIPTSPATH, script)
+    if os.path.exists(fullpath):
+        execfile(fullpath)
+    else:
+        if os.path.exists(script):
+            execfile(script)
+        else:
+            for dirname in os.environ.get("PATH", "").split(os.pathsep):
+                fullpath = os.path.join(dirname, script)
+                if os.path.exists(fullpath):
+                    execfile(fullpath)
+                    break
+
