@@ -447,7 +447,7 @@ class ModelRangeTout(object):
                 myPhoto.autorotate()
             AllreadyDone.append(new_fname)
             NewFiles.append(new_fname)
-        AllreadyDone.sort()
+        AllreadyDone.sort(key=lambda x:x[:-4])
         self.finishSignal.emit()
 
         if len(NewFiles) > 0:
