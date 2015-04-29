@@ -616,7 +616,7 @@ class Interface(object):
         newname = base + "-Gimp" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
-            self.AllJpegs.sort()
+            self.AllJpegs.sort(key=lambda x:x[:-4])
         self.idx_current = self.AllJpegs.index(newname)
         self.fn_current = newname
         newnamefull = os.path.join(config.DefaultRepository, newname)
@@ -656,7 +656,7 @@ class Interface(object):
         newname = base + "-ContrastMask" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
-            self.AllJpegs.sort()
+            self.AllJpegs.sort(key=lambda x:x[:-4])
         self.image = self.image.contrastMask(newname)
         self.show_image(self.AllJpegs.index(newname))
 
@@ -669,7 +669,7 @@ class Interface(object):
         newname = base + "-AutoWB" + ext
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
-            self.AllJpegs.sort()
+            self.AllJpegs.sort(key=lambda x:x[:-4])
         self.image = self.image.autoWB(newname)
         self.show_image(self.AllJpegs.index(newname))
 
@@ -969,10 +969,10 @@ class Interface(object):
                 raw.extractJPEG()
                 listNew.append(raw.getJpegPath())
         if len(listNew) > 0:
-            listNew.sort()
+            listNew.sort(key=lambda x:x[:-4])
             first = listNew[0]
             self.AllJpegs += listNew
-            self.AllJpegs.sort()
+            self.AllJpegs.sort(key=lambda x:x[:-4])
             self.idx_current = self.AllJpegs.index(first)
             self.show_image()
 

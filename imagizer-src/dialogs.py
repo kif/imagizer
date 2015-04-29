@@ -251,11 +251,13 @@ def synchronize_dialog(current, AllPhotos, selected):
         else:
             stdout = stderr = None
         p = subprocess.Popen(["rsync", "-v", "--files-from=" + synchrofile, config.DefaultRepository + "/", config.SynchronizeRep ],
-                     bufsize=4096, stdout=stdout, stderr=stderr)
+                             bufsize=4096, stdout=stdout, stderr=stderr)
 #        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, config.DefaultRepository, config.SynchronizeRep))
         if logger.getEffectiveLevel() <= logging.INFO:
-            while p.returncode is None:
-                logger.info(p.stdout.readline())
+            line = p.stdout.readline() 
+            while p.returncode is None or line:
+                logger.info(line)
+        logger.info("Rsync finished with returncode %s"%(p.wait()))
 
 
 def slideshow_dialog():

@@ -195,7 +195,13 @@ class Config(object):
             elif j == "Burn".lower():               self.Burn = i[1]
             elif j == "WebServer".lower():          self.WebServer = i[1]
             elif j == "WebRepository".lower():      self.WebRepository = i[1]
-            elif j == "Locale".lower():             self.Locale = i[1]
+            elif j == "Locale".lower():
+                self.Locale = i[1]
+                try:
+                    locale.setlocale(locale.LC_ALL, self.Locale)
+                except locale.Error:
+                    self.Locale, _ = locale.getdefaultlocale()
+                    logger.warning("Unsupported locale %s, reverting to %s" % (i[1], self.Locale))
             elif j == "Coding".lower():             self.Coding = i[1]
             elif j == "ExportSingleDir".lower():    self.ExportSingleDir = configparser.getboolean("Selector", "ExportSingleDir")
             elif j == "WebPageAnchor".lower():      self.WebPageAnchor = i[1]
