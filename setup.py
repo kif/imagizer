@@ -50,7 +50,8 @@ SCRIPTS = "scripts"
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 EXIFTRAN = "pyexiftran"
-JPEG_VERSION = "80"  # "62"
+#JPEG_VERSION = "80"  # "62"
+JPEG_VERSION = "62"
 JPEG_DIR = os.path.join(EXIFTRAN, "jpeg", JPEG_VERSION)
 
 sources = glob.glob(os.path.join(EXIFTRAN, "*.c")) + glob.glob(os.path.join(JPEG_DIR, "*.c"))
@@ -140,29 +141,15 @@ setup(name='Imagizer',
 os.remove("imagizer.conf")
 
 if not configured:
-    from imagizer import config
-    #config = config.Config()
+    sys.path.insert(0,"imagizer-src")
+    from config import config
     config.load(ConfFile)
-#    textinterface = True
-#    try:
-#        import pygtk ; pygtk.require('2.0')
-#        import gtk, gtk.glade
-        #textinterface = False
-#    except ImportError:
-
-#        textinterface = True
-#    if textinterface:
     while True:
         print "Enter le chemin du repertoire racine du serveur WEB :"
         config.WebRepository = raw_input("[%s] :" % config.WebRepository)
-        if os.path.isdir(config.WebRepository):
+        if(os.path.isdir(config.WebRepository)):
             break
         print "No Such Directory"
-#    else:
-#        from dirchooser import WarningSc
-#        W = WarningSc(config.WebRepository, window="WWW-root")
-#        config.WebRepository = W.directory
-#        del W
     config.Locale, config.Coding = locale.getdefaultlocale()
     LANG = os.getenv("LANG")
     if LANG:
@@ -180,9 +167,4 @@ if not configured:
         import Image, ImageStat, ImageChops, ImageFile
     except ImportError:
         raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/\ninstall it by # aptitude install python-imaging")
-    try:
-        import pygtk ; pygtk.require('2.0')
-        import gtk, gtk.glade
-    except ImportError:
-        raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/\nPLease install it with # aptitude install python-glade2")
 
