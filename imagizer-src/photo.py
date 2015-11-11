@@ -27,7 +27,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20140104"
+__date__ = "11/11/2015"
 __license__ = "GPL"
 
 from math import ceil
@@ -78,6 +78,7 @@ class Photo(object):
         @param filename: Name of the image file, starting from the repository root
         """
         self.filename = filename
+        self.is_raw = os.path.splitext(filename)[-1].lower() in config.RawExtensions
         self.fn = op.join(config.DefaultRepository, self.filename)
         if not op.isfile(self.fn):
             logger.error("No such photo %s" % self.fn)
@@ -86,10 +87,10 @@ class Photo(object):
         self._pixelsY = None
         self._pil = None
         self._exif = None
-        self._pixbuf = None
+#         self._pixbuf = None
         self.scaledPixbuffer = None
         self.orientation = 1
-        if imageCache: 
+        if imageCache:
             if filename in imageCache:
                 logger.debug("Image %s found in Cache", filename)
                 fromCache = imageCache[filename]
@@ -302,7 +303,7 @@ class Photo(object):
         self.removeFromCache()
 
 
-    def readExif(self):
+    def read_exif(self):
         """
         return exif data + title from the photo
         """
@@ -358,27 +359,36 @@ class Photo(object):
                 except (IndexError, KeyError):
                     self.metadata[name] = u""
         return self.metadata.copy()
+    readExif = read_exif
 
     def has_title(self):
         """
         return true if the image is entitled
         """
-        if self.metadata == None:
-            self.readExif()
+        if self.metadata is None:
+            self.self.read_exif()()
         if  self.metadata["title"]:
             return True
         else:
             return False
 
-#    @property
-#    def pixbuf(self):
-#        if self._pixbuf is None:
-#            self._pixbuf = QtGui.QPixmap(self.fn)
-#            if self._pixbuf.isNull():
-#                err = "Unable to open file %s" % self.fn
-#                logger.error(err)
-#                raise RuntimeError(err)
-#        return self._pixbuf
+    def load_pixbuf(self):
+        """
+        Load the image using QPixmap, either directly or from preview for RAW.
+
+        @return: QPixmap
+        """
+        if self.is_raw:
+            if self.metadata is None:
+                self.read_exif()
+            largest = self._exif.previews[-1]
+            pixbuf = QtGui.QPixmap(*largest.dimensions)
+            if not pixbuf.loadFromData(largest.data):
+                logger.warning("Unable to load raw preview (size: %s): %s" %
+                               (largest.dimensions, self.fn))
+        else:
+            pixbuf = QtGui.QPixmap(self.fn)
+        return pixbuf
 
 
     def get_pixbuf(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
@@ -399,7 +409,8 @@ class Photo(object):
             config.ImageHeight = Ysize
 
 #        Prepare the big image to be put in cache
-        Rbig = min(float(config.ImageWidth) / self.pixelsX, float(config.ImageHeight) / self.pixelsY)
+        Rbig = min(float(config.ImageWidth) / self.pixelsX,
+                   float(config.ImageHeight) / self.pixelsY)
         if Rbig < 1:
             nxBig = int(round(Rbig * self.pixelsX))
             nyBig = int(round(Rbig * self.pixelsY))
@@ -515,7 +526,7 @@ class Photo(object):
         """does autorotate the image according to the EXIF tag"""
         if os.name == 'nt' and self.pil is not None:
             del self.pil
-        self.readExif()
+        self.read_exif()
         if self.orientation != 1:
             pyexiftran.autorotate(self.fn)
             if self.orientation > 4:
