@@ -28,7 +28,7 @@ Module containing most classes for handling files
 """
 
 __author__ = "Jérôme Kieffer"
-__date__ = "14/12/2014"
+__date__ = "21/11/2015"
 __licence__ = "GPLv2"
 __contact__ = "imagizer@terre-adelie.org"
 
@@ -133,7 +133,7 @@ def list_files_in_named_dir(root, dirname, filename):
     @param root:name of the root of the repository, a string
     @param dirname: name of the directory, a string
     @param filename: name of the file, a string
-    @return: None is so such file exists or the list of filenames
+    @return: [] if no such file exists or the list of filenames
     """
     ret = []
     if os.path.isdir(root):

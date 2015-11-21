@@ -367,13 +367,13 @@ class ModelRangeTout(object):
         """
         config.DefaultRepository = rootDir
         trashDir = os.path.join(rootDir, config.TrashDirectory)
-        AllJpegs = fileutils.findFiles(rootDir)
-        AllFilesToProcess = []
-        AllreadyDone = []
-        NewFiles = []
+        all_files = fileutils.findFiles(rootDir, config.Extensions+config.RawExtensions)
+        files_to_process = []
+        processed_files = []
+        new_files = []
         uid = os.getuid()
         gid = os.getgid()
-        for i in AllJpegs:
+        for i in all_files:
             if i.find(config.TrashDirectory) == 0: continue
             if i.find(config.SelectedDirectory) == 0: continue
             try:
@@ -381,34 +381,38 @@ class ModelRangeTout(object):
                 m = int(i[5:7])
                 j = int(i[8:10])
                 if (a >= 0000) and (m <= 12) and (j <= 31) and (i[4] in ["-", "_", "."]) and (i[7] in ["-", "_"]):
-                    AllreadyDone.append(i)
+                    processed_files.append(i)
                 else:
-                    AllFilesToProcess.append(i)
+                    files_to_process.append(i)
             except ValueError:
-                AllFilesToProcess.append(i)
-        AllFilesToProcess.sort()
-        NumFiles = len(AllFilesToProcess)
+                files_to_process.append(i)
+        files_to_process.sort()
+        NumFiles = len(files_to_process)
         self.startSignal.emit(self.__label, NumFiles)
-        for idx, fname in enumerate(AllFilesToProcess):
+        for idx, fname in enumerate(files_to_process):
             self.refreshSignal.emit(idx, fname)
-            myPhoto = Photo(fname, dontCache=True)
-            data = myPhoto.readExif()
+            photo = Photo(fname, dontCache=True)
+            data = photo.readExif()
             try:
                 datei, heurei = data["time"].split()
                 date = re.sub(":", "-", unicode2ascii(datei))
                 heurej = re.sub(":", "h", heurei, 1)
                 model = data["model"].split(",")[-1]
-                heure = unicode2ascii("%s-%s.jpg" % (re.sub(":", "m", heurej, 1), re.sub("/", "", re.sub(" ", "_", model))))
+                heure = unicode2ascii("%s-%s" % (re.sub(":", "m", heurej, 1),
+                                                 re.sub("/", "", re.sub(" ", "_", model))))
             except ValueError:
                 date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(rootDir, fname))))
-                heure = unicode2ascii("%s-%s.jpg" % (time.strftime("%Hh%Mm%S", time.gmtime(os.path.getctime(os.path.join(rootDir, fname)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
+                heure = unicode2ascii("%s-%s" % (time.strftime("%Hh%Mm%S",
+                                                                   time.gmtime(os.path.getctime(os.path.join(rootDir, fname)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
             if not (os.path.isdir(os.path.join(rootDir, date))) :
                 fileutils.mkdir(os.path.join(rootDir, date))
-            new_fname = os.path.join(date, heure)
+            heure_we = heure + photo.ext  # Hours with extension
+
             bSkipFile = False
-            for strImageFile in fileutils.list_files_in_named_dir(rootDir, date, heure)+fileutils.list_files_in_named_dir(trashDir, date, heure):
-                logger.debug("%s <-?-> %s", fname, strImageFile)
-                existing = Photo(strImageFile, dontCache=True)
+            for existingfn in fileutils.list_files_in_named_dir(rootDir, date, heure_we) + \
+                              fileutils.list_files_in_named_dir(trashDir, date, heure_we):
+                logger.debug("%s <-?-> %s", fname, existingfn)
+                existing = Photo(existingfn, dontCache=True)
                 try:
                     existing.readExif()
                     originalName = existing.exif["Exif.Photo.UserComment"]
@@ -419,42 +423,43 @@ class ModelRangeTout(object):
                         originalName = originalName.human_value
                     if os.path.basename(originalName) == os.path.basename(fname):
                         logger.debug("File already in repository, leaving as it is")
-                        bSkipFile = strImageFile
+                        bSkipFile = existingfn
                         break
             if bSkipFile:
                 logger.warning("%s -x-> %s", fname, bSkipFile)
                 continue
-            else:
-                strImageFile = os.path.join(rootDir, date, heure)
-            if os.path.isfile(strImageFile):
+            full_path = os.path.join(rootDir, date, heure_we)
+            if os.path.isfile(full_path):
                 s = 0
                 for j in os.listdir(os.path.join(rootDir, date)):
-                    if j.find(heure[:-4]) == 0:
+                    if j.find(heure) == 0:
                         s += 1
-                new_fname = os.path.join(date, heure[:-4] + "-%s.jpg" % s)
-                strImageFile = os.path.join(rootDir, new_fname)
-            shutil.move(os.path.join(rootDir, fname), strImageFile)
+                heure += "-%s" % s
+                heure_we = heure + photo.ext  # Hours with extension
+            new_fname = os.path.join(date, heure_we)
+            full_path = os.path.join(rootDir, new_fname)
+            shutil.move(os.path.join(rootDir, fname), full_path)
             try:
-                os.chown(strImageFile, uid, gid)
-                os.chmod(strImageFile, config.DefaultFileMode)
+                os.chown(full_path, uid, gid)
+                os.chmod(full_path, config.DefaultFileMode)
             except OSError:
-                logger.warning("in ModelRangeTout: unable to chown ot chmod  %s" , strImageFile)
-            myPhoto = Photo(strImageFile)
+                logger.warning("in ModelRangeTout: unable to chown or chmod  %s" , full_path)
+            photo = Photo(full_path)
 #            Save the old image name in exif tag
-            myPhoto.storeOriginalName(fname)
+            photo.storeOriginalName(fname)
 
             if config.AutoRotate:
-                myPhoto.autorotate()
-            AllreadyDone.append(new_fname)
-            NewFiles.append(new_fname)
-        AllreadyDone.sort(key=lambda x:x[:-4])
+                photo.autorotate()
+            processed_files.append(new_fname)
+            new_files.append(new_fname)
+        processed_files.sort(key=lambda x:x[:-4])
         self.finishSignal.emit()
 
-        if len(NewFiles) > 0:
-            FirstImage = min(NewFiles)
-            return AllreadyDone, AllreadyDone.index(FirstImage)
+        if len(new_files) > 0:
+            first = min(new_files)
+            return processed_files, processed_files.index(first)
         else:
-            return AllreadyDone, 0
+            return processed_files, 0
 
 
 class Controler(object):

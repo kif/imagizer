@@ -27,7 +27,7 @@ Module containing a class for displaying videos with mplayer in gtk windows
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20111016"
+__date__ = "20150301"
 __license__ = "GPL"
 
 
@@ -39,8 +39,9 @@ import tempfile
 import subprocess
 import logging
 import imagizer
+from .config import config
 logger = logging.getLogger("imagizer")
-config = imagizer.Config()
+
 
 class PyGtkMplayer(gtk.Socket):
     """

@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import with_statement, division, print_function, absolute_import
+
 """
 
-Bootstrap helps you to test dahu scripts without installing them
-by patching your PYTONPATH on the fly
+Bootstrap helps you to test pyFAI scripts without installing them
+by patching your PYTHONPATH on the fly
 
-example: ./bootstrap.py  dahu_server gpu1
+example: ./bootstrap.py pyFAI-integrate test/testimages/Pilatus1M.edf
 
 """
 
 __authors__ = ["Frédéric-Emmanuel Picca", "Jérôme Kieffer"]
 __contact__ = "jerome.kieffer@esrf.eu"
 __license__ = "GPLv3+"
-__date__ = "2014-06-11"
+__date__ = "21/11/2015"
+
 
 import sys
 import os
@@ -21,12 +22,16 @@ import shutil
 import distutils.util
 import subprocess
 
+
+TARGET = "imagizer"
+
 def _copy(infile, outfile):
     "link or copy file according to the OS. Nota those are HARD_LINKS"
     if "link" in dir(os):
         os.link(infile, outfile)
     else:
         shutil.copy(infile, outfile)
+
 
 def _distutils_dir_name(dname="lib"):
     """
@@ -53,6 +58,7 @@ def _get_available_scripts(path):
                "'python setup.py build' before bootstrapping ?"]
     return res
 
+
 def _copy_files(source, dest, extn):
     """
     copy all files with a given extension from source to destination
@@ -61,13 +67,19 @@ def _copy_files(source, dest, extn):
         os.makedirs(dest)
     full_src = os.path.join(os.path.dirname(__file__), source)
     for clf in os.listdir(full_src):
-        if clf.endswith(extn):
-            srcf =os.path.join(full_src, clf)
-            dstf = os.path.join(dest, clf)
-            if clf not in os.listdir(dest) or os.stat(srcf).st_mtime > os.stat(dstf).st_mtime:
-                if os.path.exists(dstf):
-                    os.unlink(dstf)
-                _copy(srcf, dstf)
+        if clf.endswith(extn) and clf not in os.listdir(dest):
+            _copy(os.path.join(full_src, clf), os.path.join(dest, clf))
+
+
+def runfile(fname):
+    try:
+        execfile(fname)
+    except SyntaxError:
+        env = os.environ.copy()
+        env.update({"PYTHONPATH": LIBPATH + os.pathsep + os.environ.get("PYTHONPATH", ""),
+                    "PATH": SCRIPTSPATH + os.pathsep + os.environ.get("PATH", "")})
+        run = subprocess.Popen(sys.argv, shell=False, env=env)
+        run.wait()
 
 home = os.path.dirname(os.path.abspath(__file__))
 SCRIPTSPATH = os.path.join(home,
@@ -79,11 +91,9 @@ if (not os.path.isdir(SCRIPTSPATH)) or (not os.path.isdir(LIBPATH)):
     build = subprocess.Popen([sys.executable, "setup.py", "build"],
                      shell=False, cwd=os.path.dirname(__file__))
     print("Build process ended with rc= %s" % build.wait())
-
-# _copy_files("openCL", os.path.join(LIBPATH, "dahu"), ".cl")
-_copy_files("gui", os.path.join(LIBPATH, "imagizer", "gui"), ".ui")
-_copy_files("pixmaps", os.path.join(LIBPATH, "imagizer", "pixmaps"), ".png")
-#_copy_files("plugins", os.path.join(LIBPATH, "dahu", "plugins"), ".py")
+# _copy_files("openCL", os.path.join(LIBPATH, TARGET, "openCL"), ".cl")
+_copy_files("gui", os.path.join(LIBPATH, TARGET, "gui"), ".ui")
+# _copy_files("calibration", os.path.join(LIBPATH, TARGET, "calibration"), ".D")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -107,14 +117,14 @@ if __name__ == "__main__":
     print("04. Executing %s.main()" % (script,))
     fullpath = os.path.join(SCRIPTSPATH, script)
     if os.path.exists(fullpath):
-        execfile(fullpath)
+        runfile(fullpath)
     else:
         if os.path.exists(script):
-            execfile(script)
+            runfile(script)
         else:
             for dirname in os.environ.get("PATH", "").split(os.pathsep):
                 fullpath = os.path.join(dirname, script)
                 if os.path.exists(fullpath):
-                    execfile(fullpath)
+                    runfile(fullpath)
                     break
 
