@@ -249,12 +249,9 @@ class Photo(object):
                 os.unlink(tmp + prev.extension)
 
             rescaled = self.__class__(dest, dontCache=True)
-            print(rescaled.orientation)
             self.exif.copy(rescaled.exif)
             rescaled.exif.write()
-            print(rescaled.orientation)
             rescaled.autorotate()
-            print(rescaled.orientation)
             return rescaled
 
 

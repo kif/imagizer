@@ -113,6 +113,7 @@ class Config(object):
             self.ImageHeight = None
             self.DEBUG = None
             self.Gimp = "gimp"
+            self.Rawtherapee = "rawtherapee"
             self.Dcraw = "dcraw -w -c"
             self.DefaultRatingSelectedImage = 3
             self.SelectedFilter = "ContrastMask"

@@ -38,6 +38,8 @@ import os
 import shutil
 import logging
 import random
+import subprocess
+import threading
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copySelected, processSelected, timer_pass
 from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel
@@ -62,6 +64,8 @@ class Interface(object):
         self.idx_current = first
         self.left_tab_width = 350
         self.image = None
+        self.processes = []
+        self.job_sem = threading.Semaphore()
 #        self.current_title = ""
 #        self.current_rate = 0
         self.fn_current = None
@@ -101,6 +105,7 @@ class Interface(object):
         self.show_image()
         flush()
         self._menu_filtrer()
+        self._menu_editer()
         flush()
         self.navigation_dict = {
          # #Image
@@ -142,7 +147,7 @@ class Interface(object):
                     self.gui.left.clicked: self.turn_left,
                     self.gui.selection.stateChanged: self.select,
                     self.gui.trash.clicked: self.trash,
-                    self.gui.edit.clicked:self.gimp,
+                    self.gui.edit.clicked:self.edit_im,
                     self.gui.reload.clicked:self.reload_img,
                     self.gui.filter.clicked:self.filter_im,
 
@@ -203,20 +208,19 @@ class Interface(object):
 
     def _menu_editer(self):
         # Drop-down filter menu
-        self.filter_menu = QtGui.QMenu("Filtrer")
+        self.edit_menu = QtGui.QMenu("Editer")
 
-        icon_contrast = QtGui.QIcon()
-        icon_contrast.addPixmap(QtGui.QPixmap(get_pixmap_file("contrast")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        action_contrast = QtGui.QAction(icon_contrast, "Masque de contrast", self.gui.filter)
-        self.filter_menu.addAction(action_contrast)
-        icon_colors = QtGui.QIcon()
-        icon_colors.addPixmap(QtGui.QPixmap(get_pixmap_file("colors")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        action_color = QtGui.QAction(icon_colors, "Balance des blancs auto", self.gui.filter)
-        self.filter_menu.addAction(action_color)
-        self.gui.filter.setMenu(self.filter_menu)
-        action_color.triggered.connect(self.filter_AutoWB)
-        action_contrast.triggered.connect(self.filter_ContrastMask)
-
+        icon_gimp = QtGui.QIcon()
+        icon_gimp.addPixmap(QtGui.QPixmap(get_pixmap_file("image-editor")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        action_gimp = QtGui.QAction(icon_gimp, "Gimp", self.gui.edit)
+        self.edit_menu.addAction(action_gimp)
+        icon_rt = QtGui.QIcon()
+        icon_rt.addPixmap(QtGui.QPixmap(get_pixmap_file("rt-logo")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        action_rt = QtGui.QAction(icon_rt, "RawTherapee", self.gui.edit)
+        self.edit_menu.addAction(action_rt)
+        self.gui.edit.setMenu(self.edit_menu)
+        action_rt.triggered.connect(self.rawtherapee)
+        action_gimp.triggered.connect(self.gimp)
 
     def _action_handler(self, act):
         """
@@ -297,6 +301,9 @@ class Interface(object):
             # Menu Filtres
             self.gui.actionAuto_whitebalance: "filter_AutoWB",
             self.gui.actionContrast_mask: "filter_ContrastMask",
+            self.gui.actionGimp: "gimp",
+            self.gui.actionRawTherapee: "rawtherapee",
+
             # Menu Aide
             self.gui.actionA_propos: "about",
 
@@ -629,6 +636,7 @@ class Interface(object):
         """Edit the current file with the Gimp"""
         logger.debug("Interface.gimp")
         self.update_title()
+        self.clean_processes()
         filename = self.fn_current
         base, ext = os.path.splitext(filename)
         newname = base + "-Gimp" + ext
@@ -640,9 +648,45 @@ class Interface(object):
         newnamefull = os.path.join(config.DefaultRepository, newname)
         shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
-        os.system("%s %s &" % (config.Gimp, newnamefull))
+        p = subprocess.Popen([config.Gimp, newnamefull])
+        with self.job_sem:
+            self.processes.append(p)
         self.show_image()
         self.image.removeFromCache()
+
+    def rawtherapee(self, *args):
+        """Edit the current file with the RawTherapee"""
+        logger.debug("Interface.rawtherapee")
+        self.update_title()
+        self.clean_processes()
+        filename = self.fn_current
+        base, ext = os.path.splitext(filename)
+        filenamefull = os.path.join(config.DefaultRepository, filename)
+        newname = base + "-RawTherapee.jpg"
+        if not newname in self.AllJpegs:
+            self.AllJpegs.append(newname)
+            self.AllJpegs.sort(key=lambda x:x[:-4])
+        self.idx_current = self.AllJpegs.index(newname)
+        self.fn_current = newname
+        newnamefull = os.path.join(config.DefaultRepository, newname)
+        self.image.as_jpeg(newnamefull)
+        os.chmod(newnamefull, config.DefaultFileMode)
+        p = subprocess.Popen([config.Rawtherapee, "-O", newnamefull, filenamefull])
+        with self.job_sem:
+            self.processes.append(p)
+        self.show_image()
+        self.image.removeFromCache()
+
+    def edit_im(self, *args):
+        """Edit an image Gimp/RT"""
+        logger.debug("Interface.edit_image")
+        logger.debug("do_filter, default=%s" % self.default_filter)
+        if self.default_filter == "ContrastMask":
+            self.filter_ContrastMask()
+        elif self.default_filter == "AutoWB":
+            self.filter_AutoWB()
+        else:
+            logger.error("Unknown filter: %s", config.SelectedFilter)
 
     def reload_img(self, *args):
         """Remove image from cache and reloads it"""
@@ -1227,7 +1271,16 @@ class Interface(object):
         flush()
         self.show_image()
 
-
+    def clean_processes(self):
+        """remove ended sub-processes
+        """
+        with self.job_sem:
+            still = []
+            for job in self.processes:
+                job.poll()
+                if job.returncode is None:
+                    still.append(job)
+            self.processes = still
 
 ################################################################################
 # # # # # # # fin de la classe interface graphique # # # # # #

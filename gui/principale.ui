@@ -635,6 +635,9 @@
     </property>
     <addaction name="actionAuto_whitebalance"/>
     <addaction name="actionContrast_mask"/>
+    <addaction name="separator"/>
+    <addaction name="actionGimp"/>
+    <addaction name="actionRawTherapee"/>
    </widget>
    <widget class="QMenu" name="menuAide">
     <property name="title">
@@ -1218,6 +1221,16 @@
   <action name="actionVers_Jpeg">
    <property name="text">
     <string>Vers Jpeg</string>
+   </property>
+  </action>
+  <action name="actionGimp">
+   <property name="text">
+    <string>Gimp</string>
+   </property>
+  </action>
+  <action name="actionRawTherapee">
+   <property name="text">
+    <string>RawTherapee</string>
    </property>
   </action>
  </widget>
