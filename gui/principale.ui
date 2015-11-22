@@ -493,6 +493,7 @@
       <string>Exécuter</string>
      </property>
      <addaction name="actionCopier_seulement"/>
+     <addaction name="actionVers_Jpeg"/>
      <addaction name="actionCopier_et_graver"/>
      <addaction name="actionCopier_et_redimensionner"/>
      <addaction name="actionVers_page_web"/>
@@ -1212,6 +1213,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionVers_Jpeg">
+   <property name="text">
+    <string>Vers Jpeg</string>
    </property>
   </action>
  </widget>

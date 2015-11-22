@@ -30,7 +30,7 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "04/01/2015"
+__date__ = "21/11/2015"
 __license__ = "GPL"
 
 import gc
@@ -201,6 +201,23 @@ class Interface(object):
         action_color.triggered.connect(self.filter_AutoWB)
         action_contrast.triggered.connect(self.filter_ContrastMask)
 
+    def _menu_editer(self):
+        # Drop-down filter menu
+        self.filter_menu = QtGui.QMenu("Filtrer")
+
+        icon_contrast = QtGui.QIcon()
+        icon_contrast.addPixmap(QtGui.QPixmap(get_pixmap_file("contrast")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        action_contrast = QtGui.QAction(icon_contrast, "Masque de contrast", self.gui.filter)
+        self.filter_menu.addAction(action_contrast)
+        icon_colors = QtGui.QIcon()
+        icon_colors.addPixmap(QtGui.QPixmap(get_pixmap_file("colors")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        action_color = QtGui.QAction(icon_colors, "Balance des blancs auto", self.gui.filter)
+        self.filter_menu.addAction(action_color)
+        self.gui.filter.setMenu(self.filter_menu)
+        action_color.triggered.connect(self.filter_AutoWB)
+        action_contrast.triggered.connect(self.filter_ContrastMask)
+
+
     def _action_handler(self, act):
         """
         Generic action handler
@@ -233,6 +250,7 @@ class Interface(object):
             self.gui.actionSynchroniser: "synchronize",
             self.gui.actionEmpty_selected: "empty_selected",
             self.gui.actionCopier_seulement: "copy",
+            self.gui.actionVers_Jpeg: "to_jpeg",
             self.gui.actionCopier_et_graver: "burn",
             self.gui.actionCopier_et_redimensionner: "copy_resize",
             self.gui.actionVers_page_web: "to_web",
@@ -748,6 +766,17 @@ class Interface(object):
         """lauch the copy of all selected files"""
         self.update_title()
         copySelected(self.selected)
+        self.selected = Selected()
+        self.gui.selection.setChecked((self.fn_current in self.selected))
+        logger.info("Done")
+
+    def to_jpeg(self, *args):
+        """Export all selected files as JPEG"""
+        self.update_title()
+        for src in self.selected:
+            dst = os.path.join(config.DefaultRepository, config.SelectedDirectory,
+                               os.path.splitext(src)[0] + ".jpg")
+            Photo(src).as_jpeg(dst)
         self.selected = Selected()
         self.gui.selection.setChecked((self.fn_current in self.selected))
         logger.info("Done")
