@@ -471,11 +471,7 @@ class Photo(object):
 
             pixbuf = QtGui.QPixmap(*largest.dimensions)
 
-            if pixbuf.loadFromData(largest.data):
-                # Update metadata
-                self._pixelsY, self._pixelsX = largest.dimensions
-                self.metadata["resolution"] = "%s x %s " % (self._pixelsX, self._pixelsY)
-            else:
+            if not pixbuf.loadFromData(largest.data):
                 logger.warning("Unable to load raw preview (size: %s): %s" %
                                 (largest.dimensions, self.fn))
             orientation = self.get_orientation(True)

@@ -28,7 +28,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 Graphical interface for selector.
 """
 __author__ = "Jérôme Kieffer"
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 __contact__ = "imagizer@terre-adelie.org"
 __date__ = "22/11/2015"
 __license__ = "GPL"
