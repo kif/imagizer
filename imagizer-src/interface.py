@@ -30,7 +30,7 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "21/11/2015"
+__date__ = "22/11/2015"
 __license__ = "GPL"
 
 import gc
@@ -968,12 +968,12 @@ class Interface(object):
         """Close the filer GUI and update the data"""
         logger.debug("dirchooser.filerSelect called")
 #        self.importImageCallBack(self.guiFiler.filer").get_current_folder())
-        self.guiFiler.filer.close
+        self.guiFiler.filer.close()
 
     def filerDestroy(self, *args):
         """Close the filer GUI"""
         logger.debug("dirchooser.filerDestroy called")
-        self.guiFiler.filer.close
+        self.guiFiler.filer.close()
 
     def importImageCallBack(self, path):
         """This is the call back method for launching the import of new images"""

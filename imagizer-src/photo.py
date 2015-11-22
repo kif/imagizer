@@ -130,7 +130,8 @@ class Photo(object):
         if self._pil is None:
             self._pil = Image.open(self.fn)
         return self._pil
-    def setPIL(self, value):self._pil = value
+    def setPIL(self, value):
+        self._pil = value
     def delPIL(self):
         del self._pil
         self.pil = None

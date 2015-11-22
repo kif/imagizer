@@ -2,7 +2,8 @@
 # -*- coding: utf8 -*-
 """Setup script for the exiftran python module distribution."""
 
-import glob,os
+import glob
+import os
 from distutils.core import setup
 from distutils.extension import Extension
 

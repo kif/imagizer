@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "14/12/2014"
+__date__ = "22/11/2015"
 __license__ = "GPL"
 
 import os
@@ -49,7 +49,7 @@ PY3 = sys.version_info[0] > 2
 
 if PY3:
     unicode = str
-    to_unicode = lambda text: str(text)
+    to_unicode = str
 else:
     def to_unicode(text):
         if isinstance(text, str):
@@ -96,14 +96,14 @@ def ask_media_size():
         try:
             config.MediaSize = abs(float(txt))
         except Exception as err:
-            logger.warning("%s does not seem to be the size of a media: err" % (txt, err))
+            logger.warning("%s does not seem to be the size of a media: %s" % (txt, err))
 
 
 
 def rename_day(filename, all_photos, selected):
     """prompt a windows and asks for a name for the day
 
-    @param filename: name of the currenty displayed image
+    @param filename: name of the curenty displayed image
     @param all_photos: list of all photos filenames
     @param selected: list of selected photos.
     @return: renamed filename if objects were modified
