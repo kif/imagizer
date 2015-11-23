@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "14/12/2014"
+__date__ = "12/11/2015"
 __license__ = "GPL"
 
 import os
@@ -49,7 +49,7 @@ PY3 = sys.version_info[0] > 2
 
 if PY3:
     unicode = str
-    to_unicode = lambda text: str(text)
+    to_unicode = str
 else:
     def to_unicode(text):
         if isinstance(text, str):
@@ -59,7 +59,7 @@ else:
 
 def message_box(parent=None, title="title", text="blabla"):
     """
-    Simple dialog asking for leavind the program
+    Simple dialog asking for leaving the program
     @param text: some text to display
     @param parent: parent window
     @return: True if accepted
