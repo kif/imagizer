@@ -18,6 +18,10 @@ class Selected(list):
     """
     Basically a list of files
     """
+    def empty(self):
+        """Empty the current selection"""
+        self = self.__class__()
+
     def get_nbytes(self):
         """Return the size of the selection in byte (octets)"""
         size = 0

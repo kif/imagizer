@@ -3,7 +3,7 @@
 #******************************************************************************\
 #*
 #* Copyright (C) 2006 - 2011,  Jérôme Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+#* Conception: Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 #* Licence GPL v2
 #*
 #* This program is free software; you can redistribute it and/or modify
@@ -89,7 +89,7 @@ class Video(object):
         logger.warning("Starting processing job %i" % idx)
         cls.queue.put_nowait((idx, script))
         logger.warning("Size of the process queue: %s", cls.queue.qsize())
-        if cls.sem._Semaphore__value > 0 :
+        if cls.sem._Semaphore__value > 0:
             logger.warning("No process Loop running: stating it")
             t = threading.Thread(target=cls.processingLoop)
             t.start()
@@ -164,22 +164,22 @@ class Video(object):
         analyses a video
         """
         logger.info("Analyzing %s" % self.fullPath)
-        if self.videoFile.lower().startswith("dscf")  :
+        if self.videoFile.lower().startswith("dscf"):
             self.camera = "Fuji"
             self.deinterleave = False
         elif self.videoFile.lower().startswith("mvi_"):
             self.camera = "Canon"
             self.deinterleave = False
-        elif self.videoFile.lower().startswith("mov") :
+        elif self.videoFile.lower().startswith("mov"):
             self.camera = "Sony"
             self.deinterleave = False
-        elif self.videoFile.lower().startswith("sdc") :
+        elif self.videoFile.lower().startswith("sdc"):
             self.camera = "Samsung"
             self.deinterleave = False
-        elif self.videoFile.lower().startswith("m2u") :
+        elif self.videoFile.lower().startswith("m2u"):
             self.camera = "Sony"
             self.deinterleave = True
-        elif self.videoFile.lower().startswith("p") :
+        elif self.videoFile.lower().startswith("p"):
             self.camera = "Panasonic"
             self.deinterleave = False
         else:
@@ -189,7 +189,8 @@ class Video(object):
         dirname = OP.split(self.videoPath)[1]
         dirdate = None
         if len(dirname) >= 10:
-            if dirname[0] == "M": dirname = dirname[1:]
+            if dirname[0] == "M":
+                dirname = dirname[1:]
             try:
                 dirdate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(dirname[:10], "%Y-%m-%d")))
             except:
@@ -487,7 +488,7 @@ class Video(object):
             data["IARL"] = self.videoFile.replace("-H264", "")
         if self.camera:
             data["ISRF"] = self.camera
-        if self.title :
+        if self.title:
             data["INAM"] = self.title
         if self.keywords:
             data["IKEY"] = ";".join(self.keywords)

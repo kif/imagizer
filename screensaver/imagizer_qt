@@ -46,6 +46,37 @@ class FullScreenWidget(QtGui.QX11EmbedWidget):
 #        if e.key() == QtCore.Qt.Key_Escape:
             self.close()
 
+    def make_fullscreen(self):
+        """
+        Put an empty rectangle for a couple of seconds to actually record
+        the size of the screen
+        """
+        pix = QtGui.QPixmap (2000, 1000)
+        self.image.setPixmap(pix)
+        app.processEvents()
+#        pix = QtGui.QPixmap (1, 2000)
+#        self.image.setPixmap(pix)
+#        app.processEvents()
+        desktop = app.desktop()
+        screen = desktop.screenNumber(self)
+        rec = desktop.screenGeometry(screen)
+        width, height = rec.width(), rec.height()
+        rec2 = QtCore.QRect(0, 0, width, height)
+        self.setGeometry(rec2)
+        self.image.setGeometry(rec2)
+        print(width, height)
+        app.processEvents()
+#        self.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+#        self.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
+#        self.image.setSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
+#        self.image.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+#        self.setAutoFillBackground(True)
+#
+#        pix = QtGui.QPixmap (width, height)
+#        self.image.setPixmap(pix)
+#        self.setGeometry(rec2)
+#        app.processEvents()
+
 
 class ScreeenSaver(object):
 
@@ -85,6 +116,7 @@ class ScreeenSaver(object):
         else:
             self.window = FullScreenWidget()
         self.window.show()
+#        self.window.make_fullscreen()
         flush()
 
     @staticmethod

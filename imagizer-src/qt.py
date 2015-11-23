@@ -34,7 +34,7 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "20/10/2014"
+__date__ = "21/11/2015"
 __status__ = "production"
 
 
@@ -193,3 +193,27 @@ class ExtendedQLabel(QtGui.QLabel):
     def wheelEvent(self, ev):
 #        print("Scroll %s at %s,%s %s" % (ev, ev.x(), ev.y(), ev.delta()))
         self.zoom.emit(ev)
+
+def get_matrix(orientation):
+    """Return the rotation matrix corresponding to the exif orientation
+
+    @param orientation: value from 1 to 8
+    @return: rotation matrix
+    """
+    if orientation == 2:
+        matrix = QtGui.QMatrix(-1, 0, 0, 1, 0, 0)
+    elif orientation == 3:
+        matrix = QtGui.QMatrix(-1, 0, 0, -1, 0, 0)
+    elif orientation == 4:
+        matrix = QtGui.QMatrix(1, 0, 0, -1, 0, 0)
+    elif orientation == 5:
+        matrix = QtGui.QMatrix(0, 1, 1, 0, 0, 0)
+    elif orientation == 6:
+        matrix = QtGui.QMatrix(0, 1, -1, 0, 0, 0)
+    elif orientation == 7:
+        matrix = QtGui.QMatrix(0, -1, -1, 0, 0, 0)
+    elif orientation == 8:
+        matrix = QtGui.QMatrix(0, -1, 1, 0, 0, 0)
+    else:
+        matrix = QtGui.QMatrix(1, 0, 0, 1, 0, 0)
+    return matrix

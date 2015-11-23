@@ -133,9 +133,9 @@ class AttrFile(object):
         for key in self._attrmap.keys():
             txt = self._attrmap[ key ]
             try:
-                self._attrmap[ key ] = txt.decode(coding)
+                self._attrmap[key] = txt.decode(coding)
             except:
-                self._attrmap[ key ] = txt
+                self._attrmap[key] = txt
 
 
     def get(self, field, default=None):

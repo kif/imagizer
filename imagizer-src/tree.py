@@ -31,7 +31,7 @@ Buils a tree view on the list of files
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20141212"
+__date__ = "22/11/2015"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -174,7 +174,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         self._current_branch=None
 
     def rowCount(self, parent):
-        if parent.column()>0:
+        if parent.column() > 0:
             return 0
         pitem = parent.internalPointer()
         if not parent.isValid():

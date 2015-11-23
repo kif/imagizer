@@ -34,7 +34,7 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "29/11/2014"
+__date__ = "22/11/2015"
 __status__ = "production"
 
 
@@ -84,9 +84,8 @@ def _get_data_path(filename):
         real_filename = os.path.join(resource, filename)
         if os.path.exists(real_filename):
             return real_filename
-    else:
-        raise RuntimeError("Can not find the [%s] resource, "
-                        " something went wrong !!!" % (real_filename,))
+    raise RuntimeError("Can not find the [%s] resource, "
+                    " something went wrong !!!" % (real_filename,))
 
 
 def get_ui_file(filename):

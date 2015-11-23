@@ -31,11 +31,14 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/11/2014"
+__date__ = "21/11/2015"
 __license__ = "GPL"
 
-import os, locale, gc, logging, glob, sys
-import os.path as op
+import os
+import locale
+import logging
+import sys
+logger = logging.getLogger("imagizer.selector")
 
 import imagizer
 from imagizer.qt            import QtGui
@@ -45,7 +48,6 @@ from imagizer.selection     import Selected
 from imagizer.argparse      import ArgumentParser
 from imagizer.imagizer      import rangeTout
 from imagizer.interface     import Interface
-logger = logging.getLogger("imagizer.selector")
 
 try:
     from rfoo.utils import rconsole
@@ -77,12 +79,12 @@ class Interfaces(object):
         self.all_files = all_files
         self.current = current
         self.warning = warning
-        self.selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+        self.selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
         self.fast = fast
         self.selected = None
 
     def print_warning(self):
-        if (self.warning) and (not op.isfile(self.selected_fn)):
+        if (self.warning) and (not os.path.isfile(self.selected_fn)):
             self.interface = WarningSc(config.DefaultRepository, callBack=self.set_root)
             self.interface.show()
         else:
@@ -90,13 +92,13 @@ class Interfaces(object):
 
     def set_root(self, path):
             config.DefaultRepository = path
-            self.selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+            self.selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
             self.interface.close()
             self.create_selected()
 
 
     def create_selected(self):
-        if not op.isfile(selected_fn):
+        if not os.path.isfile(selected_fn):
             try:
                 f = open(selected_fn, "w")
                 f.close()
@@ -138,12 +140,12 @@ if __name__ == '__main__':
     if args.nowarning:
         logger.debug("Initial warning about file renaming is disabled")
         printWarning = False
-    if args.path and  op.isdir(args.path):
+    if args.path and  os.path.isdir(args.path):
         logger.debug("Working on directory %s" % args.path)
-        config.DefaultRepository = op.abspath(args.path)
+        config.DefaultRepository = os.path.abspath(args.path)
 
     config.printConfig()
-    selected_fn = op.join(config.DefaultRepository, config.Selected_save)
+    selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
 
     app = QtGui.QApplication([])
     ifc = Interfaces(warning=printWarning, fast=args.fast)

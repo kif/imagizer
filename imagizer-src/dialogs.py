@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "12/11/2015"
+__date__ = "23/11/2015"
 __license__ = "GPL"
 
 import os
@@ -95,15 +95,14 @@ def ask_media_size():
         txt = str(gui.TailleMo.text()).strip()
         try:
             config.MediaSize = abs(float(txt))
-        except Exception as err:
-            logger.warning("%s does not seem to be the size of a media: err" % (txt, err))
-
+        except Exception as err: 
+            logger.warning("%s does not seem to be the size of a media: %s" % (txt, err))
 
 
 def rename_day(filename, all_photos, selected):
     """prompt a windows and asks for a name for the day
 
-    @param filename: name of the currenty displayed image
+    @param filename: name of the curenty displayed image
     @param all_photos: list of all photos filenames
     @param selected: list of selected photos.
     @return: renamed filename if objects were modified

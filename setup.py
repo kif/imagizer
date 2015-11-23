@@ -50,8 +50,8 @@ SCRIPTS = "scripts"
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 EXIFTRAN = "pyexiftran"
-#JPEG_VERSION = "80"  # "62"
-JPEG_VERSION = "62"
+JPEG_VERSION = "80"  # "62"
+# JPEG_VERSION = "62"
 JPEG_DIR = os.path.join(EXIFTRAN, "jpeg", JPEG_VERSION)
 
 sources = glob.glob(os.path.join(EXIFTRAN, "*.c")) + glob.glob(os.path.join(JPEG_DIR, "*.c"))
@@ -72,10 +72,9 @@ elif os.name == 'posix':
     execexiftran = os.path.join("bin", "exiftran")
     os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
-
 else:
     raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-    sys.exit(1)
+
 
 rootdir = os.path.dirname(os.path.abspath(sys.argv[0]))
 scripts = [os.path.join(SCRIPTS, scriptname) for scriptname in os.listdir(os.path.join(rootdir, "scripts"))]
