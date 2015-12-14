@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/11/2015"
+__date__ = "23/11/2015"
 __license__ = "GPL"
 
 import os
@@ -59,7 +59,7 @@ else:
 
 def message_box(parent=None, title="title", text="blabla"):
     """
-    Simple dialog asking for leavind the program
+    Simple dialog asking for leaving the program
     @param text: some text to display
     @param parent: parent window
     @return: True if accepted
@@ -95,9 +95,8 @@ def ask_media_size():
         txt = str(gui.TailleMo.text()).strip()
         try:
             config.MediaSize = abs(float(txt))
-        except Exception as err:
+        except Exception as err: 
             logger.warning("%s does not seem to be the size of a media: %s" % (txt, err))
-
 
 
 def rename_day(filename, all_photos, selected):
