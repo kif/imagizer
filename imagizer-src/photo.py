@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/11/2015"
+__date__ = "13/12/2015"
 __license__ = "GPL"
 
 from math import ceil
@@ -252,6 +252,10 @@ class Photo(object):
             self.exif.copy(rescaled.exif)
             rescaled.exif.write()
             rescaled.autorotate()
+
+            metadata = self.read_exif()
+            rescaled.name(metadata.get("title", ""), metadata.get("rate", 0))
+
             return rescaled
 
 
@@ -422,7 +426,7 @@ class Photo(object):
                     except Exception as error2:
                         logger.error("%s Failed as well in latin1, resetting" % (error2))
                         title = u""
-            self.metadata["title"] = title
+            self.metadata["title"] = title.strip()
 
             rate = exif["Exif.Image.Rating"] if  "Exif.Image.Rating" in exif else 0
             if "value" in dir(rate):  # pyexiv2 v0.2+
@@ -445,11 +449,10 @@ class Photo(object):
 
     def has_title(self):
         """
-        return true if the image is entitled
+        return: true if the image is entitled
         """
-        if self.metadata is None:
-            self.read_exif()
-        if self.metadata["title"]:
+
+        if self.read_exif().get("title"):
             return True
         else:
             return False
