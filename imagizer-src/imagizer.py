@@ -33,6 +33,8 @@ __license__ = "GPL"
 import os, sys, shutil, time, re, gc, logging
 import random
 import glob
+import threading
+sem = threading.Semaphore()  # Processing semaphore
 logger = logging.getLogger("imagizer.imagizer")
 
 from .utils import get_pixmap_file
@@ -367,7 +369,7 @@ class ModelRangeTout(object):
         """
         config.DefaultRepository = rootDir
         trashDir = os.path.join(rootDir, config.TrashDirectory)
-        all_files = fileutils.findFiles(rootDir, config.Extensions+config.RawExtensions)
+        all_files = fileutils.findFiles(rootDir, config.Extensions + config.RawExtensions)
         files_to_process = []
         processed_files = []
         new_files = []
@@ -460,6 +462,127 @@ class ModelRangeTout(object):
             return processed_files, processed_files.index(first)
         else:
             return processed_files, 0
+
+class RangeTout(object):
+    """Implemantation de range_tout
+
+    moves all the JPEG files to a directory named from
+    their day and with the name according to the time"""
+
+    def __init__(self, rootdir=None, updated_signal=None, finished_signal=None):
+        """
+        """
+        self.rootdir = rootdir
+        self.updated_signal = updated_signal
+        self.finished_signal = finished_signal
+        self.result = None
+
+    def start(self):
+        """ Lance les calculs (utilisable dans un thread a part...
+
+        @return: 2tuple containing the list of all images and the start-index
+        @rtype: (list,integer)
+        """
+        config.DefaultRepository = self.rootdir
+        trashDir = os.path.join(self.rootdir, config.TrashDirectory)
+        all_files = fileutils.findFiles(self.rootdir, config.Extensions + config.RawExtensions)
+        files_to_process = []
+        processed_files = []
+        new_files = []
+        uid = os.getuid()
+        gid = os.getgid()
+        for i in all_files:
+            if i.find(config.TrashDirectory) == 0: continue
+            if i.find(config.SelectedDirectory) == 0: continue
+            try:
+                a = int(i[:4])
+                m = int(i[5:7])
+                j = int(i[8:10])
+                if (a >= 0000) and (m <= 12) and (j <= 31) and (i[4] in ["-", "_", "."]) and (i[7] in ["-", "_"]):
+                    processed_files.append(i)
+                else:
+                    files_to_process.append(i)
+            except ValueError:
+                files_to_process.append(i)
+        files_to_process.sort()
+        number_of_files = len(files_to_process)
+        if self.updated_signal:
+            self.updated_signal.emit("range tout", 0, number_of_files)
+        for idx, fname in enumerate(files_to_process):
+            if self.updated_signal:
+                self.updated_signal.emit(fname, idx, number_of_files)
+            photo = Photo(fname, dontCache=True)
+            data = photo.readExif()
+            try:
+                datei, heurei = data["time"].split()
+                date = re.sub(":", "-", unicode2ascii(datei))
+                heurej = re.sub(":", "h", heurei, 1)
+                model = data["model"].split(",")[-1]
+                heure = unicode2ascii("%s-%s" % (re.sub(":", "m", heurej, 1),
+                                                 re.sub("/", "", re.sub(" ", "_", model))))
+            except ValueError:
+                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname))))
+                heure = unicode2ascii("%s-%s" % (time.strftime("%Hh%Mm%S",
+                                                                   time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
+            if not (os.path.isdir(os.path.join(self.rootdir, date))) :
+                fileutils.mkdir(os.path.join(self.rootdir, date))
+            heure_we = heure + photo.ext  # Hours with extension
+
+            bSkipFile = False
+            for existingfn in fileutils.list_files_in_named_dir(self.rootdir, date, heure_we) + \
+                              fileutils.list_files_in_named_dir(trashDir, date, heure_we):
+                logger.debug("%s <-?-> %s", fname, existingfn)
+                existing = Photo(existingfn, dontCache=True)
+                try:
+                    existing.readExif()
+                    originalName = existing.exif["Exif.Photo.UserComment"]
+                except:
+                    logger.error("in ModelRangeTout: reading Exif for %s", fname)
+                else:
+                    if "human_value" in dir(originalName):
+                        originalName = originalName.human_value
+                    if os.path.basename(originalName) == os.path.basename(fname):
+                        logger.debug("File already in repository, leaving as it is")
+                        bSkipFile = existingfn
+                        break
+            if bSkipFile:
+                logger.warning("%s -x-> %s", fname, bSkipFile)
+                continue
+            full_path = os.path.join(self.rootdir, date, heure_we)
+            if os.path.isfile(full_path):
+                s = 0
+                for j in os.listdir(os.path.join(self.rootdir, date)):
+                    if j.find(heure) == 0:
+                        s += 1
+                heure += "-%s" % s
+                heure_we = heure + photo.ext  # Hours with extension
+            new_fname = os.path.join(date, heure_we)
+            full_path = os.path.join(self.rootdir, new_fname)
+            shutil.move(os.path.join(self.rootdir, fname), full_path)
+            try:
+                os.chown(full_path, uid, gid)
+                os.chmod(full_path, config.DefaultFileMode)
+            except OSError:
+                logger.warning("in ModelRangeTout: unable to chown or chmod  %s" , full_path)
+            photo = Photo(full_path)
+#            Save the old image name in exif tag
+            photo.storeOriginalName(fname)
+
+            if config.AutoRotate:
+                photo.autorotate()
+            processed_files.append(new_fname)
+            new_files.append(new_fname)
+        processed_files.sort(key=lambda x:x[:-4])
+        if self.updated_signal:
+            self.updated_signal.emit("", 0, 0)
+
+        if len(new_files) > 0:
+            first = processed_files.index(min(new_files))
+        else:
+            first = 0
+        if self.finished_signal:
+            self.finished_signal.emit(processed_files, first)
+        self.result = processed_files, first
 
 
 class Controler(object):
@@ -632,6 +755,43 @@ def rangeTout(repository=None, bUseX=True, fast=False):
             viewx = ViewX()
             ControlerX(model, viewx)
         return model.start(repository)
+
+def range_tout(repository=None, bUseX=True, fast=False, updated=None, finished=None):
+    """moves all the JPEG files to a directory named from their day and with the
+    name according to the time
+    threadeded implementation
+
+    @param repository: the name of the starting repository
+    @type repository: string
+    @param bUseX: set to False to disable the use of the graphical splash screen
+    @type bUseX: boolean
+    @param fast: just retrieve the list of files.
+    @param updated: signal for update
+    @param finished: signal for finished
+    @return: 2tuple containing the list of all images and the start-index
+    @rtype: (list,integer)
+    """
+    logger.debug("in range_tout bUseX=%s fast=%s" % (bUseX, fast))
+    if not repository:
+        repository = config.DefaultRepository
+    else:
+        config.DefaultRepository = repository
+    if fast:
+        l = len(repository)
+        if not repository.endswith(os.sep):
+            l += 1
+        all_files = [i[l:] for i in glob.glob(os.path.join(repository, "????-??-??*/*.jpg"))]
+        all_files.sort()
+        first = len(all_files) - 1
+        return (all_files, first)
+    else:
+        rt = RangeTout(repository, updated, finished)
+        with sem:
+            pt = threading.Thread(target=rt.start)
+            pt.start()
+        if not(updated or finished):
+            pt.wait()
+            return rt.result
 
 
 def processSelected(lstSelectedFiles):

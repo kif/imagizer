@@ -30,7 +30,7 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "3.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/11/2015"
+__date__ = "26/12/2015"
 __license__ = "GPL"
 
 import gc
@@ -42,7 +42,7 @@ import subprocess
 import threading
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copySelected, processSelected, timer_pass
-from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel
+from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel, Signal
 from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
@@ -53,21 +53,19 @@ from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog
 from .fileutils import smartSize, recursive_delete
 
 
-class Interface(object):
+class Interface(QtCore.QObject):
     """
-    class interface that manages the GUI using Glade-2
+    class interface that manages the GUI using Qt4
     """
-    def __init__(self, AllJpegs=[], first=0, selected=[], mode="Default", callback=None):
+    signal_status = Signal(str, int, int)
+    signal_newfiles = Signal(list, int)
+    def __init__(self, AllJpegs=None, first=0, selected=None, mode="Default", callback=None):
+        QtCore.QObject.__init__(self)
         self.callback = callback
-        self.AllJpegs = AllJpegs
-        self.selected = Selected(i for i in selected if i in self.AllJpegs)
-        self.idx_current = first
         self.left_tab_width = 350
         self.image = None
         self.processes = []
         self.job_sem = threading.Semaphore()
-#        self.current_title = ""
-#        self.current_rate = 0
         self.fn_current = None
         self.is_zoomed = False
         self.min_mark = 0
@@ -96,13 +94,16 @@ class Interface(object):
         icon_on("right", self.gui.right)
 
         self.timer = None
+        self.progress_bar = None
+        self.status_bar = None
+        self.create_statusbar()
         self._populate_action_data()
         self.gui.actionAutorotate.setChecked(bool(config.AutoRotate))
         self.gui.actionSignature_filigrane_web.setChecked(bool(config.Filigrane))
 
         self.set_images_per_page(value=config.NbrPerPage)
         self.set_interpolation(value=config.Interpolation)
-        self.show_image()
+#         self.show_image()
         flush()
         self._menu_filtrer()
         self._menu_editer()
@@ -153,31 +154,27 @@ class Interface(object):
 
                     self.gui.menubar.triggered: self._action_handler,
                     self.gui.photo.zoom: self.image_zoom,
-#        self.gui.enregistrerS_activate': self.save_selection,
-#        self.gui.chargerS_activate': self.load_selection,
-#        self.gui.inverserS_activate': self.invert_selection,
-#        self.gui.aucun1_activate': self.select_none,
-#        self.gui.TouS_activate': self.select_all,
-#        self.gui.taille_selection_activate': self.display_selected_size,
-#        self.gui.media_apres_activate': self.selectNewerMedia,
-#        self.gui.media_avant_activate': self.SelectOlderMedia,
-
-#        self.gui.lance_diaporama_activate': self.SlideShow,
-
-#        "on_AutoWB_activate": self.filterAutoWB,
-#        "on_ContrastMask_activate": self.filterContrastMask,
-#
-#        "on_photo_button_press_event": self.image_pressed,
-
+                    self.signal_status: self.update_status,
+                    self.signal_newfiles: self.set_data
         }
         for signal, callback in handlers.items():
             logger.debug(callback.__name__)
             signal.connect(callback)
+
         self.gui.show()
         flush()
         width = sum(self.gui.splitter.sizes())
         self.gui.splitter.setSizes([self.left_tab_width, width - self.left_tab_width])
-        self.show_image(first)
+        self.set_data(AllJpegs, first, selected)
+
+    def set_data(self, AllJpegs=None, first=0, selected=None):
+        self.AllJpegs = AllJpegs or []
+        if selected is None:
+            selected = Selected.load()
+        self.selected = Selected(i for i in selected  if i in self.AllJpegs)
+        self.idx_current = first
+        if self.AllJpegs:
+            self.show_image(first)
 
     def _set_icons(self, kwarg):
         """
@@ -374,6 +371,30 @@ class Interface(object):
         if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
             self.image.name(new_title, new_rate)
 
+    def create_statusbar(self):
+        self.status_bar = self.gui.statusBar()
+        self.progress_bar = QtGui.QProgressBar(self.status_bar)
+        self.status_bar.insertPermanentWidget(0, self.progress_bar, 0)
+        self.status_bar.hide()
+
+    def update_status(self, message="", current=0, maxi=0):
+        """Update the status bar
+
+        @param meassage: string to be displayed
+        @param
+        """
+        if (message or current or maxi):
+            self.status_bar.showMessage(message, 1000)
+            if maxi:
+                self.progress_bar.setMaximum(maxi)
+                self.progress_bar.setValue(current)
+            else:
+                self.progress_bar.reset()
+                # self.progress_bar.hide()
+            self.status_bar.show()
+        else:
+            self.status_bar.clearMessage()
+            self.status_bar.hide()
 
     def show_image(self, new_idx=None):
         """Show the image in the given widget and set up the exif tags in the GUI
@@ -1077,7 +1098,7 @@ class Interface(object):
         self.update_title()
         self.in_slideshow = True
         self.set_min_rate(value=config.SlideShowMinRating)
-        #goto full screen mode
+        # goto full screen mode
         self.gui.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
         self.gui.menubar.setVisible(False)
         self.menubar_isvisible = False
@@ -1087,7 +1108,7 @@ class Interface(object):
         self.gui.splitter.setSizes([0, width])
         flush()
         self.show_image()
-        #start timer
+        # start timer
         self.timer = QtCore.QTimer(self.gui)
         self.timer.setInterval(1000.0 * config.SlideShowDelay)
         self.timer.timeout.connect(self.new_slide)

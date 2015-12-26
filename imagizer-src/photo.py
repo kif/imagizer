@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "13/12/2015"
+__date__ = "25/12/2015"
 __license__ = "GPL"
 
 from math import ceil
@@ -254,6 +254,7 @@ class Photo(object):
             rescaled.autorotate()
 
             metadata = self.read_exif()
+            rescaled.exif.write()
             rescaled.name(metadata.get("title", ""), metadata.get("rate", 0))
 
             return rescaled
@@ -410,10 +411,13 @@ class Photo(object):
         if self.metadata is None:
             self.metadata = {"size": "%.2f %s" % smartSize(op.getsize(self.fn))}
             if self.is_raw:
-                title = exif["Exif.Photo.UserComment"]
-                "Directly as unicode"
-                if "value" in dir(title):
-                    title = title.value
+                try:
+                    title = exif["Exif.Photo.UserComment"]
+                    "Directly as unicode"
+                    if "value" in dir(title):
+                        title = title.value
+                except KeyError:
+                    title = ""
             else:
                 title = exif.comment
                 try:

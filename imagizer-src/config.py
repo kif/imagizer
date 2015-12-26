@@ -2,25 +2,25 @@
 # coding: utf-8
 #
 #******************************************************************************\
-#*
-#* Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# *
+# * Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 from __future__ import with_statement, division, print_function, absolute_import
 """
@@ -76,7 +76,7 @@ class Config(object):
             self.SelectedDirectory = "Selected"
             self.Selected_save = ".selected-photos"
             self.Extensions = [".jpg", ".jpeg", ".jpe", ".jfif"]
-            self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng", ".pef", ".nef"]
+            self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng", ".pef", ".nef", ".raf"]
             self.AutoRotate = False
             self.DefaultMode = "664"
             try:
@@ -86,7 +86,7 @@ class Config(object):
             self.CommentFile = "index.desc"
             self.Interpolation = 1
             self.DefaultFileMode = int(self.DefaultMode, 8)
-            self.DefaultDirMode = self.DefaultFileMode + 3145 #73 = +111 en octal ... 3145 +s mode octal
+            self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 en octal ... 3145 +s mode octal
             self.Filigrane = False
             self.FiligraneSource = os.path.join(installdir, "signature.png")
             self.FiligranePosition = 5
@@ -135,7 +135,7 @@ class Config(object):
                 "ExifExtraction":False,
                 "Quality": 75
                 }
-            #Video default options
+            # Video default options
             self.ScratchDir = "/tmp"
             self.VideoBitRate = 600
             self.AudioBitRatePerChannel = 64
@@ -188,7 +188,7 @@ class Config(object):
             elif j == "WebDirIndexStyle".lower(): self.WebDirIndexStyle = i[1]
             elif j == "DefaultFileMode".lower():
                 self.DefaultFileMode = int(i[1], 8)
-                self.DefaultDirMode = self.DefaultFileMode + 3145 #73 = +111 en octal ... 3145 +s mode octal
+                self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 en octal ... 3145 +s mode octal
             elif j == "RawExtensions".lower():      self.RawExtensions = i[1].split()
             elif j == "Extensions".lower():         self.Extensions = i[1].split()
             elif j == "DefaultRepository".lower():  self.DefaultRepository = i[1]
@@ -233,10 +233,10 @@ class Config(object):
                 elif j == "Optimize".lower():dico["Optimize"] = configparser.getboolean(k, "Optimize")
                 elif j == "ExifExtraction".lower():dico["ExifExtraction"] = configparser.getboolean(k, "ExifExtraction")
                 elif j == "Quality".lower():dico["Quality"] = int(i[1])
-            self.__setattr__(k,dico)
+            self.__setattr__(k, dico)
 #            exec("self.%s=dico" % k)
 
-        #Read Video options
+        # Read Video options
         try:
             for i in configparser.items("Video"):
                 j = i[0]

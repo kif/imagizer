@@ -34,7 +34,7 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "21/11/2015"
+__date__ = "26/12/2015"
 __status__ = "production"
 
 
@@ -48,7 +48,7 @@ if ('PySide' in sys.modules):
     from PySide import QtGui, QtCore, QtUiTools, QtWebKit
     from PySide.QtCore import SIGNAL, Signal
 
-#TODO: see https://github.com/lunaryorn/snippets/blob/master/qt4/designer/pyside_dynamic.py
+# TODO: see https://github.com/lunaryorn/snippets/blob/master/qt4/designer/pyside_dynamic.py
 
     #we need to handle uic !!!
     """

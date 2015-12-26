@@ -31,7 +31,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "21/11/2015"
+__date__ = "26/12/2015"
 __license__ = "GPL"
 
 import os
@@ -46,7 +46,7 @@ from imagizer.config        import config
 from imagizer.dirchooser    import WarningSc
 from imagizer.selection     import Selected
 from imagizer.argparse      import ArgumentParser
-from imagizer.imagizer      import rangeTout
+from imagizer.imagizer      import rangeTout, range_tout
 from imagizer.interface     import Interface
 
 try:
@@ -54,7 +54,7 @@ try:
     rconsole.spawn_server()
 except ImportError:
     logger.debug("No socket opened for debugging -> please install rfoo")
-#for debugging using rfoo
+# for debugging using rfoo
 ifc = object()
 
 if os.getenv("LANGUAGE"):
@@ -107,13 +107,14 @@ class Interfaces(object):
 
     def load_list(self):
         logger.debug("load_list")
-        self.all_files, self.current = rangeTout(config.DefaultRepository, fast=self.fast)
+        self.all_files, self.current = range_tout(config.DefaultRepository, fast=self.fast)
         logger.debug("list loaded")
 
     def start_interface(self):
         if self.selected is None:
             self.selected = Selected.load()
-        self.interface = Interface(self.all_files, self.current, self.selected)
+        self.interface = Interface()  # self.all_files, self.current, self.selected)
+        range_tout(config.DefaultRepository, fast=self.fast, updated=self.interface.signal_status, finished=self.interface.signal_newfiles)
 
 if __name__ == '__main__':
     printWarning = True
@@ -151,7 +152,7 @@ if __name__ == '__main__':
     ifc = Interfaces(warning=printWarning, fast=args.fast)
     ifc.print_warning()
     ifc.create_selected()
-    ifc.load_list()
+    # ifc.load_list()
     ifc.start_interface()
     res = app.exec_()
     sys.exit(0)
