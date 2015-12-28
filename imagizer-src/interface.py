@@ -30,7 +30,7 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "3.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/12/2015"
+__date__ = "28/12/2015"
 __license__ = "GPL"
 
 import gc
@@ -41,7 +41,7 @@ import random
 import subprocess
 import threading
 logger = logging.getLogger("imagizer.interface")
-from .imagizer import copySelected, processSelected, timer_pass
+from .imagizer import copySelected, processSelected, timer_pass, to_jpeg
 from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel, Signal
 from .selection import Selected
 from .photo import Photo
@@ -59,6 +59,7 @@ class Interface(QtCore.QObject):
     """
     signal_status = Signal(str, int, int)
     signal_newfiles = Signal(list, int)
+    signal_processed = Signal(list)
     def __init__(self, AllJpegs=None, first=0, selected=None, mode="Default", callback=None):
         QtCore.QObject.__init__(self)
         self.callback = callback
@@ -838,10 +839,7 @@ class Interface(QtCore.QObject):
     def to_jpeg(self, *args):
         """Export all selected files as JPEG"""
         self.update_title()
-        for src in self.selected:
-            dst = os.path.join(config.DefaultRepository, config.SelectedDirectory,
-                               os.path.splitext(src)[0] + ".jpg")
-            Photo(src).as_jpeg(dst)
+        to_jpeg(self.selected[:], self.signal_status, self.signal_processed)
         self.selected = Selected()
         self.gui.selection.setChecked((self.fn_current in self.selected))
         logger.info("Done")
