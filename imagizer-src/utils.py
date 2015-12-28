@@ -34,13 +34,30 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "22/11/2015"
+__date__ = "28/12/2015"
 __status__ = "production"
 
 
-import os, time, logging
+import os
+import sys
+import time
+import traceback
+import logging
 installdir = os.path.dirname(os.path.abspath(__file__))
 timelog = logging.getLogger("timeit")
+depreclog = logging.getLogger("DEPRECATION")
+
+
+def deprecated(func):
+    def wrapper(*arg, **kw):
+        """
+        decorator that deprecates the use of a function
+        """
+        name = func.func_name if sys.version_info[0] < 3 else func.__name__
+        depreclog.warning("%s is Deprecated !!! %s" % (name, os.linesep.join([""] + traceback.format_stack()[:-1])))
+        return func(*arg, **kw)
+    return wrapper
+
 
 def timeit(func):
     def wrapper(*arg, **kw):
