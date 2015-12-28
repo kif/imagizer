@@ -31,7 +31,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/12/2015"
+__date__ = "28/12/2015"
 __license__ = "GPL"
 
 import os
@@ -46,7 +46,7 @@ from imagizer.config        import config
 from imagizer.dirchooser    import WarningSc
 from imagizer.selection     import Selected
 from imagizer.argparse      import ArgumentParser
-from imagizer.imagizer      import rangeTout, range_tout
+from imagizer.imagizer      import range_tout
 from imagizer.interface     import Interface
 
 try:

@@ -41,7 +41,7 @@ import random
 import subprocess
 import threading
 logger = logging.getLogger("imagizer.interface")
-from .imagizer import copySelected, processSelected, timer_pass, to_jpeg
+from .imagizer import copy_selected, process_selected, to_jpeg
 from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel, Signal
 from .selection import Selected
 from .photo import Photo
@@ -798,7 +798,7 @@ class Interface(QtCore.QObject):
         logger.debug("Interface.copy_resize")
         self.update_title()
         # TODO: go through MVC
-        processSelected(self.selected)
+        process_selected(self.selected[:], self.signal_status, self.signal_processed)
         self.selected = Selected()
         self.gui.selection.setChecked(self.fn_current in self.selected)
         logger.info("Interface.copy_resize: Done")
@@ -807,7 +807,7 @@ class Interface(QtCore.QObject):
         """lauch the copy of all selected files then scale and finaly copy them to the generator-repository and generate web pages"""
         logger.debug("Interface.to_web")
         self.update_title()
-        processSelected(self.selected)
+        process_selected(self.selected[:], self.signal_status)
         self.selected = Selected()
         self.gui.selection.setChecked((self.fn_current in self.selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
@@ -831,7 +831,7 @@ class Interface(QtCore.QObject):
     def copy(self, *args):
         """lauch the copy of all selected files"""
         self.update_title()
-        copySelected(self.selected)
+        copy_selected(self.selected[:], self.signal_status, self.signal_processed)
         self.selected = Selected()
         self.gui.selection.setChecked((self.fn_current in self.selected))
         logger.info("Done")
@@ -848,9 +848,8 @@ class Interface(QtCore.QObject):
         """lauch the copy of all selected files then burn a CD according to the configuration file"""
         logger.debug("Interface.burn")
         self.update_title()
-        copySelected(self.selected)
+        copy_selected(self.selected[:], self.signal_status)
         self.selected = Selected()
-        # TODO : MVC
         self.gui.selection.setChecked((self.fn_current in self.selected))
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.Burn.replace("$Selected", SelectedDir))
