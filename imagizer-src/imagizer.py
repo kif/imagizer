@@ -22,33 +22,33 @@
 # *
 #*****************************************************************************/
 from __future__ import with_statement, division, print_function, absolute_import
-"""
-General library used by selector and generator.
+__doc__ = """General library used by selector and generator.
 It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20131226"
+__date__ = "30/12/2015"
 __license__ = "GPL"
-import os, sys, shutil, time, re, gc, logging
-import random
+import os
+import shutil
+import time
+import re
+import logging
 import glob
 import threading
 logger = logging.getLogger("imagizer.imagizer")
 
-from .utils import get_pixmap_file, deprecated
-
 try:
     import Image  # IGNORE:F0401
 except:
-    raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
+    raise ImportError("""Selector needs PIL: Python Imaging Library
+    PIL is available from http://www.pythonware.com/products/pil/""")
 
 
 from .encoding import unicode2ascii
 from .config import config
 from . import fileutils
 from .photo import Photo, Signature
-from .qt import buildUI, flush, QtGui, QtCore
 
 
 class DummySignal(object):
@@ -96,7 +96,8 @@ class RangeTout(ThreadedProcessing):
         self.updated_signal.emit("range tout", 0, 1)
         config.DefaultRepository = self.rootdir
         trashDir = os.path.join(self.rootdir, config.TrashDirectory)
-        all_files = fileutils.findFiles(self.rootdir, config.Extensions + config.RawExtensions)
+        all_files = fileutils.findFiles(self.rootdir, config.Extensions +
+                                        config.RawExtensions)
         files_to_process = []
         processed_files = []
         new_files = []
@@ -109,7 +110,9 @@ class RangeTout(ThreadedProcessing):
                 a = int(i[:4])
                 m = int(i[5:7])
                 j = int(i[8:10])
-                if (a >= 0000) and (m <= 12) and (j <= 31) and (i[4] in ["-", "_", "."]) and (i[7] in ["-", "_"]):
+                if (a >= 0000) and (m <= 12) and \
+                    (j <= 31) and (i[4] in ["-", "_", "."]) and \
+                        (i[7] in ["-", "_"]):
                     processed_files.append(i)
                 else:
                     files_to_process.append(i)
@@ -132,8 +135,9 @@ class RangeTout(ThreadedProcessing):
             except ValueError:
                 date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname))))
                 heure = unicode2ascii("%s-%s" % (time.strftime("%Hh%Mm%S",
-                                                                   time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname)))), re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
-            if not (os.path.isdir(os.path.join(self.rootdir, date))) :
+                                                                time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname)))),
+                                                 re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
+            if not (os.path.isdir(os.path.join(self.rootdir, date))):
                 fileutils.mkdir(os.path.join(self.rootdir, date))
             heure_we = heure + photo.ext  # Hours with extension
 
@@ -172,7 +176,7 @@ class RangeTout(ThreadedProcessing):
                 os.chown(full_path, uid, gid)
                 os.chmod(full_path, config.DefaultFileMode)
             except OSError:
-                logger.warning("in ModelRangeTout: unable to chown or chmod  %s" , full_path)
+                logger.warning("in ModelRangeTout: unable to chown or chmod  %s", full_path)
             photo = Photo(full_path)
 #            Save the old image name in exif tag
             photo.storeOriginalName(fname)
@@ -181,7 +185,7 @@ class RangeTout(ThreadedProcessing):
                 photo.autorotate()
             processed_files.append(new_fname)
             new_files.append(new_fname)
-        processed_files.sort(key=lambda x:x[:-4])
+        processed_files.sort(key=lambda x: x[:-4])
         self.updated_signal.emit("", 0, 0)
 
         if len(new_files) > 0:
@@ -305,11 +309,11 @@ class CopySelected(ThreadedProcessing):
             fileutils.mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
         for day in os.listdir(SelectedDir):
-            for File in os.listdir(os.path.join(SelectedDir, day)):
-                if File.find(config.PagePrefix) == 0:
-                    if os.path.isdir(os.path.join(SelectedDir, day, File)):
-                        for strImageFile in os.listdir(os.path.join(SelectedDir, day, File)):
-                            src = os.path.join(SelectedDir, day, File, strImageFile)
+            for afile in os.listdir(os.path.join(SelectedDir, day)):
+                if afile.find(config.PagePrefix) == 0:
+                    if os.path.isdir(os.path.join(SelectedDir, day, afile)):
+                        for strImageFile in os.listdir(os.path.join(SelectedDir, day, afile)):
+                            src = os.path.join(SelectedDir, day, afile, strImageFile)
                             dst = os.path.join(SelectedDir, day, strImageFile)
                             if os.path.isfile(src) and not os.path.exists(dst):
                                 shutil.move(src, dst)
@@ -319,11 +323,11 @@ class CopySelected(ThreadedProcessing):
 
 #######then copy the selected files to their folders###########################
         globalCount = 0
-        for File in self.input:
-            dest = os.path.join(SelectedDir, File)
-            src = os.path.join(config.DefaultRepository, File)
+        for afile in self.input:
+            dest = os.path.join(SelectedDir, afile)
+            src = os.path.join(config.DefaultRepository, afile)
             destdir = os.path.dirname(dest)
-            self.updated_signal.emit(File, globalCount, max(nbfiles, globalCount))
+            self.updated_signal.emit(afile, globalCount, max(nbfiles, globalCount))
             globalCount += 1
             if not os.path.isdir(destdir):
                 fileutils.makedir(destdir)
@@ -338,16 +342,14 @@ class CopySelected(ThreadedProcessing):
                     os.chmod(dest, config.DefaultFileMode)
                 except OSError:
                     logger.warning("In ModelCopySelected: unable to chmod %s", dest)
-            else :
+            else:
                 logger.info("In ModelCopySelected: %s already exists", dest)
 ######copy the comments of the directory to the Selected directory
-        AlreadyDone = []
-        for File in self.input:
-            directory = os.path.split(File)[0]
-            if directory in AlreadyDone:
-                continue
-            else:
-                AlreadyDone.append(directory)
+        already_done = []
+        for afile in self.input:
+            directory = os.path.split(afile)[0]
+            if directory not in already_done:
+                already_done.append(directory)
                 dst = os.path.join(SelectedDir, directory, config.CommentFile)
                 src = os.path.join(config.DefaultRepository, directory, config.CommentFile)
                 if os.path.isfile(src):
@@ -406,9 +408,8 @@ class ProcessSelected(ThreadedProcessing):
             @return: the number of images for current page
             """
             logger.debug("In splitIntoPages %s %s", pathday, globalCount)
-            files = []
-            for  i in os.listdir(pathday):
-                if os.path.splitext(i)[1] in config.Extensions:files.append(i)
+            files = [i for  i in os.listdir(pathday) \
+                     if os.path.splitext(i)[1] in config.Extensions]
             files.sort()
             if  len(files) > config.NbrPerPage:
                 pages = 1 + (len(files) - 1) // config.NbrPerPage
@@ -458,46 +459,45 @@ class ProcessSelected(ThreadedProcessing):
         if not os.path.isdir(SelectedDir):
             fileutils.mkdir(SelectedDir)
 #####first of all : copy the subfolders into the day folder to help mixing the files
-        AlsoProcess = 0
         for day in os.listdir(SelectedDir):
 # if SingleDir : revert to a foldered structure
             DayOrFile = os.path.join(SelectedDir, day)
             if os.path.isfile(DayOrFile):
                 arrangeOneFile(SelectedDir, day)
-                AlsoProcess += 1
+                nbfiles += 1
 # end SingleDir normalization
             elif os.path.isdir(DayOrFile):
                 if day in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
                     fileutils.recursive_delete(DayOrFile)
                 elif day.find(config.PagePrefix) == 0:  # subpages in SIngleDir mode that need to be flatten
-                    for File in os.listdir(DayOrFile):
-                        if     os.path.isfile(os.path.join(DayOrFile, File)):
-                            arrangeOneFile(DayOrFile, File)
-                            AlsoProcess += 1
-#                        elif os.path.isdir(os.path.join(DayOrFile,File)) and File in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
-#                            recursive_delete(os.path.join(DayOrFile,File))
+                    for afile in os.listdir(DayOrFile):
+                        if     os.path.isfile(os.path.join(DayOrFile, afile)):
+                            arrangeOneFile(DayOrFile, afile)
+                            nbfiles += 1
+#                        elif os.path.isdir(os.path.join(DayOrFile,afile)) and afile in [config.ScaledImages["Suffix"],config.Thumbnails["Suffix"]]:
+#                            recursive_delete(os.path.join(DayOrFile,afile))
                     fileutils.recursive_delete(DayOrFile)
                 else:
-                    for File in os.listdir(DayOrFile):
-                        if File.find(config.PagePrefix) == 0:
-                            if os.path.isdir(os.path.join(SelectedDir, day, File)):
-                                for strImageFile in os.listdir(os.path.join(SelectedDir, day, File)):
-                                    src = os.path.join(SelectedDir, day, File, strImageFile)
+                    for afile in os.listdir(DayOrFile):
+                        if afile.find(config.PagePrefix) == 0:
+                            if os.path.isdir(os.path.join(SelectedDir, day, afile)):
+                                for strImageFile in os.listdir(os.path.join(SelectedDir, day, afile)):
+                                    src = os.path.join(SelectedDir, day, afile, strImageFile)
                                     dst = os.path.join(SelectedDir, day, strImageFile)
                                     if os.path.isfile(src) and not os.path.exists(dst):
                                         shutil.move(src, dst)
-                                        AlsoProcess += 1
+                                        nbfiles += 1
                                     if (os.path.isdir(src)) and (os.path.split(src)[1] in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]):
                                         shutil.rmtree(src)
                         else:
-                            if os.path.splitext(File)[1] in config.Extensions:
-                                AlsoProcess += 1
+                            if os.path.splitext(afile)[1] in config.Extensions:
+                                nbfiles += 1
 
 #######then copy the selected files to their folders###########################
         for afile in self.input:
             ph = Photo(afile)
             if ph.is_raw:
-                dest = os.path.join(SelectedDir, afile.splitext()[0] + ".jpg")
+                dest = os.path.join(SelectedDir, os.path.splitext(afile)[0] + ".jpg")
             else:
                 dest = os.path.join(SelectedDir, afile)
             src = os.path.join(config.DefaultRepository, afile)
@@ -514,26 +514,26 @@ class ProcessSelected(ThreadedProcessing):
                     os.chmod(dest, config.DefaultFileMode)
                 except OSError:
                     logger.warning("Unable to chmod %s" % dest)
-                AlsoProcess += 1
-            else :
+                nbfiles += 1
+            else:
                 logger.warning("%s existe déja" % dest)
-        if AlsoProcess > 0:self.NbrJobsSignal.emit(AlsoProcess)
 ######copy the comments of the directory to the Selected directory
-        AlreadyDone = []
+        already_done = []
         for afile in self.input:
             directory = os.path.split(afile)[0]
-            if directory in AlreadyDone:
-                continue
-            else:
-                AlreadyDone.append(directory)
-                dst = os.path.join(SelectedDir, directory, config.CommentFile)
-                src = os.path.join(config.DefaultRepository, directory, config.CommentFile)
+            if directory not in already_done:
+                already_done.append(directory)
+                dst = os.path.join(SelectedDir,
+                                   directory, config.CommentFile)
+                src = os.path.join(config.DefaultRepository,
+                                   directory, config.CommentFile)
                 if os.path.isfile(src):
                     shutil.copy(src, dst)
 
-########finally recreate the structure with pages or make a single page ########################
+########finally recreate the structure with pages or make a single page ######
         logger.debug("in ModelProcessSelected, SelectedDir= %s", SelectedDir)
-        dirs = [ i for i in os.listdir(SelectedDir) if os.path.isdir(os.path.join(SelectedDir, i))]
+        dirs = [i for i in os.listdir(SelectedDir) \
+                if os.path.isdir(os.path.join(SelectedDir, i))]
         dirs.sort()
         if config.ExportSingleDir:  # SingleDir
             # first move all files to the root
@@ -541,7 +541,8 @@ class ProcessSelected(ThreadedProcessing):
                 daydir = os.path.join(SelectedDir, day)
                 for filename in os.listdir(daydir):
                     try:
-                        timetuple = time.strptime(day[:10] + "_" + filename[:8], "%Y-%m-%d_%Hh%Mm%S")
+                        timetuple = time.strptime(day[:10] + "_" + filename[:8],
+                                                  "%Y-%m-%d_%Hh%Mm%S")
                         suffix = filename[8:]
                     except ValueError:
                         try:
@@ -561,7 +562,7 @@ class ProcessSelected(ThreadedProcessing):
             for day in dirs:
                 globalCount = splitIntoPages(os.path.join(SelectedDir, day), globalCount)
 
-        self.updated_signal("", 0, 0)
+        self.updated_signal.emit("", 0, 0)
         self.result = res
         self.finished_signal.emit(res)
         return self.result
@@ -618,5 +619,5 @@ def scaleImage(filename, filigrane=None):
         try:
             os.chmod(filename, config.DefaultFileMode)
         except OSError:
-            logger.warning("in scaleImage: Unable to chmod %s" % filename)
+            logger.warning("in scaleImage: Unable to chmod %s", filename)
 
