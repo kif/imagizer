@@ -40,9 +40,10 @@ logger = logging.getLogger("imagizer.imagizer")
 
 try:
     import Image  # IGNORE:F0401
-except:
-    raise ImportError("""Selector needs PIL: Python Imaging Library
+except ImportError as error:
+    logger.error("""Selector needs PIL: Python Imaging Library
     PIL is available from http://www.pythonware.com/products/pil/""")
+    raise err
 
 
 from .encoding import unicode2ascii
