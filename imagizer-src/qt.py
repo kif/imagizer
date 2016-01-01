@@ -4,9 +4,9 @@
 #    Project: Imagizer
 #             https://github.com/kif/imagizer
 #
-#    Copyright (C) European Synchrotron Radiation Facility, Grenoble, France
+#    Copyright (C) Jerome Kieffer
 #
-#    Principal author:       Jérôme Kieffer (Jerome.Kieffer@ESRF.eu)
+#    Principal author:       Jérôme Kieffer (Jerome.Kieffer@terre-adelie.org)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,12 +24,7 @@
 
 from __future__ import with_statement, division, print_function, absolute_import
 
-"""
-
-Module to handle matplotlib and the Qt backend
-
-"""
-
+__doc__ = """Module to handle matplotlib and the Qt backend"""
 __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
@@ -46,26 +41,10 @@ import logging
 logger = logging.getLogger("imagizer.qt")
 
 has_Qt = True
-if ('PySide' in sys.modules):
+if 'PySide' in sys.modules:
     from PySide import QtGui, QtCore, QtUiTools, QtWebKit
     from PySide.QtCore import SIGNAL, Signal
-
-# TODO: see https://github.com/lunaryorn/snippets/blob/master/qt4/designer/pyside_dynamic.py
-
-    #we need to handle uic !!!
-    """
-    loadUi(uifile, baseinstance=None, package='') -> widget
-
-Load a Qt Designer .ui file and return an instance of the user interface.
-
-uifile is a file name or file-like object containing the .ui file.
-baseinstance is an optional instance of the Qt base class.  If specified
-then the user interface is created in it.  Otherwise a new instance of the
-base class is automatically created.
-package is the optional package which is used as the base for any relative
-imports of custom widgets.
-
-    """
+    from .pyside_dynamic import loadUi as _loadUi
     class uic(object):
         @staticmethod
         def loadUi(uifile, baseinstance=None, package=''):
@@ -77,21 +56,14 @@ imports of custom widgets.
             base class is automatically created.
             package is the optional package which is used as the base for any relative
             imports of custom widgets.
-
-            Totally untested !
             """
-            loader = QtUiTools.QUiLoader()
-            file = QtCore.QFile(uifile)
-            file.open(QtCore.QFile.ReadOnly)
-            myWidget = loader.load(file, self)
-            file.close()
-            if baseinstance is not None:
-                baseinstance = myWidget
-            else:
-                return myWidget
+            return _loadUi(uifile, baseinstance,
+                           customWidgets={'Line': QtGui.QFrame})
 
     sys.modules["PySide.uic"] = uic
     matplotlib.rcParams['backend.qt4'] = 'PySide'
+    Qt_version = QtCore.__version_info__
+    loadUi = _loadUi  # uic.loadUi
 else:
     try:
         from PyQt4 import QtGui, QtCore, uic, QtWebKit
@@ -114,14 +86,14 @@ else:
 
 transformations = (QtCore.Qt.FastTransformation, QtCore.Qt.SmoothTransformation)
 
+
 def flush():
     """
     Enforce the flush of the graphical application
     """
     if QtCore.QCoreApplication.hasPendingEvents():
-        QtCore.QCoreApplication.flush ()
-#         for evt in QtCore.QCoreApplication.p
-#     QtCore.QCoreApplication.processEvents()
+        QtCore.QCoreApplication.flush()
+
 
 def update_fig(fig=None):
     """
@@ -180,15 +152,17 @@ def icon_on(target="right", button=None, icon_name=None,):
 
 
 class ExtendedQLabel(QtGui.QLabel):
+    """Extenstion for Qlabel with pan and zoom function used to display images
+    """
     zoom = Signal(QtGui.QWheelEvent, name="zoom")
     pan = Signal(QtGui.QMoveEvent, name="pan")
     DELTA2 = 100
-    def __init(self, parent):
+    def __init__(self, parent):
         QtGui.QLabel.__init__(self, parent)
         self.old_pos = None
 
     def mouseReleaseEvent(self, ev):
-        logger.debug("Released %s %s" , ev, ev)
+        logger.debug("Released %s %s", ev, ev)
         if self.old_pos is not None:
             lastx, lasty = self.old_pos
             x = ev.x()
@@ -196,9 +170,9 @@ class ExtendedQLabel(QtGui.QLabel):
             dx = x - lastx
             dy = y - lasty
             delta2 = dx * dx + dy * dy
-#             logger.info("Delta2: %s %s %s %s %s ", delta2, x , y , lastx, lasty)
             if delta2 > self.DELTA2:
-                move_ev = QtGui.QMoveEvent(ev.pos(), QtCore.QPoint(*self.old_pos))
+                move_ev = QtGui.QMoveEvent(ev.pos(),
+                                           QtCore.QPoint(*self.old_pos))
 #                 logger.info("move image %s", move_ev)
                 self.pan.emit(move_ev)
             self.old_pos = None
@@ -206,12 +180,14 @@ class ExtendedQLabel(QtGui.QLabel):
             print("last ev is None !!!")
 
     def mousePressEvent(self, ev):
-        logger.debug("Pressed %s %s %s " , ev, ev.x(), ev.y())
+        logger.debug("Pressed %s %s %s ", ev, ev.x(), ev.y())
         self.old_pos = (ev.x(), ev.y())
 
     def wheelEvent(self, ev):
-        logger.debug("Scroll %s at %s,%s %s" , ev, ev.x(), ev.y(), ev.delta())
+        logger.debug("Scroll %s at %s,%s %s",
+                     ev, ev.x(), ev.y(), ev.delta())
         self.zoom.emit(ev)
+
 
 def get_matrix(orientation):
     """Return the rotation matrix corresponding to the exif orientation
