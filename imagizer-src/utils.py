@@ -4,9 +4,9 @@
 #    Project: Imagizer
 #             https://github.com/kif/imagizer
 #
-#    Copyright (C) European Synchrotron Radiation Facility, Grenoble, France
+#    Copyright (C) Jerome Kieffer
 #
-#    Principal author:       Jérôme Kieffer (Jerome.Kieffer@ESRF.eu)
+#    Principal author:       Jérôme Kieffer (Jerome.Kieffer@terre-adelie.org)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "28/12/2015"
+__date__ = "01/01/2016"
 __status__ = "production"
 
 
