@@ -34,7 +34,7 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "26/12/2015"
+__date__ = "01/01/2016"
 __status__ = "production"
 
 
@@ -42,6 +42,8 @@ import os
 import sys
 import matplotlib
 from .utils import get_ui_file
+import logging
+logger = logging.getLogger("imagizer.qt")
 
 has_Qt = True
 if ('PySide' in sys.modules):
@@ -176,22 +178,39 @@ def icon_on(target="right", button=None, icon_name=None,):
     else:
         widget.layout().addRow(lab_ico, lab_txt)
 
+
 class ExtendedQLabel(QtGui.QLabel):
     zoom = Signal(QtGui.QWheelEvent, name="zoom")
+    pan = Signal(QtGui.QMoveEvent, name="pan")
+    DELTA2 = 100
     def __init(self, parent):
         QtGui.QLabel.__init__(self, parent)
-
+        self.old_pos = None
 
     def mouseReleaseEvent(self, ev):
-#        print("Released %s" % ev)
-        self.emit(SIGNAL('clicked()'))
+        logger.debug("Released %s %s" , ev, ev)
+        if self.old_pos is not None:
+            lastx, lasty = self.old_pos
+            x = ev.x()
+            y = ev.y()
+            dx = x - lastx
+            dy = y - lasty
+            delta2 = dx * dx + dy * dy
+#             logger.info("Delta2: %s %s %s %s %s ", delta2, x , y , lastx, lasty)
+            if delta2 > self.DELTA2:
+                move_ev = QtGui.QMoveEvent(ev.pos(), QtCore.QPoint(*self.old_pos))
+#                 logger.info("move image %s", move_ev)
+                self.pan.emit(move_ev)
+            self.old_pos = None
+        else:
+            print("last ev is None !!!")
 
     def mousePressEvent(self, ev):
-#        print("Pressed %s" % ev)
-        self.emit(SIGNAL('clicked()'))
+        logger.debug("Pressed %s %s %s " , ev, ev.x(), ev.y())
+        self.old_pos = (ev.x(), ev.y())
 
     def wheelEvent(self, ev):
-#        print("Scroll %s at %s,%s %s" % (ev, ev.x(), ev.y(), ev.delta()))
+        logger.debug("Scroll %s at %s,%s %s" , ev, ev.x(), ev.y(), ev.delta())
         self.zoom.emit(ev)
 
 def get_matrix(orientation):

@@ -30,7 +30,7 @@ Graphical interface for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "3.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/12/2015"
+__date__ = "01/01/2016"
 __license__ = "GPL"
 
 import gc
@@ -68,7 +68,7 @@ class Interface(QtCore.QObject):
         self.processes = []
         self.job_sem = threading.Semaphore()
         self.fn_current = None
-        self.is_zoomed = False
+        self.is_zoomed = None
         self.min_mark = 0
         self.default_filter = None
         self.menubar_isvisible = True
@@ -155,6 +155,7 @@ class Interface(QtCore.QObject):
 
                     self.gui.menubar.triggered: self._action_handler,
                     self.gui.photo.zoom: self.image_zoom,
+                    self.gui.photo.pan: self.image_pan,
                     self.signal_status: self.update_status,
                     self.signal_newfiles: self.set_data
         }
@@ -1216,8 +1217,10 @@ class Interface(QtCore.QObject):
     def image_zoom(self, ev):
         """
         mouse scroll on the image to zoom
+
+        @param ev: QWheelEvent. See qt.ExtendedLabel
         """
-        logger.info("Interface.image_zoom ")
+        logger.debug("Interface.image_zoom ")
         zoom = ev.delta()
         w_width = self.gui.photo.width()
         w_height = self.gui.photo.height()
@@ -1226,19 +1229,42 @@ class Interface(QtCore.QObject):
         x = ev.x()
         y = ev.y()
         if zoom > 0 and not self.is_zoomed:
-            nx = x - (w_width - p_width) / 2.0
-            ny = y - (w_height - p_height) / 2.0
-            pixbuf = self.image.get_pixbuf(w_width, w_height,
-                                     nx / p_width,
-                                     ny / p_height)
+            nx = (x - (w_width - p_width) / 2.0) / p_width
+            ny = (y - (w_height - p_height) / 2.0) / p_height
+            pixbuf = self.image.get_pixbuf(w_width, w_height, nx, ny)
             self.gui.photo.setPixmap(pixbuf)
             del pixbuf
-            self.is_zoomed = True
+            self.is_zoomed = (nx, ny)
         elif zoom < 0 and self.is_zoomed:
             pixbuf = self.image.get_pixbuf(w_width, w_height)
             self.gui.photo.setPixmap(pixbuf)
             del pixbuf
-            self.is_zoomed = False
+            self.is_zoomed = None
+        gc.collect()
+
+    def image_pan(self, ev):
+        """
+        mouse pan on the image when zoomed in
+
+        @param ev: moveEvent
+        """
+        logger.debug("Interface.image_pan %s", ev)
+        if not self.is_zoomed:
+            return
+        w_width = self.gui.photo.width()
+        w_height = self.gui.photo.height()
+        p_width = self.image.pixelsX
+        p_height = self.image.pixelsY
+        x, y = self.is_zoomed
+        dx = ev.pos().x() - ev.oldPos().x()
+        dy = ev.pos().y() - ev.oldPos().y()
+        nx = x - dx / p_width
+        ny = y - dy / p_height
+#         logger.info("dx %s, dy %s, oldxy %s %s new xy %s %s", dx, dy, x, y, nx, ny)
+        pixbuf = self.image.get_pixbuf(w_width, w_height, nx, ny)
+        self.is_zoomed = (nx, ny)
+        self.gui.photo.setPixmap(pixbuf)
+        del pixbuf
         gc.collect()
 
     def show_treeview(self, *arg):
