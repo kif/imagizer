@@ -24,13 +24,10 @@
 
 from __future__ import with_statement, division, print_function, absolute_import
 
-"""
-Graphical interface for selector.
-"""
+__doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
-__version__ = "3.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "01/01/2016"
+__date__ = "03/01/2016"
 __license__ = "GPL"
 
 import gc
@@ -48,7 +45,7 @@ from .photo import Photo
 from .utils import get_pixmap_file
 from .config import config, listConfigurationFiles
 from .imagecache import imageCache
-from . import tree
+from . import tree, __version__
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
 from .fileutils import smartSize, recursive_delete
 
@@ -904,7 +901,7 @@ class Interface(QtCore.QObject):
         """display a copyright message"""
         logger.debug("Interface.about clicked")
         self.update_title()
-        msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s" % (__author__, __contact__, __version__)
+        msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s (%s)" % (__author__, __contact__, __version__, __date__)
         message_box(self.gui, "À Propos", msg)
 
     def searchJ(self, *args):
