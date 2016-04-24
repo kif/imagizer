@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "25/12/2015"
+__date__ = "24/04/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -417,14 +417,17 @@ class Photo(object):
                     if "value" in dir(title):
                         title = title.value
                 except KeyError:
-                    title = ""
+                    title = u""
+                else:
+                    title = title.strip(u"\x00")
+
             else:
                 title = exif.comment
                 try:
                     title = title.decode(config.Coding)
                 except Exception as error:
-                    logger.error("%s in comment: %s, unable to decode in %s for %s" %
-                                 (error, self.metadata["title"], config.Coding, self.filename))
+                    logger.error("%s in comment: %s, unable to decode in %s for %s",
+                                 error, title, config.Coding, self.filename)
                     try:
                         title = title.decode("latin1")
                     except Exception as error2:
