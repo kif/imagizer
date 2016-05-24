@@ -30,9 +30,9 @@ It handles images, progress bars and configuration file.
 """
 
 __author__ = "Jérôme Kieffer"
-__version__ = "3.2.0"
+__version__ = "3.2.1"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "30/12/2015"
+__date__ = "24/05/2016"
 __license__ = "GPL"
 
 import os, logging, sys

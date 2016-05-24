@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "03/01/2016"
+__date__ = "24/05/2016"
 __license__ = "GPL"
 
 import gc
@@ -659,14 +659,14 @@ class Interface(QtCore.QObject):
         self.clean_processes()
         filename = self.fn_current
         base, ext = os.path.splitext(filename)
-        newname = base + "-Gimp" + ext
+        newname = base + "-Gimp.jpg"
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort(key=lambda x:x[:-4])
         self.idx_current = self.AllJpegs.index(newname)
         self.fn_current = newname
         newnamefull = os.path.join(config.DefaultRepository, newname)
-        shutil.copy(os.path.join(config.DefaultRepository, filename), newnamefull)
+        self.image.as_jpeg(newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
         p = subprocess.Popen([config.Gimp, newnamefull])
         with self.job_sem:
@@ -682,7 +682,7 @@ class Interface(QtCore.QObject):
         filename = self.fn_current
         base, ext = os.path.splitext(filename)
         filenamefull = os.path.join(config.DefaultRepository, filename)
-        newname = base + "-RawTherapee.jpg"
+        newname = base + "-RT.jpg"
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort(key=lambda x:x[:-4])
