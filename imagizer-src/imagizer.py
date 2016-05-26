@@ -147,18 +147,11 @@ class RangeTout(ThreadedProcessing):
                               fileutils.list_files_in_named_dir(trashDir, date, heure_we):
                 logger.debug("%s <-?-> %s", fname, existingfn)
                 existing = Photo(existingfn, dontCache=True)
-                try:
-                    existing.readExif()
-                    original_name = existing.exif["Exif.Photo.UserComment"]
-                except:
-                    logger.error("in ModelRangeTout: reading Exif for %s", fname)
-                else:
-                    if "human_value" in dir(original_name):
-                        original_name = original_name.human_value
-                    if original_name and (os.path.basename(original_name) == os.path.basename(fname)):
-                        logger.debug("File already in repository, leaving as it is")
-                        bSkipFile = existingfn
-                        break
+                original_name = existing.retrieve_original_name()
+                if original_name and (os.path.basename(original_name) == os.path.basename(fname)):
+                    logger.debug("File already in repository, leaving as it is")
+                    bSkipFile = existingfn
+                    break
             if bSkipFile:
                 logger.warning("%s -x-> %s", fname, bSkipFile)
                 continue

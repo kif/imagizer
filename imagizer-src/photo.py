@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "24/04/2016"
+__date__ = "26/05/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -620,7 +620,7 @@ class Photo(object):
             imageCache.rename(oldname, newname)
 
 
-    def storeOriginalName(self, originalName):
+    def store_original_name(self, originalName):
         """
         Save the original name of the file into the Exif.Photo.UserComment tag.
         This tag is usually not used, people prefer the JPEG tag for entitling images.
@@ -630,6 +630,22 @@ class Photo(object):
         """
         self.exif["Exif.Image.DocumentName"] = originalName
         self.exif.write()
+    storeOriginalName = store_original_name
+
+    def retrieve_original_name(self):
+        """Retrives the original name of the file into the Exif.Photo.DocumentName tag.
+
+        @return: name of the file before it was processed by selector
+        @rtype: python string
+        """
+        exif = self.get_exif()
+        original_name = exif.get("Exif.Photo.UserComment")
+        if original_name is None :
+            logger.error("in ModelRangeTout: reading Exif for %s", fname)
+        elif "human_value" in dir(original_name):
+            return original_name.human_value
+        else:
+            return original_name
 
 
     def autorotate(self):
