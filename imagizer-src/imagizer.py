@@ -27,7 +27,7 @@ It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "30/12/2015"
+__date__ = "26/05/2016"
 __license__ = "GPL"
 import os
 import shutil
@@ -149,13 +149,13 @@ class RangeTout(ThreadedProcessing):
                 existing = Photo(existingfn, dontCache=True)
                 try:
                     existing.readExif()
-                    originalName = existing.exif["Exif.Photo.UserComment"]
+                    original_name = existing.exif["Exif.Photo.UserComment"]
                 except:
                     logger.error("in ModelRangeTout: reading Exif for %s", fname)
                 else:
-                    if "human_value" in dir(originalName):
-                        originalName = originalName.human_value
-                    if os.path.basename(originalName) == os.path.basename(fname):
+                    if "human_value" in dir(original_name):
+                        original_name = original_name.human_value
+                    if original_name and (os.path.basename(original_name) == os.path.basename(fname)):
                         logger.debug("File already in repository, leaving as it is")
                         bSkipFile = existingfn
                         break
