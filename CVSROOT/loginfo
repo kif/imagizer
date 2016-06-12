@@ -21,7 +21,7 @@
 # Note that %{sVv} is a list operator and not all elements are necessary.  Thus %{sv} is
 # a legal format string, but will only be replaced with file name and new revision.
 # it also generates multiple arguments for each file being operated upon.  i.e. if two
-# files, file1 & file2, are being commited from 1.1 to version 1.1.2.1 and from 1.1.2.2
+# files, file1 & file2, are being committed from 1.1 to version 1.1.2.1 and from 1.1.2.2
 # to 1.1.2.3, respectively, %{sVv} will generate the following six arguments in this
 # order: file1, 1.1, 1.1.2.1, file2, 1.1.2.2, 1.1.2.3.
 #

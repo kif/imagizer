@@ -26,7 +26,7 @@
 
 #
 # Liste des dépendances : python, PIL, Glade-2
-# Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
+# Exiftran existe en version windows maintenant ... nous utilisons une version modifiée ...!!!!
 #
 #todo liste des fonctions a implemanter ....
 # - se passer de exiftran

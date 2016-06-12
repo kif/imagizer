@@ -675,7 +675,7 @@ class Signature(object):
         return
 
     def substract(self, inimage, orientation=5):
-        """apply a substraction mask on the image"""
+        """apply a subtraction mask on the image"""
         self.img = inimage
         self.x, self.y = self.img.size
         ImageFile.MAXBLOCK = self.x * self.y
