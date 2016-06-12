@@ -366,7 +366,7 @@ class ModelCopySelected(object):
             if not os.path.exists(dest):
                 if filigrane:
                     image = Image.open(src)
-                    filigrane.substract(image).save(dest, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
+                    filigrane.subtract(image).save(dest, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
                 else:
                     shutil.copy(src, dest)
                 try:
@@ -725,7 +725,7 @@ def scaleImage(filename, filigrane=None):
     param["strThumbFile"] = os.path.join(thumbdir, os.path.basename(filename))[:-4] + "--%s.jpg" % config.Thumbnails["Suffix"]
     photo.saveThumb(**param)
     if filigrane is not None:
-        filigrane.substract(photo.pil).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
+        filigrane.subtract(photo.pil).save(filename, quality=config.FiligraneQuality, optimize=config.FiligraneOptimize, progressive=config.FiligraneOptimize)
         try:
             os.chmod(filename, config.DefaultFileMode)
         except OSError:

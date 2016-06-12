@@ -25,7 +25,7 @@
 #*****************************************************************************/
 #
 # Liste des dépendances : python, PIL, Glade-2
-# Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
+# Exiftran existe en version windows maintenant ... nous utilisons une version modifiée ...!!!!
 #
 from __future__ import with_statement
 

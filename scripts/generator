@@ -1471,7 +1471,7 @@ def readTemplate(tfn):
         except IOError, e:
             print >> sys.stderr, "Error: can't open image template file:", fn
             sys.exit(1)
-        if opts.verbose: print "  succesfully loaded template", tfn
+        if opts.verbose: print "  successfully loaded template", tfn
 
     else:
         # bah... can't load it, use fallback templates

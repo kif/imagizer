@@ -12,7 +12,7 @@ them, by re-arrangement of compressed blocks.
 
 * Selector is the GUI part, it should run on a graphical workstation, it searches the 
 sub-directories for JPEG files and sorts them according to their date/time and camera 
-model. After this initial step occuring during the splash screen, Selector offers 
+model. After this initial step occurring during the splash screen, Selector offers 
 a GUI for rotating, adding comments, selecting images for publication (or archiving)
 and displaying slideshows.  
 

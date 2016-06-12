@@ -162,7 +162,7 @@ imagizer.imagizer.photo.has_title	imagizer.imagizer.photo-class.html#has_title
 imagizer.imagizer.photo.GaussianKernel	imagizer.imagizer.photo-class.html#GaussianKernel
 imagizer.imagizer.photo.autorotate	imagizer.imagizer.photo-class.html#autorotate
 imagizer.imagizer.signature	imagizer.imagizer.signature-class.html
-imagizer.imagizer.signature.substract	imagizer.imagizer.signature-class.html#substract
+imagizer.imagizer.signature.subtract	imagizer.imagizer.signature-class.html#subtract
 imagizer.imagizer.signature.mask	imagizer.imagizer.signature-class.html#mask
 imagizer.imagizer.signature.__init__	imagizer.imagizer.signature-class.html#__init__
 imagizer.parser.AttrFile	imagizer.parser.AttrFile-class.html
