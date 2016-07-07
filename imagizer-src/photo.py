@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/05/2016"
+__date__ = "05/06/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -147,7 +147,7 @@ class Photo(object):
     def getPixelsX(self):
         if not self._pixelsX:
             if self.is_raw:
-                self.getExif()
+                self.get_exif()
             else:
                 self._pixelsX = max(1, self.pil.size[0])
         return self._pixelsX
@@ -158,7 +158,7 @@ class Photo(object):
     def getPixelsY(self):
         if not self._pixelsY:
             if self.is_raw:
-                self.getExif()
+                self.get_exif()
             else:
                 self._pixelsY = max(1, self.pil.size[1])
         return self._pixelsY
@@ -166,7 +166,7 @@ class Photo(object):
         self._pixelsY = value
     pixelsY = property(getPixelsY, setPixelsY, doc="Property to get the size in pixels via PIL")
 
-    def getExif(self):
+    def get_exif(self):
         if self._exif is None:
             self._exif = Exif(self.fn)
             self._exif.read()
@@ -187,7 +187,8 @@ class Photo(object):
                 if self.get_orientation(True) > 4:
                     self._pixelsX, self._pixelsY = self._pixelsY, self._pixelsX
         return self._exif
-    exif = property(getExif, doc="property for exif data")
+    getExif = get_exif
+    exif = property(get_exif, doc="property for exif data")
 
     def get_orientation(self, check=False):
         if not self._orientation or check:
@@ -406,7 +407,7 @@ class Photo(object):
         """
         @return: metadata dict (exif data + title from the photo)
         """
-        exif = self.getExif()
+        exif = self.get_exif()
         "initialize exifs"
         if self.metadata is None:
             self.metadata = {"size": "%.2f %s" % smartSize(op.getsize(self.fn))}

@@ -1,27 +1,27 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# * $Source$
+# * $Id$
+# *
+# * Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 from Image import Image
 __author__ = "Jérôme Kieffer"
@@ -30,7 +30,7 @@ __copyright__ = "Jerome Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
 
-#Find all the videos and renames them, compress then .... and write an html file to set online
+# Find all the videos and renames them, compress then .... and write an html file to set online
 
 import logging
 import Image
@@ -171,14 +171,18 @@ class Video:
             try:
                 self.metadata = extractMetadata(myParser)
             except HachoirError, err:
-                print "Metadata extraction error: %s" % unicode(err)
+                print("Metadata extraction error: %s" % err)
                 self.metadata = None
         if self.metadata:
             bDoMplayer = False
             try:
+                old_timestamp = self.timeStamp
                 self.timeStamp = self.metadata.get("creation_date")
             except:
                 pass
+            else:
+                if self.timeStamp.year < 1990:
+                    self.timeStamp = old_timestamp  # probably a bug in hachoir
             if type(self.timeStamp) == type(datetime.date(2000, 10, 10)):
                 try:
                     hour = datetime.time(*time.strptime(self.videoFile[:9], "%Hh%Mm%Ss")[3:6])
@@ -200,19 +204,19 @@ class Video:
 #                if ord(i) > 127: convertLatin1ToUTF8 = True
 #            if convertLatin1ToUTF8:
 #                self.title = self.title.encode("latin1").decode("UTF8")
-#Work-around for latin1 related bug 
+# Work-around for latin1 related bug
             self.height = self.metadata.get("height")
             try:
                 self.frameRate = self.metadata.get("frame_rate")
             except:
                 bDoMplayer = True
-                #self.frameRate = 24 #default value for Canon G11
+                # self.frameRate = 24 #default value for Canon G11
 
             try:
                 self.bitRate = self.metadata.get("bit_rate")
             except:
                 bDoMplayer = True
-                #self.bitRate = None
+                # self.bitRate = None
             oldcamera = self.camera
             try:
                 self.camera = self.metadata.get("producer").replace(" ", "_")
@@ -246,7 +250,7 @@ class Video:
                     (self.videoCodec) is None or \
                     (self.videoBpP) is None:
                 self.MplayerMetadata()
-        else:#Doing it in the not clean way, i.e. parse mplayer output !
+        else:  # Doing it in the not clean way, i.e. parse mplayer output !
             self.MplayerMetadata()
 
     def MplayerMetadata(self):
@@ -352,7 +356,7 @@ class Video:
             else:
                 rotate = " "
         bDoAudio = (self.audioCodec.lower().find("pcm") >= 0)
-        #print "Audio spec= " + self.audioCodec
+        # print "Audio spec= " + self.audioCodec
         bDoVideo = (not (self.videoCodec.lower().find("h264") >= 0 or self.videoCodec.lower().find("avc1") >= 0)) or self.videoFile.lower().endswith(".mov")
         logging.debug(str("DoAudio=%s\tDoVideo=%s" % (bDoAudio, bDoVideo)))
         if bDoAudio:
@@ -364,7 +368,7 @@ class Video:
             os.system(sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s " % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
         __, tmpavi = tempfile.mkstemp(suffix=".avi")
         if False:
-        #if bDoVideo:
+        # if bDoVideo:
             os.system(mencoder + rotate + " -nosound -ovc x264 -x264encopts bitrate=%s:pass=1:turbo=1:%s -o %s %s" % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
             os.remove(tmpavi)
             os.system(mencoder + rotate + " -nosound -ovc x264 -x264encopts bitrate=%s:pass=3:%s -o %s %s" % (VIDEO_BIT_RATE, x264opts, tmpavi, self.fullPath))
@@ -416,7 +420,7 @@ class Video:
         if bDoAudio:
             newSampleRate = 44100
             wavaudio = "audio-%s.wav" % newSampleRate
-            if (self.audioSampleRate == 11024) and (self.audioChannel == 1): #specific Ixus 
+            if (self.audioSampleRate == 11024) and (self.audioChannel == 1):  # specific Ixus
                 rawaudio = "audio-%s.raw" % self.audioSampleRate
                 pbsfile.write(mplayer + ' "%s" -dumpaudio   -dumpfile %s \n' % (self.fullPath, rawaudio))
                 pbsfile.write(sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s \n" % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
@@ -553,7 +557,7 @@ if __name__ == "__main__":
         Action = "Rename"
     elif sys.argv[0].lower().find("genhtml") >= 0:
         Action = "GenHTML"
-    else: #sys.argv[0].lower().find("genhtml") >= 0:
+    else:  # sys.argv[0].lower().find("genhtml") >= 0:
         Action = "DEBUG"
     debug = False
     for oneArg in sys.argv[1:]:
@@ -575,7 +579,7 @@ if __name__ == "__main__":
     UpperDir = OP.split(RootDir)[0]
     if Action == "Rename":
         for onefile in FindFile(RootDir):
-    #for onefile in os.listdir("."):
+    # for onefile in os.listdir("."):
     #    if OP.splitext(onefile)[1].lower() in VideoExts:
             vi = Video(onefile)
             vi.FindThumb()
