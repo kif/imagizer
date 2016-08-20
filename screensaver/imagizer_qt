@@ -17,7 +17,7 @@ import logging
 import random
 import uuid
 from argparse               import ArgumentParser
-logging.basicConfig(level=logging.DEBUG , filename="/tmp/imagizer_screensaver_%s.log" % uuid.uuid1())
+logging.basicConfig(level=logging.INFO , filename="/tmp/imagizer_screensaver_%s.log" % uuid.uuid1())
 logger = logging.getLogger("imagizer.screensaver")
 
 from imagizer.qt            import QtGui, QtCore, flush
