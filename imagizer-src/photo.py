@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "05/06/2016"
+__date__ = "21/08/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -254,7 +254,9 @@ class Photo(object):
             rescaled.exif.write()
             rescaled.autorotate()
 
+
             metadata = self.read_exif()
+            rescaled.orientation = 0
             rescaled.exif.write()
             rescaled.name(metadata.get("title", ""), metadata.get("rate", 0))
 
