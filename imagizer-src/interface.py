@@ -735,7 +735,7 @@ class Interface(QtCore.QObject):
         self.update_title()
         filename = self.fn_current
         base, ext = os.path.splitext(filename)
-        newname = base + "-ContrastMask" + ext
+        newname = base + "-ContrastMask.jpg"
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort(key=lambda x:x[:-4])
@@ -748,7 +748,7 @@ class Interface(QtCore.QObject):
         self.update_title()
         filename = self.fn_current
         base, ext = os.path.splitext(filename)
-        newname = base + "-AutoWB" + ext
+        newname = base + "-AutoWB.jpg"
         if not newname in self.AllJpegs:
             self.AllJpegs.append(newname)
             self.AllJpegs.sort(key=lambda x:x[:-4])
