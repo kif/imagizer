@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "24/05/2016"
+__date__ = "21/08/2016"
 __license__ = "GPL"
 
 import gc
@@ -366,7 +366,7 @@ class Interface(QtCore.QObject):
         logger.debug("Interface.update_title")
         new_title = unicode(self.gui.title.text())
         new_rate = int(self.gui.rate.value())
-        metadata = self.image.metadata
+        metadata = self.image.metadata or {}
         if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
             self.image.name(new_title, new_rate)
 
