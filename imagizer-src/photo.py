@@ -42,6 +42,7 @@ import time
 import subprocess
 import shutil
 import os.path as op
+from StringIO import StringIO
 installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.photo")
 
@@ -128,7 +129,11 @@ class Photo(object):
 
     def getPIL(self):
         if self._pil is None:
-            self._pil = Image.open(self.fn)
+            if not self.is_raw:
+                self._pil = Image.open(self.fn)
+            else:
+                largest = max(self.exif.previews, key=lambda i: i.size)
+                self._pil = Image.open(StringIO(largest.data), mode="r")
         return self._pil
     def setPIL(self, value):
         self._pil = value
@@ -182,7 +187,7 @@ class Photo(object):
                         self._pixelsY = pixelsY
                 else:
                     if "previews" in dir(self._exif) and self._exif.previews:
-                        largest = self._exif.previews[-1]
+                        largest = max(self._exif.previews, key=lambda i:i.size)
                         self._pixelsX, self._pixelsY = largest.dimensions
                 if self.get_orientation(True) > 4:
                     self._pixelsX, self._pixelsY = self._pixelsY, self._pixelsX
@@ -235,7 +240,7 @@ class Photo(object):
             shutil.copy(self.fn, dest)
             rescaled = self.__class__(dest, dontCache=True)
         else:
-            prev = self.exif.previews[-1]
+            prev = max(self.exif.previews, key=lambda i: i.size)
             ext = prev.extension
             if ext.lower() == ".jpg":
                 if dest.endswith(".jpg"):
@@ -476,7 +481,7 @@ class Photo(object):
             if self.metadata is None:
                 self.read_exif()
             logger.debug("Size of preview available: %s" % ([i.dimensions for i in self._exif.previews]))
-            largest = self._exif.previews[-1]
+            largest = max(self._exif.previews, key=lambda i:i.size)
 
             pixbuf = QtGui.QPixmap(*largest.dimensions)
 
@@ -718,7 +723,9 @@ class Photo(object):
         logger.debug("Write metadata to %s", exitJpeg)
         exifJpeg.write()
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
-        return Photo(outfile)
+        res = Photo(outfile)
+        res.autorotate()
+        return res
 
 
     def autoWB(self, outfile):
@@ -747,7 +754,7 @@ class Photo(object):
         rgb[:, 0] = 255.0 * (rgb[:, 0].clip(rgb_min[0], rgb_max[0]) - rgb_min[0]) / (rgb_max[0] - rgb_min[0])
         rgb[:, 1] = 255.0 * (rgb[:, 1].clip(rgb_min[1], rgb_max[1]) - rgb_min[1]) / (rgb_max[1] - rgb_min[1])
         rgb[:, 2] = 255.0 * (rgb[:, 2].clip(rgb_min[2], rgb_max[2]) - rgb_min[2]) / (rgb_max[2] - rgb_min[2])
-        out = Image.fromstring("RGB", (self.pixelsX, self.pixelsY), rgb.round().astype("uint8").tostring())
+        out = Image.fromstring("RGB", self.pil.size, rgb.round().clip(0, 255).astype("uint8").tostring())
         exitJpeg = op.join(config.DefaultRepository, outfile)
         out.save(exitJpeg, quality=80, progressive=True, Optimize=True)
         try:
@@ -760,7 +767,9 @@ class Photo(object):
         logger.debug("Write metadata to %s", exitJpeg)
         exifJpeg.write()
         logger.info("The whoole Auto White-Balance took %.3f" % (time.time() - t0))
-        return Photo(outfile)
+        res = Photo(outfile)
+        res.autorotate()
+        return res
 
 
 # #######################################################
