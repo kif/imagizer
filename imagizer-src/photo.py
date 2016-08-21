@@ -251,14 +251,13 @@ class Photo(object):
 
             rescaled = self.__class__(dest, dontCache=True)
             self.exif.copy(rescaled.exif)
+
             rescaled.exif.write()
             rescaled.autorotate()
 
 
             metadata = self.read_exif()
-            rescaled.orientation = 0
-            rescaled.exif.write()
-            rescaled.name(metadata.get("title", ""), metadata.get("rate", 0))
+            rescaled.name(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
 
             return rescaled
 
@@ -571,7 +570,7 @@ class Photo(object):
                                                      transformations[config.Interpolation])
         return scaled_buf
 
-    def name(self, title=None, rate=None):
+    def name(self, title=None, rate=None, reset_orientation=False):
         """
         write the title of the photo inside the description field, in the JPEG header
 
@@ -597,6 +596,8 @@ class Photo(object):
                 self.exif["Exif.Photo.UserComment"] = title.encode(config.Coding)
             else:
                 self.exif.comment = title.encode(config.Coding)
+        if reset_orientation:
+            self.exif['Exif.Image.Orientation'] = 1
 
         try:
             self.exif.write()
