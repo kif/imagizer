@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "21/08/2016"
+__date__ = "22/08/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -262,7 +262,10 @@ class Photo(object):
 
 
             metadata = self.read_exif()
-            rescaled.name(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
+            try:
+                rescaled.name(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
+            except Exception as error:
+                logger.warning("Error %s while processing %s", error, self.filename)
 
             return rescaled
 
