@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/08/2016"
+__date__ = "26/09/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -262,10 +262,7 @@ class Photo(object):
 
 
             metadata = self.read_exif()
-            try:
-                rescaled.name(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
-            except Exception as error:
-                logger.warning("Error %s while processing %s", error, self.filename)
+            rescaled.name(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
 
             return rescaled
 
@@ -653,7 +650,7 @@ class Photo(object):
         exif = self.get_exif()
         original_name = exif.get("Exif.Photo.UserComment")
         if original_name is None :
-            logger.error("in ModelRangeTout: reading Exif for %s", fname)
+            logger.error("in ModelRangeTout: reading Exif for %s", self.fn)
         elif "human_value" in dir(original_name):
             return original_name.human_value
         else:

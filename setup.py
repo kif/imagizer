@@ -50,8 +50,8 @@ SCRIPTS = "scripts"
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 EXIFTRAN = "pyexiftran"
-JPEG_VERSION = "80"  # "62"
-# JPEG_VERSION = "62"
+#JPEG_VERSION = "80"  # "62"
+JPEG_VERSION = "62"
 JPEG_DIR = os.path.join(EXIFTRAN, "jpeg", JPEG_VERSION)
 
 sources = glob.glob(os.path.join(EXIFTRAN, "*.c")) + glob.glob(os.path.join(JPEG_DIR, "*.c"))

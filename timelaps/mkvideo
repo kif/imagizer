@@ -1,0 +1,6 @@
+#!/bin/bash
+FPS=25
+BR=5000k
+ffmpeg -framerate ${FPS} -pattern_type glob -i '*.jpg' -c:v libx264 -vf "fps=${FPS},format=yuv420p" -b:v $BR  -pass 1 -f mp4 -y /dev/null
+ffmpeg -framerate ${FPS} -pattern_type glob -i '*.jpg' -c:v libx264 -vf "fps=${FPS},format=yuv420p" -b:v $BR -pass 2 video.mp4
+

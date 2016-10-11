@@ -27,7 +27,7 @@ It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/05/2016"
+__date__ = "27/08/2016"
 __license__ = "GPL"
 import os
 import shutil
@@ -217,7 +217,9 @@ class RangeTout(ThreadedProcessing):
             l = len(repository)
             if not repository.endswith(os.sep):
                 l += 1
-            all_files = [i[l:] for i in glob.glob(os.path.join(repository, "????-??-??*/*.jpg"))]
+            all_files = []
+            for ext in config.Extensions + config.RawExtensions:
+                all_files += [i[l:] for i in glob.iglob(os.path.join(repository, "????-??-??*/*" + ext))]
             all_files.sort()
             first = len(all_files) - 1
             return (all_files, first)
