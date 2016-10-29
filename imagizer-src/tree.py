@@ -21,17 +21,17 @@
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
 #*****************************************************************************/
-
-from __future__ import with_statement, division, print_function, absolute_import
-
 """
 Buils a tree view on the list of files
 """
 
+from __future__ import with_statement, division, print_function, absolute_import
+
+
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/11/2015"
+__date__ = "29/10/2016"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -47,7 +47,7 @@ MONTH = {"01": u"Janvier",
          "11": u"Novembre",
          "12": u"Décembre",
          }
-from .qt import QtCore, QtGui
+from . import qt
 import os
 from .utils import timeit
 from .photo import Photo
@@ -166,12 +166,12 @@ def build_tree(big_list):
     return root
 
 
-class TreeModel(QtCore.QAbstractItemModel):
+class TreeModel(qt.QAbstractItemModel):
     def __init__(self, root_item, win):
         super(TreeModel, self).__init__(win)
-        self._root_item=root_item
+        self._root_item = root_item
         self._win = win
-        self._current_branch=None
+        self._current_branch = None
 
     def rowCount(self, parent):
         if parent.column() > 0:
@@ -186,7 +186,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
     def flags(self, midx):
 #        if midx.column()==1:
-        return QtCore.Qt.ItemIsEnabled
+        return qt.Qt.ItemIsEnabled
 
     def index(self, row, column, parent):
         pitem = parent.internalPointer()
@@ -195,15 +195,15 @@ class TreeModel(QtCore.QAbstractItemModel):
         try:
             item = pitem.children[row]
         except IndexError:
-            return QtCore.QModelIndex()
-        return self.createIndex(row,column,item)
+            return qt.QModelIndex()
+        return self.createIndex(row, column, item)
 
     def data(self, midx, role):
         """
         What to display depending on model_index and role
         """
         leaf = midx.internalPointer()
-        if midx.column() == 0 and role == QtCore.Qt.DisplayRole:
+        if midx.column() == 0 and role == qt.Qt.DisplayRole:
             if leaf.order == 2:
                 if leaf.extra is None:
                     leaf.extra = MONTH.get(leaf.label)
@@ -211,7 +211,7 @@ class TreeModel(QtCore.QAbstractItemModel):
             else:
                 return leaf.label
 
-        if midx.column() == 1 and role == QtCore.Qt.DisplayRole:
+        if midx.column() == 1 and role == qt.Qt.DisplayRole:
             if leaf.order == 4:
                 if leaf.extra is None:
                     data = Photo(leaf.name).readExif()
@@ -219,25 +219,25 @@ class TreeModel(QtCore.QAbstractItemModel):
                 return leaf.extra
 
     def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
+        if role == qt.Qt.DisplayRole and orientation == qt.Qt.Horizontal:
             return ["Image", "Titre"][section]
 
     def parent(self, midx):
         pitem = midx.internalPointer().parent
         if pitem is self._root_item:
-            return QtCore.QModelIndex()
+            return qt.QModelIndex()
         row_idx = pitem.parent.children.index(pitem)
         return self.createIndex(row_idx, 0, pitem)
 
 
-class TreeWidget(QtGui.QWidget):
+class TreeWidget(qt.QWidget):
     def __init__(self, root, parent=None):
         super(TreeWidget, self).__init__(parent)
-        self.root=root
-        self.view = QtGui.QTreeView()
+        self.root = root
+        self.view = qt.QTreeView()
         self.model = TreeModel(root, self)
         self.view.setModel(self.model)
-        lay = QtGui.QVBoxLayout(self)
+        lay = qt.QVBoxLayout(self)
         lay.addWidget(self.view)
         self.view.setColumnWidth(0, 300)
         self.view.setAlternatingRowColors(True)
@@ -261,30 +261,30 @@ class TreeWidget(QtGui.QWidget):
             self.callback(value)
 
 
-class ColumnWidget(QtGui.QWidget):
+class ColumnWidget(qt.QWidget):
     def __init__(self, root, parent=None):
         super(ColumnWidget, self).__init__(parent)
         self.root = root
         print(root)
-        self.view = QtGui.QColumnView(self)
+        self.view = qt.QColumnView(self)
 #        self.view.header().hide()
         self.model = TreeModel(root, self)
         self.view.setModel(self.model)
-        lay = QtGui.QVBoxLayout(self)
+        lay = qt.QVBoxLayout(self)
         lay.addWidget(self.view)
 
-class TreeColWidget(QtGui.QWidget):
+class TreeColWidget(qt.QWidget):
     def __init__(self, root, parent=None):
         super(TreeColWidget, self).__init__(parent)
         self.root = root
         print(root)
-        self.view1 = QtGui.QTreeView()
+        self.view1 = qt.QTreeView()
         self.model = TreeModel(root, self)
         self.view1.setModel(self.model)
-        lay = QtGui.QVBoxLayout(self)
+        lay = qt.QVBoxLayout(self)
         lay.addWidget(self.view1)
 
-        self.view2 = QtGui.QColumnView(self)
+        self.view2 = qt.QColumnView(self)
         self.view2.setModel(self.model)
         lay.addWidget(self.view2)
 
@@ -294,8 +294,8 @@ def main():
     import imagizer.imagizer
     big_lst = imagizer.imagizer.rangeTout("/home/photo", bUseX=False, fast=True)[0]
     tree = build_tree(big_lst)
-    app = QtGui.QApplication([])
-    mainw = QtGui.QMainWindow()
+    app = qt.QApplication([])
+    mainw = qt.QMainWindow()
     mainw.setCentralWidget(TreeWidget(tree, mainw))
     mainw.show()
     app.exec_()

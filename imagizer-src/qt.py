@@ -1,98 +1,224 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding: utf-8
+# /*##########################################################################
 #
-#    Project: Imagizer
-#             https://github.com/kif/imagizer
+# Copyright (c) 2004-2016 European Synchrotron Radiation Facility
 #
-#    Copyright (C) Jerome Kieffer
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-#    Principal author:       Jérôme Kieffer (Jerome.Kieffer@terre-adelie.org)
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# ###########################################################################*/
+"""Common wrapper over Python Qt bindings:
 
-from __future__ import with_statement, division, print_function, absolute_import
+- `PyQt5 <http://pyqt.sourceforge.net/Docs/PyQt5/>`_,
+- `PyQt4 <http://pyqt.sourceforge.net/Docs/PyQt4/>`_ or
+- `PySide <http://www.pyside.org>`_.
 
-__doc__ = """Module to handle matplotlib and the Qt backend"""
-__author__ = "Jerome Kieffer"
-__contact__ = "imagizer@terre-adelie.org"
-__license__ = "GPLv3+"
-__copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "01/01/2016"
-__status__ = "production"
+If a Qt binding is already loaded, it will use it, otherwise the different
+Qt bindings are tried in this order: PyQt4, PySide, PyQt5.
+
+The name of the loaded Qt binding is stored in the BINDING variable.
+
+This module provides a flat namespace over Qt bindings by importing
+all symbols from **QtCore** and **QtGui** packages and if available
+from **QtOpenGL** and **QtSvg** packages.
+For **PyQt5**, it also imports all symbols from **QtWidgets** and
+**QtPrintSupport** packages.
+
+Example of using :mod:`silx.gui.qt` module:
+
+>>> from silx.gui import qt
+>>> app = qt.QApplication([])
+>>> widget = qt.QWidget()
+
+For an alternative solution providing a structured namespace,
+see `qtpy <https://pypi.python.org/pypi/QtPy/>`_ which
+provides the namespace of PyQt5 over PyQt4 and PySide.
+"""
+
+__authors__ = ["V.A. Sole - ESRF Data Analysis"]
+__license__ = "MIT"
+__date__ = "29/10/2016"
 
 
-import os
-import sys
-import matplotlib
-from .utils import get_ui_file
 import logging
-logger = logging.getLogger("imagizer.qt")
+import sys
 
-has_Qt = True
+
+_logger = logging.getLogger(__name__)
+
+
+BINDING = None
+"""The name of the Qt binding in use: 'PyQt5', 'PyQt4' or 'PySide'."""
+
+QtBinding = None  # noqa
+"""The Qt binding module in use: PyQt5, PyQt4 or PySide."""
+
+HAS_SVG = False
+"""True if Qt provides support for Scalable Vector Graphics (QtSVG)."""
+
+# First check for an already loaded wrapper
 if 'PySide' in sys.modules:
-    from PySide import QtGui, QtCore, QtUiTools, QtWebKit
-    from PySide.QtCore import SIGNAL, Signal
-    from .pyside_dynamic import loadUi as _loadUi
-    class uic(object):
-        @staticmethod
-        def loadUi(uifile, baseinstance=None, package=''):
-            """Load a Qt Designer .ui file and return an instance of the user interface.
+    BINDING = 'PySide'
 
-            uifile is a file name or file-like object containing the .ui file.
-            baseinstance is an optional instance of the Qt base class.  If specified
-            then the user interface is created in it.  Otherwise a new instance of the
-            base class is automatically created.
-            package is the optional package which is used as the base for any relative
-            imports of custom widgets.
-            """
-            return _loadUi(uifile, baseinstance,
-                           customWidgets={'Line': QtGui.QFrame})
+elif 'PyQt5' in sys.modules:
+    BINDING = 'PyQt5'
 
-    sys.modules["PySide.uic"] = uic
-    matplotlib.rcParams['backend.qt4'] = 'PySide'
-    Qt_version = QtCore.__version_info__
-    loadUi = _loadUi  # uic.loadUi
-else:
+elif 'PyQt4' in sys.modules:
+    BINDING = 'PyQt4'
+
+else:  # Then try Qt bindings
     try:
-        from PyQt4 import QtGui, QtCore, uic, QtWebKit
-        from PyQt4.QtCore import SIGNAL, pyqtSignal as Signal
+        import PyQt4  # noqa
     except ImportError:
-        has_Qt = False
+        try:
+            import PySide  # noqa
+        except ImportError:
+            try:
+                import PyQt5  # noqa
+            except ImportError:
+                raise ImportError(
+                    'No Qt wrapper found. Install PyQt4, PyQt5 or PySide.')
+            else:
+                BINDING = 'PyQt5'
+        else:
+            BINDING = 'PySide'
     else:
-        loadUi = uic.loadUi
-if has_Qt:
-    matplotlib.use('Qt4Agg')
-    from matplotlib.backends import backend_qt4 as backend
-    from matplotlib import pyplot
-    from matplotlib import pylab
-else:
-    from matplotlib import pyplot
-    from matplotlib import pylab
-    from matplotlib.backends import backend
-    QtGui = QtCore = QtUiTools = QtWebKit = loadUi = None
-    SIGNAL = Signal = None
+        BINDING = 'PyQt4'
 
-transformations = (QtCore.Qt.FastTransformation, QtCore.Qt.SmoothTransformation)
+
+if BINDING == 'PyQt4':
+    _logger.debug('Using PyQt4 bindings')
+
+    if sys.version < "3.0.0":
+        try:
+            import sip
+
+            sip.setapi("QString", 2)
+            sip.setapi("QVariant", 2)
+        except:
+            _logger.warning("Cannot set sip API")
+
+    import PyQt4 as QtBinding  # noqa
+
+    from PyQt4.QtCore import *  # noqa
+    from PyQt4.QtGui import *  # noqa
+
+    try:
+        from PyQt4.QtOpenGL import *  # noqa
+    except ImportError:
+        _logger.info("PyQt4.QtOpenGL not available")
+
+    try:
+        from PyQt4.QtSvg import *  # noqa
+    except ImportError:
+        _logger.info("PyQt4.QtSvg not available")
+        HAS_SVG = False
+    else:
+        HAS_SVG = True
+
+    from PyQt4.uic import loadUi  # noqa
+
+    Signal = pyqtSignal
+
+    Property = pyqtProperty
+
+    Slot = pyqtSlot
+
+elif BINDING == 'PySide':
+    _logger.debug('Using PySide bindings')
+
+    import PySide as QtBinding  # noqa
+
+    from PySide.QtCore import *  # noqa
+    from PySide.QtGui import *  # noqa
+
+    try:
+        from PySide.QtOpenGL import *  # noqa
+    except ImportError:
+        _logger.info("PySide.QtOpenGL not available")
+
+    try:
+        from PySide.QtSvg import *  # noqa
+    except ImportError:
+        _logger.info("PySide.QtSvg not available")
+        HAS_SVG = False
+    else:
+        HAS_SVG = True
+
+    pyqtSignal = Signal
+
+    # Import loadUi wrapper for PySide
+    from ._pyside_dynamic import loadUi  # noqa
+
+elif BINDING == 'PyQt5':
+    _logger.debug('Using PyQt5 bindings')
+
+    import PyQt5 as QtBinding  # noqa
+
+    from PyQt5.QtCore import *  # noqa
+    from PyQt5.QtGui import *  # noqa
+    from PyQt5.QtWidgets import *  # noqa
+    from PyQt5.QtPrintSupport import *  # noqa
+
+    try:
+        from PyQt5.QtOpenGL import *  # noqa
+    except ImportError:
+        _logger.info("PyQt5.QtOpenGL not available")
+
+    try:
+        from PyQt5.QtSvg import *  # noqa
+    except ImportError:
+        _logger.info("PyQt5.QtSvg not available")
+        HAS_SVG = False
+    else:
+        HAS_SVG = True
+
+    from PyQt5.uic import loadUi  # noqa
+
+    Signal = pyqtSignal
+
+    Property = pyqtProperty
+
+    Slot = pyqtSlot
+
+else:
+    raise ImportError('No Qt wrapper found. Install PyQt4, PyQt5 or PySide')
+
+
+def supportedImageFormats():
+    """Return a set of string of file format extensions supported by the
+    Qt runtime."""
+    if sys.version_info[0] < 3:
+        convert = str
+    else:
+        convert = lambda data: str(data, 'ascii')
+    formats = QImageReader.supportedImageFormats()
+    return set([convert(data) for data in formats])
+
+transformations = (Qt.FastTransformation, Qt.SmoothTransformation)
 
 
 def flush():
     """
     Enforce the flush of the graphical application
     """
-    if QtCore.QCoreApplication.hasPendingEvents():
-        QtCore.QCoreApplication.flush()
+    if QCoreApplication.hasPendingEvents():
+        QCoreApplication.flush()
 
 
 def update_fig(fig=None):
@@ -104,8 +230,8 @@ def update_fig(fig=None):
     if fig and "canvas" in dir(fig) and fig.canvas:
         fig.canvas.draw()
         if "Qt4" in pylab.get_backend():
-            QtGui.qApp.postEvent(fig.canvas,
-                                 QtGui.QResizeEvent(fig.canvas.size(),
+            qApp.postEvent(fig.canvas,
+                                 QResizeEvent(fig.canvas.size(),
                                                     fig.canvas.size()))
             flush()
 
@@ -113,6 +239,7 @@ def buildUI(ui_file):
     """
     Retrun a class from a ui descrition file
     """
+    from .utils import get_ui_file
     return loadUi(get_ui_file(ui_file))
 
 
@@ -126,24 +253,24 @@ def icon_on(target="right", button=None, icon_name=None,):
         return
     text = button.text()
     if icon_name is None:
-        pixmap = button.icon().pixmap(QtCore.QSize(22, 22))
+        pixmap = button.icon().pixmap(QSize(22, 22))
     else:
-        pixmap = QtGui.QPixmap(icon_name)
+        pixmap = QPixmap(icon_name)
     button.setText("")
-    button.setIcon(QtGui.QIcon())
-    layout1 = QtGui.QHBoxLayout(button)
+    button.setIcon(QIcon())
+    layout1 = QHBoxLayout(button)
     layout1.setContentsMargins(0, 0, 0, 0)
-    layout1.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+    layout1.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
     button.setLayout(layout1)
-    widget = QtGui.QWidget(button)
+    widget = QWidget(button)
     button.layout().addWidget(widget)
-    layout2 = QtGui.QFormLayout(widget)
+    layout2 = QFormLayout(widget)
     layout2.setContentsMargins(0, 0, 0, 0)
     layout2.setSpacing(2)
     widget.setLayout(layout2)
-    lab_txt = QtGui.QLabel(text, widget)
-    lab_txt.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-    lab_ico = QtGui.QLabel(widget)
+    lab_txt = QLabel(text, widget)
+    lab_txt.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    lab_ico = QLabel(widget)
     lab_ico.setPixmap(pixmap)
     if target == "right":
         widget.layout().addRow(lab_txt, lab_ico)
@@ -151,18 +278,18 @@ def icon_on(target="right", button=None, icon_name=None,):
         widget.layout().addRow(lab_ico, lab_txt)
 
 
-class ExtendedQLabel(QtGui.QLabel):
+class ExtendedQLabel(QLabel):
     """Extenstion for Qlabel with pan and zoom function used to display images
     """
-    zoom = Signal(QtGui.QWheelEvent, name="zoom")
-    pan = Signal(QtGui.QMoveEvent, name="pan")
+    zoom = Signal(QWheelEvent, name="zoom")
+    pan = Signal(QMoveEvent, name="pan")
     DELTA2 = 100
     def __init__(self, parent):
-        QtGui.QLabel.__init__(self, parent)
+        QLabel.__init__(self, parent)
         self.old_pos = None
 
     def mouseReleaseEvent(self, ev):
-        logger.debug("Released %s %s", ev, ev)
+        _logger.debug("Released %s %s", ev, ev)
         if self.old_pos is not None:
             lastx, lasty = self.old_pos
             x = ev.x()
@@ -171,20 +298,20 @@ class ExtendedQLabel(QtGui.QLabel):
             dy = y - lasty
             delta2 = dx * dx + dy * dy
             if delta2 > self.DELTA2:
-                move_ev = QtGui.QMoveEvent(ev.pos(),
-                                           QtCore.QPoint(*self.old_pos))
-#                 logger.info("move image %s", move_ev)
+                move_ev = QMoveEvent(ev.pos(),
+                                           QPoint(*self.old_pos))
+#                 _logger.info("move image %s", move_ev)
                 self.pan.emit(move_ev)
             self.old_pos = None
         else:
             print("last ev is None !!!")
 
     def mousePressEvent(self, ev):
-        logger.debug("Pressed %s %s %s ", ev, ev.x(), ev.y())
+        _logger.debug("Pressed %s %s %s ", ev, ev.x(), ev.y())
         self.old_pos = (ev.x(), ev.y())
 
     def wheelEvent(self, ev):
-        logger.debug("Scroll %s at %s,%s %s",
+        _logger.debug("Scroll %s at %s,%s %s",
                      ev, ev.x(), ev.y(), ev.delta())
         self.zoom.emit(ev)
 
@@ -196,19 +323,19 @@ def get_matrix(orientation):
     @return: rotation matrix
     """
     if orientation == 2:
-        matrix = QtGui.QMatrix(-1, 0, 0, 1, 0, 0)
+        matrix = QMatrix(-1, 0, 0, 1, 0, 0)
     elif orientation == 3:
-        matrix = QtGui.QMatrix(-1, 0, 0, -1, 0, 0)
+        matrix = QMatrix(-1, 0, 0, -1, 0, 0)
     elif orientation == 4:
-        matrix = QtGui.QMatrix(1, 0, 0, -1, 0, 0)
+        matrix = QMatrix(1, 0, 0, -1, 0, 0)
     elif orientation == 5:
-        matrix = QtGui.QMatrix(0, 1, 1, 0, 0, 0)
+        matrix = QMatrix(0, 1, 1, 0, 0, 0)
     elif orientation == 6:
-        matrix = QtGui.QMatrix(0, 1, -1, 0, 0, 0)
+        matrix = QMatrix(0, 1, -1, 0, 0, 0)
     elif orientation == 7:
-        matrix = QtGui.QMatrix(0, -1, -1, 0, 0, 0)
+        matrix = QMatrix(0, -1, -1, 0, 0, 0)
     elif orientation == 8:
-        matrix = QtGui.QMatrix(0, -1, 1, 0, 0, 0)
+        matrix = QMatrix(0, -1, 1, 0, 0, 0)
     else:
-        matrix = QtGui.QMatrix(1, 0, 0, 1, 0, 0)
+        matrix = QMatrix(1, 0, 0, 1, 0, 0)
     return matrix

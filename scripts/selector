@@ -31,7 +31,7 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/12/2015"
+__date__ = "29/10/2016"
 __license__ = "GPL"
 
 import os
@@ -41,7 +41,7 @@ import sys
 logger = logging.getLogger("imagizer.selector")
 
 import imagizer
-from imagizer.qt            import QtGui
+from imagizer            import qt
 from imagizer.config        import config
 from imagizer.dirchooser    import WarningSc
 from imagizer.selection     import Selected
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     config.printConfig()
     selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
 
-    app = QtGui.QApplication([])
+    app = qt.QApplication([])
     ifc = Interfaces(warning=printWarning, fast=args.fast)
     ifc.print_warning()
     ifc.create_selected()

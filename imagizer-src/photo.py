@@ -22,16 +22,15 @@
 # *
 # *****************************************************************************/
 
-from __future__ import print_function, absolute_import, division
-import tempfile
-
 """
 Module containing most classes for handling images
 """
+from __future__ import print_function, absolute_import, division
+
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/09/2016"
+__date__ = "29/10/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -42,6 +41,7 @@ import time
 import subprocess
 import shutil
 import os.path as op
+import tempfile
 from StringIO import StringIO
 installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.photo")
@@ -62,8 +62,7 @@ from .           import pyexiftran
 from .fileutils  import mkdir, makedir, smartSize
 from .encoding   import unicode2ascii
 from .           import blur
-from .qt import QtCore, QtGui, transformations, get_matrix
-
+from . import qt
 
 # #########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
@@ -347,8 +346,8 @@ class Photo(object):
         if angle == 90:
             if imageCache is not None:
                 pyexiftran.rotate90(self.fn)
-                trans = QtGui.QTransform().rotate(90)
-                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
+                trans = qt.QTransform().rotate(90)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
@@ -361,8 +360,8 @@ class Photo(object):
         elif angle == 270:
             if imageCache is not None:
                 pyexiftran.rotate270(self.fn)
-                trans = QtGui.QTransform().rotate(270)
-                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
+                trans = qt.QTransform().rotate(270)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 270 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
@@ -375,8 +374,8 @@ class Photo(object):
         elif angle == 180:
             if imageCache is not None:
                 pyexiftran.rotate180(self.fn)
-                trans = QtGui.QTransform().rotate(180)
-                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
+                trans = qt.QTransform().rotate(180)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 270 of %s" % newPixbuffer)
             else:
                 pyexiftran.rotate180(self.fn)
@@ -483,18 +482,18 @@ class Photo(object):
             logger.debug("Size of preview available: %s" % ([i.dimensions for i in self._exif.previews]))
             largest = max(self._exif.previews, key=lambda i:i.size)
 
-            pixbuf = QtGui.QPixmap(*largest.dimensions)
+            pixbuf = qt.QPixmap(*largest.dimensions)
 
             if not pixbuf.loadFromData(largest.data):
                 logger.warning("Unable to load raw preview (size: %s): %s" %
                                 (largest.dimensions, self.fn))
             orientation = self.get_orientation(True)
             if orientation != 1:
-                matrix = get_matrix(orientation)
-                pixbuf = pixbuf.transformed(matrix, mode=QtCore.Qt.FastTransformation)
+                matrix = qt.get_matrix(orientation)
+                pixbuf = pixbuf.transformed(matrix, mode=qt.Qt.FastTransformation)
                 self.set_orientation(1)
         else:
-            pixbuf = QtGui.QPixmap(self.fn)
+            pixbuf = qt.QPixmap(self.fn)
         return pixbuf
 
 
@@ -541,8 +540,8 @@ class Photo(object):
 
             if Rbig < 1:
 
-                self.scaledPixbuffer = pixbuf.scaled(nxBig, nyBig, aspectRatioMode=QtCore.Qt.KeepAspectRatio,
-                                                     transformMode=transformations[config.Interpolation])
+                self.scaledPixbuffer = pixbuf.scaled(nxBig, nyBig, aspectRatioMode=qt.Qt.KeepAspectRatio,
+                                                     transformMode=qt.transformations[config.Interpolation])
             else :
                 self.scaledPixbuffer = pixbuf
             logger.debug("To Cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
@@ -571,8 +570,8 @@ class Photo(object):
             logger.debug("In cache No resize %s" % self.filename)
         else:
             logger.debug("In cache To resize %s" % self.filename)
-            scaled_buf = self.scaledPixbuffer.scaled(nx, ny, QtCore.Qt.KeepAspectRatio,
-                                                     transformations[config.Interpolation])
+            scaled_buf = self.scaledPixbuffer.scaled(nx, ny, qt.Qt.KeepAspectRatio,
+                                                     qt.transformations[config.Interpolation])
         return scaled_buf
 
     def name(self, title=None, rate=None, reset_orientation=False):

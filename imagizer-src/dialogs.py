@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "23/11/2015"
+__date__ = "29/10/2016"
 __license__ = "GPL"
 
 import os
@@ -40,7 +40,7 @@ import sys
 import subprocess
 logger = logging.getLogger("imagizer.dialogs")
 from .config import config
-from .qt import QtCore, QtGui, buildUI
+from . import qt
 from .parser import AttrFile
 from .photo import Photo
 from .encoding import unicode2ascii
@@ -64,7 +64,7 @@ def message_box(parent=None, title="title", text="blabla"):
     @param parent: parent window
     @return: True if accepted
     """
-    QtGui.QMessageBox.about(parent, to_unicode(title), to_unicode(text))
+    qt.QMessageBox.about(parent, to_unicode(title), to_unicode(text))
 
 def quit_dialog(parent=None):
     """
@@ -73,29 +73,29 @@ def quit_dialog(parent=None):
     @param parent: parent window
     @return: True if accepted
     """
-    dialog = QtGui.QDialog(parent)
-    lay = QtGui.QBoxLayout(QtGui.QBoxLayout.TopToBottom, dialog)
-    lab = QtGui.QLabel("Voulez vous vraiment quitter ce programme ?", dialog)
+    dialog = qt.QDialog(parent)
+    lay = qt.QBoxLayout(qt.QBoxLayout.TopToBottom, dialog)
+    lab = qt.QLabel("Voulez vous vraiment quitter ce programme ?", dialog)
     lay.addWidget(lab)
-    buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel, QtCore.Qt.Horizontal, dialog)
+    buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Ok | qt.QDialogButtonBox.Cancel, qt.Qt.Horizontal, dialog)
     lay.addWidget(buttonBox)
     buttonBox.accepted.connect(dialog.accept)
     buttonBox.rejected.connect(dialog.reject)
     result = dialog.exec_()
-    return result == QtGui.QDialog.Accepted
+    return result == qt.QDialog.Accepted
 
 def ask_media_size():
     """
     @return: the size of the media in MB
     """
-    gui = buildUI("dialog_tailleCD")
+    gui = qt.buildUI("dialog_tailleCD")
     gui.TailleMo.setText(str(config.MediaSize))
     result = gui.exec_()
-    if result == QtGui.QDialog.Accepted:
+    if result == qt.QDialog.Accepted:
         txt = str(gui.TailleMo.text()).strip()
         try:
             config.MediaSize = abs(float(txt))
-        except Exception as err: 
+        except Exception as err:
             logger.warning("%s does not seem to be the size of a media: %s" % (txt, err))
 
 
@@ -111,7 +111,7 @@ def rename_day(filename, all_photos, selected):
     """
     initial_fname = filename
     new_fname = initial_fname
-    dayname, image  = os.path.split(filename)
+    dayname, image = os.path.split(filename)
 
     comment_fn = os.path.join(config.DefaultRepository, dayname, config.CommentFile)
     comment = AttrFile(comment_fn)
@@ -140,7 +140,7 @@ def rename_day(filename, all_photos, selected):
     if "comment" not in comment:
         comment["comment"] = to_unicode("")
 
-    gui = buildUI("dialog_renommer")
+    gui = qt.buildUI("dialog_renommer")
     signals = {gui.buttonBox.accepted: gui.accept,
                gui.buttonBox.rejected: gui.reject}
     for signal, slot in signals.items():
@@ -150,7 +150,7 @@ def rename_day(filename, all_photos, selected):
     gui.Description.setPlainText(comment["comment"].strip().replace("<BR>", "\n",))
 
     result = gui.exec_()
-    if result == QtGui.QDialog.Accepted:
+    if result == qt.QDialog.Accepted:
         newname = to_unicode(gui.Commentaire.text()).strip()
         comment["title"] = newname
         if newname == to_unicode(""):
@@ -198,9 +198,9 @@ def synchronize_dialog(current, AllPhotos, selected):
     """
     logger.debug("synchronize_dialog(%i,%i,%i)" % (current, len(AllPhotos), len(selected)))
     logger.debug("Recorded Synchronize type: %s" % config.SynchronizeType)
-    gui = buildUI("dialog_synchro")
+    gui = qt.buildUI("dialog_synchro")
     PERFORM_SYNCRO = 3
-    #Note that accept and reject are already coded into the GUI
+    # Note that accept and reject are already coded into the GUI
     gui.synchoniser.clicked.connect(lambda: gui.done(PERFORM_SYNCRO))
     gui.SyncCommand.setText(config.SynchronizeRep)
     param = {"newer":gui.SyncNewer,
@@ -213,7 +213,7 @@ def synchronize_dialog(current, AllPhotos, selected):
 
     res = gui.exec_()
     logger.debug(res)
-    if res in (QtGui.QDialog.Accepted, PERFORM_SYNCRO):
+    if res in (qt.QDialog.Accepted, PERFORM_SYNCRO):
         config.SynchronizeRep = to_unicode(gui.SyncCommand.text()).strip()
         for key, widget in param.items():
             if widget.isChecked():
@@ -260,7 +260,7 @@ def synchronize_dialog(current, AllPhotos, selected):
                     line = p.stdout.readline().strip()
                 else:
                     p.wait()
-        logger.info("Rsync finished with returncode %s"%(p.wait()))
+        logger.info("Rsync finished with returncode %s" % (p.wait()))
 
 
 def slideshow_dialog():
@@ -268,7 +268,7 @@ def slideshow_dialog():
     @return True if the slideshow should start immediately
     """
     START_DIAPO = 3
-    gui = buildUI("dialog_diaporama")
+    gui = qt.buildUI("dialog_diaporama")
     gui.startdiapo.clicked.connect(lambda: gui.done(START_DIAPO))
     MODES = {"chronological":gui.radiochrono,
              "antichronological":gui.radioantichrono,
@@ -284,7 +284,7 @@ def slideshow_dialog():
     res = gui.exec_()
     logger.debug(res)
 
-    if res in (QtGui.QDialog.Accepted, START_DIAPO):
+    if res in (qt.QDialog.Accepted, START_DIAPO):
         config.SlideShowDelay = gui.delai.value()
         config.SlideShowMinRating = gui.rating.value()
         for key, widget in MODES.items():

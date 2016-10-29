@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "21/08/2016"
+__date__ = "29/10/2016"
 __license__ = "GPL"
 
 import gc
@@ -39,7 +39,8 @@ import subprocess
 import threading
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copy_selected, process_selected, to_jpeg
-from .qt import QtCore, QtGui, buildUI, flush, SIGNAL, icon_on, ExtendedQLabel, Signal
+from . import qt
+from .qt import buildUI, flush, SIGNAL, icon_on, ExtendedQLabel, Signal
 from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
@@ -50,7 +51,7 @@ from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog
 from .fileutils import smartSize, recursive_delete
 
 
-class Interface(QtCore.QObject):
+class Interface(qt.QObject):
     """
     class interface that manages the GUI using Qt4
     """
@@ -58,7 +59,7 @@ class Interface(QtCore.QObject):
     signal_newfiles = Signal(list, int)
     signal_processed = Signal(list)
     def __init__(self, AllJpegs=None, first=0, selected=None, mode="Default", callback=None):
-        QtCore.QObject.__init__(self)
+        qt.QObject.__init__(self)
         self.callback = callback
         self.left_tab_width = 350
         self.image = None
@@ -76,7 +77,7 @@ class Interface(QtCore.QObject):
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
         # Icons on buttons
-        self.gui.logo.setPixmap(QtGui.QPixmap(get_pixmap_file("logo")))
+        self.gui.logo.setPixmap(qt.QPixmap(get_pixmap_file("logo")))
         self._set_icons({"system": self.gui.filter,
                          "left":self.gui.left,
                          "right":self.gui.right,
@@ -180,23 +181,23 @@ class Interface(QtCore.QObject):
         @param kwarg: dict with key: name of the image, value: widget
         """
         for name, widget in kwarg.items():
-            icon = QtGui.QIcon()
+            icon = qt.QIcon()
             fullname = get_pixmap_file(name)
-            pixmap = QtGui.QPixmap(fullname)
-            icon.addPixmap(pixmap, QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            pixmap = qt.QPixmap(fullname)
+            icon.addPixmap(pixmap, qt.QIcon.Normal, qt.QIcon.Off)
             widget.setIcon(icon)
 
     def _menu_filtrer(self):
         # Drop-down filter menu
-        self.filter_menu = QtGui.QMenu("Filtrer")
+        self.filter_menu = qt.QMenu("Filtrer")
 
-        icon_contrast = QtGui.QIcon()
-        icon_contrast.addPixmap(QtGui.QPixmap(get_pixmap_file("contrast")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        action_contrast = QtGui.QAction(icon_contrast, "Masque de contrast", self.gui.filter)
+        icon_contrast = qt.QIcon()
+        icon_contrast.addPixmap(qt.QPixmap(get_pixmap_file("contrast")), qt.QIcon.Normal, qt.QIcon.Off)
+        action_contrast = qt.QAction(icon_contrast, "Masque de contrast", self.gui.filter)
         self.filter_menu.addAction(action_contrast)
-        icon_colors = QtGui.QIcon()
-        icon_colors.addPixmap(QtGui.QPixmap(get_pixmap_file("colors")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        action_color = QtGui.QAction(icon_colors, "Balance des blancs auto", self.gui.filter)
+        icon_colors = qt.QIcon()
+        icon_colors.addPixmap(qt.QPixmap(get_pixmap_file("colors")), qt.QIcon.Normal, qt.QIcon.Off)
+        action_color = qt.QAction(icon_colors, "Balance des blancs auto", self.gui.filter)
         self.filter_menu.addAction(action_color)
         self.gui.filter.setMenu(self.filter_menu)
         action_color.triggered.connect(self.filter_AutoWB)
@@ -204,15 +205,15 @@ class Interface(QtCore.QObject):
 
     def _menu_editer(self):
         # Drop-down filter menu
-        self.edit_menu = QtGui.QMenu("Editer")
+        self.edit_menu = qt.QMenu("Editer")
 
-        icon_gimp = QtGui.QIcon()
-        icon_gimp.addPixmap(QtGui.QPixmap(get_pixmap_file("image-editor")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        action_gimp = QtGui.QAction(icon_gimp, "Gimp", self.gui.edit)
+        icon_gimp = qt.QIcon()
+        icon_gimp.addPixmap(qt.QPixmap(get_pixmap_file("image-editor")), qt.QIcon.Normal, qt.QIcon.Off)
+        action_gimp = qt.QAction(icon_gimp, "Gimp", self.gui.edit)
         self.edit_menu.addAction(action_gimp)
-        icon_rt = QtGui.QIcon()
-        icon_rt.addPixmap(QtGui.QPixmap(get_pixmap_file("rt-logo")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        action_rt = QtGui.QAction(icon_rt, "RawTherapee", self.gui.edit)
+        icon_rt = qt.QIcon()
+        icon_rt.addPixmap(qt.QPixmap(get_pixmap_file("rt-logo")), qt.QIcon.Normal, qt.QIcon.Off)
+        action_rt = qt.QAction(icon_rt, "RawTherapee", self.gui.edit)
         self.edit_menu.addAction(action_rt)
         self.gui.edit.setMenu(self.edit_menu)
         action_rt.triggered.connect(self.rawtherapee)
@@ -223,7 +224,7 @@ class Interface(QtCore.QObject):
         Generic action handler
         @param act: QAction
         """
-        meth_name = str(act.data().toString())
+        meth_name = str(act.data())
         logger.debug("Action %s => %s" % (act.text(), meth_name))
 
         try:
@@ -372,7 +373,7 @@ class Interface(QtCore.QObject):
 
     def create_statusbar(self):
         self.status_bar = self.gui.statusBar()
-        self.progress_bar = QtGui.QProgressBar(self.status_bar)
+        self.progress_bar = qt.QProgressBar(self.status_bar)
         self.status_bar.insertPermanentWidget(0, self.progress_bar, 0)
         self.status_bar.hide()
 
@@ -1094,7 +1095,7 @@ class Interface(QtCore.QObject):
         self.in_slideshow = True
         self.set_min_rate(value=config.SlideShowMinRating)
         # goto full screen mode
-        self.gui.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+        self.gui.setWindowState(qt.Qt.WindowFullScreen | qt.Qt.WindowActive)
         self.gui.menubar.setVisible(False)
         self.menubar_isvisible = False
         self.is_fullscreen = True
@@ -1104,7 +1105,7 @@ class Interface(QtCore.QObject):
         flush()
         self.show_image()
         # start timer
-        self.timer = QtCore.QTimer(self.gui)
+        self.timer = qt.QTimer(self.gui)
         self.timer.setInterval(1000.0 * config.SlideShowDelay)
         self.timer.timeout.connect(self.new_slide)
         self.timer.start(1000.0 * config.SlideShowDelay)
@@ -1294,7 +1295,7 @@ class Interface(QtCore.QObject):
 
     def toggle_fullscreen(self, *arg):
         if self.is_fullscreen:
-            self.gui.setWindowState(QtCore.Qt.WindowNoState | QtCore.Qt.WindowActive)
+            self.gui.setWindowState(qt.Qt.WindowNoState | qt.Qt.WindowActive)
             self.gui.menubar.setVisible(True)
             self.menubar_isvisible = True
             self.is_fullscreen = False
@@ -1302,7 +1303,7 @@ class Interface(QtCore.QObject):
             width = sum(self.gui.splitter.sizes())
             self.gui.splitter.setSizes([self.left_tab_width, width - self.left_tab_width])
         else:
-            self.gui.setWindowState(QtCore.Qt.WindowFullScreen | QtCore.Qt.WindowActive)
+            self.gui.setWindowState(qt.Qt.WindowFullScreen | qt.Qt.WindowActive)
             self.gui.menubar.setVisible(False)
             self.menubar_isvisible = False
             self.is_fullscreen = True

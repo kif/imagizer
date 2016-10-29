@@ -2,24 +2,24 @@
 # coding: utf-8
 #
 #******************************************************************************\
-#*
-#* Copyright (C) 2006-2009,  Jérome Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# *
+# * Copyright (C) 2006-2009,  Jérome Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 
 from __future__ import with_statement, division, print_function, absolute_import
@@ -29,15 +29,14 @@ Library used by selector and the installer to select the working directories.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/11/2014"
+__date__ = "29/10/2016"
 __license__ = "GPL"
 
 import os, sys, logging
 logger = logging.getLogger("imagizer.dirchooser")
 
+from . import qt
 from .config import config
-from .qt import buildUI, flush, SIGNAL, QtGui
-
 
 class WarningSc(object):
     """
@@ -55,15 +54,15 @@ class WarningSc(object):
         self.quit = True
         self.callBack = callBack
         self.guiFiler = None
-        self.gui = buildUI(self.window)
-        for widget, signal, method in ((self.gui.select, "clicked()", self.filer),
-                                        (self.gui, "rejected()", self.close),
-                                        (self.gui, "accepted()", self.continu),
+        self.gui = qt.buildUI(self.window)
+        for signal, method in ((self.gui.select.clicked, self.filer),
+                               (self.gui.rejected, self.close),
+                               (self.gui.accepted, self.continu),
 #                                        'on_dirname_editing_done': self.continu}()
-                                       ):
-            self.gui.connect(widget, SIGNAL(signal), method)
+                                ):
+            signal.connect(method)
         self.gui.dirname.setText(directory)
-        flush()
+        qt.flush()
 
     def continu(self, *args):
         """
@@ -86,7 +85,7 @@ class WarningSc(object):
         Close the filer GUI and update the data
         """
         logger.debug("WarningSc.filer called")
-        self.directory = QtGui.QFileDialog.getExistingDirectory(self.gui, "Select Directory")
+        self.directory = qt.QFileDialog.getExistingDirectory(self.gui, "Select Directory")
 
     def get_directory(self):
         """
@@ -111,7 +110,7 @@ def test():
     def callback(dirname):
         print("Got dirname %s" % dirname)
 
-    app = QtGui.QApplication([])
+    app = qt.QApplication([])
     w = WarningSc("/home", callBack=callback)
     w.show()
     res = app.exec_()
