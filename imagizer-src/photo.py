@@ -31,7 +31,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/09/2016"
+__date__ = "05/12/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -230,8 +230,8 @@ class Photo(object):
         """
         Save the photo as JPEG file in the given destination.
 
-        @parm dest: destination file
-#         @return: image Photo instance
+        :parm dest: destination file
+        :return: image Photo instance
         """
         dirname = os.path.dirname(dest)
         if not os.path.isdir(dirname):
@@ -240,7 +240,7 @@ class Photo(object):
             shutil.copy(self.fn, dest)
             rescaled = self.__class__(dest, dontCache=True)
         else:
-            prev = max(self.exif.previews, key=lambda i: i.size)
+            prev = max(self.exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
             ext = prev.extension
             if ext.lower() == ".jpg":
                 if dest.endswith(".jpg"):
