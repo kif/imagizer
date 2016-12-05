@@ -481,7 +481,7 @@ class Photo(object):
             if self.metadata is None:
                 self.read_exif()
             logger.debug("Size of preview available: %s" % ([i.dimensions for i in self._exif.previews]))
-            largest = max(self._exif.previews, key=lambda i:i.size)
+            largest = max(self._exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
 
             pixbuf = QtGui.QPixmap(*largest.dimensions)
 
