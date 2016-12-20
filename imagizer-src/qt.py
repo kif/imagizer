@@ -312,7 +312,7 @@ class ExtendedQLabel(QLabel):
 
     def wheelEvent(self, ev):
         _logger.debug("Scroll %s at %s,%s %s",
-                     ev, ev.x(), ev.y(), ev.delta())
+                     ev, ev.x(), ev.y(), ev.angleDelta())
         self.zoom.emit(ev)
 
 
@@ -323,19 +323,19 @@ def get_matrix(orientation):
     @return: rotation matrix
     """
     if orientation == 2:
-        matrix = QMatrix(-1, 0, 0, 1, 0, 0)
+        matrix = QTransform(-1., 0., 0., 1., 0., 0., 0., 1.)
     elif orientation == 3:
-        matrix = QMatrix(-1, 0, 0, -1, 0, 0)
+        matrix = QTransform(-1., 0., 0., 0., -1., 0., 0., 0., 1.)
     elif orientation == 4:
-        matrix = QMatrix(1, 0, 0, -1, 0, 0)
+        matrix = QTransform(1., 0., 0., 0., -1., 0., 0., 0., 1.)
     elif orientation == 5:
-        matrix = QMatrix(0, 1, 1, 0, 0, 0)
+        matrix = QTransform(0., 1., 0., 1., 0., 0., 0., 0., 1.)
     elif orientation == 6:
-        matrix = QMatrix(0, 1, -1, 0, 0, 0)
+        matrix = QTransform(0., 1., 0., -1., 0., 0., 0., 0., 1.)
     elif orientation == 7:
-        matrix = QMatrix(0, -1, -1, 0, 0, 0)
+        matrix = QTransform(0., -1., 0., -1., 0., 0., 0., 0., 1.)
     elif orientation == 8:
-        matrix = QMatrix(0, -1, 1, 0, 0, 0)
+        matrix = QTransform(0., -1., 0., 1., 0., 0., 0., 0., 1.)
     else:
-        matrix = QMatrix(1, 0, 0, 1, 0, 0)
+        matrix = QTransform(1., 0., 0., 0., 1., 0., 0., 0., 1.)
     return matrix

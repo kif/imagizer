@@ -61,8 +61,8 @@ from .exif       import Exif
 from .           import pyexiftran
 from .fileutils  import mkdir, makedir, smartSize
 from .encoding   import unicode2ascii
-from .           import blur
-from .qt import QtCore, QtGui, transformations, get_matrix
+from .           import blur, qt
+from .qt import transformations, get_matrix, Qt
 
 
 # #########################################################
@@ -347,7 +347,7 @@ class Photo(object):
         if angle == 90:
             if imageCache is not None:
                 pyexiftran.rotate90(self.fn)
-                trans = QtGui.QTransform().rotate(90)
+                trans = qt.QTransform().rotate(90)
                 newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
@@ -491,7 +491,7 @@ class Photo(object):
             orientation = self.get_orientation(True)
             if orientation != 1:
                 matrix = get_matrix(orientation)
-                pixbuf = pixbuf.transformed(matrix, mode=QtCore.Qt.FastTransformation)
+                pixbuf = pixbuf.transformed(matrix, mode=Qt.FastTransformation)
                 self.set_orientation(1)
         else:
             pixbuf = qt.QPixmap(self.fn)
