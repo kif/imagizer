@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "05/12/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -62,7 +62,8 @@ from .           import pyexiftran
 from .fileutils  import mkdir, makedir, smartSize
 from .encoding   import unicode2ascii
 from .           import blur
-from . import qt
+from .qt import QtCore, QtGui, transformations, get_matrix
+
 
 # #########################################################
 # # # # # # Début de la classe photo # # # # # # # # # # #
@@ -229,8 +230,8 @@ class Photo(object):
         """
         Save the photo as JPEG file in the given destination.
 
-        @parm dest: destination file
-#         @return: image Photo instance
+        :parm dest: destination file
+        :return: image Photo instance
         """
         dirname = os.path.dirname(dest)
         if not os.path.isdir(dirname):
@@ -239,7 +240,7 @@ class Photo(object):
             shutil.copy(self.fn, dest)
             rescaled = self.__class__(dest, dontCache=True)
         else:
-            prev = max(self.exif.previews, key=lambda i: i.size)
+            prev = max(self.exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
             ext = prev.extension
             if ext.lower() == ".jpg":
                 if dest.endswith(".jpg"):
@@ -346,8 +347,8 @@ class Photo(object):
         if angle == 90:
             if imageCache is not None:
                 pyexiftran.rotate90(self.fn)
-                trans = qt.QTransform().rotate(90)
-                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
+                trans = QtGui.QTransform().rotate(90)
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
@@ -480,7 +481,7 @@ class Photo(object):
             if self.metadata is None:
                 self.read_exif()
             logger.debug("Size of preview available: %s" % ([i.dimensions for i in self._exif.previews]))
-            largest = max(self._exif.previews, key=lambda i:i.size)
+            largest = max(self._exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
 
             pixbuf = qt.QPixmap(*largest.dimensions)
 
@@ -489,8 +490,8 @@ class Photo(object):
                                 (largest.dimensions, self.fn))
             orientation = self.get_orientation(True)
             if orientation != 1:
-                matrix = qt.get_matrix(orientation)
-                pixbuf = pixbuf.transformed(matrix, mode=qt.Qt.FastTransformation)
+                matrix = get_matrix(orientation)
+                pixbuf = pixbuf.transformed(matrix, mode=QtCore.Qt.FastTransformation)
                 self.set_orientation(1)
         else:
             pixbuf = qt.QPixmap(self.fn)
