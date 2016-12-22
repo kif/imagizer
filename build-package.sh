@@ -1,4 +1,5 @@
 #!/bin/sh
+rm -rf deb_dist/imagizer-*
 python setup.py --command-packages=stdeb.command bdist_deb
 sudo dpkg -i deb_dist/python-imagizer_4.*.deb
 scp deb_dist/python-imagizer_3.*.deb jerome@islay:/home/httpd/html/devel
