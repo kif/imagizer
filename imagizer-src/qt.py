@@ -58,6 +58,10 @@ __date__ = "29/10/2016"
 import logging
 import sys
 
+try: #prefer PyQt5
+    import PyQt5
+except: 
+    pass
 
 _logger = logging.getLogger(__name__)
 
@@ -311,8 +315,12 @@ class ExtendedQLabel(QLabel):
         self.old_pos = (ev.x(), ev.y())
 
     def wheelEvent(self, ev):
-        _logger.debug("Scroll %s at %s,%s %s",
-                     ev, ev.x(), ev.y(), ev.angleDelta())
+        if "delta" in dir(ev): #Qt4
+            _logger.debug("Scroll %s at %s,%s %s",
+                          ev, ev.x(), ev.y(), ev.delta())
+        else:
+            _logger.debug("Scroll %s at %s,%s %s",
+                          ev, ev.x(), ev.y(), ev.angleDelta())
         self.zoom.emit(ev)
 
 
