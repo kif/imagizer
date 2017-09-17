@@ -52,11 +52,12 @@ provides the namespace of PyQt5 over PyQt4 and PySide.
 
 __authors__ = ["V.A. Sole - ESRF Data Analysis"]
 __license__ = "MIT"
-__date__ = "29/10/2016"
+__date__ = "17/09/2017"
 
 
 import logging
 import sys
+import traceback
 
 
 _logger = logging.getLogger(__name__)
@@ -71,14 +72,17 @@ QtBinding = None  # noqa
 HAS_SVG = False
 """True if Qt provides support for Scalable Vector Graphics (QtSVG)."""
 
+HAS_OPENGL = False
+"""True if Qt provides support for OpenGL (QtOpenGL)."""
+
 # First check for an already loaded wrapper
-if 'PySide' in sys.modules:
+if 'PySide.QtCore' in sys.modules:
     BINDING = 'PySide'
 
-elif 'PyQt5' in sys.modules:
+elif 'PyQt5.QtCore' in sys.modules:
     BINDING = 'PyQt5'
 
-elif 'PyQt4' in sys.modules:
+elif 'PyQt4.QtCore' in sys.modules:
     BINDING = 'PyQt4'
 
 else:  # Then try Qt bindings
@@ -122,6 +126,9 @@ if BINDING == 'PyQt4':
         from PyQt4.QtOpenGL import *  # noqa
     except ImportError:
         _logger.info("PyQt4.QtOpenGL not available")
+        HAS_OPENGL = False
+    else:
+        HAS_OPENGL = True
 
     try:
         from PyQt4.QtSvg import *  # noqa
@@ -151,6 +158,9 @@ elif BINDING == 'PySide':
         from PySide.QtOpenGL import *  # noqa
     except ImportError:
         _logger.info("PySide.QtOpenGL not available")
+        HAS_OPENGL = False
+    else:
+        HAS_OPENGL = True
 
     try:
         from PySide.QtSvg import *  # noqa
@@ -165,6 +175,10 @@ elif BINDING == 'PySide':
     # Import loadUi wrapper for PySide
     from ._pyside_dynamic import loadUi  # noqa
 
+    # Import missing classes
+    if not hasattr(locals(), "QIdentityProxyModel"):
+        from ._pyside_missing import QIdentityProxyModel  # noqa
+
 elif BINDING == 'PyQt5':
     _logger.debug('Using PyQt5 bindings')
 
@@ -178,7 +192,10 @@ elif BINDING == 'PyQt5':
     try:
         from PyQt5.QtOpenGL import *  # noqa
     except ImportError:
-        _logger.info("PyQt5.QtOpenGL not available")
+        _logger.info("PySide.QtOpenGL not available")
+        HAS_OPENGL = False
+    else:
+        HAS_OPENGL = True
 
     try:
         from PyQt5.QtSvg import *  # noqa
@@ -199,6 +216,28 @@ elif BINDING == 'PyQt5':
 else:
     raise ImportError('No Qt wrapper found. Install PyQt4, PyQt5 or PySide')
 
+# provide a exception handler but not implement it by default
+def exceptionHandler(type_, value, trace):
+    """
+    This exception handler prevents quitting to the command line when there is
+    an unhandled exception while processing a Qt signal.
+
+    The script/application willing to use it should implement code similar to:
+
+    .. code-block:: python
+
+        if __name__ == "__main__":
+            sys.excepthook = qt.exceptionHandler
+
+    """
+    _logger.error("%s %s %s", type_, value, ''.join(traceback.format_tb(trace)))
+    msg = QMessageBox()
+    msg.setWindowTitle("Unhandled exception")
+    msg.setIcon(QMessageBox.Critical)
+    msg.setInformativeText("%s %s\nPlease report details" % (type_, value))
+    msg.setDetailedText(("%s " % value) + ''.join(traceback.format_tb(trace)))
+    msg.raise_()
+    msg.exec_()
 
 def supportedImageFormats():
     """Return a set of string of file format extensions supported by the
