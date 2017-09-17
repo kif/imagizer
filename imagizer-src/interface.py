@@ -40,7 +40,7 @@ import threading
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copy_selected, process_selected, to_jpeg
 from . import qt
-from .qt import buildUI, flush, SIGNAL, icon_on, ExtendedQLabel, Signal
+from .qt import buildUI, flush, icon_on, ExtendedQLabel, Signal
 from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
@@ -1219,7 +1219,7 @@ class Interface(qt.QObject):
         @param ev: QWheelEvent. See qt.ExtendedLabel
         """
         logger.debug("Interface.image_zoom ")
-        zoom = ev.delta()
+        zoom = ev.angleDelta().y()
         w_width = self.gui.photo.width()
         w_height = self.gui.photo.height()
         p_width = self.gui.photo.pixmap().width()
