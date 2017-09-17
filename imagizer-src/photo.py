@@ -21,16 +21,16 @@
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
 # *****************************************************************************/
-
 """
 Module containing most classes for handling images
 """
+
 from __future__ import print_function, absolute_import, division
 
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "05/12/2016"
 __license__ = "GPL"
 
 from math import ceil
@@ -229,8 +229,8 @@ class Photo(object):
         """
         Save the photo as JPEG file in the given destination.
 
-        @parm dest: destination file
-#         @return: image Photo instance
+        :parm dest: destination file
+        :return: image Photo instance
         """
         dirname = os.path.dirname(dest)
         if not os.path.isdir(dirname):
@@ -239,7 +239,7 @@ class Photo(object):
             shutil.copy(self.fn, dest)
             rescaled = self.__class__(dest, dontCache=True)
         else:
-            prev = max(self.exif.previews, key=lambda i: i.size)
+            prev = max(self.exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
             ext = prev.extension
             if ext.lower() == ".jpg":
                 if dest.endswith(".jpg"):
@@ -480,7 +480,7 @@ class Photo(object):
             if self.metadata is None:
                 self.read_exif()
             logger.debug("Size of preview available: %s" % ([i.dimensions for i in self._exif.previews]))
-            largest = max(self._exif.previews, key=lambda i:i.size)
+            largest = max(self._exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
 
             pixbuf = qt.QPixmap(*largest.dimensions)
 
