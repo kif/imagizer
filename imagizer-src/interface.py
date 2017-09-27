@@ -1219,7 +1219,10 @@ class Interface(qt.QObject):
         @param ev: QWheelEvent. See qt.ExtendedLabel
         """
         logger.debug("Interface.image_zoom ")
-        zoom = ev.angleDelta().y()
+        try:
+            zoom = ev.angleDelta().y()
+        except AttributeError: #Qt4
+            zoom = ev.delta()
         w_width = self.gui.photo.width()
         w_height = self.gui.photo.height()
         p_width = self.gui.photo.pixmap().width()
