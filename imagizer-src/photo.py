@@ -21,10 +21,10 @@
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
 # *****************************************************************************/
-
 """
 Module containing most classes for handling images
 """
+
 from __future__ import print_function, absolute_import, division
 
 
