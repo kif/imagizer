@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "05/12/2016"
+__date__ = "25/02/2018"
 __license__ = "GPL"
 
 from math import ceil
@@ -710,17 +710,17 @@ class Photo(object):
         S = ImageChops.screen(self.pil, k)
         M = ImageChops.multiply(self.pil, k)
         F = ImageChops.add(ImageChops.multiply(self.pil, S), ImageChops.multiply(ImageChops.invert(self.pil), M))
-        exitJpeg = op.join(config.DefaultRepository, outfile)
-        F.save(exitJpeg, quality=80, progressive=True, Optimize=True)
+        dst_filename = op.join(config.DefaultRepository, outfile)
+        F.save(dst_filename, quality=80, progressive=True, Optimize=True)
         try:
-            os.chmod(exitJpeg, config.DefaultFileMode)
+            os.chmod(dst_filename, config.DefaultFileMode)
         except IOError:
             logger.error("Unable to chmod %s" % outfile)
-        exifJpeg = Exif(exitJpeg)
+        exifJpeg = Exif(dst_filename)
         exifJpeg.read()
         self.exif.copy(exifJpeg)
         exifJpeg.comment = self.exif.comment
-        logger.debug("Write metadata to %s", exitJpeg)
+        logger.debug("Write metadata to %s", dst_filename)
         exifJpeg.write()
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
         res = Photo(outfile)
@@ -743,8 +743,10 @@ class Photo(object):
             return
         t0 = time.time()
         position = 5e-4
-        rgb1 = numpy.fromstring(self.pil.tostring(), dtype="uint8")
-        rgb1.shape = -1, 3
+        # rgb1 = numpy.fromstring(self.pil.tostring(), dtype="uint8")
+        rgb1 = numpy.array(self.pil).copy()
+        inshape = rgb1.shape
+        rgb1.shape = (-1, 3)
         rgb = rgb1.astype("float32")
         rgb1.sort(axis=0)
         pos_min = int(round(rgb1.shape[0] * position))
@@ -754,17 +756,18 @@ class Photo(object):
         rgb[:, 0] = 255.0 * (rgb[:, 0].clip(rgb_min[0], rgb_max[0]) - rgb_min[0]) / (rgb_max[0] - rgb_min[0])
         rgb[:, 1] = 255.0 * (rgb[:, 1].clip(rgb_min[1], rgb_max[1]) - rgb_min[1]) / (rgb_max[1] - rgb_min[1])
         rgb[:, 2] = 255.0 * (rgb[:, 2].clip(rgb_min[2], rgb_max[2]) - rgb_min[2]) / (rgb_max[2] - rgb_min[2])
-        out = Image.fromstring("RGB", self.pil.size, rgb.round().clip(0, 255).astype("uint8").tostring())
-        exitJpeg = op.join(config.DefaultRepository, outfile)
-        out.save(exitJpeg, quality=80, progressive=True, Optimize=True)
+        rgb.shape = inshape
+        out = Image.fromarray(rgb.round().clip(0, 255).astype("uint8"), mode="RGB")
+        dst_filename = op.join(config.DefaultRepository, outfile)
+        out.save(dst_filename, quality=80, progressive=True, Optimize=True)
         try:
-            os.chmod(exitJpeg, config.DefaultFileMode)
+            os.chmod(dst_filename, config.DefaultFileMode)
         except IOError:
             logger.error("Unable to chmod %s" % outfile)
-        exifJpeg = Exif(exitJpeg)
+        exifJpeg = Exif(dst_filename)
         exifJpeg.read()
         self.exif.copy(exifJpeg)
-        logger.debug("Write metadata to %s", exitJpeg)
+        logger.debug("Write metadata to %s", dst_filename)
         exifJpeg.write()
         logger.info("The whoole Auto White-Balance took %.3f" % (time.time() - t0))
         res = Photo(outfile)
