@@ -51,6 +51,7 @@ try:
 except:
     raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
 
+Image.MAX_IMAGE_PIXELS = None
 from .config import config
 from .imagecache import imageCache
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000

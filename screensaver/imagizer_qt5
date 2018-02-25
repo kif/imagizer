@@ -29,10 +29,10 @@ from PyQt5 import QtX11Extras
 
 class FullScreenWidget(qt.QWidget):
 
-    def __init__(self, wid=None):
-        super(FullScreenWidget, self).__init__()
-        if wid is not None:
-            self.embedInto(wid)
+    def __init__(self, parent=None):
+        super(FullScreenWidget, self).__init__(parent=parent)
+#        if wid is not None:
+#            self.embedInto(wid)
         self.setWindowState(qt.Qt.WindowFullScreen | qt.Qt.WindowActive)
         self.setSizePolicy(qt.QSizePolicy.Maximum, qt.QSizePolicy.Maximum)
         pal = qt.QPalette()
@@ -83,6 +83,7 @@ class ScreeenSaver(object):
         self.timer = None
         self.desktop = app.desktop()
         self.wid = None
+        self.parent = None
 
     def init_window(self):
         """initialize the window, if needed"""
@@ -104,8 +105,18 @@ class ScreeenSaver(object):
 
         logger.debug("Working on wid %s screen %s/%s" % (self.wid, self.desktop.screenNumber(self.window), self.desktop.screenCount()))
         if self.wid:
-            QtX11Extras.QX11Info.setNextStartupId(numpy.array([self.wid], int).tostring())
-        self.window = FullScreenWidget()
+            self.parent = qt.QWidget.find(self.wid)
+            if self.parent:
+                self.parent.show()
+                logger.debug("Parent place: %sx%s size: %sx%s",self.parent.x(), self.parent.y(), self.parent.height(), self.parent.width(), self.parent.height())
+            else:
+                logger.debug("parent: %s wid: %s", self.parent, self.wid)
+            #ascii_wid = numpy.array([self.wid], int).tostring()
+            #ascii_wid = hex(self.wid).encode("ascii")
+            #logger.debug("code: %s",ascii_wid)
+            #QtX11Extras.QX11Info.setNextStartupId(ascii_wid)
+            #self.win.show()
+        self.window = FullScreenWidget(parent=self.parent)
         self.window.show()
 #        self.window.make_fullscreen()
         flush()
