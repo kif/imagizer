@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "13/01/2019"
 __license__ = "GPL"
 
 import gc
@@ -692,7 +692,7 @@ class Interface(qt.QObject):
         newnamefull = os.path.join(config.DefaultRepository, newname)
         self.image.as_jpeg(newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
-        p = subprocess.Popen([config.Rawtherapee, "-O", newnamefull, filenamefull])
+        p = subprocess.Popen([config.Rawtherapee, "-R", filenamefull])
         with self.job_sem:
             self.processes.append(p)
         self.show_image()
