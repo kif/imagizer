@@ -38,7 +38,7 @@ def get_version():
     return the version string
     """
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "imagizer", "__init__.py")) as f:
+                           "imagizer-src", "__init__.py")) as f:
         for line in f:
             if line.strip().startswith("__version__"):
                 return eval(line.split("=")[1])
@@ -50,7 +50,8 @@ SCRIPTS = "scripts"
 #here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 EXIFTRAN = "pyexiftran"
-JPEG_VERSION = "80"  # "62"
+#JPEG_VERSION = "80"  # "62"
+JPEG_VERSION = "62"
 JPEG_DIR = os.path.join(EXIFTRAN, "jpeg", JPEG_VERSION)
 
 sources = glob.glob(os.path.join(EXIFTRAN, "*.c")) + glob.glob(os.path.join(JPEG_DIR, "*.c"))
@@ -71,10 +72,9 @@ elif os.name == 'posix':
     execexiftran = os.path.join("bin", "exiftran")
     os.chmod(execexiftran, 509) #509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
-
 else:
     raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
-    sys.exit(1)
+
 
 rootdir = os.path.dirname(os.path.abspath(sys.argv[0]))
 scripts = [os.path.join(SCRIPTS, scriptname) for scriptname in os.listdir(os.path.join(rootdir, "scripts"))]
@@ -88,6 +88,22 @@ for i in ConfFile:
 if len(sys.argv) == 1:
     sys.argv.append("install")
 
+binary_modules = []
+binary_modules.append({"name":'pyexiftran',
+                       "sources":sources,
+                       "define_macros":[],
+                       "include_dirs":[JPEG_DIR],
+                       "libraries":["jpeg", "exif", "m"]})
+binary_modules.append({"name":'down_sampler',
+                       "sources": ["src/down_sampler.c"],
+                       "extra_compile_args": ["-fopenmp"],
+                       "extra_link_args":["-fopenmp"]})
+binary_modules.append({"name":'_tree',
+                       "sources": ["src/_tree.c"],
+                       "extra_compile_args": [],
+                       "extra_link_args":[]})
+
+
 
 print execexiftran
 setup(name='Imagizer',
@@ -99,28 +115,20 @@ setup(name='Imagizer',
     license='GNU GPL v2',
     scripts=scripts,
     data_files=[
-        (installdir, ["selector.glade", execexiftran] +
-        [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]),
+        (installdir, ["selector.glade", execexiftran]),
+        (os.path.join(installdir, "gui"), glob.glob("gui/*.ui")),
+        (os.path.join(installdir, "pixmaps"), glob.glob("pixmaps/*.png") + glob.glob("pixmaps/*.ico")),
         (os.path.split(ConfFile[0])[0], ['imagizer.conf']),
-        ("/usr/lib/xscreensaver", ["screensaver/imagizer"])
+        ("/usr/lib/xscreensaver", ["screensaver/imagizer", "screensaver/imagizer_qt", "screensaver/imagizer_qt5"])
     ],
     packages=['imagizer'],
-    package_dir={'imagizer': 'imagizer'},
-#    package_data={'imagizer': [os.path.join("pixmaps", i) for i in os.listdir("pixmaps") if (i.endswith(".png") or i.endswith(".ico"))]},
+    package_dir={'imagizer': 'imagizer-src'},
     ext_package="imagizer",
-    ext_modules=[
-         Extension(
-         name='pyexiftran',
-         sources=sources,
-         define_macros=[],
-         include_dirs=[JPEG_DIR],
-         libraries=["jpeg", "exif", "m"],
-         ),
-    ],
+    ext_modules=[Extension(**mode) for mode in binary_modules],
     classifiers=[
           'Development Status :: 5 - production',
           'Environment :: Graphic',
-          'Environment :: GTK',
+          'Environment :: Qt',
           'Intended Audience :: End Users/Desktop',
           'Intended Audience :: Photographs',
           'License :: OSI Approved :: GPL',
@@ -132,29 +140,15 @@ setup(name='Imagizer',
 os.remove("imagizer.conf")
 
 if not configured:
-    from imagizer import config
-    #config = config.Config()
+    sys.path.insert(0,"imagizer-src")
+    from config import config
     config.load(ConfFile)
-#    textinterface = True
-#    try:
-#        import pygtk ; pygtk.require('2.0')
-#        import gtk, gtk.glade
-        #textinterface = False
-#    except ImportError:
-
-#        textinterface = True
-#    if textinterface:
     while True:
         print "Enter le chemin du repertoire racine du serveur WEB :"
         config.WebRepository = raw_input("[%s] :" % config.WebRepository)
-        if os.path.isdir(config.WebRepository):
+        if(os.path.isdir(config.WebRepository)):
             break
         print "No Such Directory"
-#    else:
-#        from dirchooser import WarningSc
-#        W = WarningSc(config.WebRepository, window="WWW-root")
-#        config.WebRepository = W.directory
-#        del W
     config.Locale, config.Coding = locale.getdefaultlocale()
     LANG = os.getenv("LANG")
     if LANG:
@@ -172,9 +166,4 @@ if not configured:
         import Image, ImageStat, ImageChops, ImageFile
     except ImportError:
         raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/\ninstall it by # aptitude install python-imaging")
-    try:
-        import pygtk ; pygtk.require('2.0')
-        import gtk, gtk.glade
-    except ImportError:
-        raise ImportError("Selector needs pygtk and glade-2 available from http://www.pygtk.org/\nPLease install it with # aptitude install python-glade2")
 

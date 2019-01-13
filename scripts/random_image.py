@@ -28,17 +28,30 @@ Create a symbolic link to any file in the repository
 
 """
 __author__ = "Jérôme Kieffer"
-__date__ = "201100901"
+__date__ = "15/01/2015"
 __licence__ = "GPLv2"
 
-import os, sys, logging, random
-from imagizer.fileutils import findFiles
-from imagizer.config    import Config
+import os, sys, logging, random, glob
+from imagizer.config    import config
 from imagizer.photo     import Photo
-config = Config()
 logger = logging.getLogger("imagizer.random_image")
 
-def create_link(linkName,lst=[]):
+def scan():
+    """
+    Scan the repository for all valid files
+    """
+    if config.DefaultRepository.endswith(os.sep):
+        l = len(config.DefaultRepository)
+    else:
+        l = len(config.DefaultRepository) + 1
+    all_jpg = [i[l:] for i in glob.glob(os.path.join(config.DefaultRepository, "*", "*.jpg"))]
+    logger.debug("Scanned directory %s and found %i images" % (config.DefaultRepository, len(all_jpg)))
+    if not all_jpg:
+        logger.error("No JPEG files in repository %s!!!" % config.DefaultRepository)
+    return all_jpg
+
+
+def create_link(linkName, lst=None):
     if (os.path.islink(linkName)):
         try:
             os.unlink(linkName)
@@ -46,24 +59,29 @@ def create_link(linkName,lst=[]):
             raise IOError("Unable to remove initial link file. Check rights")
     if linkName.startswith("-"):
         logger.error("You need to give the name of the link to create ! One argument is expected")
-        return     
+        return
     while True:
-        if lst==[]:
-            lst = findFiles(config.DefaultRepository)
+        if not lst:
+            lst = scan()
             random.shuffle(lst)
-        imFile = lst.pop()
-        photo = Photo(imFile)
-        metadata = photo.readExif()
-        rate = metadata.get("Rate", 0)
-        rating = 0.01 + 0.2 * rate
-        if random.random() < rating:
-            print("%s[%s] ---> %s" % (imFile, rate, linkName))
+        image_file = lst.pop()
+        photo = Photo(image_file, dontCache=True)
+        data = photo.readExif()
+        rate = data.get("rate", 0)
+        # 0 for x=5, 0.5 for x=3 and 0.99 for x=0
+        treshold = -0.01733333 * rate * rate + -0.11133333 * rate + 0.99
+        found = (photo.pixelsX > photo.pixelsY) and (random.random() >= treshold)
+        if found:
+            print("%s[%s] ---> %s" % (image_file, rate, linkName))
             os.symlink(photo.fn, linkName)
             break
 
-if (len(sys.argv) < 2):
-    logger.error("You need to give the name of the link to create ! One argument is expected")
-    sys.exit(1)
-for oneFile in sys.argv[1:]:
-    create_link(oneFile)
+if __name__ == "__main__":
+    if (len(sys.argv) < 2):
+        logger.error("You need to give the name of the link to create ! One argument is expected")
+        sys.exit(1)
+    lst = scan()
+    random.shuffle(lst)
+    for oneFile in sys.argv[1:]:
+        create_link(oneFile, lst)
 
