@@ -109,12 +109,12 @@ binary_modules.append({"name":'_tree',
 
 
 print execexiftran
-setup(name='Imagizer',
+setup(name='imagizer',
     version=version,
     author='Jérôme Kieffer',
     author_email='Jerome.Kieffer@terre-adelie.org',
     url='http://wiki.terre-adelie.org/Imagizer',
-    description="Imagizer is a manager for a repository of photos",
+    description="manager for a repository of images with complete metadata management",
     license='GNU GPL v2',
     scripts=scripts,
     data_files=[

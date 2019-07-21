@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "25/02/2018"
+__date__ = "21/07/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -47,9 +47,13 @@ installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.photo")
 
 try:
-    import Image, ImageStat, ImageChops, ImageFile
-except:
-    raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
+    from PIL import Image, ImageStat, ImageChops, ImageFile
+except ImportError:
+    try:
+        import Image, ImageStat, ImageChops, ImageFile
+    except ImportError:
+        logger.error("""Selector needs PIL: Python Imaging Library or pillow""")
+        raise error
 
 Image.MAX_IMAGE_PIXELS = None
 from .config import config
@@ -62,8 +66,7 @@ from .exif       import Exif
 from .           import pyexiftran
 from .fileutils  import mkdir, makedir, smartSize
 from .encoding   import unicode2ascii
-from .           import blur, qt
-from .qt import transformations, get_matrix, Qt
+from .           import blur
 
 
 # #########################################################
@@ -339,6 +342,7 @@ class Photo(object):
 
     def rotate(self, angle=0):
         """does a lossless rotation of the given jpeg file"""
+        from . import qt
         if os.name == 'nt' and self.pil != None:
             del self.pil
         x = self.pixelsX
@@ -349,7 +353,7 @@ class Photo(object):
             if imageCache is not None:
                 pyexiftran.rotate90(self.fn)
                 trans = qt.QTransform().rotate(90)
-                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
@@ -478,6 +482,7 @@ class Photo(object):
 
         @return: QPixmap
         """
+        from . import qt
         if self.is_raw:
             if self.metadata is None:
                 self.read_exif()
@@ -491,8 +496,8 @@ class Photo(object):
                                 (largest.dimensions, self.fn))
             orientation = self.get_orientation(True)
             if orientation != 1:
-                matrix = get_matrix(orientation)
-                pixbuf = pixbuf.transformed(matrix, mode=Qt.FastTransformation)
+                matrix = qt.get_matrix(orientation)
+                pixbuf = pixbuf.transformed(matrix, mode=qt.Qt.FastTransformation)
                 self.set_orientation(1)
         else:
             pixbuf = qt.QPixmap(self.fn)
@@ -509,6 +514,7 @@ class Photo(object):
         @param Ycenter: fraction of image to center on in Y
         @return: a pixbuf to shows the image in a window
         """
+        from . import qt
 
         scaled_buf = None
         if Xsize > config.ImageWidth :
