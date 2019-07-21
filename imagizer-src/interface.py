@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "13/01/2019"
+__date__ = "21/07/2019"
 __license__ = "GPL"
 
 import gc
@@ -692,7 +692,7 @@ class Interface(qt.QObject):
         newnamefull = os.path.join(config.DefaultRepository, newname)
         self.image.as_jpeg(newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
-        p = subprocess.Popen([config.Rawtherapee, "-R", filenamefull])
+        p = subprocess.Popen([config.Rawtherapee, filenamefull])
         with self.job_sem:
             self.processes.append(p)
         self.show_image()
@@ -1221,7 +1221,7 @@ class Interface(qt.QObject):
         logger.debug("Interface.image_zoom ")
         try:
             zoom = ev.angleDelta().y()
-        except AttributeError: #Qt4
+        except AttributeError:  # Qt4
             zoom = ev.delta()
         w_width = self.gui.photo.width()
         w_height = self.gui.photo.height()
