@@ -1,26 +1,26 @@
 #!/usr/bin/python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2001, Martin Blais <blais@furius.ca>
-#* Copyright (C) 2004-2011, Jerome Kieffer <kieffer@terre-adelie.org>
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# * $Source$
+# * $Id$
+# *
+# * Copyright (C) 2001, Martin Blais <blais@furius.ca>
+# * Copyright (C) 2004-2011, Jerome Kieffer <kieffer@terre-adelie.org>
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 
 """Generate HTML image gallery pages.
@@ -218,9 +218,9 @@ import imghdr
 import stat
 import distutils.sysconfig
 
-#here we detect the OS runnng the program so that we can call exftran in the right way
+# here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = op.join(distutils.sysconfig.get_python_lib(), "imagizer")
-if os.name == 'nt': #sys.platform == 'win32':
+if os.name == 'nt':  # sys.platform == 'win32':
     ConfFile = [op.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), op.join(os.getenv("USERPROFILE"), "imagizer.conf")]
 elif os.name == 'posix':
     ConfFile = ["/etc/imagizer.conf", op.join(os.getenv("HOME"), ".imagizer")]
@@ -339,9 +339,9 @@ def splitpath(path):
     This function works around a quirk in string.split()."""
 
     # FIXME perhaps call op.split repetitively would be better.
-    #s = string.split( path, '/' ) # we work with fwd slash only inside.
+    # s = string.split( path, '/' ) # we work with fwd slash only inside.
 
-#We have decided to use all kind of separator
+# We have decided to use all kind of separator
     s = []
     while True:
         first, second = op.split(path)
@@ -521,7 +521,7 @@ class Dir:
         self._attrfile = None
         self._curdir = join(root, path)
 
-        self._pagefn = None # to be computed outside according to policies
+        self._pagefn = None  # to be computed outside according to policies
 
         files = dircache.listdir(join(root, path))
 
@@ -636,7 +636,7 @@ class Dir:
                             found = True
                             break
                     if not found: self._attrfile["image"] = ""
-        #here we try to find an random image that will represente the whole folder
+        # here we try to find an random image that will represente the whole folder
             if self._attrfile["image"] == "":
                 if len(self._images) > 0:
                     self._attrfile["image"] = self._images[random.randrange(len(self._images))]._base
@@ -733,24 +733,24 @@ class Image:
 
         """Constructor. Initialize to accumulation information."""
 
-        self._dir = dir # directory object
-        self._base = base # base (e.g. dscn0111)
-        self._repn = None # suffix, if present (e.g. --800x800)
-        self._ext = None # file extension (e.g. .jpg)
+        self._dir = dir  # directory object
+        self._base = base  # base (e.g. dscn0111)
+        self._repn = None  # suffix, if present (e.g. --800x800)
+        self._ext = None  # file extension (e.g. .jpg)
 
-        self._salts = [] # simple alt.repns. (i.e. base.ext)
-        self._calts = [] # complex alt.repns (i.e. base--repn.ext)
+        self._salts = []  # simple alt.repns. (i.e. base.ext)
+        self._calts = []  # complex alt.repns (i.e. base--repn.ext)
         self._size = None
-        self._thumbfn = None # thumbnail filename (i.e. base--thumb.gif)
+        self._thumbfn = None  # thumbnail filename (i.e. base--thumb.gif)
         self._thumbsize = None
         self._scaledfn = None
         self._scaledsize = None
-        self._attr = None # attributes filename boolean
-        self._title = '' # to be computed upon init()
+        self._attr = None  # attributes filename boolean
+        self._title = ''  # to be computed upon init()
 
-        self._pagefn = None # to be computed outside according to policies
-        self._comment = None # Description in Jpeg comment
-        self._exif = None # Exif tags
+        self._pagefn = None  # to be computed outside according to policies
+        self._comment = None  # Description in Jpeg comment
+        self._exif = None  # Exif tags
 
     #---------------------------------------------------------------------------
     #
@@ -991,7 +991,7 @@ class Image:
 
             cmd = getMagickProg('convert') + ' -border 2x2 '
             # FIXME check if this is a problem if not specified
-            #cmd += '-interlace NONE '
+            # cmd += '-interlace NONE '
 
             cmd += '-geometry %dx%d ' % (opts.thumb_size, opts.thumb_size)
 
@@ -1107,7 +1107,7 @@ class Image:
 
             cmd = getMagickProg('convert') + ' -border 2x2 '
             # FIXME check if this is a problem if not specified
-            #cmd += '-interlace NONE '
+            # cmd += '-interlace NONE '
 
             cmd += '-geometry %dx%d ' % (opts.scaled_size, opts.scaled_size)
 
@@ -1170,7 +1170,7 @@ def checkThumbSize(isz, tsz, desired):
     # tolerate 2% error
     try:
         if abs(float(isz[0]) / isz[1] - float(tsz[0]) / tsz[1]) > 0.02:
-            return 0 # aspect has changed, or isz rotated
+            return 0  # aspect has changed, or isz rotated
     except:
         return 0
     return abs(desired - tsz[0]) <= 1 or abs(desired - tsz[1]) <= 1
@@ -1600,7 +1600,7 @@ def execTemplate(outfile, olist, envir):
                 # Note: we don't need this anymore, since we're outputting to a
                 # real file object.  However, keep this around in case we change
                 # it back to output to a string.
-                #if hack:
+                # if hack:
                 #    ss.ignoreNextChar()
 
             except:
@@ -1799,26 +1799,20 @@ def table(dstdir, images, textfun=None, cols=4):
 
     return os.getvalue()
 
-#-------------------------------------------------------------------------------
-#
 def twoColumns(dstdir, images):
+    sio = StringIO.StringIO()
+    sio.write('<table cols=2 width=\"100%\"><tr><td>')
+    sio.write('<ul><font size=-2>')
+    for i in images[:len(images) // 2 ]:
+        sio.write('<li><a href=\"%s\">%s</a></li>' % (rel(i._pagefn, dstdir), i._title))
+    sio.write('</font></ul>')
 
-    os = StringIO.StringIO()
-    print >> os, '<table cols=2 width=\"100%\"><tr><td>'
-    print >> os, '<ul><font size=-2>'
-    for i in images[ :len(images) / 2 ]:
-     print >> os, '<li><a href=\"%s\">%s</a></li>' % \
-         (rel(i._pagefn, dstdir), i._title)
-    print >> os, '</font></ul>'
-
-    print >> os, '</td><td>'
-
-    print >> os, '<ul><font size=-2>'
-    for i in images[ len(images) / 2: ]:
-     print >> os, '<li><a href=\"%s\">%s</a></li>' % \
-         (rel(i._pagefn, dstdir), i._title)
-    print >> os, '</font></ul>'
-    print >> os, '</td></tr></table>'
+    sio.write('</td><td>')
+    sio.write('<ul><font size=-2>')
+    for i in images[ len(images) // 2: ]:
+        sio.write('<li><a href=\"%s\">%s</a></li>' % (rel(i._pagefn, dstdir), i._title))
+    sio.write('</font></ul>')
+    sio.write('</td></tr></table>')
 
     return os.getvalue()
 
@@ -2748,10 +2742,10 @@ def main():
         opts.attrext = ".desc"
 
     if not opts.thumb_sfx:
-        opts.thumb_sfx = config.Thumbnails["Suffix"] + config.Extensions[0]#"thumb.jpg" will create jpg thumbnails by default
+        opts.thumb_sfx = config.Thumbnails["Suffix"] + config.Extensions[0]  # "thumb.jpg" will create jpg thumbnails by default
 
     if not opts.scaled_sfx:
-        opts.scaled_sfx = config.ScaledImages["Suffix"] + config.Extensions[0] #"scaled.jpg"  will create jpg scaled image by default
+        opts.scaled_sfx = config.ScaledImages["Suffix"] + config.Extensions[0]  # "scaled.jpg"  will create jpg scaled image by default
 
     #
     # Validate options.
@@ -2835,7 +2829,7 @@ def main():
         sys.exit(1)
     elif len(filter(None, [opts.out_along, opts.out_subdirs,
                          opts.out_onedir])) == 0:
-        opts.out_subdirs = 1 # Default
+        opts.out_subdirs = 1  # Default
 
     #
     # initialize global constants
@@ -2846,7 +2840,7 @@ def main():
     global allindex_fn, allcidx_fn, trackindex_fn, sortindex_fn, css_fn
     index_fn = "index" + opts.htmlext
     dirindex_fn = "dirindex" + opts.htmlext
-    dirattr_fn = config.CommentFile   #"dir" + opts.attrext
+    dirattr_fn = config.CommentFile  # "dir" + opts.attrext
     allindex_fn = "allindex" + opts.htmlext
     allcidx_fn = "allindex" + cidxext
     trackindex_fn = "trackindex-%s" + opts.htmlext
