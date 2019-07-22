@@ -29,7 +29,7 @@ Utility function to convert string to ASCII
 """
 from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
-__date__ = "21/07/2019"
+__date__ = "22/07/2019"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"

@@ -30,16 +30,17 @@ class Entry(object):
 class FCache:
     "A class which handles the cache for the image size "
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         "Initialize the fcache, reading the given file."
-        self.cachefn = filename
+        self.cachefn = None
         self.entries = {}
-        if os.path.exists(self.cachefn):
-            self.load()
+        if (filename is not None) and os.path.exists(filename):
+            self.load(filename)
 
-    def load(self):
+    def load(self, filename):
         "Initialize the cache from disk"
-        with open(self.cachefn) as fp:
+        self.cachefn = filename
+        with open(filename) as fp:
             data = json.load(fp)
         for entry in data:
             self.entries[entry[0]] = Entry(*entry)
@@ -48,7 +49,9 @@ class FCache:
         s = os.stat(fn)
         self.entries[fn] = Entry(fn, s[stat.ST_MTIME], s[stat.ST_SIZE], info)
 
-        # write out cache
+        if self.cachefn is None:
+            return
+        # else write out cache
         try:
             with open(self.cachefn, 'w') as fp:
                 json.dump([e.as_tuple() for e in self.entries.values(), fp])
@@ -68,8 +71,6 @@ class FCache:
         return e.info
 
     def dump(self):
-        if not opts.quiet:
-            return None
         print("Cache filename: %s", self.cachefn)
         print()
         for e in self.entries.values():
