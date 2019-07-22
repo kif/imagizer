@@ -382,21 +382,19 @@ def unicode2ascii(unicrap):
     return str_out
 
 
-def unicode2html(_unicrap):
+def unicode2html(unicrap):
     """
     Converts an unicode input into a "html" like string
 
-    @param _unicrap: input unicode
+    @param unicrap: input unicode
     @return: html string
     """
-    str_out = ""
-    if _unicrap is not None:
-        for i in _unicrap:
-            if i in UNICODE_TO_HTML:
-                str_out += UNICODE_TO_HTML[i]
-            else:
-                str_out += str(i)
-    return str_out
+    strout = ""
+    if unicrap is not None:
+        if not isinstance(unicrap, unicode):
+            unicrap = unicrap.decode("utf-8")
+        strout = "".join(UNICODE_TO_HTML[i] if i in UNICODE_TO_HTML else str(i) for i in unicrap)
+    return strout
 
 def test():
     if PY3:

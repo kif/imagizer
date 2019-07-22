@@ -272,65 +272,6 @@ def urlquote(text):
         return urllib.quote(text)
 
 from imagizer.curator import  FCache
-# class Entry:
-#     def __init__(self, fn, mtime, size, info):
-#         self.fn = fn
-#         self.mtime = mtime
-#         self.size = size
-#         self.info = info
-#
-# class FCache:
-#     mre = re.compile('^"([^"]*)" (\d+) (\d+): (.*)$')
-#
-#     def __init__(self, filename):
-#         "Initialize the fcache, reading the given file."
-#         self.cachefn = filename
-#         self.entries = {}
-#         if exists(self.cachefn):
-#             f = open(self.cachefn, 'r')
-#             lines = f.readlines()
-#             for line in lines:
-#                 mo = FCache.mre.match(line)
-#                 if mo:
-#                     (fn, mtime, size, info) = mo.groups()
-#                     self.entries[fn] = Entry(fn, int(mtime), int(size), info)
-#             f.close()
-#
-#     def store(self, fn, info):
-#         s = os.stat(fn)
-#         self.entries[fn] = Entry(fn, s[stat.ST_MTIME], s[stat.ST_SIZE], info)
-#
-#         # write out cache
-#         try:
-#             with open(self.cachefn, 'w') as f:
-#                 for e in self.entries.values():
-#                     f.write('"%s" %d %d: %s\n' % (e.fn, e.mtime, e.size, e.info))
-#         except IOError:
-#             sys.stderr.write("Error writing out cache")
-#
-#     def lookup(self, fn):
-#         try:
-#             e = self.entries[fn]
-#         except KeyError:
-#             return None
-#
-#         s = os.stat(fn)
-#         if e.mtime != s[stat.ST_MTIME] or e.size != s[stat.ST_SIZE]:
-#             return None
-#
-#         return e.info
-#
-#     def dump(self):
-#         if not opts.quiet:
-#             return None
-#         print("Cache filename: %s", self.cachefn)
-#         print()
-#         for e in self.entries.values():
-#             print("filename: %s" % e.fn)
-#             print("mtime: %s" % e.mtime)
-#             print("size: %s" % e.size)
-#             print("info: %s" % e.info)
-#             print()
 
 
 #===============================================================================
@@ -1211,7 +1152,7 @@ def imageSizeNoCache(filename):
 
 #-------------------------------------------------------------------------------
 #
-fcachesizes = None
+fcachesizes = FCache()
 szre = re.compile('(\d+)x(\d+)')
 
 imageSizeCache = {}
@@ -2129,8 +2070,7 @@ def main():
     opts.debug = 0
 
     # Initialize the global cache
-    global fcachesizes
-    fcachesizes = FCache(join(opts.root, '.fcache'))
+    fcachesizes.load(join(opts.root, '.fcache'))
 
 
 

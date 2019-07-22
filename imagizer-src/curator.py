@@ -40,23 +40,23 @@ class FCache:
     def load(self, filename):
         "Initialize the cache from disk"
         self.cachefn = filename
-        with open(filename) as fp:
-            data = json.load(fp)
-        for entry in data:
-            self.entries[entry[0]] = Entry(*entry)
+        if os.path.exists(filename):
+            with open(filename) as fp:
+                data = json.load(fp)
+            for entry in data:
+                self.entries[entry[0]] = Entry(*entry)
 
     def store(self, fn, info):
         s = os.stat(fn)
         self.entries[fn] = Entry(fn, s[stat.ST_MTIME], s[stat.ST_SIZE], info)
 
-        if self.cachefn is None:
-            return
-        # else write out cache
-        try:
-            with open(self.cachefn, 'w') as fp:
-                json.dump([e.as_tuple() for e in self.entries.values(), fp])
-        except IOError as err:
-            logger.error("Error writing out cache: %s" % err)
+        if self.cachefn is not None:
+            # write out cache
+            try:
+                with open(self.cachefn, 'w') as fp:
+                    json.dump([e.as_tuple() for e in self.entries.values()], fp)
+            except IOError as err:
+                logger.error("Error writing-out cache: %s" % err)
 
     def lookup(self, fn):
         try:
