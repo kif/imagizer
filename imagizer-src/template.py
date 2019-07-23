@@ -741,7 +741,7 @@ class Templates(object):
             pretext = templatetxt[ pos : mo1.start() ]
             code = templatetxt[ mo1.end() : mo2.start() ]
             if not mo1.group('code'):
-                code = "print(%s, end='')" % code
+                code = "sys.stdout.write(%s)" % code
             output.append(self.compile_code(pretext, code, filename))
             pos = mo2.end()
 
