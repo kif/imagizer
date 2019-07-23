@@ -247,36 +247,12 @@ else:
     locale.setlocale(locale.LC_ALL, config.Locale)
 from imagizer.exif      import Exif
 from imagizer.parser    import AttrFile
-from imagizer.template import default_templates as fallbackTemplates
+from imagizer.template import Templates
+from imagizer.curator import  FCache, urlquote
+templates = Templates()
+fcachesizes = FCache()
 
 
-from traceback import print_exception
-
-#===============================================================================
-# PUBLIC DECLARATIONS
-#===============================================================================
-
-#===============================================================================
-# fcache module
-#===============================================================================
-
-#===============================================================================
-# PUBLIC DECLARATIONS
-#===============================================================================
-
-def urlquote(text):
-    """same as urllib.quote but windows compliant"""
-    if op.sep == "\\":
-        return urllib.quote(text.replace("\\", "/"))
-    else:
-        return urllib.quote(text)
-
-from imagizer.curator import  FCache
-
-
-#===============================================================================
-# DIRECTORY NAMES
-#===============================================================================
 
 #-------------------------------------------------------------------------------
 #
@@ -415,10 +391,6 @@ def getMagickProg(progname):
     return o
 
 
-
-#===============================================================================
-# BASIC CLASSES (for internal representation)
-#===============================================================================
 
 #===============================================================================
 # CLASS Dir
@@ -1152,7 +1124,7 @@ def imageSizeNoCache(filename):
 
 #-------------------------------------------------------------------------------
 #
-fcachesizes = FCache()
+
 szre = re.compile('(\d+)x(\d+)')
 
 imageSizeCache = {}
@@ -1206,12 +1178,11 @@ def generatePage(fn, ttype, envir):
     # Write out modified file.
     try:
         afn = join(opts.root, fn)
-        tfile = open(afn, "w")
-        execTemplate(tfile, templates[ttype], envir)
-        tfile.close()
+        with open(afn, "w") as tfile:
+            templates.execute(tfile, ttype, envir)
 
-    except IOError, e:
-        print >> sys.stderr, "Error: can't open file: %s" % fn
+    except IOError as e:
+        logger.error("%s cannot open file: %s", e, fn)
 
 #-------------------------------------------------------------------------------
 #
@@ -1285,253 +1256,6 @@ class StringStream:
         return self._string
 
 
-#-------------------------------------------------------------------------------
-#
-def readTemplates():
-
-    """Reads the template files."""
-
-    # Compile HTML templates.
-    templates = {}
-    for tt in [ 'image', 'dirindex', 'allindex', 'trackindex', 'sortindex' ]:
-        fn = 'template-%s' % tt + opts.htmlext
-        ttext = readTemplate(fn)
-        templates[ tt ] = compileTemplate(ttext, fn)
-
-    fn = 'template-css.css'
-    ttext = readTemplate(fn)
-    templates[ 'css' ] = compileTemplate(ttext, fn)
-
-    # Compile user-specified rc file.
-    rcsfx = 'rc'
-    templates[ rcsfx ] = []
-    if opts.rc:
-        try:
-            tfile = open(opts.rc, "r")
-            orc = tfile.read()
-            tfile.close()
-        except IOError, e:
-            print >> sys.stderr, "Error: can't open user rc file:", opts.rc
-            sys.exit(1)
-
-        o = compileCode('', orc, opts.rc)
-        templates[ rcsfx ] += [ o ]
-
-    # Compile user-specified code.
-    if opts.rccode:
-        o = compileCode('', opts.rccode, "rccode option")
-        templates[ rcsfx ] += [ o ]
-
-    # Compile global rc file without HTML tags, just python code.
-    code = readTemplate('template-%s' % rcsfx + '.py')
-    o = compileCode('', code, tt)
-    templates[ rcsfx ] += [ o ]
-
-    return templates
-
-
-#-------------------------------------------------------------------------------
-#
-def readTemplate(tfn):
-
-    """Reads a template file.
-    This method expects an simple filename."""
-
-    if opts.verbose: print "fetching template", tfn
-
-    found = 0
-    foundInRoot = 0
-
-    # check in user-specified template root.
-    if opts.templates:
-        fn = join(opts.templates, tfn)
-        if opts.verbose: print "  looking in %s" % fn
-        if exists(fn):
-            found = 1
-
-    # check in hierarchy root
-    if not found:
-        fn = join(opts.root, tfn)
-        if opts.verbose: print "  looking in %s" % fn
-        if exists(fn):
-            foundInRoot = 1
-            found = 1
-
-    # look for it in the environment var path
-    if not found:
-        try:
-            curatorPath = os.environ[ 'CURATOR_TEMPLATE' ]
-            pathlist = string.split(curatorPath, os.pathsep)
-            for p in pathlist:
-                fn = join(p, tfn)
-                if opts.verbose: print "  looking in %s" % fn
-                if exists(fn):
-                    found = 1
-                    break
-        except KeyError:
-            pass
-
-    if found == 1:
-        # read the file
-        try:
-            tfile = open(fn, "r")
-            t = tfile.read()
-            tfile.close()
-        except IOError, e:
-            print >> sys.stderr, "Error: can't open image template file:", fn
-            sys.exit(1)
-        if opts.verbose: print "  succesfully loaded template", tfn
-
-    else:
-        # bah... can't load it, use fallback templates
-        if opts.verbose:
-            print "  falling back on simplistic default templates."
-        global fallbackTemplates
-        try:
-            t = fallbackTemplates[ splitext(tfn)[0] ]
-        except KeyError:
-            t = ''
-
-    # Save templates in root, if it was requested.
-    if opts.save_templates and foundInRoot == 0:
-        rootfn = join(opts.root, tfn)
-        if opts.verbose: print "  saving template in %s" % rootfn
-
-        # saving the file template
-        if exists(rootfn):
-            bakfn = join(opts.root, tfn + '.bak')
-            if opts.verbose: print "  making backup in %s" % bakfn
-            import shutil
-            try:
-                shutil.copy(rootfn, bakfn)
-            except:
-                print >> sys.stderr, \
-                      "Error: can't copy backup template %s", bakfn
-
-        try:
-            ofile = open(rootfn, "w")
-            ofile.write(t)
-            ofile.close()
-        except IOError, e:
-            print >> sys.stderr, "Error: can't save template file to", rootfn
-
-    return t
-
-#-------------------------------------------------------------------------------
-#
-def compileCode(pretext, codetext, filename):
-
-    """Compile a chunk of code."""
-
-    try:
-        if codetext:
-            co = compile(codetext, filename, "exec")
-            o = [ pretext, co, codetext ]
-        else:
-            o = [ pretext, None, codetext ]
-    except:
-        o = [ pretext, None, codetext ]
-
-        print >> sys.stderr, \
-              "Error compiling template in the following code:"
-        print >> sys.stderr, codetext
-
-        try:
-            etype, value, tb = sys.exc_info()
-            print_exception(etype, value, tb, None, sys.stderr)
-        finally:
-            etype = value = tb = None
-        if not opts.ignore_errors:
-            errors = 1
-
-        print >> sys.stderr
-    return o
-
-
-#-------------------------------------------------------------------------------
-#
-def compileTemplate(ttext, filename):
-
-    """Compiles template text."""
-
-    mre1 = re.compile("<!--tag(?P<code>code)?:\s*")
-    mre2 = re.compile("-->")
-    pos = 0
-    olist = []
-    errors = 0
-    while pos < len(ttext):
-        mo1 = mre1.search(ttext, pos)
-        if not mo1:
-            break
-        mo2 = mre2.search(ttext, mo1.end())
-        if not mo2:
-            print >> sys.stderr, "Error: unfinished tag."
-            sys.exit(1)
-
-        pretext = ttext[ pos : mo1.start() ]
-        code = ttext[ mo1.end() : mo2.start() ]
-        if not mo1.group('code'):
-            code = "print " + code + ","
-
-        o = compileCode(pretext, code, filename)
-
-        olist.append(o)
-        pos = mo2.end()
-    if pos < len(ttext):
-        olist.append([ ttext[ pos: ], None ])
-
-    if errors == 1 and not opts.ignore_errors:
-        sys.exit(1)
-
-    return olist
-
-#-------------------------------------------------------------------------------
-#
-def execTemplate(outfile, olist, envir):
-
-    """Executes template text.  Output is written to outfile."""
-
-    ss = outfile
-    saved_stdout = sys.stdout
-    sys.stdout = ss
-    errors = 0
-    for o in olist:
-        ss.write(o[0])
-
-        if o[1]:
-            try:
-                eval(o[1], envir)
-
-                # Note: this is a TERRIBLE hack to flush the comma cache of the
-                # python interpreter's print statement between tags when outfile
-                # is a string stream.
-                #
-                # Note: we don't need this anymore, since we're outputting to a
-                # real file object.  However, keep this around in case we change
-                # it back to output to a string.
-                # if hack:
-                #    ss.ignoreNextChar()
-
-            except:
-                print >> sys.stderr, \
-                      "Error executing template in the following code:"
-                print >> sys.stderr, o[2]
-
-                try:
-                    etype, value, tb = sys.exc_info()
-                    print_exception(etype, value, tb, None, sys.stderr)
-                finally:
-                    etype = value = tb = None
-                if not opts.ignore_errors:
-                    errors = 1
-
-                print >> sys.stderr
-
-
-    if errors == 1 and not opts.ignore_errors:
-        sys.exit(1)
-
-    sys.stdout = saved_stdout
 
 #===============================================================================
 # MISC
@@ -1602,16 +1326,6 @@ def clean(allimages, alldirs):
                 os.unlink(fn)
 
 
-
-#===============================================================================
-# DEFAULT TEMPLATES
-#===============================================================================
-
-# These are the very bare minimum and are provided here so that we just NEVER
-# abort because we can't find the templates.
-
-# Note: we really want this at the end of the file, because it screws up emacs
-# python-mode highlighting.
 
 #---------------------------------------------------------------------------
 #
@@ -2294,8 +2008,7 @@ def main():
     #
     if opts.quiet: print "====> templates input and compilation"
 
-    global templates
-    templates = readTemplates()
+    templates.set_opts(opts)
 
     #
     # Thumbnail generation.
@@ -2320,7 +2033,7 @@ def main():
     envir = {}
     envir.update(globals())
     envir.update(locals())
-    execTemplate(sys.stdout, templates['rc'], envir)
+    templates.execute(sys.stdout, 'rc', envir)
 
     #
     # Output directory indexes
@@ -2409,15 +2122,3 @@ def main():
 # Run main if loaded as a script
 if __name__ == "__main__":
     main()
-
-#===============================================================================
-# END
-#===============================================================================
-
-# change 'name' to 'file-or-title'
-
-# split stuff that could totally be in the includes.py file
-
-# remove table b.s. when it all works
-
-# make it work with CSS

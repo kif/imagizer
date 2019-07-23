@@ -3,13 +3,14 @@
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/07/2019"
+__date__ = "23/07/2019"
 __license__ = "GPL"
 
 import os
 import json
 import logging
 import stat
+import urllib
 
 logger = logging.getLogger(__name__)
 
@@ -79,3 +80,11 @@ class FCache:
             print("size: %s" % e.size)
             print("info: %s" % e.info)
             print()
+
+
+def urlquote(text):
+    """same as urllib.quote but windows compliant"""
+    if os.path.sep == "\\":
+        return urllib.quote(text.replace("\\", "/"))
+    else:
+        return urllib.quote(text)
