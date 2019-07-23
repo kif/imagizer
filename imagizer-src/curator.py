@@ -42,10 +42,15 @@ class FCache:
         "Initialize the cache from disk"
         self.cachefn = filename
         if os.path.exists(filename):
-            with open(filename) as fp:
-                data = json.load(fp)
-            for entry in data:
-                self.entries[entry[0]] = Entry(*entry)
+            try:
+                with open(filename) as fp:
+                    data = json.load(fp)
+            except Exception as error:
+                logger.error("Unable to parse saved JSON data: discarding them")
+                os.unlink(filename)
+            else:
+                for entry in data:
+                    self.entries[entry[0]] = Entry(*entry)
 
     def store(self, fn, info):
         s = os.stat(fn)
