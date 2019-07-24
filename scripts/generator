@@ -195,14 +195,14 @@ __author__ = "Martin Blais <blais@furius.ca>"
 #===============================================================================
 
 import sys, logging
-import imagizer
-logger = logging.getLogger("imagizer.generator")
+logging.basicConfig()
+logging.root.setLevel(logging.INFO)
+logger = logging.getLogger("generator")
 
 from imagizer.encoding import unicode2html
 
 if int(sys.version[0]) != 2:
-    logger.error("You need Python version 2 to run generator.")
-    sys.exit(1)
+    logger.warning("Only Python 2 has been tested so far with generator.")
 
 import os, dircache
 import os.path as op
@@ -210,10 +210,8 @@ from os.path import join, dirname, basename, normpath, splitext
 from os.path import isfile, islink, isdir, exists
 
 import re, string, time, random, locale
-import urllib
 
 import imghdr
-import stat
 import distutils.sysconfig
 
 # here we detect the OS runnng the program so that we can call exftran in the right way
@@ -248,9 +246,11 @@ else:
 from imagizer.exif      import Exif
 from imagizer.parser    import AttrFile
 from imagizer.template import Templates
-from imagizer.curator import  FCache, urlquote, split_filename, relative_path as rel
+from imagizer.curator import  FCache, urlquote, split_filename, check_thumbnail_size, relative_path as rel
+from imagizer.imagemagick import ImageMagick
 templates = Templates()
 fcachesizes = FCache()
+magick = ImageMagick()
 
 fast_imgexts = [ 'jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', \
                  'tiff', 'tif', 'rast', 'xbm', 'bmp' ]
@@ -272,38 +272,6 @@ def imgwhat(fn, fast=None):
             return imghdr.what(fn)
         except IOError:
             return None
-
-#-------------------------------------------------------------------------------
-#
-magick_path_cache = {}
-
-def getMagickProg(progname):
-
-    """Returns the program name to execute for an ImageMagick command."""
-
-    if magick_path_cache.has_key(progname):
-        p = magick_path_cache[ progname ]
-    else:
-        if opts.magick_path:
-            prg = join(opts.magick_path, progname)
-        else:
-            prg = progname
-        magick_path_cache[ progname ] = prg
-
-        prg = normpath(prg)
-
-        # Issue a warning if we can't find the program where specified.
-        if opts.magick_path:
-            if not exists(prg) and not exists(prg + '.exe'):
-                sys.stderr.write("Warning: can't stat ImageMagick program %s\n" % prg)
-                print >> sys.stderr, \
-                      "Perhaps try specifying it using --magick-path."
-
-        p = prg
-
-    o = p
-    return o
-
 
 
 #===============================================================================
@@ -344,8 +312,8 @@ class Dir:
             if exists(pattr) and isfile(pattr):
                 self._attrfile.read()
                 if self._attrfile.keys():
-                    if opts.quiet: print "  read attributes", self._attrfile.keys()
-            if not self._attrfile.has_key("comment"):
+                    logger.info("  read attributes %s", self._attrfile.keys())
+            if "comment" not in self._attrfile:
                 self._attrfile["comment"] = ""
             longtitle = op.split(self._basename)[1]
             if not self._attrfile.has_key("date"):
@@ -385,11 +353,11 @@ class Dir:
 
                 # perhaps ignore file
                 if opts.ignore_pattern and opts.ignore_re.search(af):
-                    if opts.quiet: print "ignoring file", af
+                    logger.info("ignoring file %s", af)
                     continue
 
                 # check for separator
-                (dir, base, repn, ext) = split_filename(f)
+                (dir, base, repn, ext) = split_filename(f, opts.separator)
                 # dir should be nothing here.
 
                 # ignore html file
@@ -416,23 +384,19 @@ class Dir:
         # Detect thumbnails, imagepages, attributes files.
         for i in imgmap.keys():
             e = imgmap[i]
-            if opts.quiet: print "looking for images with base '%s'" % \
-                  join(e._dir._path, e._base)
+            logger.info("looking for images with base '%s'", os.path.join(e._dir._path, e._base))
             e.cleanAlts()
             if not e.selectName(join(root, path)):
                 del imgmap[i]
-            print
 
         for f in imgmap.keys():
             img = imgmap[f]
             img.init(self._attrfile)
             if img._ignore:
                 if opts.quiet:
-                    print "ignoring", img._base, "from desc file ignore tag."
+                    logger.info("ignoring %s from desc file ignore tag.", img._base)
                 continue
             self._images.append(img)
-
-
 
         if not longtitle in [config.ScaledImages["Suffix"], config.Thumbnails["Suffix"]]:
         # fix the problem if there are many pages ...
@@ -582,7 +546,7 @@ class Image:
                 attr = AttrFile(pattr)
                 attr.read()
                 if attr.keys():
-                    if opts.quiet: print "  read attributes", attr.keys()
+                    logger.info("  read attributes %s", attr.keys())
 
                 self._attr = attr
 
@@ -598,7 +562,7 @@ class Image:
                 try:
                     self.handleDescription(a)
                 except:
-                    sys.stderr.write("Error: in attributes file %s\n" % a._path)
+                    sys.stderr.write("Error: in attributes file %s\n", a._path)
 
         self._exif, self._comment = exif(join(opts.root, self._filename))
         # no title, so use something unique to the image, it's path
@@ -632,7 +596,7 @@ class Image:
         # Detect html files, remove them in the altrepn
         try:
             idx = self._salts.index(opts.htmlext)
-            if opts.quiet: print "  detected existing imagepage '%s'" % opts.htmlext
+            logger.info("  detected existing imagepage '%s'" , opts.htmlext)
             del self._salts[idx]
         except ValueError:
             pass
@@ -640,7 +604,7 @@ class Image:
         # Detect attributes files, remove them in the altrepn
         try:
             idx = self._salts.index(opts.attrext)
-            if opts.quiet: print "  detected attributes file '%s'" % opts.attrext
+            logger.info("  detected attributes file '%s'", opts.attrext)
             self._attr = self._salts[idx]
             del self._salts[idx]
         except ValueError:
@@ -649,7 +613,7 @@ class Image:
         # Detect thumb file, separate them from altrepns
         for k in self._calts:
             if k.startswith(opts.thumb_sfx):
-                if opts.quiet: print "  detected thumb file '%s'" % k
+                logger.info("  detected thumb file '%s'", k)
                 self._thumbfn = k
                 self._calts.remove(k)
                 break
@@ -661,7 +625,7 @@ class Image:
         """Select base file (image file) for image page generation. Returns true
         if it could find a suitable one."""
 
-        if opts.quiet: print "  ", self._salts + self._calts
+        logger.info("  %s%s", self._salts , self._calts)
 
         #
         # choose one representation for the imagepage
@@ -682,10 +646,10 @@ class Image:
                             self._calts.remove(f)
                             (self._repn, self._ext) = splitext(f)
 
-                        if opts.quiet: print "  choosing affinity '%s'" % f
+                        logger.info("  choosing affinity '%s'", f)
                         return 1
                     else:
-                        if opts.quiet: print "  ignoring non-image '%s'" % f
+                        logger.info("  ignoring non-image '%s'", f)
 
         # 2) the first of the base files which is an image file
         if opts.use_repn:
@@ -706,12 +670,12 @@ class Image:
                 else:
                     self._calts.remove(f)
                     (self._repn, self._ext) = splitext(f)
-#                if opts.quiet: print "  choosing imagefile '%s'" % f
+#                logger.info( "  choosing imagefile '%s'" % f
                 return 1
             else:
-                if opts.quiet: print "  ignoring non-image '%s'" % f
+                logger.info("  ignoring non-image '%s'", f)
 
-#        if opts.quiet: print "  no imagepage for base '%s'" % self._base
+#        logger.info( "  no imagepage for base '%s'" % self._base
         return 0
 
     #---------------------------------------------------------------------------
@@ -752,38 +716,34 @@ class Image:
         athumbfn = join(opts.root, self._thumbfn)
 
         if opts.thumb_force:
-            if opts.quiet: print "forced regeneration of '%s'" % self._thumbfn
+            logger.info("forced regeneration of '%s'", self._thumbfn)
         elif not exists(athumbfn):
-            if opts.quiet: print "thumbnail absent '%s'" % self._thumbfn
+            logger.info("thumbnail absent '%s'", self._thumbfn)
         else:
             # Check if thumbsize has changed
             if not opts.fast:
                 self._thumbsize = imageSize(athumbfn)
-                if not checkThumbSize(self._size, \
-                                       self._thumbsize, \
-                                       opts.thumb_size):
-                    if opts.quiet: print "thumbnail '%s size has changed" % self._thumbfn
+                if not check_thumbnail_size(self._size, self._thumbsize, opts.thumb_size):
+                    logger.info("thumbnail '%s size has changed", self._thumbfn)
                     try:
                         # Clear cache for thumbnail size.
                         del imageSizeCache[ athumbfn ]
                     except:
                         pass
                 else:
-#                    pass
-#                    if opts.quiet: print "thumbnail '%s' already generated (size ok)" \
-#                          % self._thumbfn
+                    logger.debug("thumbnail '%s' already generated (size ok)", self._thumbfn)
                     return
             else:
-                if opts.quiet: print "thumbnail '%s' already generated" % self._thumbfn
+                logger.info("thumbnail '%s' already generated", self._thumbfn)
                 return
 
         if opts.no_magick:
-            if opts.quiet: print "ImageMagick tools disabled, can't create thumbnail"
+            logger.info("ImageMagick tools disabled, can't create thumbnail")
             return
 
         # create necessary directories
         d = dirname(athumbfn)
-        if not exists(d):
+        if not os.path.exists(d):
             os.makedirs(d)
 
         if opts.pil and PilImage:
@@ -794,22 +754,18 @@ class Image:
                 self._thumbsize = im.size
             except IOError as e:
                 raise SystemExit("Error: identifying file '%s': %s" % (aimgfn, e))
-
         else:
-
-            cmd = getMagickProg('convert') + ' -border 2x2 '
-            # FIXME check if this is a problem if not specified
-            # cmd += '-interlace NONE '
-
-            cmd += '-geometry %dx%d ' % (opts.thumb_size, opts.thumb_size)
+            cmd = ['convert',
+                   "-border", "2x2",
+                   '-geometry", "%dx%d' % (opts.thumb_size, opts.thumb_size)]
 
             if opts.thumb_quality:
-                cmd += '-quality %d ' % opts.thumb_quality
+                cmd += ['-quality', '%d' % opts.thumb_quality]
 
             # This doesn't add text into the picture itself, just the comment in
             # the header.
             if opts.copyright:
-                cmd += '-comment \"%s\" ' % opts.copyright
+                cmd += ['-comment', opts.copyright]
 
             # We use [1] to extract the thumbnail when there is one.
             # It is harmless otherwise.
@@ -817,31 +773,19 @@ class Image:
             if self._ext.lower() in [ ".jpg", ".tif", ".tiff" ]:
                 subimg = "[1]"
 
-            cmd += '"%s%s" "%s"' % (aimgfn, subimg, athumbfn)
+            cmd += [aimgfn + subimg, athumbfn]
 
-            if opts.quiet: print("generating thumbnail '%s'" % self._thumbfn)
+            logger.info("generating thumbnail '%s'", self._thumbfn)
+            out, err = magick.run(*cmd)
+            if err:
+                logger.error("Running convert program on %s:\n%s", aimgfn, err)
 
-            _, chout, cherr = os.popen3(cmd)
-            errs = cherr.readlines()
-            chout.close()
-            cherr.close()
-            if errs:
-                sys.stderr.write("Error: running convert program on %s:\n" % aimgfn)
-                errs = os.linesep.join(errs + [""])
-                print(errs)
-
-                if subimg and \
-                       re.compile('Unable to read subimage').search(errs):
-                    if opts.quiet: print("retrying without subimage")
-                    cmd = string.replace(cmd, subimg, "")
-
-                    _, chout, cherr = os.popen3(cmd)
-                    errs = cherr.readlines()
-                    chout.close()
-                    cherr.close()
-                    if errs:
-                        sys.stderr.write("Error: running convert program on %s:\n" % aimgfn)
-                        sys.stderr.write(os.linesep.join(errs + [""]))
+                if subimg and re.compile('Unable to read subimage').search(err):
+                    logger.info("retrying without subimage")
+                    cmd = cmd[:-2] + [aimgfn, athumbfn]
+                    out, err = magick.run(*cmd)
+                    if err:
+                        logger.error("Running convert program on %s:\n%s" % aimgfn, err)
             else:
                 self._thumbsize = imageSize(athumbfn)
 
@@ -863,32 +807,29 @@ class Image:
         ascaledfn = join(opts.root, self._scaledfn)
 
         if opts.scaled_force:
-            if opts.quiet: print "forced regeneration of '%s'" % self._scaledfn
+            logger.info("forced regeneration of '%s'", self._scaledfn)
         elif not exists(ascaledfn):
-            if opts.quiet: print "thumbnail absent '%s'" % self._scaledfn
+            logger.info("thumbnail absent '%s'", self._scaledfn)
         else:
             # Check if scaledsize has changed
             if not opts.fast:
                 self._scaledsize = imageSize(ascaledfn)
-                if not checkThumbSize(self._size, \
-                                       self._scaledsize, \
-                                       opts.scaled_size):
-                    if opts.quiet: print "thumbnail '%s size has changed" % self._scaledfn
+                if not check_thumbnail_size(self._size, self._scaledsize, opts.scaled_size):
+                    logger.info("thumbnail '%s size has changed", self._scaledfn)
                     try:
                         # Clear cache for thumbnail size.
                         del imageSizeCache[ ascaledfn ]
                     except:
                         pass
                 else:
-                    if opts.quiet: print "thumbnail '%s' already generated (size ok)" \
-                          % self._scaledfn
+                    logger.info("thumbnail '%s' already generated (size ok)", self._scaledfn)
                     return
             else:
-                if opts.quiet: print "thumbnail '%s' already generated" % self._scaledfn
+                logger.info("thumbnail '%s' already generated", self._scaledfn)
                 return
 
         if opts.no_magick:
-            if opts.quiet: print "ImageMagick tools disabled, can't create thumbnail"
+            logger.warning("ImageMagick tools disabled, can't create thumbnail")
             return
 
         # create necessary directories
@@ -907,19 +848,17 @@ class Image:
 
         else:
 
-            cmd = getMagickProg('convert') + ' -border 2x2 '
-            # FIXME check if this is a problem if not specified
-            # cmd += '-interlace NONE '
-
-            cmd += '-geometry %dx%d ' % (opts.scaled_size, opts.scaled_size)
+            cmd = ['convert',
+                   "-border", "2x2",
+                   '-geometry', '%dx%d' % (opts.scaled_size, opts.scaled_size)]
 
             if opts.scaled_quality:
-                cmd += '-quality %d ' % opts.scaled_quality
+                cmd += ['-quality', '%d' % opts.scaled_quality]
 
             # This doesn't add text into the picture itself, just the comment in
             # the header.
             if opts.copyright:
-                cmd += '-comment \"%s\" ' % opts.copyright
+                cmd += ['-comment', opts.copyright]
 
             # We use [1] to extract the thumbnail when there is one.
             # It is harmless otherwise.
@@ -927,33 +866,19 @@ class Image:
             if self._ext.lower() in [ ".jpg", ".tif", ".tiff" ]:
                 subimg = "[1]"
 
-            cmd += '"%s%s" "%s"' % (aimgfn, subimg, ascaledfn)
+            cmd += [aimgfn + subimg, ascaledfn]
 
-            if opts.quiet: print "generating thumbnail '%s'" % self._scaledfn
+            logger.info("generating scaled '%s'", self._scaledfn)
+            out, err = magick.run(*cmd)
+            if err:
+                logger.error("Running convert program on %s:\n%s", aimgfn, err)
 
-            _, chout, cherr = os.popen3(cmd)
-            errs = cherr.readlines()
-            chout.close()
-            cherr.close()
-            if errs:
-                sys.stderr.write("Error: running convert program on %s:\n" % aimgfn)
-                errs = os.linesep.join(errs + [""])
-                sys.stderr.write(errs)
-
-                if subimg and \
-                       re.compile('Unable to read subimage').search(errs):
-                    if opts.quiet: print "retrying without subimage"
-                    cmd = string.replace(cmd, subimg, "")
-
-                    (chin, chout, cherr) = os.popen3(cmd)
-                    errs = cherr.readlines()
-                    chout.close()
-                    cherr.close()
-                    if errs:
-                        print >> sys.stderr, \
-                              "Error: running convert program on %s:" % aimgfn
-                        print os.linesep.join(errs, '\n')
-
+                if subimg and re.compile('Unable to read subimage').search(err):
+                    logger.info("retrying without subimage")
+                    cmd = cmd[:-2] + [aimgfn, ascaledfn]
+                    out, err = magick.run(*cmd)
+                    if err:
+                        logger.error("Running convert program on %s:\n%s" % aimgfn, err)
             else:
                 self._scaledsize = imageSize(ascaledfn)
 
@@ -962,77 +887,56 @@ class Image:
 # IMAGE SIZE CACHE
 #===============================================================================
 
-#-------------------------------------------------------------------------------
-#
-def checkThumbSize(isz, tsz, desired):
-
-    """Returns true if the sizepair fits the size."""
-
-    # tolerate 2% error
-    try:
-        if abs(float(isz[0]) / isz[1] - float(tsz[0]) / tsz[1]) > 0.02:
-            return 0  # aspect has changed, or isz rotated
-    except:
-        return 0
-    return abs(desired - tsz[0]) <= 1 or abs(desired - tsz[1]) <= 1
-
-
-#-------------------------------------------------------------------------------
-#
 def imageSizeNoCache(filename):
-
-    """Non-caching finding out the size of an image file."""
+    """Non-caching finding out the size of an image file.
+    :param filename: name of the image file
+    :return: 2-tuple (width, height)
+    """
 
     if opts.no_magick:
         return (0, 0)
 
-    fn = filename
     if opts.pil:
 
         try:
-            im = PilImage.open(fn)
+            im = PilImage.open(filename)
             s = im.size
         except IOError as e:
-            raise SystemExit("Error: identifying file '%s': %s" % (fn, e))
+            raise SystemExit("Error: identifying file '%s': %s" % (filename, e))
 
         return s
 
     elif not opts.old_magick:
 
-        cmd = getMagickProg('identify') + ' -format "%w %h" ' + \
-              '"%s"' % fn
-        po = os.popen(cmd)
-        output = po.read()
+        cmd = ['identify', '-format', '"%w %h"' + filename]
+        output, err = magick.run(cmd)
         try:
-            (width, height) = map(lambda x: int(x), string.split(output))
+            width, height = [int(i) for i in output.split()]
         except ValueError:
-            sys.stderr.write("Error: parsing identify output on %s \n" % fn)
+            logger.error("parsing identify output on %s: %s" % filename, output)
             return (0, 0)
-        err = po.close()
         if err:
-            sys.stderr.write("Error: running identify program on %s\n" % fn)
+            logger.error("running identify program on %s: %s" % filename, err)
             return (0, 0)
         return (width, height)
 
     else:
         # Old imagemagick doesn't have format tags
-        cmd = getMagickProg('identify') + ' "%s"' % fn
-
-        po = os.popen(cmd)
-        output = po.read()
-        err = po.close()
+        cmd = ['identify', filename]
+        output, err = magick.run(cmd)
         if err:
-            sys.stderr.write("Error: running identify program on %s\n" % fn)
+            logger.error("running identify program on %s: %s" % filename, err)
             return (0, 0)
 
+        out = output.split()
         mre = re.compile("([0-9]+)x([0-9]+)")
-        mo = mre.match(string.split(output)[1])
+        mo = mre.match(out[1])
         if not mo:
-            mo = mre.match(string.split(output)[2])
+            mo = mre.match(out[2])
         if mo:
-            (width, height) = map(lambda x: int(x), mo.groups())
+            (width, height) = [int(i) for i in mo.groups()]
             return (width, height)
-        sys.stderr.write("Warning: could not identify size for image '%s\n" % filename)
+        logger.warning("could not identify size for image '%s" % filename)
         return (0, 0)
 
 
@@ -1116,8 +1020,6 @@ def generateSummary(fn, allimages):
         l += ','
         if i._title:
             l += i._title
-        # Make sure it's on a single line
-#        print l
         otext += l.replace('\n', ' ') + '\n'
 
     # Write out file.
@@ -1127,56 +1029,10 @@ def generateSummary(fn, allimages):
         tfile.write(otext.encode(config.Coding))
         tfile.close()
 
-    except IOError, e:
-        print >> sys.stderr, "Error: can't open file: %s" % fn
-
-#===============================================================================
-# TEMPLATE PARSING AND EXECUTION
-#===============================================================================
-
-#===============================================================================
-# CLASS StringStream
-#===============================================================================
-
-class StringStream:
-
-    """Simple string stream with a write() method, for replacing stdout when
-    running in script environment. We can't use StringIO because we need the
-    pop() hack."""
-
-    #---------------------------------------------------------------------------
-    #
-    def __init__(self):
-        self._string = ""
-        self._ignoreNext = 0
-
-    #---------------------------------------------------------------------------
-    #
-    def write(self, s):
-        if self._ignoreNext:
-            s = s[1:]
-            self._ignoreNext = 0
-
-        self._string += (s)
-
-    #---------------------------------------------------------------------------
-    #
-    def ignoreNextChar(self):
-        self._ignoreNext = 1
-
-    #---------------------------------------------------------------------------
-    #
-    def getvalue(self):
-        return self._string
+    except IOError as  error:
+        logger.error("can't open file: %s; %s", fn, error)
 
 
-
-#===============================================================================
-# MISC
-#===============================================================================
-
-#-------------------------------------------------------------------------------
-#
 def computeTrackmap(imagelist):
 
     """Computes a map of files in each track. The key is the track name."""
@@ -1733,7 +1589,16 @@ def main():
     #
     # Validate options.
     #
-    if opts.quiet: print "====> validating options"
+    logger.info("====> validating options")
+
+    if not opts.quiet:
+        logging.root.setLevel(logging.WARNING)
+        logger.setLevel(logging.WARNING)
+    elif opts.verbose:
+        logger.setLevel(logging.DEBUG)
+        logging.root.setLevel(logging.DEBUG)
+
+    magick.set_path(opts.magick_path)
 
     if opts.pil == None and opts.old_magick == None :
         opts.pil = 1
@@ -1742,18 +1607,15 @@ def main():
         opts.templates = op.expanduser(opts.templates)
 
     if (opts.magick_path or opts.old_magick != None) and opts.no_magick:
-        print >> sys.stderr, "Error: Ambiguous options, use Magick or not?"
+        logger.error("Ambiguous options, use Magick or not?")
         sys.exit(1)
-
-#    if opts.old_magick == None:
-#        opts.old_magick = 1
 
     try:
         opts.thumb_size = int(opts.thumb_size)
         if opts.thumb_size <= 0:
             raise ValueError()
     except ValueError:
-        print >> sys.stderr, "Error: Illegal thumbnail size."
+        logger.error("Illegal thumbnail size.")
         sys.exit(1)
 
     try:
@@ -1761,23 +1623,22 @@ def main():
         if opts.scaled_size <= 0:
             raise ValueError()
     except ValueError:
-        print >> sys.stderr, "Error: Illegal scaled image size."
+        logger.error("Illegal scaled image size.")
         sys.exit(1)
 
     if opts.thumb_quality:
         try:
             opts.thumb_quality = int(opts.thumb_quality)
         except ValueError:
-            print >> sys.stderr, "Error: Illegal thumbnail quality."
+            logger.error("Illegal thumbnail quality.")
             sys.exit(1)
 
     if opts.scaled_quality:
         try:
             opts.scaled_quality = int(opts.scaled_quality)
         except ValueError:
-            print >> sys.stderr, "Error: Illegal scaled Image quality."
+            logger.error("Illegal scaled Image quality.")
             sys.exit(1)
-
 
     if opts.ignore_pattern:
         # pre-compile ignore re for efficiency
@@ -1785,7 +1646,7 @@ def main():
 
     if opts.repn_affinity:
         res = []
-        for r in string.split(opts.repn_affinity, ','):
+        for r in opts.repn_affinity.split(','):
             res.append(re.compile(r))
         opts.repn_affinity = res
     else:
@@ -1793,7 +1654,7 @@ def main():
 
     if len(filter(None, [opts.out_along, opts.out_subdirs,
                          opts.out_onedir])) > 1:
-        sys.stderr.write("Error: Make up your mind, which outputs?\n")
+        logger.error("Make up your mind, which outputs?")
         sys.exit(1)
     elif len(filter(None, [opts.out_along, opts.out_subdirs,
                          opts.out_onedir])) == 0:
@@ -1819,23 +1680,22 @@ def main():
     hor_sep = "&nbsp;&nbsp;\n"
     ver_sep = "<BR>\n"
 
-    opts.root = normpath(opts.root)
-    if not exists(opts.root) or not isdir(opts.root):
-        sys.stderr.write("Error: root %s doesn't exist.\n" % opts.root)
+    opts.root = os.path.normpath(opts.root)
+    if not os.path.exists(opts.root) or not isdir(opts.root):
+        logger.error(" root %s doesn't exist." , opts.root)
         sys.exit(1)
 
     if opts.magick_path:
         opts.magick_path = normpath(opts.magick_path)
-        if not exists(opts.magick_path) or \
-           not isdir(opts.magick_path):
-            sys.stderr.write("Error: magick-path %s is invalid.\n" % opts.magick_path)
+        if not os.path.exists(opts.magick_path) or not os.path.isdir(opts.magick_path):
+            logger.error("magick-path %s is invalid.", opts.magick_path)
             sys.exit(1)
 
     #
     # Find and process list of images, reading necessary information for each
     # image.
     #
-    if opts.quiet: print "====> gathering image list and attributes files"
+    logger.info("====> gathering image list and attributes files")
 
     rootdir = Dir("", None, opts.root)
 
@@ -1911,30 +1771,30 @@ def main():
     # If asked to clean, clean and exit.
     #
     if opts.clean:
-        if opts.quiet: print "====> cleaning up generated files"
+        logger.info("====> cleaning up generated files")
 
         clean(allimages, alldirs)
-        if opts.quiet: print "====> done."
+        logger.info("====> done.")
         sys.exit(0)
 
     #
     # Read template files.
     #
-    if opts.quiet: print "====> templates input and compilation"
+    logger.info("====> templates input and compilation")
 
     templates.set_opts(opts)
 
     #
     # Thumbnail generation.
     #
-    if opts.quiet: print "====> thumbnail generation and sizes computation"
+    logger.info("====> thumbnail generation and sizes computation")
 
     for img in allimages:
         img.generateThumbnail()
     #
     # Scaled Image generation.
     #
-    if opts.quiet: print "====> thumbnail generation and sizes computation"
+    logger.info("====> thumbnail generation and sizes computation")
 
     for img in allimages:
         img.generateScaled()
@@ -1943,7 +1803,7 @@ def main():
     #
     # Execute global rc file.
     #
-    if opts.quiet: print "====> executing global rc file"
+    logger.info("====> executing global rc file")
     envir = {}
     envir.update(globals())
     envir.update(locals())
@@ -1952,21 +1812,21 @@ def main():
     #
     # Output directory indexes
     #
-    if opts.quiet: print "==> directory index generation"
+    logger.info("==> directory index generation")
 
     def walkDirsForIndex(dir):
         # this does not do make the link for existing dirindex
         if dir.hasImages() == 1:
             envir['dir'] = dir
-            if opts.quiet: print "generating dirindex", dir._pagefn
+            logger.info("generating dirindex %s", dir._pagefn)
             generatePage(dir._pagefn, 'dirindex', envir)
 
             lnfn = join(opts.root, dir._path, index_fn)
             if islink(lnfn): os.remove(lnfn)
             if not (opts.no_links or opts.out_onedir) and \
                    not exists(lnfn) and not islink(lnfn):
-                f = open(lnfn, "w")
-                f.write('''
+                with open(lnfn, "w") as f:
+                    f.write('''
 <HTML>
 <HEAD>
     <link rel=stylesheet type="text/css" href="style.css">
@@ -1980,42 +1840,39 @@ def main():
     <p> <a href="html/dirindex.html#end">html/dirindex.html</a></p>
 </BODY>
 </HTML>''')
-                f.close()
-#                if hasattr(os, 'symlink'):
-#                    os.symlink(rel(dir._pagefn, dir._path), lnfn)
     rootdir.visit(walkDirsForIndex)
 
     #
     # Output track indexes HTML
     #
-    if opts.quiet: print "==> track index generation"
+    logger.info("==> track index generation")
 
     for track in trackmap.keys():
         fn = trackindex_fns[track]
         envir['dir'] = rootdir
         envir['track'] = track
-        if opts.quiet: print "generating trackindex", fn
+        logger.info("generating trackindex %s", fn)
         generatePage(fn, 'trackindex', envir)
 
     #
     # Output global index HTML file and summary text file.
     #
-    if opts.quiet: print "==> global index generation"
+    logger.info("==> global index generation")
 
     envir['dir'] = rootdir
-#    if opts.quiet: print "generating allindex", allindex_fn
+#    logger.info( "generating allindex", allindex_fn
 #    generatePage( allindex_fn, 'allindex', envir )
-#    if opts.quiet: print "generating sortindex", sortindex_fn
+#    logger.info( "generating sortindex", sortindex_fn
 #    generatePage( sortindex_fn, 'sortindex', envir )
-    if opts.quiet: print "generating summary", allcidx_fn
+    logger.info("generating summary %s", allcidx_fn)
     generateSummary(allcidx_fn, allimages)
-    if opts.quiet: print "generating css file", css_fn
+    logger.info("generating css file %s", css_fn)
     generatePage(css_fn, 'css', envir)
 
     #
     # Output image HTML files
     #
-    if opts.quiet: print "====> image page generation"
+    logger.info("====> image page generation")
 
     global walkDirsForImages
     def walkDirsForImages(dir):
@@ -2024,13 +1881,13 @@ def main():
         for img in dir._images:
             envir['dir'] = dir
             envir['image'] = img
-            if opts.quiet: print "generating image page", img._pagefn
+            logger.info("generating image page %s", img._pagefn)
             generatePage(img._pagefn, 'image', envir)
 
     walkDirsForImages(rootdir)
 
     # signal the end
-    if opts.quiet: print "====> done."
+    logger.info("====> done.")
 
 
 # Run main if loaded as a script

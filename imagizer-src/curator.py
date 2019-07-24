@@ -3,7 +3,7 @@
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "23/07/2019"
+__date__ = "24/07/2019"
 __license__ = "GPL"
 
 import os
@@ -99,16 +99,16 @@ def urlquote(text):
 
 def full_split_path(path):
     """Splits a path into a list of components.
-    
+
     In a sense it it similar to path.split(os.sep)
     This function works around a quirk in string.split().
-    
+
     :param path: a string
-    :return: a list of directory names. 
-    
+    :return: a list of directory names.
+
     """
     if not path:
-        return [] 
+        return []
 
     first, second = os.path.split(path)
     result = [second]
@@ -120,7 +120,7 @@ def full_split_path(path):
 
 def relative_path(dest, curdir):
     """Relative path to curdir
-    
+
     :param dest: a path
     :param curdir: the current path
     :return: relative path of dest to curdir.
@@ -138,36 +138,63 @@ def relative_path(dest, curdir):
     if len(sc) == 0 and len(sd) == 0:
         out = ""
     elif len(sc) == 0:
-        out = apply(join, sd)
+        out = apply(os.path.join, sd)
     elif len(sd) == 0:
-        out = apply(join, map(lambda x: os.pardir, sc))
+        out = apply(os.path.join, [os.pardir] * len(sc))
     else:
-        out = apply(join, map(lambda x: os.pardir, sc) + list(sd))
+        out = apply(os.path.join, [os.pardir] * len(sc) + list(sd))
 
     # make sure the path is suitable for html consumption
     return out
 
+
 def split_filename(filename, separator):
-    """Returns a NamedTuple (dir, base, repn, ext).  
-    
-    The repn is splitted using separator. 
+    """Returns a NamedTuple (dir, base, repn, ext).
+
+    The repn is split using separator.
     The separator should not be present more than once.
     Repn is '' if not present.
-    
+
     :param filename: the path for a filename
-    :param options: An OptionParser object with the config
+    :param separator: the separator for the representation, usually "--"
     :return: SplitName namedtuple which contains (dir, base, repn, ext)
     """
 
     (directory, basename) = os.path.split(filename)
 
-    fidx = basename.find(opts.separator)
+    fidx = basename.find(separator)
     if fidx != -1:
         # found separator, add as an alt repn
         base = basename[ :fidx ]
-        (repn, ext) = os.path.splitext(basename[fidx + len(opts.separator):])
+        (repn, ext) = os.path.splitext(basename[fidx + len(separator):])
     else:
         # didn't find separator, split using extension
         (base, ext) = os.path.splitext(basename)
         repn = ''
     return SplitName(directory, base, repn, ext)
+
+
+def check_thumbnail_size(image_size, thumbnail_size, desired):
+    """Returns true if the sizepair fits the size.
+
+    :param image_size: Size of the image as 2-tuple
+    :param thumbnail_size: size of the thumbnail as 2-tuple
+    :param desired: maximum dimention size of the image
+    :return: True if the size match expectation, else 0 or False
+    """
+
+    # tolerate 2% error
+    try:
+        if abs(float(image_size[0]) / image_size[1] - float(thumbnail_size[0]) / thumbnail_size[1]) > 0.02:
+            # Extra checks for panoramic images
+            if abs(desired - thumbnail_size[0]) <= 1:
+                expected = float(image_size[1] * thumbnail_size[0]) / float(image_size[0])
+                return abs(expected - thumbnail_size[1]) <= 1
+            elif abs(desired - thumbnail_size[1]) <= 1:
+                expected = float(image_size[0] * thumbnail_size[1]) / float(image_size[1])
+                return abs(expected - thumbnail_size[0]) <= 1
+            else:
+                return 0  # aspect has changed, or image_size rotated
+    except:
+        return 0
+    return abs(desired - thumbnail_size[0]) <= 1 or abs(desired - thumbnail_size[1]) <= 1
