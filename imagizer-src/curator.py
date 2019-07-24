@@ -11,7 +11,8 @@ import json
 import logging
 import stat
 import urllib
-
+from collections import namedtuple
+SplitName = namedtuple("SplitName", "dir base repn ext")
 logger = logging.getLogger(__name__)
 
 
@@ -93,3 +94,80 @@ def urlquote(text):
         return urllib.quote(text.replace("\\", "/"))
     else:
         return urllib.quote(text)
+
+
+
+def full_split_path(path):
+    """Splits a path into a list of components.
+    
+    In a sense it it similar to path.split(os.sep)
+    This function works around a quirk in string.split().
+    
+    :param path: a string
+    :return: a list of directory names. 
+    
+    """
+    if not path:
+        return [] 
+
+    first, second = os.path.split(path)
+    result = [second]
+    while first:
+        first, second = os.path.split(first)
+        result.insert(0, second)
+    return result
+
+
+def relative_path(dest, curdir):
+    """Relative path to curdir
+    
+    :param dest: a path
+    :param curdir: the current path
+    :return: relative path of dest to curdir.
+    """
+
+    sc = full_split_path(curdir)
+    sd = full_split_path(dest)
+
+    while sc and sd:
+        if sc[0] != sd[0]:
+            break
+        sc = sc[1:]
+        sd = sd[1:]
+
+    if len(sc) == 0 and len(sd) == 0:
+        out = ""
+    elif len(sc) == 0:
+        out = apply(join, sd)
+    elif len(sd) == 0:
+        out = apply(join, map(lambda x: os.pardir, sc))
+    else:
+        out = apply(join, map(lambda x: os.pardir, sc) + list(sd))
+
+    # make sure the path is suitable for html consumption
+    return out
+
+def split_filename(filename, separator):
+    """Returns a NamedTuple (dir, base, repn, ext).  
+    
+    The repn is splitted using separator. 
+    The separator should not be present more than once.
+    Repn is '' if not present.
+    
+    :param filename: the path for a filename
+    :param options: An OptionParser object with the config
+    :return: SplitName namedtuple which contains (dir, base, repn, ext)
+    """
+
+    (directory, basename) = os.path.split(filename)
+
+    fidx = basename.find(opts.separator)
+    if fidx != -1:
+        # found separator, add as an alt repn
+        base = basename[ :fidx ]
+        (repn, ext) = os.path.splitext(basename[fidx + len(opts.separator):])
+    else:
+        # didn't find separator, split using extension
+        (base, ext) = os.path.splitext(basename)
+        repn = ''
+    return SplitName(directory, base, repn, ext)

@@ -248,61 +248,12 @@ else:
 from imagizer.exif      import Exif
 from imagizer.parser    import AttrFile
 from imagizer.template import Templates
-from imagizer.curator import  FCache, urlquote
+from imagizer.curator import  FCache, urlquote, relative_path as rel
 templates = Templates()
 fcachesizes = FCache()
 
 
 
-#-------------------------------------------------------------------------------
-#
-def splitpath(path):
-
-    """Splits a path into a list of components.
-    This function works around a quirk in string.split()."""
-
-    # FIXME perhaps call op.split repetitively would be better.
-    # s = string.split( path, '/' ) # we work with fwd slash only inside.
-
-# We have decided to use all kind of separator
-    s = []
-    while True:
-        first, second = op.split(path)
-        s.append(second)
-        if first == "":
-            break
-        else:
-            path = first
-    s.reverse()
-    if len(s) == 1 and s[0] == "":
-        s = []
-    return s
-#-------------------------------------------------------------------------------
-#
-def rel(dest, curdir):
-
-    """Returns dest filename relative to curdir."""
-
-    sc = splitpath(curdir)
-    sd = splitpath(dest)
-
-    while len(sc) > 0 and len(sd) > 0:
-        if sc[0] != sd[0]:
-            break
-        sc = sc[1:]
-        sd = sd[1:]
-
-    if len(sc) == 0 and len(sd) == 0:
-        out = ""
-    elif len(sc) == 0:
-        out = apply(join, sd)
-    elif len(sd) == 0:
-        out = apply(join, map(lambda x: os.pardir, sc))
-    else:
-        out = apply(join, map(lambda x: os.pardir, sc) + list(sd))
-
-    # make sure the path is suitable for html consumption
-    return out
 
 
 def splitFn(fn):
