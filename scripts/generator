@@ -248,47 +248,10 @@ else:
 from imagizer.exif      import Exif
 from imagizer.parser    import AttrFile
 from imagizer.template import Templates
-from imagizer.curator import  FCache, urlquote, relative_path as rel
+from imagizer.curator import  FCache, urlquote, split_filename, relative_path as rel
 templates = Templates()
 fcachesizes = FCache()
 
-
-
-
-
-def splitFn(fn):
-    """Returns a tuplet ( dir, base, repn, ext ).  Repn is '' if not present."""
-
-    (dir, bn) = op.split(fn)
-
-    fidx = bn.find(opts.separator)
-    if fidx != -1:
-        # found separator, add as an alt repn
-        base = bn[ :fidx ]
-        (repn, ext) = splitext(bn[ fidx + len(opts.separator): ])
-
-    else:
-        # didn't find separator, split using extension
-        (base, ext) = splitext(bn)
-        repn = ''
-    return (dir, base, repn, ext)
-
-
-#===============================================================================
-# UTILITIES
-#===============================================================================
-
-#-------------------------------------------------------------------------------
-#
-def test_jpeg_exif(h, f):
-    """imghdr test for JPEG data in EXIF format"""
-    if h[6:10].lower() == 'exif':
-        return 'jpeg'
-
-imghdr.tests.append(test_jpeg_exif)
-
-#-------------------------------------------------------------------------------
-#
 fast_imgexts = [ 'jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', \
                  'tiff', 'tif', 'rast', 'xbm', 'bmp' ]
 
@@ -426,7 +389,7 @@ class Dir:
                     continue
 
                 # check for separator
-                (dir, base, repn, ext) = splitFn(f)
+                (dir, base, repn, ext) = split_filename(f)
                 # dir should be nothing here.
 
                 # ignore html file
