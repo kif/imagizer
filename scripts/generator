@@ -1397,7 +1397,7 @@ def prepend(path, pfx):
     (d, f) = os.path.split(path)
     return os.path.join(d, pfx, f)
 
-def prependDirVisitor(directory, root):
+def prepend_dir_visitor(directory, root):
     directory._pagefn = os.path.join(root, directory._pagefn)
 
 #===============================================================================
@@ -1728,9 +1728,10 @@ def main():
         for t in tracks:
             trackindex_fns[t] = prepend(trackindex_fns[t], htmldir)
 
-        def prependDirVisitor(dir):
+        # Locally defined function
+        def prepend_dir_visitor(directory):
             dir._pagefn = prepend(dir._pagefn, htmldir)
-        rootdir.visit(prependDirVisitor)
+        rootdir.visit(prepend_dir_visitor)
 
         for i in allimages:
             i._pagefn = prepend(i._pagefn, htmldir)
@@ -1738,21 +1739,25 @@ def main():
             i._scaledfn = prepend(i._scaledfn, scaleddir)
 
     elif opts.out_onedir:
-        od = 'html'
+        singledir = 'html'
 
-        allindex_fn = join(od, allindex_fn)
-        allcidx_fn = join(od, allcidx_fn)
-        sortindex_fn = join(od, sortindex_fn)
-        css_fn = join(od, css_fn)
+        allindex_fn = os.path.join(singledir, allindex_fn)
+        allcidx_fn = os.path.join(singledir, allcidx_fn)
+        sortindex_fn = os.path.join(singledir, sortindex_fn)
+        css_fn = os.path.join(singledir, css_fn)
         for t in tracks:
-            trackindex_fns[t] = join(od, trackindex_fns[t])
+            trackindex_fns[t] = os.path.join(singledir, trackindex_fns[t])
 
-        rootdir.visit(prependDirVisitor, od)
+        # Locally defined function
+        def prepend_dir_visitor(directory):
+            directory._pagefn = os.path.join(singledir, directory._pagefn)
+
+        rootdir.visit(prepend_dir_visitor)
 
         for i in allimages:
-            i._pagefn = join(od, i._pagefn)
-            i._thumbfn = join(od, i._thumbfn)
-            i._scaledfn = join(od, i._scaledfn)
+            i._pagefn = os.path.join(singledir, i._pagefn)
+            i._thumbfn = os.path.join(singledir, i._thumbfn)
+            i._scaledfn = os.path.join(singledir, i._scaledfn)
 
     #
     # If asked to clean, clean and exit.
