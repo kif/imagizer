@@ -1730,7 +1730,7 @@ def main():
 
         # Locally defined function
         def prepend_dir_visitor(directory):
-            dir._pagefn = prepend(dir._pagefn, htmldir)
+            directory._pagefn = prepend(directory._pagefn, htmldir)
         rootdir.visit(prepend_dir_visitor)
 
         for i in allimages:
