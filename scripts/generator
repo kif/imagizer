@@ -258,21 +258,20 @@ dirnavsep = " / "
 fast_imgexts = [ 'jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', \
                  'tiff', 'tif', 'rast', 'xbm', 'bmp' ]
 
-def imgwhat(fn, fast=None):
+def imgwhat(filename, fast=None):
 
     """Faster, sloppier, imgwhat, that doesn't require opening the file if we
     specified that it should be fast."""
 
-    if fast == 1:
-        (base, ext) = splitext(fn)
+    if fast:
+        (base, ext) = splitext(filename)
         if ext[1:].lower() in fast_imgexts:
             return ext.lower()
         else:
             return None
     else:
-        # slow method, requires opening the file
         try:
-            return imghdr.what(fn)
+            return imghdr.what(filename)
         except IOError:
             return None
 
