@@ -252,6 +252,9 @@ templates = Templates()
 fcachesizes = FCache()
 magick = ImageMagick()
 
+hor_sep = "&nbsp;&nbsp;\n"
+ver_sep = "<BR>\n"
+dirnavsep = " / "
 fast_imgexts = [ 'jpeg', 'jpg', 'gif', 'png', 'rgb', 'pbm', 'pgm', 'ppm', \
                  'tiff', 'tif', 'rast', 'xbm', 'bmp' ]
 
@@ -275,21 +278,26 @@ def imgwhat(fn, fast=None):
 
 
 #===============================================================================
-# CLASS Dir
+# CLASS Directory
 #===============================================================================
+class Directory(object):
+    """Directory class.
 
-class Dir:
+    Handles
+    """
 
-    """Directory class."""
-
-    #---------------------------------------------------------------------------
-    #
     def __init__(self, path, parent, root):
 
-        """This ctor is called recursively to implement the recursive find.
+        """This constructor is called recursively to implement the recursive find.
 
-        This returns a directory object. It expects the absolute path to the
-        root and a relative directory name."""
+        This returns a Directory object.
+
+        :param path: Current directory
+        :param parent: path of the root
+        :param root: path of the root
+        It expects the absolute path to the
+        root and a relative directory name.
+        """
 
         self._path = path
         self._basename = basename(path)
@@ -316,21 +324,19 @@ class Dir:
             if "comment" not in self._attrfile:
                 self._attrfile["comment"] = ""
             longtitle = op.split(self._basename)[1]
-            if not self._attrfile.has_key("date"):
+            if "date" not in self._attrfile:
                 try:
                     self._attrfile["date"] = time.strftime("%A, %d %B %Y", time.strptime(longtitle[:10], "%Y-%m-%d")).capitalize().decode(config.Coding)
                 except:
                     self._attrfile["date"] = ""
-            if not self._attrfile.has_key("title"):
+            if "title" not in self._attrfile:
                 if len(longtitle) > 11 and  len(self._attrfile["date"]) > 1:
                     self._attrfile["title"] = longtitle[11:]
                 else:
                     self._attrfile["title"] = longtitle
-            if not self._attrfile.has_key("image"):
+            if "image" not in self._attrfile:
                 self._attrfile["image"] = ""
         ####reste un probleme avec les images noms d'image.... il sera resolu 100 lignes plus loin
-
-
         imgmap = {}
         for f in files:
             af = join(path, f)
@@ -341,12 +347,10 @@ class Dir:
 
             # add subdir
             if isdir(paf):
-                subdir = Dir(af, self, root)
+                subdir = Directory(af, self, root)
                 # ignore directories which do not have images under them.
-                if subdir.hasImages():
+                if subdir.has_images():
                     self._subdirs.append(subdir)
-
-
 
             # check other files in map
             else:
@@ -437,51 +441,40 @@ class Dir:
         mmap = computeTrackmap(self._images)
         self._tracks = mmap.keys().sort()
 
-    #---------------------------------------------------------------------------
-    #
-    def visit(self, functor):
+    def visit(self, functor, *args):
+        """Visitor pattern
+        :param functor: function to be applied to all sub-directories
+        """
         for sd in self._subdirs:
-            sd.visit(functor)
-        functor(self)
+            sd.visit(functor, *args)
+        functor(self, *args)
 
-    #---------------------------------------------------------------------------
-    #
-    def getAllImages(self):
-
+    def get_all_images(self):
         """Gathers and returns all images in this directory and in its
         subdirectories."""
-
         images = list(self._images)
         for s in self._subdirs:
-            images += s.getAllImages()
+            images += s.get_all_images()
         return images
 
-    #---------------------------------------------------------------------------
-    #
-    def getAllDirs(self):
-
+    def get_all_dirs(self):
         """Gathers and returns all dirnames and subdirnames from this
         directory."""
-
         dirs = [ self ]
         for d in self._subdirs:
-            if d.hasImages():
-                dirs += d.getAllDirs()
+            if d.has_images():
+                dirs += d.get_all_dirs()
         return dirs
 
-    #---------------------------------------------------------------------------
-    #
-    def hasImages(self):
-
+    def has_images(self):
         """Returns true if this directory has images, or if any of it
         subdirectories has images."""
-
         if len(self._images) > 0:
-            return 1
+            return True
         for s in self._subdirs:
-            if s.hasImages():
-                return 1
-        return 0
+            if s.has_images():
+                return True
+        return False
 
 #-------------------------------------------------------------------------------
 #
@@ -499,15 +492,16 @@ def Dir_cmpdates(dir1, dir2):
 # CLASS Image
 #===============================================================================
 
-class Image:
+class Image(object):
+    """Image specific processing and storage.
 
-    """Image specific processing and storage."""
+    """
 
-    #---------------------------------------------------------------------------
-    #
     def __init__(self, dir, base):
-
-        """Constructor. Initialize to accumulation information."""
+        """Constructor. Initialize to accumulation information.
+        :param dir:
+        :param base:
+        """
 
         self._dir = dir  # directory object
         self._base = base  # base (e.g. dscn0111)
@@ -531,8 +525,9 @@ class Image:
     #---------------------------------------------------------------------------
     #
     def init(self, dirattrfile=None):
-
-        """Performs proper initialization."""
+        """Performs proper initialization.
+        :param dirattrfile: path of the attr-file associated
+        """
 
         self._filename = join(self._dir._path, self._base)
         if self._repn: self._filename += opts.separator + self._repn
@@ -576,8 +571,6 @@ class Image:
         for k in self._calts:
             self._altrepns[ k ] = self._base + opts.separator + k
 
-    #---------------------------------------------------------------------------
-    #
     def __repr__(self):
         t = "Image( %s, %s, %s, %s,\n" % \
             (self._dir, self._base, self._repn, self._ext)
@@ -586,11 +579,7 @@ class Image:
         t += "       %s )\n" % self._attr
         return t
 
-
-    #---------------------------------------------------------------------------
-    #
     def cleanAlts(self):
-
         """Clean up found alt.repns, thumbnails, attributes files, etc."""
 
         # Detect html files, remove them in the altrepn
@@ -618,10 +607,7 @@ class Image:
                 self._calts.remove(k)
                 break
 
-    #---------------------------------------------------------------------------
-    #
     def selectName(self, absdirname):
-
         """Select base file (image file) for image page generation. Returns true
         if it could find a suitable one."""
 
@@ -678,10 +664,7 @@ class Image:
 #        logger.info( "  no imagepage for base '%s'" % self._base
         return 0
 
-    #---------------------------------------------------------------------------
-    #
     def handleDescription(self, attrfile):
-
         """Two description files, with precedence for the first."""
 
         tracks = attrfile.get('tracks')
@@ -700,8 +683,7 @@ class Image:
         if title:
             self._title = title
 
-    def generateThumbnail(self):
-
+    def generate_thumbnail(self):
         """Generates a thumbnail for an image.
 
         Make it so that the longest dimension is the specified dimension."""
@@ -789,9 +771,7 @@ class Image:
             else:
                 self._thumbsize = imageSize(athumbfn)
 
-    #---------------------------------------------------------------------------
-    #
-    def generateScaled(self):
+    def generate_scaled(self):
 
         """Generates a scaled image for screen size.
 
@@ -982,7 +962,7 @@ def imageSize(path):
 
 #-------------------------------------------------------------------------------
 #
-def generatePage(fn, ttype, envir):
+def generatePage(fn, ttype, environ):
 
     """Generates an index page, replacing the tags as needed."""
 
@@ -991,13 +971,13 @@ def generatePage(fn, ttype, envir):
     if not exists(d):
         os.makedirs(d)
 
-    envir['cd'] = dirname(fn)
+    environ['cd'] = dirname(fn)
 
     # Write out modified file.
     try:
         afn = join(opts.root, fn)
         with open(afn, "w") as tfile:
-            templates.execute(tfile, ttype, envir)
+            templates.execute(tfile, ttype, environ)
 
     except IOError as e:
         logger.error("%s cannot open file: %s", e, fn)
@@ -1034,21 +1014,18 @@ def generateSummary(fn, allimages):
 
 
 def computeTrackmap(imagelist):
-
     """Computes a map of files in each track. The key is the track name."""
     tracks = {}
     for i in imagelist:
         for t in i._tracks:
-            if not tracks.has_key(t):
-                tracks[ t ] = []
-            tracks[ t ].append(i)
+            if t not in tracks:
+                tracks[t] = [i]
+            else:
+                tracks[t].append(i)
     return tracks
 
 
-#-------------------------------------------------------------------------------
-#
 def clean(allimages, alldirs):
-
     """Removes the files generated by generator in the current directory and
     below."""
 
@@ -1095,10 +1072,10 @@ def clean(allimages, alldirs):
             if f == index_fn and islink(fn):
                 os.unlink(fn)
 
+################################################################################
+# Few functions used by the template generator
+################################################################################
 
-
-#---------------------------------------------------------------------------
-#
 def imageSrc(cd, image, xtra=''):
 
     assert(image._filename)
@@ -1158,9 +1135,9 @@ def table(dstdir, images, textfun=None, cols=4):
     if len(images) == 0:
         return ""
 
-    sio = []
+    lstxt = []
     idx = 0
-    sio.append('<center><table width="100%">')
+    lstxt.append('<center><table width="100%">')
     while idx < len(images):
 
         if len(images) - idx >= cols:
@@ -1171,81 +1148,79 @@ def table(dstdir, images, textfun=None, cols=4):
             idx += len(isubset)
 
         # Separate tables provide for tighter fitting of thumbnails.
-#        sio.append( '<center><table width="100%">'
-        sio.append('<tr align=center>')
+#        lstxt.append( '<center><table width="100%">'
+        lstxt.append('<tr align=center>')
         for i in isubset:
-            sio.append('<td>')
+            lstxt.append('<td>')
             # altname = 'alt="%s"' % i._title
 
-            sio.append(thumbImage(dstdir, i))
+            lstxt.append(thumbImage(dstdir, i))
             if textfun:
-                sio.append(textfun(i))
+                lstxt.append(textfun(i))
 
-            sio.append("</td>")
+            lstxt.append("</td>")
 
         for i in range(0, cols - len(isubset)):
-            sio.append("<td></td>")
+            lstxt.append("<td></td>")
 
-        sio.append("</tr>")
+        lstxt.append("</tr>")
 
-    sio.append("</table></center>")
+    lstxt.append("</table></center>")
 
-    return os.linesep.join(sio)
+    return os.linesep.join(lstxt)
 
 def twoColumns(dstdir, images):
-    sio = []
-    sio.append('<table cols=2 width=\"100%\"><tr><td>')
-    sio.append('<ul><font size=-2>')
+    lstxt = []
+    lstxt.append('<table cols=2 width=\"100%\"><tr><td>')
+    lstxt.append('<ul><font size=-2>')
     for i in images[:len(images) // 2 ]:
-        sio.append('<li><a href=\"%s\">%s</a></li>' % (rel(i._pagefn, dstdir), i._title))
-    sio.append('</font></ul>')
+        lstxt.append('<li><a href=\"%s\">%s</a></li>' % (rel(i._pagefn, dstdir), i._title))
+    lstxt.append('</font></ul>')
 
-    sio.append('</td><td>')
-    sio.append('<ul><font size=-2>')
+    lstxt.append('</td><td>')
+    lstxt.append('<ul><font size=-2>')
     for i in images[ len(images) // 2: ]:
-        sio.append('<li><a href=\"%s\">%s</a></li>' % (rel(i._pagefn, dstdir), i._title))
-    sio.append('</font></ul>')
-    sio.append('</td></tr></table>')
+        lstxt.append('<li><a href=\"%s\">%s</a></li>' % (rel(i._pagefn, dstdir), i._title))
+    lstxt.append('</font></ul>')
+    lstxt.append('</td></tr></table>')
 
-    return os.linesep.join(sio)
+    return os.linesep.join(lstxt)
 
-#---------------------------------------------------------------------------
-#
+
 def imagePile(dstdir, images):
-
     if not images:
         return ""
 
-    sio = []
-    sio.append('<center>')
+    lstxt = []
+    lstxt.append('<center>')
     for i in images:
-        sio.append(thumbImage(dstdir, i))
-    sio.append("</center>")
+        lstxt.append(thumbImage(dstdir, i))
+    lstxt.append("</center>")
 
-    return os.linesep.join(sio)
+    return os.linesep.join(lstxt)
 
 
-#---------------------------------------------------------------------------
-#
-dirnavsep = ' / '
-def dirnav(cd, dir, rootname="(root)", dirsep=dirnavsep):
-
-    """(rootname: string, dirsep: string, dir: Dir, ignoreCurrent: bool)
-
+def dirnav(cd, directory, rootname="(root)", dirsep=dirnavsep):
+    """
     Utility that generates an anchored HTML representation for a
     directory within the image hierarchy. You can click on the directory
-    names."""
+    names.
+    (rootname: string, dirsep: string, dir: Directory, ignoreCurrent: bool)
 
-    d = dir
+    :param cd: ??
+    :param directory: Directory instance
+    :param rootname: name exposed in HTML page for the top level (root)
+    :param dirsep: separator between directories in the web page
+    """
+    d = directory
     dirs = []
     while d:
-        dirs.append(d)
+        dirs.insert(0, d)
         d = d._parent
-    dirs.reverse()
 
     comps = []
     for d in dirs:
-        f = urlquote(join(rel(d._pagefn, cd)))
+        f = urlquote(os.path.join(rel(d._pagefn, cd)))
         if d._parent == None:
             name = rootname
         elif d._attrfile and d._attrfile.get("title"):
@@ -1257,38 +1232,27 @@ def dirnav(cd, dir, rootname="(root)", dirsep=dirnavsep):
 
     return ('\n%s\n' % dirsep).join(comps)
 
-#---------------------------------------------------------------------------
-#
 def next(image, imglist):
     idx = imglist.index(image)
     if idx + 1 < len(imglist):
         return imglist[idx + 1]
     return None
 
-#---------------------------------------------------------------------------
-#
 def prev(image, imglist):
     idx = imglist.index(image)
     if idx - 1 >= 0:
         return imglist[idx - 1]
     return None
 
-#---------------------------------------------------------------------------
-#
 def cycnext(image, imglist):
     idxnext = (imglist.index(image) + 1) % len(imglist)
     return imglist[idxnext]
 
-#---------------------------------------------------------------------------
-#
 def cycprev(image, imglist):
     idxprev = (imglist.index(image) - 1) % len(imglist)
     return imglist[idxprev]
 
-#---------------------------------------------------------------------------
-#
 def textnav(dstdir, image, imglist, midtext="", middest=None, pcycling=0):
-
     """(imglist: seq of Image, midtext: string, middest: string,
     pcycling: bool)
 
@@ -1302,33 +1266,41 @@ def textnav(dstdir, image, imglist, midtext="", middest=None, pcycling=0):
         prevfunc = prev
         nextfunc = next
 
-    sio = []
+    lstxt = []
 
     pi = prevfunc(image, imglist)
     if pi:
-        sio.append("<a href=\"%s\">" % rel(pi._pagefn, dstdir))
-        sio.append("<font size=\"-2\">prev</font></a>")
+        lstxt.append("<a href=\"%s\">" % rel(pi._pagefn, dstdir))
+        lstxt.append("<font size=\"-2\">prev</font></a>")
 
     if midtext:
-        sio.append("[")
+        lstxt.append("[")
         if middest:
-            sio.append("<a href=\"%s\"><font size=\"-2\">%s</font></a>" % (urlquote(middest), midtext))
+            lstxt.append("<a href=\"%s\"><font size=\"-2\">%s</font></a>" % (urlquote(middest), midtext))
         else:
-            sio.append("<font size=\"-2\"> %s </font>" % midtext)
-        sio.append("]")
+            lstxt.append("<font size=\"-2\"> %s </font>" % midtext)
+        lstxt.append("]")
     else:
         if pi:
-            sio.append("&nbsp;")
+            lstxt.append("&nbsp;")
 
     ni = nextfunc(image, imglist)
     if ni:
-        sio.append("<a href=\"%s\">" % rel(ni._pagefn, dstdir))
-        sio.append("<font size=\"-2\">next</font></a>")
+        lstxt.append("<a href=\"%s\">" % rel(ni._pagefn, dstdir))
+        lstxt.append("<font size=\"-2\">next</font></a>")
 
-    return os.linesep.join(sio)
-#-----------------------------------------------------------------------
+    return os.linesep.join(lstxt)
 
-def desc_index(dir):
+
+def desc_index(directory):
+    """Retrive the attribute from a directory
+
+
+    :param directory: Directory object
+    :return: Attr object
+    """
+    if directory._attrfile:
+        return directory._attrfile
     file_ind = join(dir._path, config.CommentFile)
     attr = None
     if op.exists(file_ind):
@@ -1336,17 +1308,19 @@ def desc_index(dir):
         attr.read()
     return attr
 
-#------------------------------------------------------------------------
-def sous_titre(i):
-    s_titre = '<br> \n <font SIZE="-2">' + i._base + '</font>'
+
+def sous_titre(image):
+    "Provide a subtitle for an image"
+    s_titre = '<br> \n <font SIZE="-2">%s</font>' % image._base
     description = None
-    if i._attr:
-        description = i._attr.get('description')
-    elif i._comment:
-        description = unicode2html(i._comment.replace("<BR>", "\n")).replace("\n", "<BR>")
+    if image._attr:
+        description = image._attr.get('description')
+    elif image._comment:
+        description = unicode2html(image._comment.replace("<BR>", "\n")).replace("\n", "<BR>")
     if description:
         s_titre += '<br>\n' + description
     return s_titre
+
 
 def exif(filename):
     """return exif data + title from the photo"""
@@ -1376,7 +1350,55 @@ def exif(filename):
             data[i] = ""
     return data, comment
 
+################################################################################
+# Visitor pattern helper functions
+################################################################################
 
+def walk_for_images(directory, environ):
+    for d in directory._subdirs:
+        walk_for_images(d, environ)
+    for img in directory._images:
+        environ['dir'] = directory
+        environ['image'] = img
+        logger.info("generating image page %s", img._pagefn)
+        generatePage(img._pagefn, 'image', environ)
+
+
+def walk_for_index(directory, environ):
+    # this does not do make the link for existing dirindex
+    if directory.has_images():
+        environ['dir'] = directory
+        logger.info("generating dirindex %s", directory._pagefn)
+        generatePage(directory._pagefn, 'dirindex', environ)
+
+        lnfn = join(opts.root, directory._path, index_fn)
+        if os.path.islink(lnfn):
+            os.remove(lnfn)
+        if not (opts.no_links or opts.out_onedir) and \
+               not os.path.exists(lnfn) and not os.path.islink(lnfn):
+            with open(lnfn, "w") as f:
+                f.write('''
+<HTML>
+<HEAD>
+<link rel=stylesheet type="text/css" href="style.css">
+<TITLE>Redirection</TITLE>
+<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#''')
+                f.write(config.WebPageAnchor)
+                f.write('''">
+</HEAD>
+<BODY>
+<H1>You should be reloacted to the correct URL in a second :</H1>
+<p> <a href="html/dirindex.html#end">html/dirindex.html</a></p>
+</BODY>
+</HTML>''')
+
+
+def prepend(path, pfx):
+    (d, f) = os.path.split(path)
+    return os.path.join(d, pfx, f)
+
+def prependDirVisitor(directory, root):
+    directory._pagefn = os.path.join(root, directory._pagefn)
 
 #===============================================================================
 # MAIN
@@ -1443,25 +1465,23 @@ def main():
     parser.add_option('-I', '--ignore-pattern', action='store',
                       help="regexp to specify image files to ignore")
 
-    parser.add_option('--htmlext', action='store',
+    parser.add_option('--htmlext', action='store', default=".html",
                       help="specifies html files extension (default: '.html')")
 
-    parser.add_option('--attrext', action='store', help="""specifies
-                      attributes files extension (default: '.desc')""")
+    parser.add_option('--attrext', action='store', default='.desc',
+                      help="""specifies attributes files extension (default: '.desc')""")
 
-    parser.add_option('--thumb-sfx', action='store', help="""specifies the
-                      thumbnail alt.repn. suffix (default: 'thumb.jpg')""")
+    parser.add_option('--thumb-sfx', action='store', default='thumb.jpg',
+                      help="""specifies the thumbnail alt.repn. suffix (default: 'thumb.jpg')""")
 
     parser.add_option('--scaled-sfx', action='store', help="""specifies the
                       thumbnail alt.repn. suffix (default: 'scaled.jpg')""")
 
-    parser.add_option('-p', '--separator', action='store', help="""specify the
-                      image basename separator from the suffix and extension
-                      (default: --)""")
+    parser.add_option('-p', '--separator', action='store', default="--",
+                      help="""specify the image basename separator from the suffix and extension (default: --)""")
 
     parser.add_option('-C', '--copyright', action='store',
-                      help="""specifies a copyright notice to include in image
-                      conversions""")
+                      help="""specifies a copyright notice to include in image conversions""")
 
     group = optparse.OptionGroup(\
         parser, "Conversion tools",
@@ -1528,10 +1548,6 @@ def main():
                      help="Put all outputs in a single output subdirectory.")
     parser.add_option_group(group)
 
-    # FIXME eventually make it use the full power of optparse
-    # type conversions
-    # aliases
-
     global opts
     opts, args = parser.parse_args()
 
@@ -1550,13 +1566,9 @@ def main():
     # end options parsing.
     #
 
-    # Debugging this script
-    opts.debug = 0
 
     # Initialize the global cache
     fcachesizes.load(join(opts.root, '.fcache'))
-
-
 
     #
     # set defaults
@@ -1564,21 +1576,10 @@ def main():
 
     if not opts.thumb_size:
         opts.thumb_size = config.Thumbnails["Size"]
-        # this is the best default IMHO, that doesn't detract the attention too
-        # much from 1024x768 images (makes the clicker curious) yet gives enough
-        # detail you can find the image in the index.
 
     if not opts.scaled_size:
         opts.scaled_size = config.ScaledImages["Size"]
 
-    if not opts.separator:
-        opts.separator = "--"
-
-    if not opts.htmlext:
-        opts.htmlext = ".html"
-
-    if not opts.attrext:
-        opts.attrext = ".desc"
 
     if not opts.thumb_sfx:
         opts.thumb_sfx = config.Thumbnails["Suffix"] + config.Extensions[0]  # "thumb.jpg" will create jpg thumbnails by default
@@ -1676,12 +1677,8 @@ def main():
     sortindex_fn = "sortindex" + opts.htmlext
     css_fn = 'style.css'
 
-    global hor_sep, ver_sep
-    hor_sep = "&nbsp;&nbsp;\n"
-    ver_sep = "<BR>\n"
-
     opts.root = os.path.normpath(opts.root)
-    if not os.path.exists(opts.root) or not isdir(opts.root):
+    if not os.path.exists(opts.root) or not os.path.isdir(opts.root):
         logger.error(" root %s doesn't exist." , opts.root)
         sys.exit(1)
 
@@ -1691,23 +1688,15 @@ def main():
             logger.error("magick-path %s is invalid.", opts.magick_path)
             sys.exit(1)
 
-    #
     # Find and process list of images, reading necessary information for each
     # image.
-    #
     logger.info("====> gathering image list and attributes files")
 
-    rootdir = Dir("", None, opts.root)
+    rootdir = Directory("", None, opts.root)
 
-    #
     # compute pathnames and some global variables
-    #
-    def prepend(path, pfx):
-        (d, f) = op.split(path)
-        return join(d, pfx, f)
-
-    allimages = rootdir.getAllImages()
-    alldirs = rootdir.getAllDirs()
+    allimages = rootdir.get_all_images()
+    alldirs = rootdir.get_all_dirs()
     trackmap = computeTrackmap(allimages)
     tracks = trackmap.keys()
     tracks.sort()
@@ -1715,8 +1704,8 @@ def main():
     for t in tracks:
         trackindex_fns[t] = trackindex_fn % t
 
-    def compDirName(dir):
-        dir._pagefn = join(dir._path, dirindex_fn)
+    def compDirName(directory):
+        directory._pagefn = join(directory._path, dirindex_fn)
     rootdir.visit(compDirName)
 
     for i in allimages:
@@ -1758,9 +1747,7 @@ def main():
         for t in tracks:
             trackindex_fns[t] = join(od, trackindex_fns[t])
 
-        def prependDirVisitor(dir):
-            dir._pagefn = join(od, dir._pagefn)
-        rootdir.visit(prependDirVisitor)
+        rootdir.visit(prependDirVisitor, od)
 
         for i in allimages:
             i._pagefn = join(od, i._pagefn)
@@ -1790,57 +1777,31 @@ def main():
     logger.info("====> thumbnail generation and sizes computation")
 
     for img in allimages:
-        img.generateThumbnail()
+        img.generate_thumbnail()
     #
     # Scaled Image generation.
     #
     logger.info("====> thumbnail generation and sizes computation")
 
     for img in allimages:
-        img.generateScaled()
+        img.generate_scaled()
 
 
     #
     # Execute global rc file.
     #
     logger.info("====> executing global rc file")
-    envir = {}
-    envir.update(globals())
-    envir.update(locals())
-    templates.execute(sys.stdout, 'rc', envir)
+    environ = {}
+    environ.update(globals())
+    environ.update(locals())
+    templates.execute(sys.stdout, 'rc', environ)
 
     #
     # Output directory indexes
     #
     logger.info("==> directory index generation")
 
-    def walkDirsForIndex(dir):
-        # this does not do make the link for existing dirindex
-        if dir.hasImages() == 1:
-            envir['dir'] = dir
-            logger.info("generating dirindex %s", dir._pagefn)
-            generatePage(dir._pagefn, 'dirindex', envir)
-
-            lnfn = join(opts.root, dir._path, index_fn)
-            if islink(lnfn): os.remove(lnfn)
-            if not (opts.no_links or opts.out_onedir) and \
-                   not exists(lnfn) and not islink(lnfn):
-                with open(lnfn, "w") as f:
-                    f.write('''
-<HTML>
-<HEAD>
-    <link rel=stylesheet type="text/css" href="style.css">
-    <TITLE>Redirection</TITLE>
-    <META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#''')
-                    f.write(config.WebPageAnchor)
-                    f.write('''">
-</HEAD>
-<BODY>
-    <H1>You should be reloacted to the correct URL in a second :</H1>
-    <p> <a href="html/dirindex.html#end">html/dirindex.html</a></p>
-</BODY>
-</HTML>''')
-    rootdir.visit(walkDirsForIndex)
+    rootdir.visit(walk_for_index, environ)
 
     #
     # Output track indexes HTML
@@ -1849,42 +1810,32 @@ def main():
 
     for track in trackmap.keys():
         fn = trackindex_fns[track]
-        envir['dir'] = rootdir
-        envir['track'] = track
+        environ['dir'] = rootdir
+        environ['track'] = track
         logger.info("generating trackindex %s", fn)
-        generatePage(fn, 'trackindex', envir)
+        generatePage(fn, 'trackindex', environ)
 
     #
     # Output global index HTML file and summary text file.
     #
     logger.info("==> global index generation")
 
-    envir['dir'] = rootdir
+    environ['dir'] = rootdir
 #    logger.info( "generating allindex", allindex_fn
-#    generatePage( allindex_fn, 'allindex', envir )
+#    generatePage( allindex_fn, 'allindex', environ )
 #    logger.info( "generating sortindex", sortindex_fn
-#    generatePage( sortindex_fn, 'sortindex', envir )
+#    generatePage( sortindex_fn, 'sortindex', environ )
     logger.info("generating summary %s", allcidx_fn)
     generateSummary(allcidx_fn, allimages)
     logger.info("generating css file %s", css_fn)
-    generatePage(css_fn, 'css', envir)
+    generatePage(css_fn, 'css', environ)
 
     #
     # Output image HTML files
     #
     logger.info("====> image page generation")
 
-    global walkDirsForImages
-    def walkDirsForImages(dir):
-        for d in dir._subdirs:
-            walkDirsForImages(d)
-        for img in dir._images:
-            envir['dir'] = dir
-            envir['image'] = img
-            logger.info("generating image page %s", img._pagefn)
-            generatePage(img._pagefn, 'image', envir)
-
-    walkDirsForImages(rootdir)
+    walk_for_images(rootdir, environ)
 
     # signal the end
     logger.info("====> done.")
