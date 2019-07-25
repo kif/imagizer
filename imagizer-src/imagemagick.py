@@ -30,6 +30,7 @@ class ImageMagick(object):
         self.cache = {}
         self.path = os.path.abspath(path) if path else None
 
+
     def get_executable(self, progname):
         """Returns the program name to execute for an ImageMagick command."""
 

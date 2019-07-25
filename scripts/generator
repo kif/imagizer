@@ -1832,8 +1832,8 @@ def main():
     <link rel=stylesheet type="text/css" href="style.css">
     <TITLE>Redirection</TITLE>
     <META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#''')
-                f.write(config.WebPageAnchor)
-                f.write('''">
+                    f.write(config.WebPageAnchor)
+                    f.write('''">
 </HEAD>
 <BODY>
     <H1>You should be reloacted to the correct URL in a second :</H1>
