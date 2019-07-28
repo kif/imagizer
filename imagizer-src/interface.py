@@ -48,6 +48,7 @@ from .config import config, listConfigurationFiles
 from .imagecache import image_cache, title_cache
 from . import tree, __version__
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
+from .search import SearchTitle
 from .fileutils import smartSize, recursive_delete
 
 
@@ -73,6 +74,7 @@ class Interface(qt.QObject):
         self.is_fullscreen = False
         self.in_slideshow = False
         self.treeview = None
+        self.searchview = None
         self.rnd_lst = []
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
@@ -355,6 +357,7 @@ class Interface(qt.QObject):
             self.gui.actionNav_untitle_last: "navigate",
 
             self.gui.actionNav_tree: "show_treeview",
+            self.gui.actionRechercher: "show_searchview",
 
             }
         # assign as data the name of the method to be called as callback
@@ -1278,6 +1281,11 @@ class Interface(qt.QObject):
             self.treeview = tree.TreeWidget(tree_rep)
             self.treeview.callback = self.goto_image
         self.treeview.show()
+
+    def show_searchview(self, *arg):
+        if self.searchview is None:
+            self.searchview = SearchTitle(self.goto_image)
+        self.searchview.show()
 
     def goto_image(self, name=None):
         """

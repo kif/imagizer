@@ -29,7 +29,7 @@ Utility function to convert string to ASCII
 """
 from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
-__date__ = "22/07/2019"
+__date__ = "28/07/2019"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -47,7 +47,8 @@ else:
 
 
 
-LATIN_TO_ASCII = {0xc0:'A',
+LATIN_TO_ASCII = {0x99: 'oe',
+                  0xc0:'A',
                   0xc1:'A',
                   0xc2:'A',
                   0xc3:'A',
@@ -82,9 +83,108 @@ LATIN_TO_ASCII = {0xc0:'A',
                   0xb5:'{micro}', 0xb6:'{paragraph}', 0xb7:'*', 0xb8:'{cedilla}',
                   0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>',
                   0xbc:'{1/4}', 0xbd:'{1/2}', 0xbe:'{3/4}', 0xbf:'?',
-                  0xd7:'*', 0xf7:'/'
+                  0xd7:'*', 0xf7:'/',
+                  0xe2:"'",
                  }
-
+UNICODE_TO_ASCII = { u'\x99': 'oe',
+                     u'\xa1': '!',
+                     u'\xa2': '{cent}',
+                     u'\xa3': '{pound}',
+                     u'\xa4': '{currency}',
+                     u'\xa5': '{yen}',
+                     u'\xa6': '|',
+                     u'\xa7': '{section}',
+                     u'\xa8': '{umlaut}',
+                     u'\xa9': '{C}',
+                     u'\xaa': '{^a}',
+                     u'\xab': '<<',
+                     u'\xac': '{not}',
+                     u'\xad': '-',
+                     u'\xae': '{R}',
+                     u'\xaf': '_',
+                     u'\xb0': '{degrees}',
+                     u'\xb1': '{+/-}',
+                     u'\xb2': '{^2}',
+                     u'\xb3': '{^3}',
+                     u'\xb4': "'",
+                     u'\xb5': '{micro}',
+                     u'\xb6': '{paragraph}',
+                     u'\xb7': '*',
+                     u'\xb8': '{cedilla}',
+                     u'\xb9': '{^1}',
+                     u'\xba': '{^o}',
+                     u'\xbb': '>>',
+                     u'\xbc': '{1/4}',
+                     u'\xbd': '{1/2}',
+                     u'\xbe': '{3/4}',
+                     u'\xbf': '?',
+                     u'\xc0': 'A',
+                     u'\xc1': 'A',
+                     u'\xc2': 'A',
+                     u'\xc3': 'A',
+                     u'\xc4': 'A',
+                     u'\xc5': 'A',
+                     u'\xc6': 'AE',
+                     u'\xc7': 'C',
+                     u'\xc8': 'E',
+                     u'\xc9': 'E',
+                     u'\xca': 'E',
+                     u'\xcb': 'E',
+                     u'\xcc': 'I',
+                     u'\xcd': 'I',
+                     u'\xce': 'I',
+                     u'\xcf': 'I',
+                     u'\xd0': 'Th',
+                     u'\xd1': 'N',
+                     u'\xd2': 'O',
+                     u'\xd3': 'O',
+                     u'\xd4': 'O',
+                     u'\xd5': 'O',
+                     u'\xd6': 'O',
+                     u'\xd7': '*',
+                     u'\xd8': 'O',
+                     u'\xd9': 'U',
+                     u'\xda': 'U',
+                     u'\xdb': 'U',
+                     u'\xdc': 'U',
+                     u'\xdd': 'Y',
+                     u'\xde': 'Th',
+                     u'\xdf': 'ss',
+                     u'\xe0': 'a',
+                     u'\xe1': 'a',
+                     u'\xe2': "'",
+                     u'\xe3': 'a',
+                     u'\xe4': 'a',
+                     u'\xe5': 'a',
+                     u'\xe6': 'ae',
+                     u'\xe7': 'c',
+                     u'\xe8': 'e',
+                     u'\xe9': 'e',
+                     u'\xea': 'e',
+                     u'\xeb': 'e',
+                     u'\xec': 'i',
+                     u'\xed': 'i',
+                     u'\xee': 'i',
+                     u'\xef': 'i',
+                     u'\xf0': 'th',
+                     u'\xf1': 'n',
+                     u'\xf2': 'o',
+                     u'\xf3': 'o',
+                     u'\xf4': 'o',
+                     u'\xf5': 'o',
+                     u'\xf6': 'o',
+                     u'\xf7': '/',
+                     u'\xf8': 'o',
+                     u'\xf9': 'u',
+                     u'\xfa': 'u',
+                     u'\xfb': 'u',
+                     u'\xfc': 'u',
+                     u'\xfd': 'y',
+                     u'\xfe': 'th',
+                     u'\xff': 'y',
+                     u'\x99': 'oe',
+                     u'\u2019': "'",
+                     }
 
 UNICODE_TO_HTML = { u('\u0022'): '&quot;',
                     u('\u0026'): '&amp;',
@@ -338,7 +438,7 @@ UNICODE_TO_HTML = { u('\u0022'): '&quot;',
                     u('\u2660'): '&spades;',
                     u('\u2663'): '&clubs;',
                     u('\u2665'): '&hearts;',
-                    u('\u2666'): '&diams;'
+                    u('\u2666'): '&diams;',
                     }
 
 def unicode2ascii(unicrap):
@@ -368,17 +468,17 @@ def unicode2ascii(unicrap):
 
     else:  # Python2
         if isinstance(unicrap, unicode):
-            byte_crap = unicrap.encode("latin-1")
+            str_out = "".join(UNICODE_TO_ASCII.get(i, "")  if ord(i) > 128 else i for i in unicrap)
         else:
             byte_crap = unicrap
-        for i in byte_crap:
-            ordi = ord(i)
-            if ordi in LATIN_TO_ASCII:
-                str_out += LATIN_TO_ASCII[ordi]
-            elif ordi >= 0x80:
-                pass
-            else:
-                str_out += str(i)
+            for i in byte_crap:
+                ordi = ord(i)
+                if ordi in LATIN_TO_ASCII:
+                    str_out += LATIN_TO_ASCII[ordi]
+                elif ordi >= 0x80:
+                    pass
+                else:
+                    str_out += str(i)
     return str_out
 
 

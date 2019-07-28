@@ -3,6 +3,7 @@ logger = logging.getLogger(__name__)
 import cython
 import os
 
+
 cdef class TreeItem(object):
     """
     Node of a tree ...
@@ -21,7 +22,7 @@ cdef class TreeItem(object):
     cdef public int order
     cdef public object extra
 
-    def __init__(self, label=None, parent=None):
+    def __init__(self, str label=None, TreeItem parent=None, object extra=None):
         self.children = []
         self.parent = parent
         self.label = label
@@ -30,7 +31,7 @@ cdef class TreeItem(object):
             self.order = parent.order + 1
         else:
             self.order = 0
-        self.extra = None
+        self.extra = extra
 
     cpdef add_child(self, TreeItem child):
         self.children.append(child)
@@ -55,7 +56,8 @@ cdef class TreeItem(object):
         self.children.sort(key=lambda x:x.label)
 
     cpdef TreeItem next(self):
-        cdef int idx
+        cdef:
+            int idx
         if self.parent is None:
             raise IndexError("Next does not exist")
         idx = self.parent.children.index(self)
@@ -65,7 +67,8 @@ cdef class TreeItem(object):
             return self.parent.next().children[0]
 
     cpdef TreeItem previous(self):
-        cdef int idx
+        cdef:
+            int idx
         if self.parent is None:
             raise IndexError("Previous does not exist")
         idx = self.parent.children.index(self)
@@ -88,8 +91,9 @@ cdef class TreeItem(object):
 
     cdef int _size(self):
         "Cython way of calculating size"
-        cdef int s = 0
-        cdef TreeItem child
+        cdef:
+            int s = 0
+            TreeItem child
         if self.children:
             for child in self.children:
                 s += child._size()
@@ -157,16 +161,19 @@ cdef class TreeRoot(TreeItem):
             element = child
         return element
 
-    cpdef add_leaf(self, str name):
+    cpdef add_leaf(self, str name, object extra=None):
         "Add a new leaf to the tree, only available from root"
         day, hour = os.path.split(name)
         ymd = day.split("-", 2)
         ymd.append(hour)
         element = self
-        for item in ymd:
+        for level, item in enumerate(ymd):
             child = element.get(item)
             if child is None:
-                child = TreeItem(item, element)
+                if level == 3:
+                    child = TreeItem(item, element, extra)
+                else:
+                    child = TreeItem(item, element)
             element = child
 
     cpdef del_leaf(self, str name):
