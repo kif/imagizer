@@ -42,5 +42,5 @@ for i, onefile in enumerate(all_jpg):
 
 print("Done ! Saving %s (%i)" % (filename, i))
 title_cache.sync()
-with open("images.json", "w") as f:
+with open(filename, "w") as f:
     f.write(json.dumps(data, indent=2))

@@ -76,10 +76,15 @@ class SearchTitle(qt.QObject):
         self.gui.treeView.setAlternatingRowColors(True)
 
     def show(self):
+        "Display the window"
         self.gui.show()
 
     def search_clicked(self, *args):
-        value = unicode2ascii(self.gui.lineEdit.text()).lower()
+        "Start the search"
+        self.model = TreeModel(TreeRoot(), self.gui)
+        self.gui.treeView.setModel(self.model)
+        qt.flush()
+        value = self.gui.lineEdit.text()
         logger.info("Searching for %s", value)
         results = self.search(value)
         logger.info("found %s", results)
@@ -87,15 +92,25 @@ class SearchTitle(qt.QObject):
         self.gui.treeView.setModel(self.model)
 
     def search(self, value):
+        """Performs actually the search both in the filename and in the title
+
+        :param value: string to search
+        :return: Tree structure with all results
+        """
+        value = unicode2ascii(self.gui.lineEdit.text()).lower()
         results = TreeRoot()
         for key, val in title_cache.items():
-            try:
-                dec = unicode2ascii(val).lower()
-            except UnicodeEncodeError as err:
-                dec = val.lower()
-                logger.error("Unicode error for %s: %s (%s) ... %s", key, val, type(val), err)
-            if value in dec:
+            if value in key.lower():
                 results.add_leaf(key, val)
+            else:
+                try:
+                    dec = unicode2ascii(val).lower()
+                except UnicodeEncodeError as err:
+                    dec = val.lower()
+                    logger.error("Unicode error for %s: %s (%s) ... %s", key, val, type(val), err)
+                if value in dec:
+                    results.add_leaf(key, val)
+        results.sort()
         return results
 
     def goto(self, midx):
