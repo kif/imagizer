@@ -54,8 +54,9 @@ import os
 from .utils import timeit
 from .photo import Photo
 try:
-    from ._tree import TreeItem
+    from ._tree import TreeItem, TreeRoot
 except:
+# if True:
     class TreeItem(object):
         """
         Node of a tree ...
@@ -95,6 +96,9 @@ except:
                 return "TreeItem %s->%s with children: " % (self.parent.label, self.label) + ", ".join([i.label for i in self.children])
             else:
                 return "TreeItem %s with children: " % (self.label) + ", ".join([i.label for i in self.children])
+
+        def __len__(self):
+            return self.size
 
         def sort(self):
             for child in self.children:
@@ -149,33 +153,45 @@ except:
             else:
                 return 1
 
+        def sub_index(self):
+            if self.parent is None:
+                return 0
+            else:
+                in_list = self.parent.children.index(self)
+                return sum(brother.size for brother in self.parent.children[:in_list])
+
+
+    class TreeRoot(TreeItem):
+        "TreeRoot has some additional methods"
+        def find_leaf(self, name):
+            "Find an element in the tree, return None if not present"
+            day, hour = os.path.split(name)
+            ymd = day.split("-", 2)
+            ymd.append(hour)
+            element = self
+            for item in ymd:
+                child = element.get(item)
+                if child is None:
+                    logger.error("Node %s from %s does not exist, cannot remove", item, name)
+                element = child
+            return element
+
         def add_leaf(self, name):
             "Add a new leaf to the tree, only available from root"
-            if self.parent is None:
-                day, hour = os.path.split(name)
-                ymd = day.split("-", 2)
-                ymd.append(hour)
-                element = self
-                for item in ymd:
-                    child = element.get(item)
-                    if child is None:
-                        child = TreeItem(item, element)
-                    element = child
-            else:
-                logger.error("add_leaf is only possible from the root of the tree")
+            day, hour = os.path.split(name)
+            ymd = day.split("-", 2)
+            ymd.append(hour)
+            element = self
+            for item in ymd:
+                child = element.get(item)
+                if child is None:
+                    child = TreeItem(item, element)
+                element = child
 
         def del_leaf(self, name):
             "Remove a leaf from the tree, only available from root"
-            if self.parent is None:
-                day, hour = os.path.split(name)
-                ymd = day.split("-", 2)
-                ymd.append(hour)
-                element = self
-                for item in ymd:
-                    child = element.get(item)
-                    if child is None:
-                        logger.error("Node %s from %s does not exist, cannot remove", item, name)
-                    element = child
+            element = find_leaf(name)
+            if element:
                 # Now start deleting:
                 while element.parent is not None:
                     element.parent.children.remove(element)
@@ -183,14 +199,24 @@ except:
                         element = element.parent
                     else:
                         return
-            else:
-                logger.error("add_leaf is only possible from the root of the tree")
+
+        def index(self, name):
+            "Calculate the index of an item as if it was a list"
+            element = self.find_leaf(name)
+            if element is None:
+                return -1
+            idx = 0
+            while element:
+                idx += element.sub_index()
+                element = element.parent
+
+            return idx
 
 @timeit
 def build_tree(big_list):
     """
     """
-    root = TreeItem()
+    root = TreeRoot()
     for line in big_list:
         root.add_leaf(line)
     return root
@@ -244,8 +270,7 @@ class TreeModel(qt.QAbstractItemModel):
         if midx.column() == 1 and role == qt.Qt.DisplayRole:
             if leaf.order == 4:
                 if leaf.extra is None:
-                    data = Photo(leaf.name).readExif()
-                    leaf.extra = data["title"]
+                    leaf.extra = Photo(leaf.name).get_title()
                 return leaf.extra
 
     def headerData(self, section, orientation, role):

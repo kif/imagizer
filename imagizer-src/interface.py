@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "21/07/2019"
+__date__ = "28/07/2019"
 __license__ = "GPL"
 
 import gc
@@ -45,7 +45,7 @@ from .selection import Selected
 from .photo import Photo
 from .utils import get_pixmap_file
 from .config import config, listConfigurationFiles
-from .imagecache import imageCache
+from .imagecache import image_cache, title_cache
 from . import tree, __version__
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
 from .fileutils import smartSize, recursive_delete
@@ -369,7 +369,7 @@ class Interface(qt.QObject):
         new_rate = int(self.gui.rate.value())
         metadata = self.image.metadata or {}
         if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
-            self.image.name(new_title, new_rate)
+            self.image.set_title(new_title, new_rate)
 
     def create_statusbar(self):
         self.status_bar = self.gui.statusBar()
@@ -550,43 +550,43 @@ class Interface(qt.QObject):
             if what == "first":
                 for i in self.AllJpegs:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return  self.AllJpegs.index(i)
             elif what == "previous":
                 for i in self.AllJpegs[current_idx - 1::-1]:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "next":
                 for i in self.AllJpegs[current_idx + 1:]:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "last":
                 for i in self.AllJpegs[-1::-1]:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
         elif menu == "untitle":
             if what == "first":
                 for i in self.AllJpegs:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return  self.AllJpegs.index(i)
             elif what == "previous":
                 for i in self.AllJpegs[current_idx - 1::-1]:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "next":
                 for i in self.AllJpegs[current_idx + 1:]:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "last":
                 for i in self.AllJpegs[-1::-1]:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
         elif menu == "random":
             if what == "last":
@@ -649,6 +649,8 @@ class Interface(qt.QObject):
         self.update_title()
         if self.fn_current in  self.selected:
             self.selected.remove(self.fn_current)
+#         if self.treeview is not None:
+#             self.treeview.root. TODO
         self.AllJpegs.remove(self.fn_current)
         self.image.trash()
         self.show_image(min(self.idx_current, len(self.AllJpegs) - 1))
@@ -714,8 +716,8 @@ class Interface(qt.QObject):
         logger.debug("Interface.reload")
         self.update_title()
         filename = self.fn_current
-        if (imageCache is not None) and (filename in imageCache):
-            imageCache.pop(filename)
+        if (image_cache is not None) and (filename in image_cache):
+            image_cache.pop(filename)
         self.image = Photo(filename)
         self.show_image()
 

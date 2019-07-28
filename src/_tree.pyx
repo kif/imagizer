@@ -86,16 +86,20 @@ cdef class TreeItem(object):
         else:
             return self
 
+    cdef int _size(self):
+        "Cython way of calculating size"
+        cdef int s = 0
+        cdef TreeItem child
+        if self.children:
+            for child in self.children:
+                s += child._size()
+            return s
+        else:
+            return 1
+
     property size:
         def __get__(self):
-            cdef int s = 0
-            cdef TreeItem child
-            if self.children:
-                for child in self.children:
-                    s += child.size
-                return s
-            else:
-                return 1
+            return self._size()
 
     property name:
         def __get__(self):
@@ -106,33 +110,71 @@ cdef class TreeItem(object):
             else:
                 return self.parent.name + "-" + self.label
 
-    def add_leaf(self, name):
-        "Add a new leaf to the tree, only available from root"
-        if self.parent is None:
-            day, hour = os.path.split(name)
-            ymd = day.split("-", 2)
-            ymd.append(hour)
-            element = self
-            for item in ymd:
-                child = element.get(item)
-                if child is None:
-                    child = TreeItem(item, element)
-                element = child
-        else:
-            logger.error("add_leaf is only possible from the root of the tree")
+    cpdef int sub_index(self):
+        cdef:
+            int s, in_list
+            TreeItem brother
 
-    def del_leaf(self, name):
-        "Remove a leaf from the tree, only available from root"
         if self.parent is None:
-            day, hour = os.path.split(name)
-            ymd = day.split("-", 2)
-            ymd.append(hour)
-            element = self
-            for item in ymd:
-                child = element.get(item)
-                if child is None:
-                    logger.error("Node %s from %s does not exist, cannot remove", item, name)
-                element = child
+            return 0
+        else:
+            in_list = self.parent.children.index(self)
+            s = 0
+            for brother in self.parent.children[:in_list]:
+                s+=brother._size()
+            return s
+
+    cpdef TreeItem _getitem(self, int idx):
+        "List emulation mode, retrieve index, return self when no children"
+        cdef:
+            int size, sum_,
+            TreeItem child, element
+        if self.children:
+            sum_ = 0
+            for child in self.children:
+                child_size = child._size()
+                if sum_ + child_size <= idx:
+                    sum_ += child_size
+                else:
+                    return child._getitem(idx - sum_)
+        else:
+            return self
+
+
+cdef class TreeRoot(TreeItem):
+    "TreeRoot has some additional methods"
+    cpdef TreeItem find_leaf(self, str name):
+        "Find an element in the tree, return None if not present"
+        cdef TreeItem element, child
+        day, hour = os.path.split(name)
+        ymd = day.split("-", 2)
+        ymd.append(hour)
+        element = self
+        for item in ymd:
+            child = element.get(item)
+            if child is None:
+                logger.error("Node %s from %s does not exist, cannot remove", item, name)
+            element = child
+        return element
+
+    cpdef add_leaf(self, str name):
+        "Add a new leaf to the tree, only available from root"
+        day, hour = os.path.split(name)
+        ymd = day.split("-", 2)
+        ymd.append(hour)
+        element = self
+        for item in ymd:
+            child = element.get(item)
+            if child is None:
+                child = TreeItem(item, element)
+            element = child
+
+    cpdef del_leaf(self, str name):
+        "Remove a leaf from the tree, only available from root"
+        cdef:
+            TreeItem element, child
+        element = self.find_leaf(name)
+        if element:
             # Now start deleting:
             while element.parent is not None:
                 element.parent.children.remove(element)
@@ -140,5 +182,28 @@ cdef class TreeItem(object):
                     element = element.parent
                 else:
                     return
-        else:
-            logger.error("add_leaf is only possible from the root of the tree")
+
+    cpdef int index(self, str name):
+        "Calculate the index of an item as if it was a list"
+        cdef:
+            int idx=0
+            TreeItem element
+        element = self.find_leaf(name)
+        if element is None:
+            return -1
+        while element:
+            idx += element.sub_index()
+            element = element.parent
+        return idx
+
+    def  __getitem__(self, idx):
+        "x.__getitem__(y) <==> x[y]"
+        cdef:
+            int size
+        size = self._size()
+        if idx<0:
+            idx = size + idx
+        if idx>=size:
+            raise IndexError("list index out of range")
+        return self._getitem(idx).name
+
