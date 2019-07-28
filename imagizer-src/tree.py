@@ -31,7 +31,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "28/07/2019"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -47,6 +47,8 @@ MONTH = {"01": u"Janvier",
          "11": u"Novembre",
          "12": u"Décembre",
          }
+import logging
+logger = logging.getLogger(__name__)
 from . import qt
 import os
 from .utils import timeit
@@ -147,6 +149,42 @@ except:
             else:
                 return 1
 
+        def add_leaf(self, name):
+            "Add a new leaf to the tree, only available from root"
+            if self.parent is None:
+                day, hour = os.path.split(name)
+                ymd = day.split("-", 2)
+                ymd.append(hour)
+                element = self
+                for item in ymd:
+                    child = element.get(item)
+                    if child is None:
+                        child = TreeItem(item, element)
+                    element = child
+            else:
+                logger.error("add_leaf is only possible from the root of the tree")
+
+        def del_leaf(self, name):
+            "Remove a leaf from the tree, only available from root"
+            if self.parent is None:
+                day, hour = os.path.split(name)
+                ymd = day.split("-", 2)
+                ymd.append(hour)
+                element = self
+                for item in ymd:
+                    child = element.get(item)
+                    if child is None:
+                        logger.error("Node %s from %s does not exist, cannot remove", item, name)
+                    element = child
+                # Now start deleting:
+                while element.parent is not None:
+                    element.parent.children.remove(element)
+                    if not element.parent.children:
+                        element = element.parent
+                    else:
+                        return
+            else:
+                logger.error("add_leaf is only possible from the root of the tree")
 
 @timeit
 def build_tree(big_list):
@@ -154,15 +192,7 @@ def build_tree(big_list):
     """
     root = TreeItem()
     for line in big_list:
-        day, hour = os.path.split(line)
-        ymd = day.split("-", 2)
-        ymd.append(hour)
-        element = root
-        for item in ymd:
-            child = element.get(item)
-            if not child:
-                child = TreeItem(item, element)
-            element = child
+        root.add_leaf(line)
     return root
 
 
@@ -292,7 +322,7 @@ class TreeColWidget(qt.QWidget):
 
 def main():
     import imagizer.imagizer
-    big_lst = imagizer.imagizer.rangeTout("/home/photo", bUseX=False, fast=True)[0]
+    big_lst = imagizer.imagizer.range_tout("/home/photo", bUseX=False, fast=True)[0]
     tree = build_tree(big_lst)
     app = qt.QApplication([])
     mainw = qt.QMainWindow()

@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 import cython
 import os
 
@@ -90,7 +92,7 @@ cdef class TreeItem(object):
             cdef TreeItem child
             if self.children:
                 for child in self.children:
-                    s += child.size()
+                    s += child.size
                 return s
             else:
                 return 1
@@ -104,3 +106,39 @@ cdef class TreeItem(object):
             else:
                 return self.parent.name + "-" + self.label
 
+    def add_leaf(self, name):
+        "Add a new leaf to the tree, only available from root"
+        if self.parent is None:
+            day, hour = os.path.split(name)
+            ymd = day.split("-", 2)
+            ymd.append(hour)
+            element = self
+            for item in ymd:
+                child = element.get(item)
+                if child is None:
+                    child = TreeItem(item, element)
+                element = child
+        else:
+            logger.error("add_leaf is only possible from the root of the tree")
+
+    def del_leaf(self, name):
+        "Remove a leaf from the tree, only available from root"
+        if self.parent is None:
+            day, hour = os.path.split(name)
+            ymd = day.split("-", 2)
+            ymd.append(hour)
+            element = self
+            for item in ymd:
+                child = element.get(item)
+                if child is None:
+                    logger.error("Node %s from %s does not exist, cannot remove", item, name)
+                element = child
+            # Now start deleting:
+            while element.parent is not None:
+                element.parent.children.remove(element)
+                if not element.parent.children:
+                    element = element.parent
+                else:
+                    return
+        else:
+            logger.error("add_leaf is only possible from the root of the tree")
