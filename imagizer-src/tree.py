@@ -31,7 +31,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "28/07/2019"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -47,13 +47,16 @@ MONTH = {"01": u"Janvier",
          "11": u"Novembre",
          "12": u"Décembre",
          }
+import logging
+logger = logging.getLogger(__name__)
 from . import qt
 import os
 from .utils import timeit
 from .photo import Photo
 try:
-    from ._tree import TreeItem
+    from ._tree import TreeItem, TreeRoot
 except:
+# if True:
     class TreeItem(object):
         """
         Node of a tree ...
@@ -93,6 +96,9 @@ except:
                 return "TreeItem %s->%s with children: " % (self.parent.label, self.label) + ", ".join([i.label for i in self.children])
             else:
                 return "TreeItem %s with children: " % (self.label) + ", ".join([i.label for i in self.children])
+
+        def __len__(self):
+            return self.size
 
         def sort(self):
             for child in self.children:
@@ -147,22 +153,72 @@ except:
             else:
                 return 1
 
+        def sub_index(self):
+            if self.parent is None:
+                return 0
+            else:
+                in_list = self.parent.children.index(self)
+                return sum(brother.size for brother in self.parent.children[:in_list])
+
+
+    class TreeRoot(TreeItem):
+        "TreeRoot has some additional methods"
+        def find_leaf(self, name):
+            "Find an element in the tree, return None if not present"
+            day, hour = os.path.split(name)
+            ymd = day.split("-", 2)
+            ymd.append(hour)
+            element = self
+            for item in ymd:
+                child = element.get(item)
+                if child is None:
+                    logger.error("Node %s from %s does not exist, cannot remove", item, name)
+                element = child
+            return element
+
+        def add_leaf(self, name):
+            "Add a new leaf to the tree, only available from root"
+            day, hour = os.path.split(name)
+            ymd = day.split("-", 2)
+            ymd.append(hour)
+            element = self
+            for item in ymd:
+                child = element.get(item)
+                if child is None:
+                    child = TreeItem(item, element)
+                element = child
+
+        def del_leaf(self, name):
+            "Remove a leaf from the tree, only available from root"
+            element = find_leaf(name)
+            if element:
+                # Now start deleting:
+                while element.parent is not None:
+                    element.parent.children.remove(element)
+                    if not element.parent.children:
+                        element = element.parent
+                    else:
+                        return
+
+        def index(self, name):
+            "Calculate the index of an item as if it was a list"
+            element = self.find_leaf(name)
+            if element is None:
+                return -1
+            idx = 0
+            while element:
+                idx += element.sub_index()
+                element = element.parent
+
+            return idx
 
 @timeit
 def build_tree(big_list):
     """
     """
-    root = TreeItem()
+    root = TreeRoot()
     for line in big_list:
-        day, hour = os.path.split(line)
-        ymd = day.split("-", 2)
-        ymd.append(hour)
-        element = root
-        for item in ymd:
-            child = element.get(item)
-            if not child:
-                child = TreeItem(item, element)
-            element = child
+        root.add_leaf(line)
     return root
 
 
@@ -214,8 +270,7 @@ class TreeModel(qt.QAbstractItemModel):
         if midx.column() == 1 and role == qt.Qt.DisplayRole:
             if leaf.order == 4:
                 if leaf.extra is None:
-                    data = Photo(leaf.name).readExif()
-                    leaf.extra = data["title"]
+                    leaf.extra = Photo(leaf.name).get_title()
                 return leaf.extra
 
     def headerData(self, section, orientation, role):
@@ -292,7 +347,7 @@ class TreeColWidget(qt.QWidget):
 
 def main():
     import imagizer.imagizer
-    big_lst = imagizer.imagizer.rangeTout("/home/photo", bUseX=False, fast=True)[0]
+    big_lst = imagizer.imagizer.range_tout("/home/photo", bUseX=False, fast=True)[0]
     tree = build_tree(big_lst)
     app = qt.QApplication([])
     mainw = qt.QMainWindow()

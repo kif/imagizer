@@ -31,11 +31,13 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "31/12/2017"
+__date__ = "26/02/2018"
 __status__ = "production"
 
 from ._qt import * # noqa
 # from ._utils import * # noqa
+
+import logging
 _logger = logging.getLogger(__name__)
 
 transformations = (Qt.FastTransformation, Qt.SmoothTransformation)

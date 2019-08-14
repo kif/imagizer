@@ -29,7 +29,7 @@ Technically it is a Borg (design Pattern) so every instance of Config has exactl
 """
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20141129"
+__date__ = "20190727"
 __license__ = "GPL"
 
 import os, locale, logging, ConfigParser
@@ -57,7 +57,7 @@ def float_or_None(inp):
 
 
 ################################################################################################
-###############  Class Config for storing the cofiguratio in a Borg ############################
+###############  Class Config for storing the configuratio in a Borg ############################
 ################################################################################################
 class Config(object):
     """this class is a Borg : always returns the same values regardless to the instance of the object"""
@@ -75,6 +75,7 @@ class Config(object):
             self.TrashDirectory = "Trash"
             self.SelectedDirectory = "Selected"
             self.Selected_save = ".selected-photos"
+            self.Database_file = ".imagizer.sqlite"
             self.Extensions = [".jpg", ".jpeg", ".jpe", ".jfif"]
             self.RawExtensions = [".cr2", ".arw", ".mrw", ".dng", ".pef", ".nef", ".raf"]
             self.AutoRotate = False
@@ -168,94 +169,92 @@ class Config(object):
             return
 
         configparser.read(files)
-        for i in configparser.items("Selector"):
-            j = i[0]
-            if j == "ScreenSize".lower():         self.ScreenSize = int(i[1])
-            elif j == "Interpolation".lower():    self.Interpolation = int(i[1])
-            elif j == "PagePrefix".lower():       self.PagePrefix = i[1]
-            elif j == "NbrPerPage".lower():       self.NbrPerPage = int(i[1])
-            elif j == "TrashDirectory".lower():   self.TrashDirectory = i[1]
-            elif j == "SelectedDirectory".lower():self.SelectedDirectory = i[1]
-            elif j == "Selected_save".lower():    self.Selected_save = i[1]
-            elif j == "AutoRotate".lower():       self.AutoRotate = configparser.getboolean("Selector", "AutoRotate")
-            elif j == "Filigrane".lower():        self.Filigrane = configparser.getboolean("Selector", "Filigrane")
-            elif j == "FiligraneSource".lower():  self.FiligraneSource = i[1]
-            elif j == "FiligranePosition".lower():self.FiligranePosition = int(i[1])
-            elif j == "FiligraneQuality".lower(): self.FiligraneQuality = int(i[1])
-            elif j == "FiligraneOptimize".lower():self.FiligraneOptimize = configparser.getboolean("Selector", "FiligraneOptimize")
-            elif j == "FiligraneProgressive".lower():self.FiligraneProgressive = configparser.getboolean("Selector", "FiligraneProgressive")
-            elif j == "CommentFile".lower():      self.CommentFile = i[1]
-            elif j == "WebDirIndexStyle".lower(): self.WebDirIndexStyle = i[1]
-            elif j == "DefaultFileMode".lower():
-                self.DefaultFileMode = int(i[1], 8)
+        for (key, value) in configparser.items("Selector"):
+            if key == "ScreenSize".lower():         self.ScreenSize = int(value)
+            elif key == "Interpolation".lower():    self.Interpolation = int(value)
+            elif key == "PagePrefix".lower():       self.PagePrefix = value
+            elif key == "NbrPerPage".lower():       self.NbrPerPage = int(value)
+            elif key == "TrashDirectory".lower():   self.TrashDirectory = value
+            elif key == "SelectedDirectory".lower():self.SelectedDirectory = value
+            elif key == "Selected_save".lower():    self.Selected_save = value
+            elif key == "Database_file".lower():    self.Database_file = value
+            elif key == "AutoRotate".lower():       self.AutoRotate = configparser.getboolean("Selector", "AutoRotate")
+            elif key == "Filigrane".lower():        self.Filigrane = configparser.getboolean("Selector", "Filigrane")
+            elif key == "FiligraneSource".lower():  self.FiligraneSource = value
+            elif key == "FiligranePosition".lower():self.FiligranePosition = int(value)
+            elif key == "FiligraneQuality".lower(): self.FiligraneQuality = int(value)
+            elif key == "FiligraneOptimize".lower():self.FiligraneOptimize = configparser.getboolean("Selector", "FiligraneOptimize")
+            elif key == "FiligraneProgressive".lower():self.FiligraneProgressive = configparser.getboolean("Selector", "FiligraneProgressive")
+            elif key == "CommentFile".lower():      self.CommentFile = value
+            elif key == "WebDirIndexStyle".lower(): self.WebDirIndexStyle = value
+            elif key == "DefaultFileMode".lower():
+                self.DefaultFileMode = int(value, 8)
                 self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 en octal ... 3145 +s mode octal
-            elif j == "RawExtensions".lower():      self.RawExtensions = i[1].split()
-            elif j == "Extensions".lower():         self.Extensions = i[1].split()
-            elif j == "DefaultRepository".lower():  self.DefaultRepository = i[1]
-            elif j == "MediaSize".lower():          self.MediaSize = float(i[1])
-            elif j == "Burn".lower():               self.Burn = i[1]
-            elif j == "WebServer".lower():          self.WebServer = i[1]
-            elif j == "WebRepository".lower():      self.WebRepository = i[1]
-            elif j == "Locale".lower():
-                self.Locale = i[1]
+            elif key == "RawExtensions".lower():      self.RawExtensions = value.split()
+            elif key == "Extensions".lower():         self.Extensions = value.split()
+            elif key == "DefaultRepository".lower():  self.DefaultRepository = value
+            elif key == "MediaSize".lower():          self.MediaSize = float(value)
+            elif key == "Burn".lower():               self.Burn = value
+            elif key == "WebServer".lower():          self.WebServer = value
+            elif key == "WebRepository".lower():      self.WebRepository = value
+            elif key == "Locale".lower():
+                self.Locale = value
                 try:
                     locale.setlocale(locale.LC_ALL, self.Locale)
                 except locale.Error:
                     self.Locale, _ = locale.getdefaultlocale()
-                    logger.warning("Unsupported locale %s, reverting to %s" % (i[1], self.Locale))
-            elif j == "Coding".lower():             self.Coding = i[1]
-            elif j == "ExportSingleDir".lower():    self.ExportSingleDir = configparser.getboolean("Selector", "ExportSingleDir")
-            elif j == "WebPageAnchor".lower():      self.WebPageAnchor = i[1]
-            elif j == "SlideShowDelay".lower():     self.SlideShowDelay = float(i[1])
-            elif j == "SlideShowMinRating".lower(): self.SlideShowMinRating = min(5, max(0, int(i[1])))
-            elif j == "SlideShowType".lower():      self.SlideShowType = i[1]
-            elif j == "SynchronizeRep".lower():     self.SynchronizeRep = i[1]
-            elif j == "SynchronizeType".lower():    self.SynchronizeType = i[1]
-            elif j == "ImageCache".lower():         self.ImageCache = int(i[1])
-            elif j == "ImageWidth".lower():         self.ImageWidth = int(i[1])
-            elif j == "ImageHeight".lower():        self.ImageHeight = int(i[1])
-            elif j == "gimp".lower():               self.Gimp = i[1]
-            elif j == "dcraw".lower():              self.Dcraw = i[1]
-            elif j == "SelectedFilter".lower():      self.SelectedFilter = i[1]
-            else: logging.warning(str("Config.load: unknown key %s" % j))
+                    logger.warning("Unsupported locale %s, reverting to %s" % (value, self.Locale))
+            elif key == "Coding".lower():             self.Coding = value
+            elif key == "ExportSingleDir".lower():    self.ExportSingleDir = configparser.getboolean("Selector", "ExportSingleDir")
+            elif key == "WebPageAnchor".lower():      self.WebPageAnchor = value
+            elif key == "SlideShowDelay".lower():     self.SlideShowDelay = float(value)
+            elif key == "SlideShowMinRating".lower(): self.SlideShowMinRating = min(5, max(0, int(value)))
+            elif key == "SlideShowType".lower():      self.SlideShowType = value
+            elif key == "SynchronizeRep".lower():     self.SynchronizeRep = value
+            elif key == "SynchronizeType".lower():    self.SynchronizeType = value
+            elif key == "ImageCache".lower():         self.ImageCache = int(value)
+            elif key == "ImageWidth".lower():         self.ImageWidth = int(value)
+            elif key == "ImageHeight".lower():        self.ImageHeight = int(value)
+            elif key == "gimp".lower():               self.Gimp = value
+            elif key == "dcraw".lower():              self.Dcraw = value
+            elif key == "SelectedFilter".lower():      self.SelectedFilter = value
+            else: logging.warning(str("Config.load: unknown key %s" % key))
 
         for k in ["ScaledImages", "Thumbnails"]:
             try:
                 dico = eval(k)
             except:
                 dico = {}
-            for i in configparser.items(k):
-                j = i[0]
-                if j == "Size".lower():dico["Size"] = int(i[1])
-                elif j == "Suffix".lower():dico["Suffix"] = i[1]
-                elif j == "Interpolation".lower():dico["Interpolation"] = int(i[1])
-                elif j == "Progressive".lower():dico["Progressive"] = configparser.getboolean(k, "Progressive")
-                elif j == "Optimize".lower():dico["Optimize"] = configparser.getboolean(k, "Optimize")
-                elif j == "ExifExtraction".lower():dico["ExifExtraction"] = configparser.getboolean(k, "ExifExtraction")
-                elif j == "Quality".lower():dico["Quality"] = int(i[1])
+            for (key, value) in configparser.items(k):
+                if key == "Size".lower():dico["Size"] = int(value)
+                elif key == "Suffix".lower():dico["Suffix"] = value
+                elif key == "Interpolation".lower():dico["Interpolation"] = int(value)
+                elif key == "Progressive".lower():dico["Progressive"] = configparser.getboolean(k, "Progressive")
+                elif key == "Optimize".lower():dico["Optimize"] = configparser.getboolean(k, "Optimize")
+                elif key == "ExifExtraction".lower():dico["ExifExtraction"] = configparser.getboolean(k, "ExifExtraction")
+                elif key == "Quality".lower():dico["Quality"] = int(value)
             self.__setattr__(k, dico)
 #            exec("self.%s=dico" % k)
 
         # Read Video options
         try:
-            for i in configparser.items("Video"):
-                j = i[0]
-                if j == "ScratchDir".lower():           self.ScratchDir = os.path.abspath(i[1])
-                elif j == "VideoBitRate".lower():       self.VideoBitRate = int(i[1])
-                elif j == "AudioBitRatePerChannel".lower(): self.AudioBitRatePerChannel = int(i[1])
-                elif j == "X264Options".lower():        self.X264Options = i[1]
-                elif j == "FramesPerSecond".lower():    self.FramesPerSecond = float_or_None(i[1])
-                elif j == "MPlayer".lower():            self.MPlayer = os.path.abspath(i[1])
-                elif j == "MEncoder".lower():           self.MEncoder = os.path.abspath(i[1])
-                elif j == "Sox".lower():                self.Sox = os.path.abspath(i[1])
-                elif j == "Convert".lower():            self.Convert = os.path.abspath(i[1])
-                elif j == "AviMerge".lower():           self.AviMerge = os.path.abspath(i[1])
-                elif j == "VideoExtensions".lower():    self.VideoExtensions = i[1].split()
-                elif j == "ThumbnailExtensions".lower():    self.ThumbnailExtensions = i[1].split()
-                elif j == "BatchScriptExecutor".lower():    self.BatchScriptExecutor = os.path.abspath(i[1])
-                elif j == "BatchUsesPipe".lower():            self.BatchUsesPipe = configparser.getboolean("Video", "BatchUsesPipe")
+            for (key, value) in configparser.items("Video"):
+                if key == "ScratchDir".lower():           self.ScratchDir = os.path.abspath(value)
+                elif key == "VideoBitRate".lower():       self.VideoBitRate = int(value)
+                elif key == "AudioBitRatePerChannel".lower(): self.AudioBitRatePerChannel = int(value)
+                elif key == "X264Options".lower():        self.X264Options = value
+                elif key == "FramesPerSecond".lower():    self.FramesPerSecond = float_or_None(value)
+                elif key == "MPlayer".lower():            self.MPlayer = os.path.abspath(value)
+                elif key == "MEncoder".lower():           self.MEncoder = os.path.abspath(value)
+                elif key == "Sox".lower():                self.Sox = os.path.abspath(value)
+                elif key == "Convert".lower():            self.Convert = os.path.abspath(value)
+                elif key == "AviMerge".lower():           self.AviMerge = os.path.abspath(value)
+                elif key == "VideoExtensions".lower():    self.VideoExtensions = value.split()
+                elif key == "ThumbnailExtensions".lower():    self.ThumbnailExtensions = value.split()
+                elif key == "BatchScriptExecutor".lower():    self.BatchScriptExecutor = os.path.abspath(value)
+                elif key == "BatchUsesPipe".lower():            self.BatchUsesPipe = configparser.getboolean("Video", "BatchUsesPipe")
 
-                else: logging.warning(str("Config.load: unknown key %s" % j))
+                else: logging.warning(str("Config.load: unknown key %s" % key))
         except ConfigParser.NoSectionError:
             logging.warning("No Video section in configuration file !")
         if resource:
@@ -314,6 +313,7 @@ class Config(object):
         "#Trash sub-directory", "TrashDirectory: %s" % self.TrashDirectory, "",
         "#Selected/processed images sub-directory", "SelectedDirectory: %s" % self.SelectedDirectory, "",
         "#File containing the list of selected but unprocessed images", "Selected_save: %s" % self.Selected_save, "",
+        "#File containing the database with all title of images", "Database_file: %s" % self.Database_file, "",
         "#Use Exif data for auto-rotation of the images (canon cameras mainly)", "AutoRotate: %s" % self.AutoRotate, "",
         "#Default mode for files (in octal)", "DefaultFileMode: %o" % self.DefaultFileMode, "",
         "#Default JPEG extensions", "Extensions: " + " ".join(self.Extensions), "",

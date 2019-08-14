@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "05/12/2016"
+__date__ = "28/07/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -47,13 +47,17 @@ installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.photo")
 
 try:
-    import Image, ImageStat, ImageChops, ImageFile
-except:
-    raise ImportError("Selector needs PIL: Python Imaging Library\n PIL is available from http://www.pythonware.com/products/pil/")
+    from PIL import Image, ImageStat, ImageChops, ImageFile
+except ImportError:
+    try:
+        import Image, ImageStat, ImageChops, ImageFile
+    except ImportError:
+        logger.error("""Selector needs PIL: Python Imaging Library or pillow""")
+        raise error
 
 Image.MAX_IMAGE_PIXELS = None
 from .config import config
-from .imagecache import imageCache
+from .imagecache import image_cache, title_cache
 kpix = 3 * config.ScaledImages["Size"] ** 2 / 4000
 if kpix > 64:
     ImageFile.MAXBLOCK = 2 ** 26  # Thats 66 Mpix
@@ -62,8 +66,7 @@ from .exif       import Exif
 from .           import pyexiftran
 from .fileutils  import mkdir, makedir, smartSize
 from .encoding   import unicode2ascii
-from .           import blur, qt
-from .qt import transformations, get_matrix, Qt
+from .           import blur
 
 
 # #########################################################
@@ -102,7 +105,10 @@ class Photo(object):
             self.fn = op.join(config.DefaultRepository, self.filename)
         if not op.isfile(self.fn):
             logger.error("No such photo %s" % self.fn)
-        self.metadata = None
+        if title_cache and self.filename in title_cache:
+            self.metadata = {"title": title_cache[self.filename]}
+        else:
+            self.metadata = {}
         self._pixelsX = None
         self._pixelsY = None
         self._pil = None
@@ -110,10 +116,11 @@ class Photo(object):
 #         self._pixbuf = None
         self.scaledPixbuffer = None
         self._orientation = 0
-        if imageCache:
-            if filename in imageCache:
+
+        if image_cache:
+            if filename in image_cache:
                 logger.debug("Image %s found in Cache", filename)
-                fromCache = imageCache[filename]
+                fromCache = image_cache[filename]
                 self.metadata = fromCache.metadata
                 self._pixelsX = fromCache.pixelsX
                 self._pixelsY = fromCache.pixelsY
@@ -123,7 +130,7 @@ class Photo(object):
                 self._orientation = fromCache.orientation
             elif not dontCache:
                 logger.debug("Image %s not in Cache", filename)
-                imageCache[filename] = self
+                image_cache[filename] = self
 
     def __repr__(self):
         return "Photo object on filename %s" % self.filename
@@ -263,7 +270,7 @@ class Photo(object):
 
 
             metadata = self.read_exif()
-            rescaled.name(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
+            rescaled.set_title(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
 
             return rescaled
 
@@ -339,6 +346,7 @@ class Photo(object):
 
     def rotate(self, angle=0):
         """does a lossless rotation of the given jpeg file"""
+        from . import qt
         if os.name == 'nt' and self.pil != None:
             del self.pil
         x = self.pixelsX
@@ -346,21 +354,21 @@ class Photo(object):
         logger.debug("Before rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" % (angle, x, y, self.scaledPixbuffer.width(), self.scaledPixbuffer.height()))
 
         if angle == 90:
-            if imageCache is not None:
+            if image_cache is not None:
                 pyexiftran.rotate90(self.fn)
                 trans = qt.QTransform().rotate(90)
-                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=transformations[config.Interpolation])
+                newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
                 self.pixelsX = y
                 self.pixelsY = x
-                if self.metadata is not None:
+                if self.metadata.get("resolution") is not None:
                     self.metadata["resolution"] = "%i x % i" % (y, x)
             else:
                 pyexiftran.rotate90(self.fn)
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 270:
-            if imageCache is not None:
+            if image_cache is not None:
                 pyexiftran.rotate270(self.fn)
                 trans = qt.QTransform().rotate(270)
                 newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
@@ -374,7 +382,7 @@ class Photo(object):
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 180:
-            if imageCache is not None:
+            if image_cache is not None:
                 pyexiftran.rotate180(self.fn)
                 trans = qt.QTransform().rotate(180)
                 newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
@@ -385,18 +393,19 @@ class Photo(object):
                 self.pixelsY = None
         else:
             logger.error("Il n'est pas possible de faire une rotation de ce type sans perte de donnée.")
-        if imageCache is not None:
+        if image_cache is not None:
             self.scaledPixbuffer = newPixbuffer
-            imageCache[self.filename] = self
+            image_cache[self.filename] = self
         logger.debug("After   rotation %i, x=%i, y=%i, scaledX=%i, scaledY=%i" %
                      (angle, self.pixelsX, self.pixelsY,
                       self.scaledPixbuffer.width(), self.scaledPixbuffer.height()))
 
     def removeFromCache(self):
         """remove the curent image from the Cache .... for various reasons"""
-        if imageCache is not None:
-            if self.filename in imageCache.ordered:
-                imageCache.pop(self.filename)
+        if image_cache is not None and self.filename in image_cache.ordered:
+            image_cache.pop(self.filename)
+        if title_cache is not None and self.filename in title_cache:
+            title_cache.pop(self.filename)
 
     def trash(self):
         """Send the file to the trash folder"""
@@ -416,8 +425,8 @@ class Photo(object):
         """
         exif = self.get_exif()
         "initialize exifs"
-        if self.metadata is None:
-            self.metadata = {"size": "%.2f %s" % smartSize(op.getsize(self.fn))}
+        if self.metadata.get("size") is None:
+            self.metadata["size"] = "%.2f %s" % smartSize(op.getsize(self.fn))
             if self.is_raw:
                 try:
                     title = exif["Exif.Photo.UserComment"]
@@ -442,6 +451,8 @@ class Photo(object):
                         logger.error("%s Failed as well in latin1, resetting" % (error2))
                         title = u""
             self.metadata["title"] = title.strip()
+            if title_cache:
+                title_cache[self.filename] = title
 
             rate = exif["Exif.Image.Rating"] if  "Exif.Image.Rating" in exif else 0
             if "value" in dir(rate):  # pyexiv2 v0.2+
@@ -462,24 +473,15 @@ class Photo(object):
         return self.metadata.copy()
     readExif = read_exif
 
-    def has_title(self):
-        """
-        return: true if the image is entitled
-        """
-
-        if self.read_exif().get("title"):
-            return True
-        else:
-            return False
-
     def load_pixbuf(self):
         """
         Load the image using QPixmap, either directly or from preview for RAW.
 
         @return: QPixmap
         """
+        from . import qt
         if self.is_raw:
-            if self.metadata is None:
+            if self.metadata.get("size") is None:
                 self.read_exif()
             logger.debug("Size of preview available: %s" % ([i.dimensions for i in self._exif.previews]))
             largest = max(self._exif.previews, key=lambda i: i.dimensions[0] * i.dimensions[1])
@@ -491,8 +493,8 @@ class Photo(object):
                                 (largest.dimensions, self.fn))
             orientation = self.get_orientation(True)
             if orientation != 1:
-                matrix = get_matrix(orientation)
-                pixbuf = pixbuf.transformed(matrix, mode=Qt.FastTransformation)
+                matrix = qt.get_matrix(orientation)
+                pixbuf = pixbuf.transformed(matrix, mode=qt.Qt.FastTransformation)
                 self.set_orientation(1)
         else:
             pixbuf = qt.QPixmap(self.fn)
@@ -509,6 +511,7 @@ class Photo(object):
         @param Ycenter: fraction of image to center on in Y
         @return: a pixbuf to shows the image in a window
         """
+        from . import qt
 
         scaled_buf = None
         if Xsize > config.ImageWidth :
@@ -576,7 +579,22 @@ class Photo(object):
                                                      qt.transformations[config.Interpolation])
         return scaled_buf
 
-    def name(self, title=None, rate=None, reset_orientation=False):
+    def is_entitled(self):
+        """return: true if the image is entitled
+        """
+        return bool(self.get_title())
+
+    def get_title(self):
+        "retrieve the name set inside the file using either the database, either by reading the file"
+        if self._exif is None:
+            name = self.metadata.get("title")
+            if not name:
+                name = self.read_exif().get("title")
+        else:
+            name = self.metadata.get("title")
+        return name
+
+    def set_title(self, title=None, rate=None, reset_orientation=False):
         """
         write the title of the photo inside the description field, in the JPEG header
 
@@ -626,8 +644,8 @@ class Photo(object):
         self.filename = newname
         self.fn = newfn
         self._exif = None
-        if (imageCache is not None) and (oldname in imageCache):
-            imageCache.rename(oldname, newname)
+        if (image_cache is not None) and (oldname in image_cache):
+            image_cache.rename(oldname, newname)
 
 
     def store_original_name(self, originalName):
@@ -711,17 +729,17 @@ class Photo(object):
         S = ImageChops.screen(self.pil, k)
         M = ImageChops.multiply(self.pil, k)
         F = ImageChops.add(ImageChops.multiply(self.pil, S), ImageChops.multiply(ImageChops.invert(self.pil), M))
-        exitJpeg = op.join(config.DefaultRepository, outfile)
-        F.save(exitJpeg, quality=80, progressive=True, Optimize=True)
+        dst_filename = op.join(config.DefaultRepository, outfile)
+        F.save(dst_filename, quality=80, progressive=True, Optimize=True)
         try:
-            os.chmod(exitJpeg, config.DefaultFileMode)
+            os.chmod(dst_filename, config.DefaultFileMode)
         except IOError:
             logger.error("Unable to chmod %s" % outfile)
-        exifJpeg = Exif(exitJpeg)
+        exifJpeg = Exif(dst_filename)
         exifJpeg.read()
         self.exif.copy(exifJpeg)
         exifJpeg.comment = self.exif.comment
-        logger.debug("Write metadata to %s", exitJpeg)
+        logger.debug("Write metadata to %s", dst_filename)
         exifJpeg.write()
         logger.info("The whoole contrast mask took %.3f" % (time.time() - t0))
         res = Photo(outfile)
@@ -744,8 +762,10 @@ class Photo(object):
             return
         t0 = time.time()
         position = 5e-4
-        rgb1 = numpy.fromstring(self.pil.tostring(), dtype="uint8")
-        rgb1.shape = -1, 3
+        # rgb1 = numpy.fromstring(self.pil.tostring(), dtype="uint8")
+        rgb1 = numpy.array(self.pil).copy()
+        inshape = rgb1.shape
+        rgb1.shape = (-1, 3)
         rgb = rgb1.astype("float32")
         rgb1.sort(axis=0)
         pos_min = int(round(rgb1.shape[0] * position))
@@ -755,17 +775,18 @@ class Photo(object):
         rgb[:, 0] = 255.0 * (rgb[:, 0].clip(rgb_min[0], rgb_max[0]) - rgb_min[0]) / (rgb_max[0] - rgb_min[0])
         rgb[:, 1] = 255.0 * (rgb[:, 1].clip(rgb_min[1], rgb_max[1]) - rgb_min[1]) / (rgb_max[1] - rgb_min[1])
         rgb[:, 2] = 255.0 * (rgb[:, 2].clip(rgb_min[2], rgb_max[2]) - rgb_min[2]) / (rgb_max[2] - rgb_min[2])
-        out = Image.fromstring("RGB", self.pil.size, rgb.round().clip(0, 255).astype("uint8").tostring())
-        exitJpeg = op.join(config.DefaultRepository, outfile)
-        out.save(exitJpeg, quality=80, progressive=True, Optimize=True)
+        rgb.shape = inshape
+        out = Image.fromarray(rgb.round().clip(0, 255).astype("uint8"), mode="RGB")
+        dst_filename = op.join(config.DefaultRepository, outfile)
+        out.save(dst_filename, quality=80, progressive=True, Optimize=True)
         try:
-            os.chmod(exitJpeg, config.DefaultFileMode)
+            os.chmod(dst_filename, config.DefaultFileMode)
         except IOError:
             logger.error("Unable to chmod %s" % outfile)
-        exifJpeg = Exif(exitJpeg)
+        exifJpeg = Exif(dst_filename)
         exifJpeg.read()
         self.exif.copy(exifJpeg)
-        logger.debug("Write metadata to %s", exitJpeg)
+        logger.debug("Write metadata to %s", dst_filename)
         exifJpeg.write()
         logger.info("The whoole Auto White-Balance took %.3f" % (time.time() - t0))
         res = Photo(outfile)

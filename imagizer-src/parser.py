@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 # coding: utf8
 #******************************************************************************\
-#*
-#* Copyright (C) 2001, Martin Blais <blais@furius.ca>
-#* Copyright (C) 2012, Jerome Kieffer <imagizer@terre-adelie.org>
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# *
+# * Copyright (C) 2001, Martin Blais <blais@furius.ca>
+# * Copyright (C) 2012, Jerome Kieffer <imagizer@terre-adelie.org>
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 from __future__ import with_statement, division, print_function, absolute_import
 
@@ -30,8 +30,11 @@ __date__ = "20120415"
 __license__ = "GPL"
 
 import re, os, sys, logging
+from collections import OrderedDict
 logger = logging.getLogger("imagizer.parser")
 from .config import config
+
+PY2 = sys.version_info[0] == 2
 
 class AttrFile(object):
     """Attributes file representation and trivial parser."""
@@ -40,7 +43,7 @@ class AttrFile(object):
     def __init__(self, path):
         """Constructor."""
         self._path = path
-        self._attrmap = {}
+        self._attrmap = OrderedDict()
         self._dirty = False
         self._attrmap["coding"] = config.Coding
 
@@ -229,5 +232,8 @@ class AttrFile(object):
         Returns contents to a string for debugging purposes.
         """
         lsttxt = ["AttrFile for %s" % self._path]
-        lsttxt += ["%s: %s" % (a, b) for a, b in self._attrmap.items()]
+        if PY2:
+            lsttxt += ["%s: %s" % (a, b.encode(config.Coding)) for a, b in self._attrmap.items()]
+        else:
+            lsttxt += ["%s: %s" % (a, b) for a, b in self._attrmap.items()]
         return os.linesep.join(lsttxt)

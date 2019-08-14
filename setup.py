@@ -1,34 +1,37 @@
 #!/usr/bin/env python
 # -*- coding: UTF8 -*-
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# * $Source$
+# * $Id$
+# *
+# * Copyright (C) 2006,  Jérome Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 
 """
 The setup.py script allows to install Imagizer regardless to the operating system
 """
 import glob
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 from distutils.extension import Extension
 import os, sys, distutils.sysconfig, shutil, locale
 sys.path.insert(0, os.path.dirname(__file__))
@@ -47,17 +50,17 @@ version = get_version()
 
 SCRIPTS = "scripts"
 
-#here we detect the OS runnng the program so that we can call exftran in the right way
+# here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = os.path.join(distutils.sysconfig.get_python_lib(), "imagizer")
 EXIFTRAN = "pyexiftran"
-#JPEG_VERSION = "80"  # "62"
+# JPEG_VERSION = "80"  # "62"
 JPEG_VERSION = "62"
 JPEG_DIR = os.path.join(EXIFTRAN, "jpeg", JPEG_VERSION)
 
 sources = glob.glob(os.path.join(EXIFTRAN, "*.c")) + glob.glob(os.path.join(JPEG_DIR, "*.c"))
 
 
-if os.name == 'nt': #sys.platform == 'win32':
+if os.name == 'nt':  # sys.platform == 'win32':
     execexiftran = os.path.join("bin", "exiftran.exe")
     ConfFile = [os.path.join(os.getenv("ALLUSERSPROFILE"), "imagizer.conf"), os.path.join(os.getenv("USERPROFILE"), "imagizer.conf")]
     shutil.copy('selector', 'selector.py')
@@ -70,7 +73,7 @@ elif os.name == 'posix':
     ConfFile = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
 #    scripts = ['selector', "generator", "NommeVideo.py", "NommeVideo2.py"]
     execexiftran = os.path.join("bin", "exiftran")
-    os.chmod(execexiftran, 509) #509 = 775 in octal
+    os.chmod(execexiftran, 509)  # 509 = 775 in octal
     shutil.copy('imagizer.conf-unix', 'imagizer.conf')
 else:
     raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
@@ -84,7 +87,7 @@ for i in ConfFile:
     if os.path.isfile(i):configured = True
 
 
-### trick to make an auto-install under windows :
+# ## trick to make an auto-install under windows :
 if len(sys.argv) == 1:
     sys.argv.append("install")
 
@@ -106,12 +109,12 @@ binary_modules.append({"name":'_tree',
 
 
 print execexiftran
-setup(name='Imagizer',
+setup(name='imagizer',
     version=version,
     author='Jérôme Kieffer',
     author_email='Jerome.Kieffer@terre-adelie.org',
     url='http://wiki.terre-adelie.org/Imagizer',
-    description="Imagizer is a manager for a repository of photos",
+    description="manager for a repository of images with complete metadata management",
     license='GNU GPL v2',
     scripts=scripts,
     data_files=[
@@ -140,7 +143,7 @@ setup(name='Imagizer',
 os.remove("imagizer.conf")
 
 if not configured:
-    sys.path.insert(0,"imagizer-src")
+    sys.path.insert(0, "imagizer-src")
     from config import config
     config.load(ConfFile)
     while True:

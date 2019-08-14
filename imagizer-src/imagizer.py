@@ -27,7 +27,7 @@ It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "27/08/2016"
+__date__ = "21/07/2019"
 __license__ = "GPL"
 import os
 import shutil
@@ -39,11 +39,13 @@ import threading
 logger = logging.getLogger("imagizer.imagizer")
 
 try:
-    import Image  # IGNORE:F0401
-except ImportError as error:
-    logger.error("""Selector needs PIL: Python Imaging Library
-    PIL is available from http://www.pythonware.com/products/pil/""")
-    raise err
+    from PIL import Image
+except ImportError:
+    try:
+        import Image
+    except ImportError:
+        logger.error("""Selector needs PIL: Python Imaging Library or pillow""")
+        raise error
 
 
 from .encoding import unicode2ascii
