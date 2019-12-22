@@ -1,86 +1,152 @@
 #!/usr/bin/env python
 # coding: utf8
+from __builtin__ import isinstance
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20120530"
+__date__ = "20191222"
 __license__ = "GPL"
 
-import pyexiv2
-try:
-    version_info = pyexiv2.version_info
-except AttributeError:
-    version_info = (0, 1, 0)
+import os
+import gi
+gi.require_version('GExiv2', '0.10')
+from gi.repository import GExiv2
 
-if version_info >= (0, 2, 0):
-    class Exif(pyexiv2.ImageMetadata):
-        def interpretedExifValue(self, key):
-            """
-            Get the interpreted value of an EXIF tag as presented by the exiv2 tool.
-            @param key: the EXIF key of the requested metadata tag
-            """
-            return self[key].human_value
+class Exif:
 
-        def dumpThumbnailToFile(self, thumbFile):
-                self.exif_thumbnail.write_to_file(thumbFile)
-
-else:
-    class Exif(pyexiv2.Image):
+    def __init__(self, filename):
+        """Constructor of the class
+        
+        :param filename: name of the image file
         """
-        Wrapper for pyexiv2 v0.1.x
+        self.filename = filename
+        if not os.path.exists(filename):
+            raise RuntimeError("File does not exist: %s"%filename)
+        self._gi = None
+        self.read()
+
+    def read(self):
+        """Read the metadata embedded in the associated image. 
+        It is necessary to call this method once before attempting 
+        to access the metadata (an exception will be raised if 
+        trying to access metadata before calling this method).
+        
+        Should do nothing: left for compatibility
         """
-        def __init__(self, filename):
-            """    :
-            Constructor of the class Exif for handling Exif metadata
-            Wrapper for pyexiv2 v0.1.x
+        if self._gi is None:
+            self._gi = GExiv2.Metadata(self.filename)
 
-            @param filename: path to an image file
-            @type filename: string
-            """
-            self.filename = filename
-            pyexiv2.Image.__init__(self, filename)
-        def read(self):
-            return self.readMetadata()
-        def write(self):
-            return self.writeMetadata()
-        def getComment(self):
-            return pyexiv2.Image.getComment(self)
-        def setComment(self, value):
-            return pyexiv2.Image.setComment(self, value)
-        comment = property(getComment, setComment)
-        def getExifKeys(self):
-            return self.exifKeys()
-        exif_keys = property(getExifKeys)
-        def copy(self, other, exif=True, iptc=True, xmp=True, comment=True):
-            """
-            Copy the metadata to another image.
-            The metadata in the destination is overridden. In particular, if the
-            destination contains e.g. EXIF data and the source doesn't, it will be
-            erased in the destination, unless explicitly omitted.
+    def write(preserve_timestamps=False):
+        """Write the metadata back to the image.
+        
+        :param bool preserve_timestamps: Whether to preserve the file’s 
+                original timestamps (access time and modification time)
+        """
+        if preserve_timestamps:
+            stats = os.stat(self.filename)
+        self._gi.save_file(self.filename)
+        if preserve_timestamps:
+            os.utime(self.filename, (stats.atime, stats.mtime))
 
-            @ param other: the destination metadata to copy to (it must have been
-              :meth:`.read` beforehand)
-            @type other: :class:`pyexiv2.metadata.ImageMetadata`
-            @param exif: whether to copy the EXIF metadata
-            @type exif: boolean
-            @param iptc: whether to copy the IPTC metadata
-            @type iptc: boolean
-            @param xmp: whether to copy the XMP metadata
-            @type xmp: boolean
-            @param comment: whether to copy the image comment
-            @type comment: boolean
+    @property
+    def comment(self):
+        return self._gi.get_comment()
 
-            """
-            if comment:
-                other.setComment(self.getComment())
-            if exif:
-                for metadata in [ 'Exif.Image.Make', 'Exif.Image.Model', 'Exif.Photo.DateTimeOriginal',
-                         'Exif.Photo.ExposureTime', 'Exif.Photo.FNumber', 'Exif.Photo.ExposureBiasValue',
-                         'Exif.Photo.Flash', 'Exif.Photo.FocalLength', 'Exif.Photo.ISOSpeedRatings',
-                         "Exif.Image.Orientation", "Exif.Photo.UserComment"
-                         ]:
-                    if metadata in self.getExifKeys():
-                        try:
-                            other[metadata] = self[metadata]
-                        except:
-                            print("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.filename, self.exif[metadata]))
+    @comment.setter
+    def comment(self, comment):
+        return self._gi.set_comment(comment)
+
+    @property
+    def exif_keys(self):
+        "return list of exif keys"
+        if self._gi.has_exif():
+            return self._gi.get_exif_tags()
+        else:
+            return []
+    
+    def dumpThumbnailToFile(self, thumb_filename):
+        "Save the best resolution thumbnail to another file ... probably deprecated"
+        props = self._gi.get_preview_properties()
+        best = None
+        best_size = 0
+        for p in props:
+            ext = p.get_extension()
+            size = p.get_size()
+            if "jp" in ext.lower():
+                if size > best_size:
+                    best_size = size
+                    best = p
+        if best is None: # DOn't check for jpeg
+            for p in props:
+                size = p.get_size()
+                if size > best_size:
+                    best_size = size
+                    best = p
+        if best is None:
+            raise RuntimeError("No Thumbnail found in file %s"%self.filename)
+        preview = self._gi.get_preview_image(best)
+        ext = preview.get_extension()
+        if thumb_filename.lower().endswith(ext.lower()):
+            thumb_filename = thumb_filename[:-len(ext)]
+        preview.write_file(thumb_filename)
+
+    def interpretedExifValue(self, key):
+        "This is legacy"
+        return self._gi.get_tag_interpreted_string(key)
+
+    def copy(self, other):
+        """
+        Copy the metadata to another image.
+        The metadata in the destination is overridden. In particular, if the
+        destination contains e.g. EXIF data and the source doesn't, it will be
+        erased in the destination, unless explicitly omitted.
+
+        :param other: the destination metadata to copy to 
+        """
+        self._gi.save_file(other.filename)
+        other.read()
+
+    def write(self):
+        "save the metadata to the file"
+        self._gi.save_file(self.filename)
+
+    def __iter__(self):
+        "Implements the dictionnary interface"
+        for x in self.exif_keys:
+            yield x
+
+    def __contains__(self, key):
+        "Implements the dictionnary interface ... TODO"
+        return self._gi.has_tag(key)
+
+    def items(self):
+        "Implements the dictionnary interface"
+        for tag in self.exif_keys:
+            yield (tag, self._gi.get_tag_interpreted_string(tag))
+
+    keys = __iter__
+
+    def values(self):
+        "Implements the dictionnary interface"
+        for tag in self.exif_keys:
+            yield self._gi.get_tag_interpreted_string(tag)
+
+    def __setitem__(self, key, value):
+        if isinstance(value, str):
+            self._gi.set_tag_string(key, value)
+        elif isinstance(value, int):
+            self._gi.set_tag_long(key, value)
+        else:
+            try:
+                self._gi.set_tag_multiple(key, value)
+            except Exception as e:
+                logger.error(e)
+
+    def __getitem__(self, key):
+        return self._gi.get_tag_interpreted_string(key)
+
+    def __repr__(self):
+        return str(dict((key, self._gi.get_tag_interpreted_string(key)) for key in self.exif_keys))
+
+    def __len__(self):
+        return len(self.exif_keys)
 
