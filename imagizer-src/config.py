@@ -29,10 +29,16 @@ Technically it is a Borg (design Pattern) so every instance of Config has exactl
 """
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20190727"
+__date__ = "20191222"
 __license__ = "GPL"
 
-import os, locale, logging, ConfigParser
+import os, locale, logging
+
+try: 
+    from configparser import  ConfigParser, NoSectionError
+except ImportError:
+    #Python2 version ... 
+    from ConfigParser import ConfigParser, NoSectionError
 installdir = os.path.dirname(os.path.abspath(__file__))
 logger = logging.getLogger("imagizer.config")
 try:
@@ -160,7 +166,7 @@ class Config(object):
         @type filenames: list of strings or unicode
         """
         logging.debug("Config.load")
-        configparser = ConfigParser.ConfigParser()
+        configparser = ConfigParser()
         files = []
         for i in filenames:
             if os.path.isfile(i):files.append(i)
@@ -255,7 +261,7 @@ class Config(object):
                 elif key == "BatchUsesPipe".lower():            self.BatchUsesPipe = configparser.getboolean("Video", "BatchUsesPipe")
 
                 else: logging.warning(str("Config.load: unknown key %s" % key))
-        except ConfigParser.NoSectionError:
+        except NoSectionError:
             logging.warning("No Video section in configuration file !")
         if resource:
             max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0] - 15

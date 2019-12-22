@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/07/2019"
+__date__ = "22/12/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -935,7 +935,6 @@ class RawImage:
                     exifJpeg[metadata] = self.exif[metadata]
                 except:
                     logger.error("Unable to copying metadata %s in file %s, value: %s" % (metadata, self.strRawFile, self.exif[metadata]))
-            # self.exif.copyMetadataTo(self.strJepgFile)
 
             exifJpeg.write()
 

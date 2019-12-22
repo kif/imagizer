@@ -84,8 +84,8 @@ scripts = [os.path.join(SCRIPTS, scriptname) for scriptname in os.listdir(os.pat
 
 configured = False
 for i in ConfFile:
-    if os.path.isfile(i):configured = True
-
+    if os.path.isfile(i):
+        configured = True
 
 # ## trick to make an auto-install under windows :
 if len(sys.argv) == 1:
@@ -106,9 +106,7 @@ binary_modules.append({"name":'_tree',
                        "extra_compile_args": [],
                        "extra_link_args":[]})
 
-
-
-print execexiftran
+print("execexiftran", execexiftran)
 setup(name='imagizer',
     version=version,
     author='Jérôme Kieffer',
@@ -147,23 +145,23 @@ if not configured:
     from config import config
     config.load(ConfFile)
     while True:
-        print "Enter le chemin du repertoire racine du serveur WEB :"
+        print("Enter le chemin du repertoire racine du serveur WEB :")
         config.WebRepository = raw_input("[%s] :" % config.WebRepository)
         if(os.path.isdir(config.WebRepository)):
             break
-        print "No Such Directory"
+        print("No Such Directory")
     config.Locale, config.Coding = locale.getdefaultlocale()
     LANG = os.getenv("LANG")
     if LANG:
         config.Locale = LANG
     config.printConfig()
     config.save("/etc/imagizer.conf")
-    print "Configuration finished .... Saving it\nYou can modify it in /etc/imagizer.conf"
+    print("Configuration finished .... Saving it\nYou can modify it in /etc/imagizer.conf")
 
     try:
-        import pyexiv2
+        import exif
     except ImportError:
-        raise ImportError("You should install pyexiv2 by: #aptitude install python-pyexiv2")
+        raise ImportError("You should install exiv2 by: #aptitude install python-gi libgexiv2-2")
 
     try:
         import Image, ImageStat, ImageChops, ImageFile

@@ -1,3 +1,5 @@
+# cython: profile=False
+# cython: language_level=3
 # -*- coding: utf-8 -*-
 #
 #    Project: Image downsampler
@@ -25,7 +27,7 @@
 """Implementation of a separable 2D convolution"""
 __authors__ = ["Jerome Kieffer"]
 __contact__ = "Jerome.kieffer@terre-adelie.org"
-__date__ = "06/12/2014"
+__date__ = "22/12/2019"
 __status__ = "stable"
 __license__ = "GPLv3+"
 import cython

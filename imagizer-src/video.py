@@ -308,8 +308,8 @@ class Video(object):
             myParser = createParser(filename, realname)
             try:
                 hachoirMetadata = extractMetadata(myParser)
-            except HachoirError, err:
-                print "Metadata extraction error: %s" % unicode(err)
+            except HachoirError as err:
+                logger.error("Metadata extraction error: %s", err)
                 hachoirMetadata = None
         if hachoirMetadata:
             bDoMplayer = False
@@ -474,7 +474,7 @@ class Video(object):
             print("Former title: %s" % self.title)
         self.title = raw_input("Title (INAM): ").decode(config.Coding).strip()
         if self.keywords:
-            print "Former keywords: " + "\t".join(self.keywords.split(";"))
+            print("Former keywords: " + "\t".join(self.keywords.split(";")))
         self.keywords = raw_input("Keywords (IKEY): ").decode(config.Coding).split()
         self.toDisk()
 
@@ -584,7 +584,7 @@ class Video(object):
         sub.wait()
         listThumb = [os.path.join(tempdir, i) for i in os.listdir(tempdir)]
         if len(listThumb) != 1:
-            print ("Unexpected result ... have a look at %s ther should only be one jpeg image" % tempdir)
+            print("Unexpected result ... have a look at %s ther should only be one jpeg image" % tempdir)
         self.thumbName = OP.splitext(self.fullPath)[0] + "--Thumb.jpg"
         img = Image.open(listThumb[0])
         img.thumbnail((size, size))
@@ -915,19 +915,20 @@ class AllVideos(object):
 
 def test(inFile):
     allV = AllVideos(inFile)
-    print "test 1"
+    print("test 1")
     for i in range(len(allV)):
-        print allV.next()
+        print(allV.next())
 
-    print "test 2"
+    print("test 2")
     for i in range(len(allV)):
-        print allV[i]
+        print(allV[i])
 
-    print "test 3"
+    print("test 3")
     for i in allV:
-        print i
+        print(i)
 
-    print "test 4"
+    print("test 4")
+
 
 if __name__ == "__main__":
     DEBUG = False

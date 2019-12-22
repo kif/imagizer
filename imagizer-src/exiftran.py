@@ -45,15 +45,15 @@ __date__ = "20111016"
 __license__ = "GPL"
 
 import os, threading, logging
-
+logger = logging.getLogger(__name__)
 installdir = os.path.dirname(__file__)
 
 try:
     import libexiftran
     exiftranExe = None
-    print "Successfully imported libexiftran"
+    logger.info("Successfully imported libexiftran")
 except:
-    print "Failed to import libexiftran: use old fashion"
+    logger.warning("Failed to import libexiftran: use old fashion")
     if os.name == 'nt': #sys.platform == 'win32':
         exiftranExe = os.path.join(installdir, "exiftran.exe ")
     elif os.name == 'posix':

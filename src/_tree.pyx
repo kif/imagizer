@@ -1,3 +1,6 @@
+# cython: profile=False
+# cython: language_level=3
+
 import logging
 logger = logging.getLogger(__name__)
 import cython
