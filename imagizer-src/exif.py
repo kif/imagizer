@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf8
-from __builtin__ import isinstance
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
 __date__ = "20191222"
@@ -22,6 +21,7 @@ class Exif:
         if not os.path.exists(filename):
             raise RuntimeError("File does not exist: %s"%filename)
         self._gi = None
+        self._tags = [] # cached tags
         self.read()
 
     def read(self):
@@ -46,6 +46,22 @@ class Exif:
         self._gi.save_file(self.filename)
         if preserve_timestamps:
             os.utime(self.filename, (stats.atime, stats.mtime))
+    
+    @property
+    def previews(self):
+        "return a list of preview"
+        props = self._gi.get_preview_properties()
+        return [self._gi.get_preview_image(i) for i in props]
+
+    @property
+    def size(self):
+        "Calculate the size of the image"
+        return (self._gi.get_pixel_width(), self._gi.get_pixel_height())
+
+    @property
+    def orientation(self):
+        "return the orientation value for the image"
+        return self._gi.get_orientation().real
 
     @property
     def comment(self):
@@ -58,13 +74,16 @@ class Exif:
     @property
     def exif_keys(self):
         "return list of exif keys"
+        res = []
         if self._gi.has_exif():
-            return self._gi.get_exif_tags()
-        else:
-            return []
+            res = self._gi.get_exif_tags()
+        if self._gi.has_xmp():
+            res += self._gi.get_xmp_tags()
+        if self._gi.has_iptc():
+            res += self._gi.get_iptc_tags()
+        return res
     
-    def dumpThumbnailToFile(self, thumb_filename):
-        "Save the best resolution thumbnail to another file ... probably deprecated"
+    def get_largest_preview(self):
         props = self._gi.get_preview_properties()
         best = None
         best_size = 0
@@ -83,7 +102,11 @@ class Exif:
                     best = p
         if best is None:
             raise RuntimeError("No Thumbnail found in file %s"%self.filename)
-        preview = self._gi.get_preview_image(best)
+        return self._gi.get_preview_image(best)
+
+    def dumpThumbnailToFile(self, thumb_filename):
+        "Save the best resolution thumbnail to another file ... probably deprecated"
+        preview = self.get_largest_preview()
         ext = preview.get_extension()
         if thumb_filename.lower().endswith(ext.lower()):
             thumb_filename = thumb_filename[:-len(ext)]
@@ -108,6 +131,19 @@ class Exif:
     def write(self):
         "save the metadata to the file"
         self._gi.save_file(self.filename)
+
+    def get(self, key, default=None, type=None):
+        if key in self.exif_keys:
+            if type is str:
+                return self._gi.get_tag_string(key)
+            elif type is int:
+                return self._gi.get_tag_long(key)
+            elif type is str:
+                return self._gi.get_tag_string(key)
+            else:
+                return self._gi.get_tag_raw(key)
+        else:
+            return default
 
     def __iter__(self):
         "Implements the dictionnary interface"

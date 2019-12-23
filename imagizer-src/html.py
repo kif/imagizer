@@ -28,7 +28,7 @@ __license__ = "GPL"
 __contact__ = "imagizer@terre-adelie.org"
 
 import os
-from encoding import unicode2html
+from .encoding import unicode2html
 
 
 class Html(object):

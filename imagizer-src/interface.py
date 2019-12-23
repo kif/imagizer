@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/07/2019"
+__date__ = "23/12/2019"
 __license__ = "GPL"
 
 import gc
@@ -37,6 +37,9 @@ import logging
 import random
 import subprocess
 import threading
+import sys
+if sys.version_info[0] > 2:
+    unicode = str
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copy_selected, process_selected, to_jpeg
 from . import qt
@@ -417,7 +420,7 @@ class Interface(qt.QObject):
         self.gui.photo.setPixmap(pixbuf)
         del pixbuf
         gc.collect()
-        metadata = self.image.readExif()
+        metadata = self.image.read_exif()
         if "rate" in metadata:
             self.gui.rate.setValue(int(float(metadata["rate"])))
             metadata.pop("rate")
@@ -450,7 +453,7 @@ class Interface(qt.QObject):
                 else:
                     for fn in self.AllJpegs[current_idx + 1:]:
                         image = Photo(fn)
-                        data = image.readExif()
+                        data = image.read_exif()
                         if "rate" in data:
                             rate = int(float(data["rate"]))
                             if rate >= self.min_mark:
@@ -466,7 +469,7 @@ class Interface(qt.QObject):
                 else:
                     for fn in self.AllJpegs[current_idx - 1::-1]:
                         image = Photo(fn)
-                        data = image.readExif()
+                        data = image.read_exif()
                         if "rate" in data:
                             rate = int(float(data["rate"]))
                             if rate >= self.min_mark:
@@ -603,7 +606,7 @@ class Interface(qt.QObject):
                         random.shuffle(self.rnd_lst)
                     new_idx = self.rnd_lst.pop()
                     image = Photo(self.AllJpegs[new_idx])
-                    data = image.readExif()
+                    data = image.read_exif()
                     if "rate" in data:
                         rate = int(float(data["rate"]))
                         if rate >= self.min_mark:

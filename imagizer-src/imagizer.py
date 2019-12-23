@@ -127,7 +127,7 @@ class RangeTout(ThreadedProcessing):
         for idx, fname in enumerate(files_to_process):
             self.updated_signal.emit(fname, idx, number_of_files)
             photo = Photo(fname, dontCache=True)
-            data = photo.readExif()
+            data = photo.read_exif()
             try:
                 datei, heurei = data["time"].split()
                 date = re.sub(":", "-", unicode2ascii(datei))

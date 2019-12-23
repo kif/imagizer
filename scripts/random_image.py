@@ -66,7 +66,7 @@ def create_link(linkName, lst=None):
             random.shuffle(lst)
         image_file = lst.pop()
         photo = Photo(image_file, dontCache=True)
-        data = photo.readExif()
+        data = photo.read_exif()
         rate = data.get("rate", 0)
         # 0 for x=5, 0.5 for x=3 and 0.99 for x=0
         treshold = -0.01733333 * rate * rate + -0.11133333 * rate + 0.99
