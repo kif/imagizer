@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "25/12/2019"
+__date__ = "26/12/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -427,10 +427,11 @@ class Photo(object):
             self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             for key, name in self.EXIF_KEYS.items():
                 try:
-                    value = self.exif[key]
-                    self.metadata[name] = value.strip()
+                    value = self.exif[key] or u""
                 except (IndexError, KeyError):
-                    self.metadata[name] = u""
+                    value = u""
+                finally:
+                    self.metadata[name] = value.strip()
         return self.metadata.copy()
 
     def load_pixbuf(self):
