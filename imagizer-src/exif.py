@@ -113,7 +113,7 @@ class Exif:
         preview.write_file(thumb_filename)
 
     def interpretedExifValue(self, key):
-        "This is legacy"
+        "This is legacy, use the [] to access interpreted value"
         return self._gi.get_tag_interpreted_string(key)
 
     def copy(self, other):
@@ -124,9 +124,12 @@ class Exif:
         erased in the destination, unless explicitly omitted.
 
         :param other: the destination metadata to copy to 
+        :return: other (updated)
         """
         self._gi.save_file(other.filename)
+        other._tags = None
         other.read()
+        return other
 
     def write(self):
         "save the metadata to the file"
@@ -138,8 +141,8 @@ class Exif:
                 return self._gi.get_tag_string(key)
             elif type is int:
                 return self._gi.get_tag_long(key)
-            elif type is str:
-                return self._gi.get_tag_string(key)
+            elif type is bytes:
+                return self._gi.get_tag_raw(key).get_data()
             else:
                 return self._gi.get_tag_raw(key)
         else:
@@ -181,7 +184,7 @@ class Exif:
         return self._gi.get_tag_interpreted_string(key)
 
     def __repr__(self):
-        return str(dict((key, self._gi.get_tag_interpreted_string(key)) for key in self.exif_keys))
+        return "\n".join(("%50s:\t%s" % (key, self._gi.get_tag_interpreted_string(key)) for key in self.exif_keys))
 
     def __len__(self):
         return len(self.exif_keys)

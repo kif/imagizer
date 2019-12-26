@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "23/12/2019"
+__date__ = "25/12/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -248,17 +248,15 @@ class Photo(object):
             else:
                 pil = Image.open(BytesIO(prev.get_data()), mode="r")
                 pil.save(dest)
-
             rescaled = self.__class__(dest, dontCache=True)
-            self.exif.copy(rescaled.exif)
-
-            rescaled.exif.write()
-            rescaled.autorotate()
-
-
+            rescaled_exif = rescaled.exif
+            self.exif.copy(rescaled_exif)
+            rescaled._exif = None
+            rescaled.read_exif()
+            rescaled.orientation = self.orientation
+            rescaled.autorotate(check=False)
             metadata = self.read_exif()
             rescaled.set_title(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
-
             return rescaled
 
 
@@ -285,7 +283,7 @@ class Photo(object):
                 try:
                     self.exif.dumpThumbnailToFile(strThumbFile[:-4])
                     extract = True
-                except (OSError, IOError):
+                except (OSError, IOError, RuntimeError):
                     extract = False
 
                 if extract and op.isfile(strThumbFile):
@@ -342,7 +340,7 @@ class Photo(object):
 
         if angle == 90:
             if image_cache is not None:
-                pyexiftran.rotate90(self.fn)
+                pyexiftran.rotate90(self.fn, config.Coding)
                 trans = qt.QTransform().rotate(90)
                 newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 90 of %s" % newPixbuffer)
@@ -351,12 +349,12 @@ class Photo(object):
                 if self.metadata.get("resolution") is not None:
                     self.metadata["resolution"] = "%i x % i" % (y, x)
             else:
-                pyexiftran.rotate90(self.fn)
+                pyexiftran.rotate90(self.fn, config.Coding)
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 270:
             if image_cache is not None:
-                pyexiftran.rotate270(self.fn)
+                pyexiftran.rotate270(self.fn, config.Coding)
                 trans = qt.QTransform().rotate(270)
                 newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 270 of %s" % newPixbuffer)
@@ -365,17 +363,17 @@ class Photo(object):
                 if self.metadata is not None:
                     self.metadata["resolution"] = "%i x % i" % (y, x)
             else:
-                pyexiftran.rotate270(self.fn)
+                pyexiftran.rotate270(self.fn, config.Coding)
                 self.pixelsX = None
                 self.pixelsY = None
         elif angle == 180:
             if image_cache is not None:
-                pyexiftran.rotate180(self.fn)
+                pyexiftran.rotate180(self.fn, config.Coding)
                 trans = qt.QTransform().rotate(180)
                 newPixbuffer = self.scaledPixbuffer.transformed(trans, mode=qt.transformations[config.Interpolation])
                 logger.debug("rotate 270 of %s" % newPixbuffer)
             else:
-                pyexiftran.rotate180(self.fn)
+                pyexiftran.rotate180(self.fn, config.Coding)
                 self.pixelsX = None
                 self.pixelsY = None
         else:
@@ -414,29 +412,12 @@ class Photo(object):
         if self.metadata.get("size") is None:
             self.metadata["size"] = "%.2f %s" % smartSize(op.getsize(self.fn))
             if self.is_raw:
-                try:
-                    title = exif["Exif.Photo.UserComment"]
-                    "Directly as unicode"
-                    if "value" in dir(title):
-                        title = title.value
-                except KeyError:
-                    title = u""
-                else:
-                    title = title.strip(u"\x00")
-
+                title = exif["Exif.Photo.UserComment"]
+                title = title.strip(u"\x00")
             else:
-                title = exif.comment
-#                 try:
-#                     title = title.decode(config.Coding)
-#                 except Exception as error:
-#                     logger.error("%s in comment: %s, unable to decode in %s for %s",
-#                                  error, title, config.Coding, self.filename)
-#                     try:
-#                         title = title.decode("latin1")
-#                     except Exception as error2:
-#                         logger.error("%s Failed as well in latin1, resetting" % (error2))
-#                         title = u""
-            self.metadata["title"] = title.strip()
+                title = exif.comment or u""
+            title = title.strip()
+            self.metadata["title"] = title
             if title_cache:
                 title_cache[self.filename] = title
 
@@ -446,8 +427,8 @@ class Photo(object):
             self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             for key, name in self.EXIF_KEYS.items():
                 try:
-                    value = self.exif.interpretedExifValue(key).strip()
-                    self.metadata[name] = value
+                    value = self.exif[key]
+                    self.metadata[name] = value.strip()
                 except (IndexError, KeyError):
                     self.metadata[name] = u""
         return self.metadata.copy()
@@ -466,7 +447,7 @@ class Photo(object):
             dimentions = largest. get_width(), largest.get_height()
             pixbuf = qt.QPixmap(*dimentions)
 
-            if not pixbuf.loadFromData(largest.get_data):
+            if not pixbuf.loadFromData(largest.get_data()):
                 logger.warning("Unable to load raw preview (size: %s): %s" %
                                 (dimensions, self.fn))
             orientation = self.get_orientation(True)
@@ -639,33 +620,28 @@ class Photo(object):
     storeOriginalName = store_original_name
 
     def retrieve_original_name(self):
-        """Retrives the original name of the file into the Exif.Photo.DocumentName tag.
+        """Retrives the original name of the file into the Exif.Photo.UserComment tag.
 
         @return: name of the file before it was processed by selector
-        @rtype: python string
         """
-        exif = self.get_exif()
-        original_name = exif.get("Exif.Photo.UserComment")
-        if original_name is None :
-            logger.error("in ModelRangeTout: reading Exif for %s", self.fn)
-        elif "human_value" in dir(original_name):
-            return original_name.human_value
-        else:
-            return original_name
+        exif = self.exif
+        original_name = exif["Exif.Photo.UserComment"]
+        if original_name is None:
+            logger.error("in retrieve_original_name: reading Exif for %s", self.fn)
+        return original_name
 
-
-    def autorotate(self):
+    def autorotate(self, check=True):
         """does autorotate the image according to the EXIF tag.
         Works only for JPEG images
-
+        :param check: set to False to use the strored 
         """
         if self.is_raw:
             return
         if os.name == 'nt' and self.pil is not None:
             del self.pil
-        orientation = self.get_orientation(True)
+        orientation = self.get_orientation(check)
         if orientation != 1:
-            pyexiftran.autorotate(self.fn)
+            pyexiftran.autorotate(self.fn, config.Coding)
             if orientation > 4:
                 self.pixelsX, self.pixelsY = self.pixelsY, self.pixelsX
                 if self.metadata is not None:
@@ -862,8 +838,8 @@ class RawImage:
             self.exif.read()
         if self.strJepgFile is None:
             self.strJepgFile = unicode2ascii("%s-%s.jpg" % (
-                    self.exif.interpretedExifValue("Exif.Photo.DateTimeOriginal").replace(" ", os.sep).replace(":", "-", 2).replace(":", "h", 1).replace(":", "m", 1),
-                    self.exif.interpretedExifValue("Exif.Image.Model").strip().split(",")[-1].replace("/", "").replace(" ", "_")
+                    self.exif["Exif.Photo.DateTimeOriginal"].replace(" ", os.sep).replace(":", "-", 2).replace(":", "h", 1).replace(":", "m", 1),
+                    self.exif["Exif.Image.Model"].strip().split(",")[-1].replace("/", "").replace(" ", "_")
                     ))
             while op.isfile(op.join(config.DefaultRepository, self.strJepgFile)):
                 number = ""
@@ -918,6 +894,6 @@ class RawImage:
 
         else:  # in config.Extensions, i.e. a JPEG file
             shutil.copy(self.strRawFile, strJpegFullPath)
-            pyexiftran.autorotate(strJpegFullPath)
+            pyexiftran.autorotate(strJpegFullPath, config.Coding)
 
         os.chmod(strJpegFullPath, config.DefaultFileMode)

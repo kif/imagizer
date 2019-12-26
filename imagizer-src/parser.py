@@ -20,9 +20,9 @@
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
 #*****************************************************************************/
-from __future__ import with_statement, division, print_function, absolute_import
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
+from __future__ import with_statement, division, print_function, absolute_import
 
 __authors__ = ["Martin Blais", "Jérôme Kieffer"]
 __contact = "imagizer@terre-adelie.org"
@@ -56,7 +56,7 @@ class AttrFile(object):
                 self._lines = f.read()
         except IOError as error:
             logger.error("Cannot open attributes file %s: %s", self._path, error)
-            self._lines = ''
+            self._lines = b''
 
         self.parse(self._lines)
         self._dirty = False
@@ -86,30 +86,28 @@ class AttrFile(object):
 
             with open(self._path, "wb") as f:
                 for k in self._attrmap.keys():
-                    f.write(k)
-                    f.write(": ")
+                    f.write(k.encode(coding))
+                    f.write(b": ")
                     f.write(self._attrmap[k].encode(coding))
-                    f.write("\n\n")
+                    f.write(b"\n\n")
         except IOError as e:
-            sys.stderr.write("Error: cannot open attributes file %s: %s%s"\
-                             % (self._path, e, os.linesep))
-            self._lines = ''
+            logger.error("Cannot open attributes file %s: %s", self._path, e)
+            self._lines = b''
         try:
             os.chmod(self._path, config.DefaultFileMode)
-        except:
-            logger.warning("Unable to chmod %s" % self._path)
-
+        except Exception as e:
+            logger.warning("Unable to chmod %s: %s", self._path, e)
 
     def parse(self, lines):
         """
         Parse attributes file lines into a map.
         """
         logger.debug("AttrFile.parse")
-        mre1 = re.compile("^([^:\n]+)\s*:", re.M)
-        mre2 = re.compile("^\s*$", re.M)
-
+        mre1 = re.compile(b"^([^:\n]+)\s*:", re.M)
+        mre2 = re.compile(b"^\s*$", re.M)
+        bytes_dict = OrderedDict()
         pos = 0
-        while 1:
+        while True:
             mo1 = mre1.search(lines, pos)
 
             if not mo1:
@@ -120,26 +118,35 @@ class AttrFile(object):
             if mo2:
                 txt = lines[ mo1.end() : mo2.start() ].strip()
             else:
-                txt = lines[ mo1.end() : ] .strip()
+                txt = lines[ mo1.end() : ].strip()
 
-            self._attrmap[ mo1.group(1) ] = txt
+            bytes_dict[ mo1.group(1) ] = txt
 
             if mo2:
                 pos = mo2.end()
             else:
                 break
-        try:
-            coding = self._attrmap["coding"]
-        except:
-            coding = config.Coding
-
-        for key in self._attrmap.keys():
-            txt = self._attrmap[ key ]
+        if b"coding" in bytes_dict:
             try:
-                self._attrmap[key] = txt.decode(coding)
-            except:
-                self._attrmap[key] = txt
+                coding = bytes_dict[b"coding"].decode()
+            except Exception as err:
+                logger.error("Unable to decode '%s' %s: %s", bytes_dict[b"coding"], type(err), err)
+                coding = None
+            if coding is None:
+                coding = config.Coding
 
+        for key, txt in bytes_dict.items():
+            try:
+                ukey = key.decode(coding)
+            except Exception as err:
+                logger.error("Unable to decode key '%s' %s: %s", key, type(err), err)
+                continue
+            try:
+                utxt = txt.decode(coding)
+            except Exception as err:
+                logger.error("Unable to decode value '%s' %s: %s", txt, type(err), err)
+                utxt = txt
+            self._attrmap[ukey] = utxt
 
     def get(self, field, default=None):
         """

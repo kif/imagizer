@@ -1339,12 +1339,11 @@ def exif(filename):
 ]
     data = {}
     image_exif = Exif(filename)
-    image_exif.read()
     comment = image_exif.comment
 
     for i in clef:
         try:
-            data[i] = image_exif.interpretedExifValue(i)
+            data[i] = image_exif[i]
         except:
             data[i] = ""
     return data, comment
