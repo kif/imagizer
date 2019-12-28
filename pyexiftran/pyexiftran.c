@@ -816,7 +816,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "pyexiftran.pyx",
+  "pyexiftran/pyexiftran.pyx",
 };
 /* NoFastGil.proto */
 #define __Pyx_PyGILState_Ensure PyGILState_Ensure
@@ -1026,9 +1026,6 @@ static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
 /* Import.proto */
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
 
-/* ImportFrom.proto */
-static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name);
-
 /* PyErrFetchRestore.proto */
 #if CYTHON_FAST_THREAD_STATE
 #define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
@@ -1150,14 +1147,14 @@ static const char __pyx_k_rotate180_s[] = "rotate180 %s";
 static const char __pyx_k_rotate270_s[] = "rotate270 %s";
 static const char __pyx_k_Jrme_Kieffer[] = "J\303\251r\303\264me Kieffer";
 static const char __pyx_k_autorotate_s[] = "autorotate %s";
-static const char __pyx_k_pyexiftran_pyx[] = "pyexiftran.pyx";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_imagizer_terre_adelie_org[] = "imagizer@terre-adelie.org";
-static const char __pyx_k_scripts_extract_image_labels[] = "scripts.extract_image_labels";
+static const char __pyx_k_pyexiftran_pyexiftran_pyx[] = "pyexiftran/pyexiftran.pyx";
 static const char __pyx_k_rotate90_returned_code_s_on_s[] = "rotate90 returned code %s on %s";
 static const char __pyx_k_rotate180_returned_code_s_on_s[] = "rotate180 returned code %s on %s";
 static const char __pyx_k_rotate270_returned_code_s_on_s[] = "rotate270 returned code %s on %s";
 static const char __pyx_k_autorotate_returned_code_s_on_s[] = "autorotate returned code %s on %s";
+static const char __pyx_k_pyexiftran_py_a_wrapper_for_the[] = "\npyexiftran.py a wrapper for the original exiftran provided by Gerd Korn\nhttp://linux.bytesex.org/fbida/\n\nNeeds libexif-dev, libjepg-dev and python-dev to be installed on the system.\n";
 static PyObject *__pyx_kp_u_24_12_2019;
 static PyObject *__pyx_n_u_GPL;
 static PyObject *__pyx_kp_u_Jrme_Kieffer;
@@ -1184,7 +1181,7 @@ static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_pyexiftran;
 static PyObject *__pyx_n_u_pyexiftran;
-static PyObject *__pyx_kp_s_pyexiftran_pyx;
+static PyObject *__pyx_kp_s_pyexiftran_pyexiftran_pyx;
 static PyObject *__pyx_n_s_rc;
 static PyObject *__pyx_n_s_rotate180;
 static PyObject *__pyx_kp_u_rotate180_returned_code_s_on_s;
@@ -1195,7 +1192,6 @@ static PyObject *__pyx_kp_u_rotate270_s;
 static PyObject *__pyx_n_s_rotate90;
 static PyObject *__pyx_kp_u_rotate90_returned_code_s_on_s;
 static PyObject *__pyx_kp_u_rotate90_s;
-static PyObject *__pyx_n_s_scripts_extract_image_labels;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_warning;
 static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_filename, PyObject *__pyx_v_encoding); /* proto */
@@ -1213,7 +1209,7 @@ static PyObject *__pyx_codeobj__7;
 static PyObject *__pyx_codeobj__9;
 /* Late includes */
 
-/* "pyexiftran.pyx":45
+/* "pyexiftran.pyx":44
  * logger = logging.getLogger("pyexiftran")
  * 
  * cdef inline bytes _encode(filename, encoding):             # <<<<<<<<<<<<<<
@@ -1236,7 +1232,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
   PyObject *__pyx_t_9 = NULL;
   __Pyx_RefNannySetupContext("_encode", 0);
 
-  /* "pyexiftran.pyx":47
+  /* "pyexiftran.pyx":46
  * cdef inline bytes _encode(filename, encoding):
  *     cdef bytes bytestring
  *     if isinstance(filename, bytes):             # <<<<<<<<<<<<<<
@@ -1247,20 +1243,20 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pyexiftran.pyx":48
+    /* "pyexiftran.pyx":47
  *     cdef bytes bytestring
  *     if isinstance(filename, bytes):
  *         bytestring = filename             # <<<<<<<<<<<<<<
  *     else:
  *         try:
  */
-    if (!(likely(PyBytes_CheckExact(__pyx_v_filename))||((__pyx_v_filename) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_filename)->tp_name), 0))) __PYX_ERR(0, 48, __pyx_L1_error)
+    if (!(likely(PyBytes_CheckExact(__pyx_v_filename))||((__pyx_v_filename) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_v_filename)->tp_name), 0))) __PYX_ERR(0, 47, __pyx_L1_error)
     __pyx_t_3 = __pyx_v_filename;
     __Pyx_INCREF(__pyx_t_3);
     __pyx_v_bytestring = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "pyexiftran.pyx":47
+    /* "pyexiftran.pyx":46
  * cdef inline bytes _encode(filename, encoding):
  *     cdef bytes bytestring
  *     if isinstance(filename, bytes):             # <<<<<<<<<<<<<<
@@ -1270,7 +1266,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
     goto __pyx_L3;
   }
 
-  /* "pyexiftran.pyx":50
+  /* "pyexiftran.pyx":49
  *         bytestring = filename
  *     else:
  *         try:             # <<<<<<<<<<<<<<
@@ -1287,14 +1283,14 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
       __Pyx_XGOTREF(__pyx_t_6);
       /*try:*/ {
 
-        /* "pyexiftran.pyx":51
+        /* "pyexiftran.pyx":50
  *     else:
  *         try:
  *             bytestring = filename.encode(encoding)             # <<<<<<<<<<<<<<
  *         except:
  *             bytestring = bytes(filename)
  */
-        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_filename, __pyx_n_s_encode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 51, __pyx_L4_error)
+        __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_filename, __pyx_n_s_encode); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 50, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_7);
         __pyx_t_8 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
@@ -1308,14 +1304,14 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
         }
         __pyx_t_3 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_7, __pyx_t_8, __pyx_v_encoding) : __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_v_encoding);
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L4_error)
+        if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L4_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (!(likely(PyBytes_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 51, __pyx_L4_error)
+        if (!(likely(PyBytes_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 50, __pyx_L4_error)
         __pyx_v_bytestring = ((PyObject*)__pyx_t_3);
         __pyx_t_3 = 0;
 
-        /* "pyexiftran.pyx":50
+        /* "pyexiftran.pyx":49
  *         bytestring = filename
  *     else:
  *         try:             # <<<<<<<<<<<<<<
@@ -1332,7 +1328,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-      /* "pyexiftran.pyx":52
+      /* "pyexiftran.pyx":51
  *         try:
  *             bytestring = filename.encode(encoding)
  *         except:             # <<<<<<<<<<<<<<
@@ -1341,19 +1337,19 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
  */
       /*except:*/ {
         __Pyx_AddTraceback("pyexiftran._encode", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_3, &__pyx_t_7, &__pyx_t_8) < 0) __PYX_ERR(0, 52, __pyx_L6_except_error)
+        if (__Pyx_GetException(&__pyx_t_3, &__pyx_t_7, &__pyx_t_8) < 0) __PYX_ERR(0, 51, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GOTREF(__pyx_t_8);
 
-        /* "pyexiftran.pyx":53
+        /* "pyexiftran.pyx":52
  *             bytestring = filename.encode(encoding)
  *         except:
  *             bytestring = bytes(filename)             # <<<<<<<<<<<<<<
  *     return bytestring
  * 
  */
-        __pyx_t_9 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyBytes_Type)), __pyx_v_filename); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 53, __pyx_L6_except_error)
+        __pyx_t_9 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyBytes_Type)), __pyx_v_filename); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 52, __pyx_L6_except_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_XDECREF_SET(__pyx_v_bytestring, ((PyObject*)__pyx_t_9));
         __pyx_t_9 = 0;
@@ -1364,7 +1360,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
       }
       __pyx_L6_except_error:;
 
-      /* "pyexiftran.pyx":50
+      /* "pyexiftran.pyx":49
  *         bytestring = filename
  *     else:
  *         try:             # <<<<<<<<<<<<<<
@@ -1386,7 +1382,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
   }
   __pyx_L3:;
 
-  /* "pyexiftran.pyx":54
+  /* "pyexiftran.pyx":53
  *         except:
  *             bytestring = bytes(filename)
  *     return bytestring             # <<<<<<<<<<<<<<
@@ -1398,7 +1394,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
   __pyx_r = __pyx_v_bytestring;
   goto __pyx_L0;
 
-  /* "pyexiftran.pyx":45
+  /* "pyexiftran.pyx":44
  * logger = logging.getLogger("pyexiftran")
  * 
  * cdef inline bytes _encode(filename, encoding):             # <<<<<<<<<<<<<<
@@ -1421,7 +1417,7 @@ static CYTHON_INLINE PyObject *__pyx_f_10pyexiftran__encode(PyObject *__pyx_v_fi
   return __pyx_r;
 }
 
-/* "pyexiftran.pyx":57
+/* "pyexiftran.pyx":56
  * 
  * 
  * def rotate90(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -1467,7 +1463,7 @@ static PyObject *__pyx_pw_10pyexiftran_1rotate90(PyObject *__pyx_self, PyObject 
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rotate90") < 0)) __PYX_ERR(0, 57, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rotate90") < 0)) __PYX_ERR(0, 56, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1483,7 +1479,7 @@ static PyObject *__pyx_pw_10pyexiftran_1rotate90(PyObject *__pyx_self, PyObject 
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("rotate90", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 57, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("rotate90", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 56, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pyexiftran.rotate90", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1512,19 +1508,19 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("rotate90", 0);
 
-  /* "pyexiftran.pyx":66
+  /* "pyexiftran.pyx":65
  *     cdef:
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)             # <<<<<<<<<<<<<<
  *         char* cfname = bytestring
  *     logger.debug("rotate90 %s", filename)
  */
-  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_bytestring = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":67
+  /* "pyexiftran.pyx":66
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring             # <<<<<<<<<<<<<<
@@ -1533,21 +1529,21 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
  */
   if (unlikely(__pyx_v_bytestring == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 67, __pyx_L1_error)
+    __PYX_ERR(0, 66, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 67, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
   __pyx_v_cfname = __pyx_t_2;
 
-  /* "pyexiftran.pyx":68
+  /* "pyexiftran.pyx":67
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring
  *     logger.debug("rotate90 %s", filename)             # <<<<<<<<<<<<<<
  *     with nogil:
  *         rc = pylib(9, cfname)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -1565,7 +1561,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_rotate90_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -1573,13 +1569,13 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_rotate90_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 68, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 67, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     if (__pyx_t_3) {
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -1590,14 +1586,14 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
     __Pyx_INCREF(__pyx_v_filename);
     __Pyx_GIVEREF(__pyx_v_filename);
     PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_filename);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":69
+  /* "pyexiftran.pyx":68
  *         char* cfname = bytestring
  *     logger.debug("rotate90 %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -1612,7 +1608,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
       #endif
       /*try:*/ {
 
-        /* "pyexiftran.pyx":70
+        /* "pyexiftran.pyx":69
  *     logger.debug("rotate90 %s", filename)
  *     with nogil:
  *         rc = pylib(9, cfname)             # <<<<<<<<<<<<<<
@@ -1622,7 +1618,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
         __pyx_v_rc = pylib(9, __pyx_v_cfname);
       }
 
-      /* "pyexiftran.pyx":69
+      /* "pyexiftran.pyx":68
  *         char* cfname = bytestring
  *     logger.debug("rotate90 %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -1641,7 +1637,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
       }
   }
 
-  /* "pyexiftran.pyx":71
+  /* "pyexiftran.pyx":70
  *     with nogil:
  *         rc = pylib(9, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -1651,19 +1647,19 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
   __pyx_t_7 = (__pyx_v_rc != 0);
   if (__pyx_t_7) {
 
-    /* "pyexiftran.pyx":72
+    /* "pyexiftran.pyx":71
  *         rc = pylib(9, cfname)
  *     if rc:
  *         logger.warning("rotate90 returned code %s on %s", rc, filename)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_3 = NULL;
     __pyx_t_5 = 0;
@@ -1680,7 +1676,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_rotate90_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -1689,14 +1685,14 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_rotate90_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 72, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 71, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_3) {
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -1710,14 +1706,14 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
       __Pyx_GIVEREF(__pyx_v_filename);
       PyTuple_SET_ITEM(__pyx_t_8, 2+__pyx_t_5, __pyx_v_filename);
       __pyx_t_4 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 72, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "pyexiftran.pyx":71
+    /* "pyexiftran.pyx":70
  *     with nogil:
  *         rc = pylib(9, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -1726,7 +1722,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
  */
   }
 
-  /* "pyexiftran.pyx":57
+  /* "pyexiftran.pyx":56
  * 
  * 
  * def rotate90(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -1752,7 +1748,7 @@ static PyObject *__pyx_pf_10pyexiftran_rotate90(CYTHON_UNUSED PyObject *__pyx_se
   return __pyx_r;
 }
 
-/* "pyexiftran.pyx":75
+/* "pyexiftran.pyx":74
  * 
  * 
  * def rotate180(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -1798,7 +1794,7 @@ static PyObject *__pyx_pw_10pyexiftran_3rotate180(PyObject *__pyx_self, PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rotate180") < 0)) __PYX_ERR(0, 75, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rotate180") < 0)) __PYX_ERR(0, 74, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1814,7 +1810,7 @@ static PyObject *__pyx_pw_10pyexiftran_3rotate180(PyObject *__pyx_self, PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("rotate180", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 75, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("rotate180", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 74, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pyexiftran.rotate180", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1843,19 +1839,19 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("rotate180", 0);
 
-  /* "pyexiftran.pyx":84
+  /* "pyexiftran.pyx":83
  *     cdef:
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)             # <<<<<<<<<<<<<<
  *         char* cfname = bytestring
  *     logger.debug("rotate180 %s", filename)
  */
-  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_bytestring = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":85
+  /* "pyexiftran.pyx":84
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring             # <<<<<<<<<<<<<<
@@ -1864,21 +1860,21 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
  */
   if (unlikely(__pyx_v_bytestring == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 85, __pyx_L1_error)
+    __PYX_ERR(0, 84, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 85, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L1_error)
   __pyx_v_cfname = __pyx_t_2;
 
-  /* "pyexiftran.pyx":86
+  /* "pyexiftran.pyx":85
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring
  *     logger.debug("rotate180 %s", filename)             # <<<<<<<<<<<<<<
  *     with nogil:
  *         rc = pylib(1, cfname)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -1896,7 +1892,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_rotate180_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -1904,13 +1900,13 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_rotate180_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     if (__pyx_t_3) {
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -1921,14 +1917,14 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
     __Pyx_INCREF(__pyx_v_filename);
     __Pyx_GIVEREF(__pyx_v_filename);
     PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_filename);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":87
+  /* "pyexiftran.pyx":86
  *         char* cfname = bytestring
  *     logger.debug("rotate180 %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -1943,7 +1939,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
       #endif
       /*try:*/ {
 
-        /* "pyexiftran.pyx":88
+        /* "pyexiftran.pyx":87
  *     logger.debug("rotate180 %s", filename)
  *     with nogil:
  *         rc = pylib(1, cfname)             # <<<<<<<<<<<<<<
@@ -1953,7 +1949,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
         __pyx_v_rc = pylib(1, __pyx_v_cfname);
       }
 
-      /* "pyexiftran.pyx":87
+      /* "pyexiftran.pyx":86
  *         char* cfname = bytestring
  *     logger.debug("rotate180 %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -1972,7 +1968,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
       }
   }
 
-  /* "pyexiftran.pyx":89
+  /* "pyexiftran.pyx":88
  *     with nogil:
  *         rc = pylib(1, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -1982,19 +1978,19 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_7 = (__pyx_v_rc != 0);
   if (__pyx_t_7) {
 
-    /* "pyexiftran.pyx":90
+    /* "pyexiftran.pyx":89
  *         rc = pylib(1, cfname)
  *     if rc:
  *         logger.warning("rotate180 returned code %s on %s", rc, filename)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 90, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 90, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 89, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 90, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_3 = NULL;
     __pyx_t_5 = 0;
@@ -2011,7 +2007,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_rotate180_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -2020,14 +2016,14 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_rotate180_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 90, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 89, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_3) {
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -2041,14 +2037,14 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
       __Pyx_GIVEREF(__pyx_v_filename);
       PyTuple_SET_ITEM(__pyx_t_8, 2+__pyx_t_5, __pyx_v_filename);
       __pyx_t_4 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "pyexiftran.pyx":89
+    /* "pyexiftran.pyx":88
  *     with nogil:
  *         rc = pylib(1, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -2057,7 +2053,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
  */
   }
 
-  /* "pyexiftran.pyx":75
+  /* "pyexiftran.pyx":74
  * 
  * 
  * def rotate180(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -2083,7 +2079,7 @@ static PyObject *__pyx_pf_10pyexiftran_2rotate180(CYTHON_UNUSED PyObject *__pyx_
   return __pyx_r;
 }
 
-/* "pyexiftran.pyx":93
+/* "pyexiftran.pyx":92
  * 
  * 
  * def rotate270(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -2129,7 +2125,7 @@ static PyObject *__pyx_pw_10pyexiftran_5rotate270(PyObject *__pyx_self, PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rotate270") < 0)) __PYX_ERR(0, 93, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rotate270") < 0)) __PYX_ERR(0, 92, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2145,7 +2141,7 @@ static PyObject *__pyx_pw_10pyexiftran_5rotate270(PyObject *__pyx_self, PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("rotate270", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 93, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("rotate270", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 92, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pyexiftran.rotate270", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2174,19 +2170,19 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("rotate270", 0);
 
-  /* "pyexiftran.pyx":102
+  /* "pyexiftran.pyx":101
  *     cdef:
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)             # <<<<<<<<<<<<<<
  *         char* cfname = bytestring
  *     logger.debug("rotate270 %s", filename)
  */
-  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 101, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_bytestring = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":103
+  /* "pyexiftran.pyx":102
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring             # <<<<<<<<<<<<<<
@@ -2195,21 +2191,21 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
  */
   if (unlikely(__pyx_v_bytestring == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 103, __pyx_L1_error)
+    __PYX_ERR(0, 102, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
   __pyx_v_cfname = __pyx_t_2;
 
-  /* "pyexiftran.pyx":104
+  /* "pyexiftran.pyx":103
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring
  *     logger.debug("rotate270 %s", filename)             # <<<<<<<<<<<<<<
  *     with nogil:
  *         rc = pylib(2, cfname)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -2227,7 +2223,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_rotate270_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -2235,13 +2231,13 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_rotate270_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 103, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     if (__pyx_t_3) {
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -2252,14 +2248,14 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
     __Pyx_INCREF(__pyx_v_filename);
     __Pyx_GIVEREF(__pyx_v_filename);
     PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_filename);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":105
+  /* "pyexiftran.pyx":104
  *         char* cfname = bytestring
  *     logger.debug("rotate270 %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -2274,7 +2270,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
       #endif
       /*try:*/ {
 
-        /* "pyexiftran.pyx":106
+        /* "pyexiftran.pyx":105
  *     logger.debug("rotate270 %s", filename)
  *     with nogil:
  *         rc = pylib(2, cfname)             # <<<<<<<<<<<<<<
@@ -2284,7 +2280,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
         __pyx_v_rc = pylib(2, __pyx_v_cfname);
       }
 
-      /* "pyexiftran.pyx":105
+      /* "pyexiftran.pyx":104
  *         char* cfname = bytestring
  *     logger.debug("rotate270 %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -2303,7 +2299,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
       }
   }
 
-  /* "pyexiftran.pyx":107
+  /* "pyexiftran.pyx":106
  *     with nogil:
  *         rc = pylib(2, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -2313,19 +2309,19 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_7 = (__pyx_v_rc != 0);
   if (__pyx_t_7) {
 
-    /* "pyexiftran.pyx":108
+    /* "pyexiftran.pyx":107
  *         rc = pylib(2, cfname)
  *     if rc:
  *         logger.warning("rotate270 returned code %s on %s", rc, filename)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 107, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_3 = NULL;
     __pyx_t_5 = 0;
@@ -2342,7 +2338,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_rotate270_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -2351,14 +2347,14 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_rotate270_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_3) {
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -2372,14 +2368,14 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
       __Pyx_GIVEREF(__pyx_v_filename);
       PyTuple_SET_ITEM(__pyx_t_8, 2+__pyx_t_5, __pyx_v_filename);
       __pyx_t_4 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "pyexiftran.pyx":107
+    /* "pyexiftran.pyx":106
  *     with nogil:
  *         rc = pylib(2, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -2388,7 +2384,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
  */
   }
 
-  /* "pyexiftran.pyx":93
+  /* "pyexiftran.pyx":92
  * 
  * 
  * def rotate270(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -2414,7 +2410,7 @@ static PyObject *__pyx_pf_10pyexiftran_4rotate270(CYTHON_UNUSED PyObject *__pyx_
   return __pyx_r;
 }
 
-/* "pyexiftran.pyx":111
+/* "pyexiftran.pyx":110
  * 
  * 
  * def autorotate(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -2460,7 +2456,7 @@ static PyObject *__pyx_pw_10pyexiftran_7autorotate(PyObject *__pyx_self, PyObjec
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "autorotate") < 0)) __PYX_ERR(0, 111, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "autorotate") < 0)) __PYX_ERR(0, 110, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2476,7 +2472,7 @@ static PyObject *__pyx_pw_10pyexiftran_7autorotate(PyObject *__pyx_self, PyObjec
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("autorotate", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 111, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("autorotate", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 110, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pyexiftran.autorotate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2505,19 +2501,19 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("autorotate", 0);
 
-  /* "pyexiftran.pyx":120
+  /* "pyexiftran.pyx":119
  *     cdef:
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)             # <<<<<<<<<<<<<<
  *         char* cfname = bytestring
  *     logger.debug("autorotate %s", filename)
  */
-  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_10pyexiftran__encode(__pyx_v_filename, __pyx_v_encoding); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_bytestring = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":121
+  /* "pyexiftran.pyx":120
  *         int rc
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring             # <<<<<<<<<<<<<<
@@ -2526,21 +2522,21 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
  */
   if (unlikely(__pyx_v_bytestring == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 121, __pyx_L1_error)
+    __PYX_ERR(0, 120, __pyx_L1_error)
   }
-  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsWritableString(__pyx_v_bytestring); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 120, __pyx_L1_error)
   __pyx_v_cfname = __pyx_t_2;
 
-  /* "pyexiftran.pyx":122
+  /* "pyexiftran.pyx":121
  *         bytes bytestring = _encode(filename, encoding)
  *         char* cfname = bytestring
  *     logger.debug("autorotate %s", filename)             # <<<<<<<<<<<<<<
  *     with nogil:
  *         rc = pylib(0, cfname)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_logger); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_debug); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -2558,7 +2554,7 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_autorotate_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -2566,13 +2562,13 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_kp_u_autorotate_s, __pyx_v_filename};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 122, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     if (__pyx_t_3) {
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -2583,14 +2579,14 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
     __Pyx_INCREF(__pyx_v_filename);
     __Pyx_GIVEREF(__pyx_v_filename);
     PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_filename);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":123
+  /* "pyexiftran.pyx":122
  *         char* cfname = bytestring
  *     logger.debug("autorotate %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -2605,7 +2601,7 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
       #endif
       /*try:*/ {
 
-        /* "pyexiftran.pyx":124
+        /* "pyexiftran.pyx":123
  *     logger.debug("autorotate %s", filename)
  *     with nogil:
  *         rc = pylib(0, cfname)             # <<<<<<<<<<<<<<
@@ -2615,7 +2611,7 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
         __pyx_v_rc = pylib(0, __pyx_v_cfname);
       }
 
-      /* "pyexiftran.pyx":123
+      /* "pyexiftran.pyx":122
  *         char* cfname = bytestring
  *     logger.debug("autorotate %s", filename)
  *     with nogil:             # <<<<<<<<<<<<<<
@@ -2634,7 +2630,7 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
       }
   }
 
-  /* "pyexiftran.pyx":125
+  /* "pyexiftran.pyx":124
  *     with nogil:
  *         rc = pylib(0, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -2643,17 +2639,17 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
   __pyx_t_7 = (__pyx_v_rc != 0);
   if (__pyx_t_7) {
 
-    /* "pyexiftran.pyx":126
+    /* "pyexiftran.pyx":125
  *         rc = pylib(0, cfname)
  *     if rc:
  *         logger.warning("autorotate returned code %s on %s", rc, filename)             # <<<<<<<<<<<<<<
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_logger); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 125, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_warning); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 125, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_rc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 125, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_3 = NULL;
     __pyx_t_5 = 0;
@@ -2670,7 +2666,7 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_autorotate_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -2679,14 +2675,14 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[4] = {__pyx_t_3, __pyx_kp_u_autorotate_returned_code_s_on_s, __pyx_t_4, __pyx_v_filename};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_5, 3+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 126, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(3+__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 125, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_3) {
         __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -2700,14 +2696,14 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
       __Pyx_GIVEREF(__pyx_v_filename);
       PyTuple_SET_ITEM(__pyx_t_8, 2+__pyx_t_5, __pyx_v_filename);
       __pyx_t_4 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "pyexiftran.pyx":125
+    /* "pyexiftran.pyx":124
  *     with nogil:
  *         rc = pylib(0, cfname)
  *     if rc:             # <<<<<<<<<<<<<<
@@ -2715,7 +2711,7 @@ static PyObject *__pyx_pf_10pyexiftran_6autorotate(CYTHON_UNUSED PyObject *__pyx
  */
   }
 
-  /* "pyexiftran.pyx":111
+  /* "pyexiftran.pyx":110
  * 
  * 
  * def autorotate(filename, encoding=None):             # <<<<<<<<<<<<<<
@@ -2759,7 +2755,7 @@ static PyModuleDef_Slot __pyx_moduledef_slots[] = {
 static struct PyModuleDef __pyx_moduledef = {
     PyModuleDef_HEAD_INIT,
     "pyexiftran",
-    0, /* m_doc */
+    __pyx_k_pyexiftran_py_a_wrapper_for_the, /* m_doc */
   #if CYTHON_PEP489_MULTI_PHASE_INIT
     0, /* m_size */
   #else
@@ -2813,7 +2809,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_pyexiftran, __pyx_k_pyexiftran, sizeof(__pyx_k_pyexiftran), 0, 0, 1, 1},
   {&__pyx_n_u_pyexiftran, __pyx_k_pyexiftran, sizeof(__pyx_k_pyexiftran), 0, 1, 0, 1},
-  {&__pyx_kp_s_pyexiftran_pyx, __pyx_k_pyexiftran_pyx, sizeof(__pyx_k_pyexiftran_pyx), 0, 0, 1, 0},
+  {&__pyx_kp_s_pyexiftran_pyexiftran_pyx, __pyx_k_pyexiftran_pyexiftran_pyx, sizeof(__pyx_k_pyexiftran_pyexiftran_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_rc, __pyx_k_rc, sizeof(__pyx_k_rc), 0, 0, 1, 1},
   {&__pyx_n_s_rotate180, __pyx_k_rotate180, sizeof(__pyx_k_rotate180), 0, 0, 1, 1},
   {&__pyx_kp_u_rotate180_returned_code_s_on_s, __pyx_k_rotate180_returned_code_s_on_s, sizeof(__pyx_k_rotate180_returned_code_s_on_s), 0, 1, 0, 0},
@@ -2824,7 +2820,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_rotate90, __pyx_k_rotate90, sizeof(__pyx_k_rotate90), 0, 0, 1, 1},
   {&__pyx_kp_u_rotate90_returned_code_s_on_s, __pyx_k_rotate90_returned_code_s_on_s, sizeof(__pyx_k_rotate90_returned_code_s_on_s), 0, 1, 0, 0},
   {&__pyx_kp_u_rotate90_s, __pyx_k_rotate90_s, sizeof(__pyx_k_rotate90_s), 0, 1, 0, 0},
-  {&__pyx_n_s_scripts_extract_image_labels, __pyx_k_scripts_extract_image_labels, sizeof(__pyx_k_scripts_extract_image_labels), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_warning, __pyx_k_warning, sizeof(__pyx_k_warning), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
@@ -2837,64 +2832,64 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "pyexiftran.pyx":43
+  /* "pyexiftran.pyx":42
  *     int pylib(int a, char *name) nogil
  * 
  * logger = logging.getLogger("pyexiftran")             # <<<<<<<<<<<<<<
  * 
  * cdef inline bytes _encode(filename, encoding):
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_n_u_pyexiftran); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_n_u_pyexiftran); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "pyexiftran.pyx":57
+  /* "pyexiftran.pyx":56
  * 
  * 
  * def rotate90(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Rotate the given image file by 90 degrees clockwise
  */
-  __pyx_tuple__2 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyx, __pyx_n_s_rotate90, 57, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyexiftran_pyx, __pyx_n_s_rotate90, 56, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 56, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":75
+  /* "pyexiftran.pyx":74
  * 
  * 
  * def rotate180(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Rotate the given image file by 180 degrees
  */
-  __pyx_tuple__4 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 74, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyx, __pyx_n_s_rotate180, 75, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyexiftran_pyx, __pyx_n_s_rotate180, 74, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 74, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":93
+  /* "pyexiftran.pyx":92
  * 
  * 
  * def rotate270(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Rotate the given file by 90 degrees counter-clockwise (270deg clockwise)
  */
-  __pyx_tuple__6 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 92, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
-  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyx, __pyx_n_s_rotate270, 93, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyexiftran_pyx, __pyx_n_s_rotate270, 92, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 92, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":111
+  /* "pyexiftran.pyx":110
  * 
  * 
  * def autorotate(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Auto rotate the given image file
  */
-  __pyx_tuple__8 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(5, __pyx_n_s_filename, __pyx_n_s_encoding, __pyx_n_s_rc, __pyx_n_s_bytestring, __pyx_n_s_cfname); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 110, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyx, __pyx_n_s_autorotate, 111, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pyexiftran_pyexiftran_pyx, __pyx_n_s_autorotate, 110, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 110, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -3125,7 +3120,7 @@ if (!__Pyx_RefNanny) {
   Py_INCREF(__pyx_m);
   #else
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4("pyexiftran", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4("pyexiftran", __pyx_methods, __pyx_k_pyexiftran_py_a_wrapper_for_the, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
@@ -3172,150 +3167,129 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "pyexiftran.pyx":24
- * #*
- * #*****************************************************************************[inserted by cython to avoid comment closer]/
- * from scripts.extract_image_labels import filename             # <<<<<<<<<<<<<<
- * 
- * #
- */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 24, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(__pyx_n_s_filename);
-  __Pyx_GIVEREF(__pyx_n_s_filename);
-  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_filename);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_scripts_extract_image_labels, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 24, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_filename); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 24, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_filename, __pyx_t_1) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "pyexiftran.pyx":33
+  /* "pyexiftran.pyx":32
  * Needs libexif-dev, libjepg-dev and python-dev to be installed on the system.
  * """
  * __author__ = "Jrme Kieffer"             # <<<<<<<<<<<<<<
  * __contact__ = "imagizer@terre-adelie.org"
  * __date__ = "24/12/2019"
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_author, __pyx_kp_u_Jrme_Kieffer) < 0) __PYX_ERR(0, 33, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_author, __pyx_kp_u_Jrme_Kieffer) < 0) __PYX_ERR(0, 32, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":34
+  /* "pyexiftran.pyx":33
  * """
  * __author__ = "Jrme Kieffer"
  * __contact__ = "imagizer@terre-adelie.org"             # <<<<<<<<<<<<<<
  * __date__ = "24/12/2019"
  * __license__ = "GPL"
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_contact, __pyx_kp_u_imagizer_terre_adelie_org) < 0) __PYX_ERR(0, 34, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_contact, __pyx_kp_u_imagizer_terre_adelie_org) < 0) __PYX_ERR(0, 33, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":35
+  /* "pyexiftran.pyx":34
  * __author__ = "Jrme Kieffer"
  * __contact__ = "imagizer@terre-adelie.org"
  * __date__ = "24/12/2019"             # <<<<<<<<<<<<<<
  * __license__ = "GPL"
  * 
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_date, __pyx_kp_u_24_12_2019) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_date, __pyx_kp_u_24_12_2019) < 0) __PYX_ERR(0, 34, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":36
+  /* "pyexiftran.pyx":35
  * __contact__ = "imagizer@terre-adelie.org"
  * __date__ = "24/12/2019"
  * __license__ = "GPL"             # <<<<<<<<<<<<<<
  * 
  * import logging
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_license, __pyx_n_u_GPL) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_license, __pyx_n_u_GPL) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
 
-  /* "pyexiftran.pyx":38
+  /* "pyexiftran.pyx":37
  * __license__ = "GPL"
  * 
  * import logging             # <<<<<<<<<<<<<<
  * 
  * cdef extern from "exiftran.h":
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_logging, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logging, __pyx_t_2) < 0) __PYX_ERR(0, 38, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_logging, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logging, __pyx_t_1) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":43
+  /* "pyexiftran.pyx":42
  *     int pylib(int a, char *name) nogil
  * 
  * logger = logging.getLogger("pyexiftran")             # <<<<<<<<<<<<<<
  * 
  * cdef inline bytes _encode(filename, encoding):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_logging); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_getLogger); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_logging); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_getLogger); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logger, __pyx_t_2) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_logger, __pyx_t_1) < 0) __PYX_ERR(0, 42, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":57
+  /* "pyexiftran.pyx":56
  * 
  * 
  * def rotate90(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Rotate the given image file by 90 degrees clockwise
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_1rotate90, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_rotate90, __pyx_t_2) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_1rotate90, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_rotate90, __pyx_t_1) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":75
+  /* "pyexiftran.pyx":74
  * 
  * 
  * def rotate180(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Rotate the given image file by 180 degrees
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_3rotate180, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_rotate180, __pyx_t_2) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_3rotate180, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_rotate180, __pyx_t_1) < 0) __PYX_ERR(0, 74, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":93
+  /* "pyexiftran.pyx":92
  * 
  * 
  * def rotate270(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Rotate the given file by 90 degrees counter-clockwise (270deg clockwise)
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_5rotate270, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_rotate270, __pyx_t_2) < 0) __PYX_ERR(0, 93, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_5rotate270, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_rotate270, __pyx_t_1) < 0) __PYX_ERR(0, 92, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pyexiftran.pyx":111
+  /* "pyexiftran.pyx":110
  * 
  * 
  * def autorotate(filename, encoding=None):             # <<<<<<<<<<<<<<
  *     """
  *     Auto rotate the given image file
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_7autorotate, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_autorotate, __pyx_t_2) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_10pyexiftran_7autorotate, NULL, __pyx_n_s_pyexiftran); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 110, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_autorotate, __pyx_t_1) < 0) __PYX_ERR(0, 110, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "pyexiftran.pyx":1
  * # cython: language_level=3             # <<<<<<<<<<<<<<
  * # -*- coding: UTF8 -*-
  * #******************************************************************************\
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /*--- Wrapped vars code ---*/
 
@@ -4009,20 +3983,6 @@ bad:
     Py_XDECREF(empty_list);
     Py_XDECREF(empty_dict);
     return module;
-}
-
-/* ImportFrom */
-static PyObject* __Pyx_ImportFrom(PyObject* module, PyObject* name) {
-    PyObject* value = __Pyx_PyObject_GetAttrStr(module, name);
-    if (unlikely(!value) && PyErr_ExceptionMatches(PyExc_AttributeError)) {
-        PyErr_Format(PyExc_ImportError,
-        #if PY_MAJOR_VERSION < 3
-            "cannot import name %.230s", PyString_AS_STRING(name));
-        #else
-            "cannot import name %S", name);
-        #endif
-    }
-    return value;
 }
 
 /* PyErrFetchRestore */

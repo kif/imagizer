@@ -27,7 +27,7 @@ It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "21/07/2019"
+__date__ = "26/12/2019"
 __license__ = "GPL"
 import os
 import shutil
@@ -175,7 +175,7 @@ class RangeTout(ThreadedProcessing):
                 logger.warning("in ModelRangeTout: unable to chown or chmod  %s", full_path)
             photo = Photo(full_path)
 #            Save the old image name in exif tag
-            photo.storeOriginalName(fname)
+            photo.store_original_name(fname)
 
             if config.AutoRotate:
                 photo.autorotate()

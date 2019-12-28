@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "23/12/2019"
+__date__ = "26/12/2019"
 __license__ = "GPL"
 
 import gc
@@ -826,9 +826,12 @@ class Interface(qt.QObject):
     def empty_selected(self, *args):
         """remove all the files in the "Selected" folder"""
 
-        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
-        for dirs in os.listdir(SelectedDir):
-            curfile = os.path.join(SelectedDir, dirs)
+        sel_dirname = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        if not os.path.isdir(sel_dirname):
+            os.mkdir(sel_dirname)
+            return
+        for dirs in os.listdir(sel_dirname):
+            curfile = os.path.join(sel_dirname, dirs)
             if os.path.isdir(curfile):
                 recursive_delete(curfile)
             else:

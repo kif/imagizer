@@ -32,10 +32,15 @@ class Exif:
         
         Should do nothing: left for compatibility
         """
-        if self._gi is None:
-            self._gi = GExiv2.Metadata(self.filename)
+        self._gi = GExiv2.Metadata(self.filename)
+        # Work around for bug about comment being the camera make by resetting the tag
+        description = self._gi.get_tag_raw("Exif.Image.ImageDescription")
+        camera = self._gi.get_tag_raw("Exif.Image.Make")
+        if camera and description and description.get_data() == camera.get_data():
+            self._gi.set_tag_long("Exif.Image.ImageDescription", 0) and self._gi.clear_tag("Exif.Image.ImageDescription")
+        return self
 
-    def write(preserve_timestamps=False):
+    def write(self, preserve_timestamps=False):
         """Write the metadata back to the image.
         
         :param bool preserve_timestamps: Whether to preserve the file’s 
@@ -45,7 +50,7 @@ class Exif:
             stats = os.stat(self.filename)
         self._gi.save_file(self.filename)
         if preserve_timestamps:
-            os.utime(self.filename, (stats.atime, stats.mtime))
+            os.utime(self.filename, (stats.st_atime, stats.st_mtime))
     
     @property
     def previews(self):
@@ -74,14 +79,16 @@ class Exif:
     @property
     def exif_keys(self):
         "return list of exif keys"
-        res = []
-        if self._gi.has_exif():
-            res = self._gi.get_exif_tags()
-        if self._gi.has_xmp():
-            res += self._gi.get_xmp_tags()
-        if self._gi.has_iptc():
-            res += self._gi.get_iptc_tags()
-        return res
+        if not self._tags:
+            res = []
+            if self._gi.has_exif():
+                res = self._gi.get_exif_tags()
+            if self._gi.has_xmp():
+                res += self._gi.get_xmp_tags()
+            if self._gi.has_iptc():
+                res += self._gi.get_iptc_tags()
+            self._tags = res
+        return self._tags
     
     def get_largest_preview(self):
         props = self._gi.get_preview_properties()
@@ -127,13 +134,9 @@ class Exif:
         :return: other (updated)
         """
         self._gi.save_file(other.filename)
-        other._tags = None
+        other._tags = []
         other.read()
         return other
-
-    def write(self):
-        "save the metadata to the file"
-        self._gi.save_file(self.filename)
 
     def get(self, key, default=None, type=None):
         if key in self.exif_keys:
@@ -147,6 +150,15 @@ class Exif:
                 return self._gi.get_tag_raw(key)
         else:
             return default
+
+    def pop(self, key):
+        "Remove a key and return the value if present"
+        value = None
+        if key in self.exif_keys:
+            value = self._gi.get_tag_raw(key)
+            self._gi.clear_tag(key)
+            self._tags.pop(key)
+        return value
 
     def __iter__(self):
         "Implements the dictionnary interface"

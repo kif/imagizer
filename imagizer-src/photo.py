@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/12/2019"
+__date__ = "28/12/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -238,6 +238,7 @@ class Photo(object):
             shutil.copy(self.fn, dest)
             rescaled = self.__class__(dest, dontCache=True)
         else:
+            metadata = self.read_exif()
             prev = self.exif.get_largest_preview()
             ext = prev.get_extension()
             if ext.lower() == ".jpg":
@@ -248,15 +249,17 @@ class Photo(object):
             else:
                 pil = Image.open(BytesIO(prev.get_data()), mode="r")
                 pil.save(dest)
+            logger.warning(self.exif["Exif.Image.ImageDescription"])
             rescaled = self.__class__(dest, dontCache=True)
             rescaled_exif = rescaled.exif
-            self.exif.copy(rescaled_exif)
+            logger.warning(rescaled.exif["Exif.Image.ImageDescription"])
             rescaled._exif = None
-            rescaled.read_exif()
+            self.exif.copy(rescaled_exif)
             rescaled.orientation = self.orientation
             rescaled.autorotate(check=False)
-            metadata = self.read_exif()
-            rescaled.set_title(metadata.get("title", ""), metadata.get("rate", 0), reset_orientation=True)
+            title, rate = metadata.get("title", ""), metadata.get("rate", 0)
+            rescaled._exif = None
+            rescaled.set_title(title, rate, reset_orientation=True)
             return rescaled
 
 
@@ -582,7 +585,6 @@ class Photo(object):
                 self.exif.comment = title
         if reset_orientation:
             self.exif['Exif.Image.Orientation'] = 1
-
         try:
             self.exif.write()
         except IOError as error:
@@ -610,23 +612,22 @@ class Photo(object):
 
     def store_original_name(self, originalName):
         """
-        Save the original name of the file into the Exif.Photo.UserComment tag.
+        Save the original name of the file into the Exif.Image.DocumentName tag.
         This tag is usually not used, people prefer the JPEG tag for entitling images.
 
         @param  originalName: name of the file before it was processed by selector
         @type   originalName: python string
         """
         self.exif["Exif.Image.DocumentName"] = originalName
-        self.exif.write()
-    storeOriginalName = store_original_name
+        self.exif.write(preserve_timestamps=True)
 
     def retrieve_original_name(self):
-        """Retrives the original name of the file into the Exif.Photo.UserComment tag.
+        """Retrives the original name of the file into the Exif.Photo.DocumentName tag.
 
         @return: name of the file before it was processed by selector
         """
         exif = self.exif
-        original_name = exif["Exif.Photo.UserComment"]
+        original_name = exif["Exif.Image.DocumentName"]
         if original_name is None:
             logger.error("in retrieve_original_name: reading Exif for %s", self.fn)
         return original_name
@@ -693,6 +694,7 @@ class Photo(object):
         exifJpeg = Exif(dst_filename)
         exifJpeg.read()
         self.exif.copy(exifJpeg)
+        # TODO: use settitle !
         exifJpeg.comment = self.exif.comment
         logger.debug("Write metadata to %s", dst_filename)
         exifJpeg.write()
@@ -742,7 +744,7 @@ class Photo(object):
         exifJpeg.read()
         self.exif.copy(exifJpeg)
         logger.debug("Write metadata to %s", dst_filename)
-        exifJpeg.write()
+        exifJpeg.write(preserve_timestamps=True)
         logger.info("The whoole Auto White-Balance took %.3f" % (time.time() - t0))
         res = Photo(outfile)
         res.autorotate()
