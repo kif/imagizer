@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/12/2019"
+__date__ = "31/12/2019"
 __license__ = "GPL"
 
 from math import ceil
@@ -249,10 +249,8 @@ class Photo(object):
             else:
                 pil = Image.open(BytesIO(prev.get_data()), mode="r")
                 pil.save(dest)
-            logger.warning(self.exif["Exif.Image.ImageDescription"])
             rescaled = self.__class__(dest, dontCache=True)
             rescaled_exif = rescaled.exif
-            logger.warning(rescaled.exif["Exif.Image.ImageDescription"])
             rescaled._exif = None
             self.exif.copy(rescaled_exif)
             rescaled.orientation = self.orientation
@@ -453,7 +451,7 @@ class Photo(object):
 
             if not pixbuf.loadFromData(largest.get_data()):
                 logger.warning("Unable to load raw preview (size: %s): %s" %
-                                (dimensions, self.fn))
+                                (dimentions, self.fn))
             orientation = self.get_orientation(True)
             if orientation != 1:
                 matrix = qt.get_matrix(orientation)

@@ -70,11 +70,15 @@ class Exif:
 
     @property
     def comment(self):
-        return self._gi.get_comment()
+        return self._gi.get_comment().rstrip()
 
     @comment.setter
     def comment(self, comment):
-        return self._gi.set_comment(comment)
+        return self._gi.set_comment(comment or " ")
+
+    @comment.deleter
+    def comment(self):
+        return self._gi.clear_comment()
 
     @property
     def exif_keys(self):
