@@ -32,7 +32,11 @@ class Exif:
         
         Should do nothing: left for compatibility
         """
-        self._gi = GExiv2.Metadata(self.filename)
+        try:
+            self._gi = GExiv2.Metadata(self.filename)
+        except Exception as err:
+            logger.error("Unable to parse metadata for file %s", self.filename)
+            raise err
         # Work around for bug about comment being the camera make by resetting the tag
         description = self._gi.get_tag_raw("Exif.Image.ImageDescription")
         camera = self._gi.get_tag_raw("Exif.Image.Make")
@@ -70,7 +74,7 @@ class Exif:
 
     @property
     def comment(self):
-        return self._gi.get_comment().rstrip()
+        return (self._gi.get_comment() or u"").rstrip()
 
     @comment.setter
     def comment(self, comment):
