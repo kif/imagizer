@@ -2,10 +2,12 @@
 # coding: utf8
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20191222"
+__date__ = "12/07/2020"
 __license__ = "GPL"
 
 import os
+import logging
+logger = logging.getLogger(__name__)
 import gi
 gi.require_version('GExiv2', '0.10')
 from gi.repository import GExiv2

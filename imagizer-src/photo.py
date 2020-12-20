@@ -671,7 +671,7 @@ class Photo(object):
         dimX, dimY = self.pil.size
 
         ImageFile.MAXBLOCK = dimX * dimY
-        img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("float32")
+        img_array = numpy.frombuffer(self.pil.tobytes(), dtype="uint8").astype("float32")
         img_array.shape = (dimY, dimX, 3)
         red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
         # nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2

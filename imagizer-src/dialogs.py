@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "12/07/2020"
 __license__ = "GPL"
 
 import os
@@ -38,7 +38,7 @@ import logging
 import time
 import sys
 import subprocess
-logger = logging.getLogger("imagizer.dialogs")
+logger = logging.getLogger(__name__)
 from .config import config
 from . import qt
 from .parser import AttrFile
