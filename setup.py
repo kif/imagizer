@@ -146,7 +146,7 @@ if not configured:
     config.load(ConfFile)
     while True:
         print("Enter le chemin du repertoire racine du serveur WEB :")
-        config.WebRepository = raw_input("[%s] :" % config.WebRepository)
+        config.WebRepository = input("[%s] :" % config.WebRepository)
         if(os.path.isdir(config.WebRepository)):
             break
         print("No Such Directory")
