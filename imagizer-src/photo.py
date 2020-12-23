@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "31/12/2019"
+__date__ = "23/12/2020"
 __license__ = "GPL"
 
 from math import ceil
@@ -188,7 +188,7 @@ class Photo(object):
     def exif(self):
         if self._exif is None:
             self._exif = Exif(self.fn)
-            self._pixelsX, self._pixelsY = self._exif.size
+            self._pixelsX, self._pixelsY = self._exif.dimensions
             if self.is_raw and self.get_orientation(True) > 4:
                 self._pixelsX, self._pixelsY = self._pixelsY, self._pixelsX
         return self._exif
@@ -240,7 +240,7 @@ class Photo(object):
         else:
             metadata = self.read_exif()
             prev = self.exif.get_largest_preview()
-            ext = prev.get_extension()
+            ext = prev.extension
             if ext.lower() == ".jpg":
                 if dest.endswith(".jpg"):
                     prev.write_file(dest[:-4])
@@ -412,23 +412,19 @@ class Photo(object):
         exif = self.exif
         if self.metadata.get("size") is None:
             self.metadata["size"] = "%.2f %s" % smartSize(op.getsize(self.fn))
-            if self.is_raw:
-                title = exif["Exif.Photo.UserComment"]
-                title = title.strip(u"\x00")
-            else:
-                title = exif.comment or u""
+            title = exif.comment or u""
             title = title.strip()
             self.metadata["title"] = title
             if title_cache:
                 title_cache[self.filename] = title
 
-            rate = exif.get("Exif.Image.Rating", 0, int)
+            rate = exif["Exif.Image.Rating"].value if "Exif.Image.Rating" in exif else 0
             self.metadata["rate"] = rate
 
             self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             for key, name in self.EXIF_KEYS.items():
                 try:
-                    value = self.exif[key] or u""
+                    value = self.exif[key].human_value or u""
                 except (IndexError, KeyError):
                     value = u""
                 finally:
@@ -446,10 +442,10 @@ class Photo(object):
             if self.metadata.get("size") is None:
                 self.read_exif()
             largest = self._exif.get_largest_preview()
-            dimentions = largest. get_width(), largest.get_height()
+            dimentions = largest.dimensions
             pixbuf = qt.QPixmap(*dimentions)
 
-            if not pixbuf.loadFromData(largest.get_data()):
+            if not pixbuf.loadFromData(largest.data):
                 logger.warning("Unable to load raw preview (size: %s): %s" %
                                 (dimentions, self.fn))
             orientation = self.get_orientation(True)
@@ -577,10 +573,10 @@ class Photo(object):
         if title is not None:
             if self.metadata is not None:
                 self.metadata["title"] = title
-            if self.is_raw:
-                self.exif["Exif.Photo.UserComment"] = title
-            else:
-                self.exif.comment = title
+#             if self.is_raw:
+#                 self.exif["Exif.Photo.UserComment"] = title
+#             else:
+            self.exif.comment = title
         if reset_orientation:
             self.exif['Exif.Image.Orientation'] = 1
         try:
@@ -625,9 +621,11 @@ class Photo(object):
         @return: name of the file before it was processed by selector
         """
         exif = self.exif
-        original_name = exif["Exif.Image.DocumentName"]
-        if original_name is None:
-            logger.error("in retrieve_original_name: reading Exif for %s", self.fn)
+        try:
+            original_name = exif["Exif.Image.DocumentName"].human_value
+        except (KeyError, IndexError) as err:
+            original_name = None
+            logger.error("in retrieve_original_name: reading Exif for %s. %s", self.fn, err)
         return original_name
 
     def autorotate(self, check=True):
@@ -671,7 +669,7 @@ class Photo(object):
         dimX, dimY = self.pil.size
 
         ImageFile.MAXBLOCK = dimX * dimY
-        img_array = numpy.fromstring(self.pil.tostring(), dtype="UInt8").astype("float32")
+        img_array = numpy.frombuffer(self.pil.tobytes(), dtype="uint8").astype("float32")
         img_array.shape = (dimY, dimX, 3)
         red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
         # nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2

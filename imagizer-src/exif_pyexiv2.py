@@ -15,7 +15,9 @@ except AttributeError:
     version_info = (0, 1, 0)
 
 if version_info >= (0, 2, 0):
+
     class Exif(pyexiv2.ImageMetadata):
+
         def interpretedExifValue(self, key):
             """
             Get the interpreted value of an EXIF tag as presented by the exiv2 tool.
