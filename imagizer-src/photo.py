@@ -243,16 +243,18 @@ class Photo(object):
             ext = prev.extension
             if ext.lower() == ".jpg":
                 if dest.endswith(".jpg"):
-                    prev.write_file(dest[:-4])
+                    prev.write_to_file(dest[:-4])
                 else:
-                    prev.write_file(dest)
+                    prev.write_to_file(dest)
             else:
-                pil = Image.open(BytesIO(prev.get_data()), mode="r")
+                pil = Image.open(BytesIO(prev.data), mode="r")
                 pil.save(dest)
             rescaled = self.__class__(dest, dontCache=True)
             rescaled_exif = rescaled.exif
             rescaled._exif = None
             self.exif.copy(rescaled_exif)
+            # print(rescaled_exif.get_exposure_data())
+            rescaled_exif.write()
             rescaled.orientation = self.orientation
             rescaled.autorotate(check=False)
             title, rate = metadata.get("title", ""), metadata.get("rate", 0)

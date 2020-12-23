@@ -30,17 +30,18 @@ class Exif(pyexiv2.ImageMetadata):
     def _get_comment(self):
         if "Exif.Photo.UserComment" in self:
             e = self["Exif.Photo.UserComment"]
-            print("raw_value", type(e.raw_value), e.raw_value, "\n",
-                  "value", e.value, e._value, "\n",
-                  "human", e.human_value, "\n",
-                   str(e))
-            ecomment = e.value
+#             print("raw_value", type(e.raw_value), e.raw_value, "\n",
+#                   "value", e.value, e._value, "\n",
+#                   "human", e.human_value, "\n",
+#                    str(e))
+            if e.raw_value == "charset=Ascii binary comment":
+                ecomment = ""
+            else:
+                ecomment = e.value
         else:
             ecomment = ""
         jcomment = pyexiv2.ImageMetadata._get_comment(self)
         comment = jcomment or ecomment
-        if isinstance(comment, bytes):
-            comment = comment.strip(b"\x00").decode("UTF-8")
         return comment
 
     def _set_comment(self, comment):
