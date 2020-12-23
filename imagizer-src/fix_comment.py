@@ -43,7 +43,11 @@ if __name__ == "__main__":
         m.read()
         e = m["Exif.Photo.UserComment"]
         if e.value=="binary comment":
-            old = parse_exif(fn)
+            try:
+                old = parse_exif(fn)
+            except Exception:
+                print("Error parsing file: ", fn)
+                continue
             print("Updated", fn, old)
             m["Exif.Photo.UserComment"] = "charset=Unicode " + old
             m.write(True)
