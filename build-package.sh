@@ -1,6 +1,12 @@
 #!/bin/sh
 rm -rf deb_dist/imagizer-*
 export DEB_BUILD_OPTIONS=nocheck
+
+if [ -d /usr/lib/ccache ];
+then
+   export PATH=/usr/lib/ccache:$PATH
+fi
+
 python3 setup.py --command-packages=stdeb.command bdist_deb
 sudo dpkg -i deb_dist/python3-imagizer_5.*.deb
 #scp deb_dist/python-imagizer_3.*.deb jerome@islay:/home/httpd/html/devel
