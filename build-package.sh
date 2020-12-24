@@ -8,7 +8,7 @@ then
 fi
 
 python3 setup.py --command-packages=stdeb.command bdist_deb
-sudo dpkg -i deb_dist/python3-imagizer_5.*.deb
+sudo dpkg -i deb_dist/python3-imagizer_*.deb
 #scp deb_dist/python-imagizer_3.*.deb jerome@islay:/home/httpd/html/devel
 #scp deb_dist/imagizer_4.*-1.dsc jerome@islay:/home/httpd/html/devel
 #scp deb_dist/imagizer_4.*.orig.tar.gz jerome@islay:/home/httpd/html/devel
