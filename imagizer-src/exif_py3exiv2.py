@@ -34,7 +34,7 @@ class Exif(pyexiv2.ImageMetadata):
 #                   "value", e.value, e._value, "\n",
 #                   "human", e.human_value, "\n",
 #                    str(e))
-            if e.raw_value == "charset=Ascii binary comment":
+            if e.raw_value in ("charset=Ascii binary comment", 'binary comment'):
                 ecomment = ""
             else:
                 ecomment = e.value
