@@ -187,10 +187,18 @@ class Photo(object):
     @property
     def exif(self):
         if self._exif is None:
-            self._exif = Exif(self.fn)
-            self._pixelsX, self._pixelsY = self._exif.dimensions
-            if self.is_raw and self.get_orientation(True) > 4:
-                self._pixelsX, self._pixelsY = self._pixelsY, self._pixelsX
+            try:
+                self._exif = Exif(self.fn)
+            except Exception as e:
+                print(f"Unable to parse metadata for {self.fn}")
+                self._exif = None
+                self._pixelsY = max(1, self.pil.size[1])
+                self._pixelsX = max(1, self.pil.size[0])
+                raise e
+            else:
+                self._pixelsX, self._pixelsY = self._exif.dimensions
+                if self.is_raw and self.get_orientation(True) > 4:
+                    self._pixelsX, self._pixelsY = self._pixelsY, self._pixelsX
         return self._exif
 
     # No property as get_orientation may be used as a function wich check=True to avoid caching the actual value
