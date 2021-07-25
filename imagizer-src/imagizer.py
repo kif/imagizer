@@ -127,7 +127,11 @@ class RangeTout(ThreadedProcessing):
         for idx, fname in enumerate(files_to_process):
             self.updated_signal.emit(fname, idx, number_of_files)
             photo = Photo(fname, dontCache=True)
-            data = photo.read_exif()
+            try:
+                data = photo.read_exif()
+            except Exception as err:
+                print(f"Unable to read metadata for {fname}")
+                continue
             try:
                 datei, heurei = data["time"].split()
                 date = re.sub(":", "-", unicode2ascii(datei))

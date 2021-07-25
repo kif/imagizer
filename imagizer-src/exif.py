@@ -35,7 +35,7 @@ class Exif:
         try:
             self._gi = GExiv2.Metadata(self.filename)
         except Exception as err:
-            logger.error("Unable to parse metadata for file %s", self.filename)
+            print("Unable to parse metadata for file %s"% self.filename)
             raise err
         # Work around for bug about comment being the camera make by resetting the tag
         description = self._gi.get_tag_raw("Exif.Image.ImageDescription")
