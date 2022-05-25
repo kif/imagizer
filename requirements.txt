@@ -1,0 +1,3 @@
+numpy
+pyexiv2
+pillow
