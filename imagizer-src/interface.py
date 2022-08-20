@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "26/12/2019"
+__date__ = "20/08/2022"
 __license__ = "GPL"
 
 import gc
@@ -62,6 +62,7 @@ class Interface(qt.QObject):
     signal_status = Signal(str, int, int)
     signal_newfiles = Signal(list, int)
     signal_processed = Signal(list)
+
     def __init__(self, AllJpegs=None, first=0, selected=None, mode="Default", callback=None):
         qt.QObject.__init__(self)
         self.callback = callback
@@ -276,7 +277,6 @@ class Interface(qt.QObject):
             self.gui.actionHide_toolbar: "toggle_toolbar",
             #    <string>Ctrl+T</string>
 
-
             # Menu Preference
             self.gui.actionMedia_size: "defineMediaSize",
             self.gui.actionAutorotate: "setAutoRotate",
@@ -296,7 +296,6 @@ class Interface(qt.QObject):
             self.gui.actionCD_DVD_suivant: "selectMedia",
             self.gui.actionCD_DVD_precedent:"selectMedia",
 
-
 #        self.gui.indexJ_activate': self.indexJ,
 #        self.gui.searchJ_activate': self.searchJ,
 
@@ -313,7 +312,7 @@ class Interface(qt.QObject):
             self.gui.actionNearest:"set_interpolation",
             self.gui.actionLinear: "set_interpolation",
             self.gui.actionLanczos:"set_interpolation",
-            self.gui.action9:  "set_images_per_page",
+            self.gui.action9: "set_images_per_page",
             self.gui.action12: "set_images_per_page",
             self.gui.action16: "set_images_per_page",
             self.gui.action20: "set_images_per_page",
@@ -373,7 +372,12 @@ class Interface(qt.QObject):
         logger.debug("Interface.update_title")
         new_title = unicode(self.gui.title.text())
         new_rate = int(self.gui.rate.value())
-        metadata = self.image.metadata or {}
+        try:
+            metadata = self.image.metadata
+        except:
+            metadata = {}
+        else:
+            metadata = metadata or {}
         if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
             self.image.set_title(new_title, new_rate)
 
@@ -435,7 +439,6 @@ class Interface(qt.QObject):
 
         self.gui.setWindowTitle("Selector : %s" % self.fn_current)
         self.gui.selection.setChecked(self.fn_current in self.selected)
-
 
     def calc_index(self, what="next", menu="image"):
         """
@@ -510,7 +513,7 @@ class Interface(qt.QObject):
             elif what == "last":
                 lastday = os.path.dirname(self.AllJpegs[-1])
                 last = lastday
-                for img in self.AllJpegs[-1 ::-1]:
+                for img in self.AllJpegs[-1::-1]:
                     jc = os.path.dirname(img)
                     if (last == lastday) and (jc < last):
                         return self.AllJpegs.index(img) + 1
@@ -799,7 +802,6 @@ class Interface(qt.QObject):
             self.selected.save()
             self.destroy()
 
-
     def copy_resize(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
         logger.debug("Interface.copy_resize")
@@ -867,13 +869,11 @@ class Interface(qt.QObject):
             logger.error("Error n° : %i" % out)
         logger.info("Interface.burn: Done")
 
-
     def save_selection(self, *args):
         """Saves all the selection of photos """
         logger.debug("Interface.save_selection")
         self.update_title()
         self.selected.save()
-
 
     def load_selection(self, *args):
         """Load a previously saved  selection of photos """
@@ -943,7 +943,6 @@ class Interface(qt.QObject):
         """Set the Signature/Filigrane flag"""
         logger.debug("Interface.setFiligrane clicked")
 
-
     def set_interpolation(self, act=None, value=None):
         """
         @param act: Qaction
@@ -963,14 +962,13 @@ class Interface(qt.QObject):
         for name in options:
             name.setChecked(name == act)
 
-
     def set_images_per_page(self, act=None, value=None):
         """
         @param act: Qaction
         @param value: numerical value
         """
         logger.debug("Interface.set_images_per_page")
-        options = {9:  self.gui.action9,
+        options = {9: self.gui.action9,
                    12: self.gui.action12,
                    16: self.gui.action16,
                    20: self.gui.action20,
@@ -1076,7 +1074,6 @@ class Interface(qt.QObject):
             self.AllJpegs.sort(key=lambda x:x[:-4])
             self.idx_current = self.AllJpegs.index(first)
             self.show_image()
-
 
     def defineMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
@@ -1304,7 +1301,6 @@ class Interface(qt.QObject):
         else:
             self.show_image(idx)
 
-
     def toggle_toolbar(self, *arg):
         """
         Set toolbar visible/not
@@ -1348,10 +1344,8 @@ class Interface(qt.QObject):
 ################################################################################
 
 
-
-
-
 class SelectDay(object):
+
     def __init__(self, upperIface):
         self.upperIface = upperIface
         self.gui = buildUI("ChangeDir")
