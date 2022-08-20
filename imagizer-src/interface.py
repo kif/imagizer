@@ -847,8 +847,11 @@ class Interface(qt.QObject):
                 errors = errors[:10]
                 errors.append("...")
             errors.insert(0, 'Unable to delete those files/folders:')
-            error_dialog = qt.QErrorMessage()
-            error_dialog.showMessage(os.linesep.join(errors))
+            msg = os.linesep.join(errors)
+            emsg = qt.QErrorMessage(self.gui)
+            emsg.setWindowModality(qt.Qt.WindowModal)
+            emsg.showMessage(msg)
+            logger.error(msg)
         else:
             logger.info("Done")
 
