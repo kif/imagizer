@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "23/12/2020"
+__date__ = "19/08/2022"
 __license__ = "GPL"
 
 from math import ceil
@@ -142,7 +142,12 @@ class Photo(object):
                 self._pil = Image.open(self.fn)
             else:
                 largest =self.exif.get_largest_preview()
-                self._pil = Image.open(BytesIO(largest.get_data()), mode="r")
+                try:
+                    data = largest.get_data()
+                except:
+                    logger.warning("No preview data for %s", self.filename)
+                else:
+                    self._pil = Image.open(BytesIO(data), mode="r")
         return self._pil
 
     @pil.setter
