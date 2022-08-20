@@ -822,7 +822,7 @@ class Interface(qt.QObject):
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
-            logger.error("Error n° : %i" % out)
+            logger.error("Error n° : %i", out)
         logger.info("Interface.to_web: Done")
 
     def empty_selected(self, *args):
@@ -832,13 +832,25 @@ class Interface(qt.QObject):
         if not os.path.isdir(sel_dirname):
             os.mkdir(sel_dirname)
             return
+        errors = []
         for dirs in os.listdir(sel_dirname):
             curfile = os.path.join(sel_dirname, dirs)
             if os.path.isdir(curfile):
-                recursive_delete(curfile)
+                errors += recursive_delete(curfile)
             else:
-                os.remove(curfile)
-        logger.info("Done")
+                try:
+                    os.remove(curfile)
+                except:
+                    errors.append(curfile)
+        if errors:
+            if len(errors) > 10:
+                errors = errors[:10]
+                errors.append("...")
+            errors.insert(0, 'Unable to delete those files/folders:')
+            error_dialog = qt.QErrorMessage()
+            error_dialog.showMessage(os.linesep.join(errors))
+        else:
+            logger.info("Done")
 
     def copy(self, *args):
         """lauch the copy of all selected files"""
