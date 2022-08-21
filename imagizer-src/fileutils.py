@@ -28,7 +28,7 @@ Module containing most classes for handling files
 """
 
 __author__ = "Jérôme Kieffer"
-__date__ = "20/08/2022"
+__date__ = "21/08/2022"
 __licence__ = "GPLv2"
 __contact__ = "imagizer@terre-adelie.org"
 
@@ -123,14 +123,23 @@ def recursive_delete(strDirname):
     """
     errors = []
     for root, dirs, files in os.walk(strDirname, topdown=False):
-        for name in files + dirs:
+        for name in files:
             one = os.path.join(root, name)
             try:
                 os.remove(one)
             except:
                 errors.append(one)
+        for name in dirs:
+            one = os.path.join(root, name)
+            try:
+                os.rmdir(one)
+            except:
+                errors.append(one)
     if not errors:
-        os.rmdir(strDirname)
+        try:
+            os.rmdir(strDirname)
+        except:
+            errors.append(strDirname)
     return errors
 
 
