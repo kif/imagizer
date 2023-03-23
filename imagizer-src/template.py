@@ -792,21 +792,12 @@ class Templates(object):
         """
         errors = 0
         for poc in self.templates[template_name]:
-            fileobj.write(poc.preamble)
+            preamble = poc.preamble.encode() if "b" in fileobj.mode else  poc.preamble
+            fileobj.write(preamble)
             if poc.compiled:
                 try:
                     with custom_redirection(fileobj):
                         eval(poc.compiled, env)
-
-                        # Note: this is a TERRIBLE hack to flush the comma cache of the
-                        # python interpreter's print statement between tags when outfile
-                        # is a string stream.
-                        #
-                        # Note: we don't need this anymore, since we're outputting to a
-                        # real file object.  However, keep this around in case we change
-                        # it back to output to a string.
-                        # if hack:
-                        #    ss.ignoreNextChar()
 
                 except Exception as err:
                     logger.error("Error: %s executing template in the following code:\n%s", err, poc.source)
