@@ -206,7 +206,7 @@ if int(sys.version[0]) != 2:
 
 import os
 import os.path as op
-from functools import lru_cache
+from functools import lru_cache, cmp_to_key
 from os.path import join, dirname, basename, normpath, splitext
 from os.path import isfile, islink, isdir, exists
 
@@ -440,7 +440,7 @@ class Directory(object):
 
         def cmp_img(a, b):
             return cmp(a._base, b._base)
-        self._images.sort(cmp_img)
+        self._images.sort(key=cmp_to_key(cmp_img))
 
         # compute directory files' trackmap (incomplete tracks, just to get
         # the list of keys)
