@@ -1,22 +1,23 @@
-# !/usr/bin/env python
+# !/usr/bin/env python3
 # coding: utf-8
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "24/07/2019"
+__date__ = "23/03/2023"
 __license__ = "GPL"
 
 import os
 import json
 import logging
 import stat
-import urllib
+import urllib.parse
 from collections import namedtuple
 SplitName = namedtuple("SplitName", "dir base repn ext")
 logger = logging.getLogger(__name__)
 
 
 class Entry(object):
+
     def __init__(self, fn, mtime, size, info):
         self.fn = fn
         self.mtime = int(mtime)
@@ -28,6 +29,7 @@ class Entry(object):
 
     def as_tuple(self):
         return (self.fn, self.mtime, self.size, self.info)
+
 
 class FCache:
     "A class which handles the cache for the image size "
@@ -91,10 +93,9 @@ class FCache:
 def urlquote(text):
     """same as urllib.quote but windows compliant"""
     if os.path.sep == "\\":
-        return urllib.quote(text.replace("\\", "/"))
+        return urllib.parse.quote(text.replace("\\", "/"))
     else:
-        return urllib.quote(text)
-
+        return urllib.parse.quote(text)
 
 
 def full_split_path(path):
@@ -138,11 +139,11 @@ def relative_path(dest, curdir):
     if len(sc) == 0 and len(sd) == 0:
         out = ""
     elif len(sc) == 0:
-        out = apply(os.path.join, sd)
+        out = os.path.join(*sd)
     elif len(sd) == 0:
-        out = apply(os.path.join, [os.pardir] * len(sc))
+        out = os.path.join(* ([os.pardir] * len(sc)))
     else:
-        out = apply(os.path.join, [os.pardir] * len(sc) + list(sd))
+        out = os.path.join(*([os.pardir] * len(sc) + list(sd)))
 
     # make sure the path is suitable for html consumption
     return out
@@ -165,7 +166,7 @@ def split_filename(filename, separator):
     fidx = basename.find(separator)
     if fidx != -1:
         # found separator, add as an alt repn
-        base = basename[ :fidx ]
+        base = basename[:fidx ]
         (repn, ext) = os.path.splitext(basename[fidx + len(separator):])
     else:
         # didn't find separator, split using extension
