@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF8 -*-
 #******************************************************************************\
 # * $Source$
@@ -221,7 +221,7 @@ if os.name == 'nt':  # sys.platform == 'win32':
 elif os.name == 'posix':
     ConfFile = ["/etc/imagizer.conf", op.join(os.getenv("HOME"), ".imagizer")]
 else:
-    raise "Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org"
+    raise RuntimeError("Your platform does not seem to be an Unix nor a M$ Windows.\nI am sorry but the exiftran binary is necessary to run selector, and exiftran is probably not available for you plateform. If you have exiftran installed, please contact the developper to correct that bug, kieffer at terre-adelie dot org")
     sys.exit(1)
 
 try:
@@ -318,8 +318,8 @@ class Directory(object):
             self._attrfile = AttrFile(pattr)
             if exists(pattr) and isfile(pattr):
                 self._attrfile.read()
-                if self._attrfile.keys():
-                    logger.info("  read attributes %s", self._attrfile.keys())
+                if list(self._attrfile.keys()):
+                    logger.info("  read attributes %s", list(self._attrfile.keys()))
             if "comment" not in self._attrfile:
                 self._attrfile["comment"] = ""
             longtitle = op.split(self._basename)[1]
@@ -438,7 +438,7 @@ class Directory(object):
         # compute directory files' trackmap (incomplete tracks, just to get
         # the list of keys)
         mmap = computeTrackmap(self._images)
-        self._tracks = mmap.keys().sort()
+        self._tracks = list(mmap.keys()).sort()
 
     def visit(self, functor, *args):
         """Visitor pattern
@@ -480,7 +480,8 @@ class Directory(object):
 def Dir_cmpdates(dir1, dir2):
     """Compare two subdirectories by date."""
 
-    t1, t2 = map(lambda x: os.stat(x._path).st_ctime, [dir1, dir2])
+#     t1, t2 = map(lambda x: os.stat(x._path).st_ctime, [dir1, dir2])
+    t1, t2 = [os.stat(x._path).st_ctime for x in [dir1, dir2]]
     c = cmp(t1, t2)
     if c != 0:
         return c
@@ -539,8 +540,8 @@ class Image(object):
             if exists(pattr) and isfile(pattr):
                 attr = AttrFile(pattr)
                 attr.read()
-                if attr.keys():
-                    logger.info("  read attributes %s", attr.keys())
+                if list(attr.keys()):
+                    logger.info("  read attributes %s", list(attr.keys()))
 
                 self._attr = attr
 
@@ -1032,24 +1033,22 @@ def clean(allimages, alldirs):
         # Delete HTML files
         htmlfn = join(opts.root, img._dir._path, img._pagefn)
         if exists(htmlfn):
-            if opts.verbose:
-                print "Deleting", htmlfn
+            logger.info("Deleting %s", htmlfn)
             try:
                 os.unlink(htmlfn)
-            except:
-                print >> sys.stderr, "Error: deleting", htmlfn
+            except Exception as error:
+                logger.error("Error: deleting %s (%s: %s)", htmlfn, type(error), error)
 
         # Delete thumbnails
         if img._thumbfn:
             thumbfn = join(opts.root, img._thumbfn)
             if exists(thumbfn):
-                if opts.verbose:
-                    print "Deleting", thumbfn
+                logger.info("Deleting %s", thumbfn)
                 try:
                     os.unlink(thumbfn)
                     img._thumbfn = None
-                except:
-                    print >> sys.stderr, "Error: deleting", thumbfn
+                except Exception as error:
+                    logger.error("Error: deleting %s (%s: %s)", thumbfn, type(error), error) 
 
     for d in alldirs:
         files = dircache.listdir(join(opts.root, d._path))
@@ -1060,13 +1059,11 @@ def clean(allimages, alldirs):
             if f in [ dirindex_fn, allindex_fn, allcidx_fn,
                       sortindex_fn, css_fn ] or \
                f.startswith('trackindex-'):
-                if opts.verbose:
-                    print "Deleting", fn
+                logger.info("Deleting %s", fn)
                 try:
                     os.unlink(fn)
-                    pass
-                except:
-                    print >> sys.stderr, "Error: deleting", fn
+                except Exception as error:
+                    logger.error("Error: deleting %s (%s: %s)", fn, type(error), error)
 
             if f == index_fn and islink(fn):
                 os.unlink(fn)
@@ -1159,7 +1156,7 @@ def table(dstdir, images, textfun=None, cols=4):
 
             lstxt.append("</td>")
 
-        for i in range(0, cols - len(isubset)):
+        for i in range(cols - len(isubset)):
             lstxt.append("<td></td>")
 
         lstxt.append("</tr>")
@@ -1557,7 +1554,7 @@ def main():
     elif len(args) == 1:
         opts.root = args[0]
     elif len(args) > 1:
-        print >> sys.stderr, "Error: can only specify one root."
+        logger.error("Error: can only specify one root.")
         sys.exit(1)
 
     #
@@ -1651,12 +1648,12 @@ def main():
     else:
         opts.repn_affinity = []
 
-    if len(filter(None, [opts.out_along, opts.out_subdirs,
-                         opts.out_onedir])) > 1:
+    if len([_f for _f in [opts.out_along, opts.out_subdirs,
+                          opts.out_onedir] if _f]) > 1:        
         logger.error("Make up your mind, which outputs?")
         sys.exit(1)
-    elif len(filter(None, [opts.out_along, opts.out_subdirs,
-                         opts.out_onedir])) == 0:
+    elif  len([_f for _f in [opts.out_along, opts.out_subdirs,
+                           opts.out_onedir] if _f]) == 0:
         opts.out_subdirs = 1  # Default
 
     #
@@ -1696,7 +1693,7 @@ def main():
     allimages = rootdir.get_all_images()
     alldirs = rootdir.get_all_dirs()
     trackmap = computeTrackmap(allimages)
-    tracks = trackmap.keys()
+    tracks = list(trackmap.keys())
     tracks.sort()
     trackindex_fns = {}
     for t in tracks:
