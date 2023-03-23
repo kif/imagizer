@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF8 -*-
 
 __author__ = "Jérôme Kieffer"
@@ -49,7 +49,6 @@ if 'footer' in globals():
 """
 
 default_templates = {}
-
 
 default_templates[ 'template-css' ] = """
 
@@ -162,17 +161,17 @@ if image._pagefn:
         e = w
         pi = prev(image, allimages)
         if pi:
-            print '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %                   (0, 0, w4, h, rel(pi._pagefn, cd))
+            print( '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %                   (0, 0, w4, h, rel(pi._pagefn, cd)))
             s = w4
 
         ni = next(image, allimages)
         if ni:
-            print '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %                   (3*w4, 0, w, h, rel(ni._pagefn, cd))
+            print( '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %                   (3*w4, 0, w, h, rel(ni._pagefn, cd)))
             e = 3*w4
 
-        print '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %               (s, 0, e, ht, rel(image._dir._pagefn, cd))
+        print( '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %               (s, 0, e, ht, rel(image._dir._pagefn, cd)))
 
-        print '</map>'
+        print( '</map>')
 
     else:
         use_map = 0
@@ -357,12 +356,12 @@ if dir._parent:
     if icur > 0:
        iprev = icur - 1
        dprev = sname[iprev]
-       print '<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename )
-    print '<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd)
+       print('<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename ))
+    print('<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd))
     if icur < len(sname)-1:
        inext = icur + 1
        dnext = sname[inext]
-       print '|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename )
+       print('|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename ))
 -->
 </div>
 
@@ -375,13 +374,13 @@ try:
 except ImportError:
     import Image
 if len( dir._subdirs ) > 0:
-    print '<h3>Sous-repertoires:</h3>'
+    print('<h3>Sous-repertoires:</h3>')
     # sort subdirs by time
     subdirs = list(dir._subdirs)
     if config.WebDirIndexStyle=="table":
-        print "<table>"
+        print("<table>")
         for d in subdirs:
-            print "<tr>"
+            print("<tr>")
             if d._attrfile.has_key("image"):
                 temp=op.splitext(d._attrfile["image"])[0]+opts.separator+config.Thumbnails["Suffix"]+config.Extensions[0]
                 temp1,temp2=op.split(temp)
@@ -393,26 +392,26 @@ if len( dir._subdirs ) > 0:
                 else:
                     width=config.Thumbnails["Size"]
                     height=3*width/4
-                print '<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" height=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,op.split(cd)[1]),op.split(filename)[1],height,width)
+                print('<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" height=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,op.split(cd)[1]),op.split(filename)[1],height,width))
             else:
-                print "<td> </td>"
+                print("<td> </td>")
             if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
-                print  '<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]))
+                print('<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"])))
             else:
                 if len(d._basename)>11:
                     if d._basename[10] in [" ","_","-"]:
-                        print '<td><a href="%s">%s<br>%s</a></td>'%(rel(d._pagefn,cd),d._basename[:10],d._basename[11:])
+                        print('<td><a href="%s">%s<br>%s</a></td>'%(rel(d._pagefn,cd),d._basename[:10],d._basename[11:]))
                     else:
-                        print '<td><a href="%s">%s</a></td>'%(rel(d._pagefn,cd),d._basename)
+                        print('<td><a href="%s">%s</a></td>'%(rel(d._pagefn,cd),d._basename))
             if d._attrfile.has_key("comment"):
-                print "<td>%s</td>"%(unicode2html(d._attrfile["comment"].replace("<BR>","\\n")).replace("\\n","<BR>"))
+                print("<td>%s</td>"%(unicode2html(d._attrfile["comment"].replace("<BR>","\\n")).replace("\\n","<BR>")))
             else:
-                print "<td> </td>"
-            print "</tr>"
-        print "</table>"
+                print("<td> </td>")
+            print("</tr>")
+        print("</table>")
 
     else: # WebDirStyle is old fashion list
-        print '<ul>'
+        print('<ul>')
         for d in subdirs:
                 comment=""
                 if  d._attrfile.has_key("comment"):
@@ -427,12 +426,12 @@ if len( dir._subdirs ) > 0:
                         comment=unicode2html(d._attrfile["comment"].replace("<BR>"," "))
                 if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
                     if len(d._attrfile["date"])>0:
-                        print '<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]), comment)
+                        print('<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]), comment))
                     else:
-                        print '<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment)
+                        print('<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment))
                 else:
-                    print '<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment)
-        print '</ul><p>'
+                    print('<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment))
+        print('</ul><p>')
 -->
 
 <!--tagcode:
@@ -456,12 +455,12 @@ if dir._parent:
     if icur > 0:
        iprev = icur - 1
        dprev = sname[iprev]
-       print '<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename )
-    print '<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd)
+       print('<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename ))
+    print('<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd))
     if icur < len(sname)-1:
        inext = icur + 1
        dnext = sname[inext]
-       print '|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename )
+       print('|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename ))
 -->
 </div>
 
@@ -487,11 +486,11 @@ default_templates[ 'template-trackindex' ] = \
 images = trackmap[track]
 
 if len(images) > 0:
-    print '<h3>Images:</h3>'
-    print imagePile( cd, images )
+    print('<h3>Images:</h3>')
+    print(imagePile( cd, images ))
 
-    print '<h3>Images by name:</h3>'
-    print twoColumns(cd, images)
+    print('<h3>Images by name:</h3>')
+    print(twoColumns(cd, images))
 -->
 """ + html_postamble
 
@@ -511,34 +510,34 @@ default_templates[ 'template-allindex' ] = \
 
 <!--tagcode:
 if len(alldirs) > 0:
-    print '<H3>Directories:</H3>'
-    print '<UL>'
+    print('<H3>Directories:</H3>')
+    print('<UL>')
     for d in alldirs:
         if d._parent:
             pname = d._path
         else:
             pname = '(root)'
-        print '<li><a href=\"%s\">%s</a></li>' % \
-            ( rel(d._pagefn, cd), pname )
-    print '</ul><p>'
+        print('<li><a href=\"%s\">%s</a></li>' % \
+            ( rel(d._pagefn, cd), pname ))
+    print('</ul><p>')
 -->
 
 <!--tagcode:
 if len(tracks) > 0:
-    print '<h3>Tracks:</h3>'
-    print '<ul>'
+    print('<h3>Tracks:</h3>')
+    print('<ul>')
     for t in tracks:
-        print '<li><a href=\"%s\">%s</a></li>' % (trackindex_fns[t], t)
-    print '</ul>'
+        print('<li><a href=\"%s\">%s</a></li>' % (trackindex_fns[t], t))
+    print('</ul>')
 -->
 
 <!--tagcode:
 if len(allimages) > 0:
-    print '<h3>Images:</h3>'
-    print imagePile( cd, allimages )
+    print('<h3>Images:</h3>')
+    print(imagePile( cd, allimages ))
 
-    print '<h3>Images by name:</h3>'
-    print twoColumns(cd, allimages)
+    print('<h3>Images by name:</h3>')
+    print(twoColumns(cd, allimages))
 -->
 """ + html_postamble
 
@@ -559,18 +558,17 @@ default_templates[ 'template-sortindex' ] = \
 if len(allimages) > 0:
     import os
     import os.path as op
-    print '<h3>Images sorted by name:</h3>'
+    print('<h3>Images sorted by name:</h3>')
     ilist = list(allimages)
-    ilist.sort( lambda x,y: cmp( x._base, y._base ) )
+    ilist.sort( key = lambda x: x._base )
 
     for i in ilist:
-        print '<p>'
-        print thumbImage( cd, i, 'align=\"middle\"' )
-        print '<a href=\"%s\">%s</a>' %( rel(i._pagefn, cd), i._base )
-        print
+        print('<p>')
+        print(thumbImage( cd, i, 'align=\"middle\"' ))
+        print('<a href=\"%s\">%s</a>' %( rel(i._pagefn, cd), i._base ))
+        print()
 -->
 """ + html_postamble
-
 
 
 @contextmanager
@@ -585,6 +583,7 @@ def custom_redirection(fileobj):
 
 class Templates(object):
     "A class responsible for reading and providing all kind of templates"
+
     def __init__(self):
         """Constructor ... behaves like a dictionary
 
@@ -597,7 +596,6 @@ class Templates(object):
     def set_opts(self, opts):
         self.opts = opts
         self.read_all()
-
 
     def read_all(self):
         """Reads the template files."""
@@ -738,8 +736,8 @@ class Templates(object):
                 logger.error("Error: unfinished tag.")
                 sys.exit(1)
 
-            pretext = templatetxt[ pos : mo1.start() ]
-            code = templatetxt[ mo1.end() : mo2.start() ]
+            pretext = templatetxt[ pos: mo1.start() ]
+            code = templatetxt[ mo1.end(): mo2.start() ]
             if not mo1.group('code'):
                 code = "sys.stdout.write(%s)" % code
             output.append(self.compile_code(pretext, code, filename))
