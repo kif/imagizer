@@ -204,8 +204,9 @@ from imagizer.encoding import unicode2html
 if int(sys.version[0]) != 2:
     logger.warning("Only Python 2 has been tested so far with generator.")
 
-import os, dircache
+import os
 import os.path as op
+from functools import lru_cache
 from os.path import join, dirname, basename, normpath, splitext
 from os.path import isfile, islink, isdir, exists
 
@@ -213,6 +214,12 @@ import re, string, time, random, locale
 
 import imghdr
 import distutils.sysconfig
+
+
+@lru_cache
+def dircache_listdir(d):
+     return os.listdir(d)
+
 
 # here we detect the OS runnng the program so that we can call exftran in the right way
 installdir = op.join(distutils.sysconfig.get_python_lib(), "imagizer")
@@ -310,7 +317,7 @@ class Directory(object):
 
         self._pagefn = None  # to be computed outside according to policies
 
-        files = dircache.listdir(join(root, path))
+        files = dircache_listdir(join(root, path))
 
         pattr = join(root, self._path, dirattr_fn)
         longtitle = op.split(self._basename)[1]
@@ -1051,7 +1058,7 @@ def clean(allimages, alldirs):
                     logger.error("Error: deleting %s (%s: %s)", thumbfn, type(error), error) 
 
     for d in alldirs:
-        files = dircache.listdir(join(opts.root, d._path))
+        files = dircache_listdir(join(opts.root, d._path))
 
         # Delete HTML files in directories
         for f in files:
