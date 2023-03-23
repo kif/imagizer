@@ -218,7 +218,9 @@ import distutils.sysconfig
 
 @lru_cache
 def dircache_listdir(d):
-     return os.listdir(d)
+     lst = os.listdir(d)
+     lst.sort()
+     return lst
 
 
 # here we detect the OS runnng the program so that we can call exftran in the right way
