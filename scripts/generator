@@ -392,7 +392,7 @@ class Directory(object):
                     img._salts.append(ext)
 
         # Detect thumbnails, imagepages, attributes files.
-        for i in imgmap.keys():
+        for i in list(imgmap.keys()):
             e = imgmap[i]
             logger.info("looking for images with base '%s'", os.path.join(e._dir._path, e._base))
             e.cleanAlts()
