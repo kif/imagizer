@@ -980,7 +980,7 @@ def generatePage(fn, ttype, environ):
     # Write out modified file.
     try:
         afn = join(opts.root, fn)
-        with open(afn, "wb") as tfile:
+        with open(afn, "w") as tfile:
             templates.execute(tfile, ttype, environ)
 
     except IOError as e:
