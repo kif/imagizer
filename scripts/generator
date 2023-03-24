@@ -201,9 +201,6 @@ logger = logging.getLogger("generator")
 
 from imagizer.encoding import unicode2html
 
-if int(sys.version[0]) != 2:
-    logger.warning("Only Python 2 has been tested so far with generator.")
-
 import os
 import os.path as op
 from functools import lru_cache
@@ -1591,7 +1588,6 @@ def main():
     #
     # Validate options.
     #
-    logger.info("====> validating options")
 
     if not opts.quiet:
         logging.root.setLevel(logging.WARNING)
@@ -1599,6 +1595,7 @@ def main():
     elif opts.verbose:
         logger.setLevel(logging.DEBUG)
         logging.root.setLevel(logging.DEBUG)
+    logger.debug("====> validating options")
 
     magick.set_path(opts.magick_path)
 
