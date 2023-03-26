@@ -1374,15 +1374,15 @@ def walk_for_index(directory, environ):
             os.remove(lnfn)
         if not (opts.no_links or opts.out_onedir) and \
                not os.path.exists(lnfn) and not os.path.islink(lnfn):
-            with open(lnfn, "wb") as f:
-                f.write(b'''
+            with open(lnfn, "w") as f:
+                f.write('''
 <HTML>
 <HEAD>
 <link rel=stylesheet type="text/css" href="style.css">
 <TITLE>Redirection</TITLE>
 <META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#''')
                 f.write(config.WebPageAnchor)
-                f.write(b'''">
+                f.write('''">
 </HEAD>
 <BODY>
 <H1>You should be reloacted to the correct URL in a second :</H1>
