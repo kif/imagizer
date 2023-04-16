@@ -192,6 +192,16 @@ cdef class TreeRoot(TreeItem):
                     element = element.parent
                 else:
                     return
+                
+    cpdef rename_day(self, str old, str new):
+        cdef:
+            TreeItem element, child
+        element = self.find_leaf(old)
+        day, hour = os.path.split(new)
+        ymd = day.split("-", 2)
+        if element:
+            kday = element.parent
+            kday.label = ymd[-1]
 
     cpdef int index(self, str name):
         "Calculate the index of an item as if it was a list"

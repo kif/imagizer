@@ -1028,10 +1028,11 @@ class Interface(qt.QObject):
         """Launch a new window and ask for anew name for the current directory"""
         logger.debug("Interface.rename_day clicked")
         self.update_title()
+        old_name = self.fn_current
         res = rename_day(self.fn_current, self.AllJpegs, self.selected)
         if res is not None:
             if self.treeview is not None:
-                self.treeview.close()
+                self.treeview.rename_directory(old_name, res)
             self.image.filename = res
             self.image.fn = os.path.join(config.DefaultRepository, res)
             self.image._exif = None

@@ -191,7 +191,7 @@ except:
 
         def del_leaf(self, name):
             "Remove a leaf from the tree, only available from root"
-            element = find_leaf(name)
+            element = self.find_leaf(name)
             if element:
                 # Now start deleting:
                 while element.parent is not None:
@@ -200,6 +200,14 @@ except:
                         element = element.parent
                     else:
                         return
+
+        def rename_day(self, old, new):
+            element = self.find_leaf(old)
+            day, hour = os.path.split(new)
+            ymd = day.split("-", 2)
+            if element:
+                kday = element.parent
+                kday.label = ymd[-1]
 
         def index(self, name):
             "Calculate the index of an item as if it was a list"
@@ -290,6 +298,8 @@ class TreeModel(qt.QAbstractItemModel):
     def del_leaf(self, filename):
         self._root_item.del_leaf(filename)
 
+    def rename_day(self, old, new):
+        self._root_item.rename_day(old, new)
 
 class TreeWidget(qt.QWidget):
 
@@ -326,9 +336,18 @@ class TreeWidget(qt.QWidget):
         """
         Remove a filename from the tree
         """
-        print(f"remove_file {filename} from tree")
+        logger.info(f"remove_file {filename} from tree")
         self.view.collapseAll()
         self.model.del_leaf(filename)
+
+    def rename_directory(self, old, new):
+        """
+        rename a directory
+        """
+        print(f"rename_directory {old} -> {new} update tree")
+        self.view.collapseAll()
+        self.model.rename_day(old, new)
+        
 
 
 class ColumnWidget(qt.QWidget):
@@ -336,7 +355,6 @@ class ColumnWidget(qt.QWidget):
     def __init__(self, root, parent=None):
         super(ColumnWidget, self).__init__(parent)
         self.root = root
-        print(root)
         self.view = qt.QColumnView(self)
 #        self.view.header().hide()
         self.model = TreeModel(root, self)
