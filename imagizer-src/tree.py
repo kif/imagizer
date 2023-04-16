@@ -27,11 +27,10 @@ Buils a tree view on the list of files
 
 from __future__ import with_statement, division, print_function, absolute_import
 
-
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/07/2019"
+__date__ = "16/04/2023"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -56,6 +55,7 @@ from .photo import Photo
 try:
     from ._tree import TreeItem, TreeRoot
 except:
+
 # if True:
     class TreeItem(object):
         """
@@ -69,6 +69,7 @@ except:
         add size property which calculate the size of the subtree
         add a next/previous method
         """
+
         def __init__(self, label=None, parent=None):
             self.children = []
             self.parent = parent
@@ -160,9 +161,9 @@ except:
                 in_list = self.parent.children.index(self)
                 return sum(brother.size for brother in self.parent.children[:in_list])
 
-
     class TreeRoot(TreeItem):
         "TreeRoot has some additional methods"
+
         def find_leaf(self, name):
             "Find an element in the tree, return None if not present"
             day, hour = os.path.split(name)
@@ -212,6 +213,7 @@ except:
 
             return idx
 
+
 @timeit
 def build_tree(big_list):
     """
@@ -223,6 +225,7 @@ def build_tree(big_list):
 
 
 class TreeModel(qt.QAbstractItemModel):
+
     def __init__(self, root_item, win):
         super(TreeModel, self).__init__(win)
         self._root_item = root_item
@@ -284,8 +287,12 @@ class TreeModel(qt.QAbstractItemModel):
         row_idx = pitem.parent.children.index(pitem)
         return self.createIndex(row_idx, 0, pitem)
 
+    def del_leaf(self, filename):
+        self._root_item.del_leaf(filename)
+
 
 class TreeWidget(qt.QWidget):
+
     def __init__(self, root, parent=None):
         super(TreeWidget, self).__init__(parent)
         self.root = root
@@ -315,8 +322,17 @@ class TreeWidget(qt.QWidget):
         if self.callback:
             self.callback(value)
 
+    def remove_file(self, filename):
+        """
+        Remove a filename from the tree
+        """
+        print(f"remove_file {filename} from tree")
+        self.view.collapseAll()
+        self.model.del_leaf(filename)
+
 
 class ColumnWidget(qt.QWidget):
+
     def __init__(self, root, parent=None):
         super(ColumnWidget, self).__init__(parent)
         self.root = root
@@ -328,11 +344,12 @@ class ColumnWidget(qt.QWidget):
         lay = qt.QVBoxLayout(self)
         lay.addWidget(self.view)
 
+
 class TreeColWidget(qt.QWidget):
+
     def __init__(self, root, parent=None):
         super(TreeColWidget, self).__init__(parent)
         self.root = root
-        print(root)
         self.view1 = qt.QTreeView()
         self.model = TreeModel(root, self)
         self.view1.setModel(self.model)
@@ -344,7 +361,6 @@ class TreeColWidget(qt.QWidget):
         lay.addWidget(self.view2)
 
 
-
 def main():
     import imagizer.imagizer
     big_lst = imagizer.imagizer.range_tout("/home/photo", bUseX=False, fast=True)[0]
@@ -354,6 +370,7 @@ def main():
     mainw.setCentralWidget(TreeWidget(tree, mainw))
     mainw.show()
     app.exec_()
+
 
 if __name__ == "__main__":
     main()

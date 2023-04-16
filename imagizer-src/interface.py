@@ -27,7 +27,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20/08/2022"
+__date__ = "16/04/2023"
 __license__ = "GPL"
 
 import gc
@@ -658,8 +658,8 @@ class Interface(qt.QObject):
         self.update_title()
         if self.fn_current in  self.selected:
             self.selected.remove(self.fn_current)
-#         if self.treeview is not None:
-#             self.treeview.root. TODO
+        if self.treeview is not None:
+            self.treeview.remove_file(self.fn_current)
         self.AllJpegs.remove(self.fn_current)
         self.image.trash()
         self.show_image(min(self.idx_current, len(self.AllJpegs) - 1))
