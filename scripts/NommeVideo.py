@@ -23,7 +23,11 @@
 # * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # *
 #*****************************************************************************/
+from __future__ import absolute_import
+from __future__ import print_function
 from Image import Image
+from six.moves import range
+from six.moves import input
 __author__ = "Jérôme Kieffer"
 __date__ = "23 Feb 2011"
 __copyright__ = "Jerome Kieffer"
@@ -69,7 +73,7 @@ class Video:
     def __init__(self, infile):
         """initialise the class"""
         self.fullPath = OP.abspath(infile)
-        print "Processing %s" % self.fullPath
+        print("Processing %s" % self.fullPath)
         [self.videoPath, self.videoFile] = OP.split(self.fullPath)
         self.title = u""
         self.width = 0
@@ -170,8 +174,8 @@ class Video:
             myParser = createParser(filename, realname)
             try:
                 self.metadata = extractMetadata(myParser)
-            except HachoirError, err:
-                print("Metadata extraction error: %s" % err)
+            except HachoirError as err:
+                print(("Metadata extraction error: %s" % err))
                 self.metadata = None
         if self.metadata:
             bDoMplayer = False
@@ -315,7 +319,7 @@ class Video:
             logging.info("self.rotation was: %s" % self.rotation)
         else:
             os.system('mplayer "%s"' % self.fullPath)
-            rotate = raw_input("What rotation should be applied to the file ? [0] ")
+            rotate = input("What rotation should be applied to the file ? [0] ")
             rotate = rotate.strip().lower().decode(local)
             logging.debug(rotate)
             if rotate in ["90", "cw"]:
@@ -328,16 +332,16 @@ class Video:
 
     def setTitle(self):
         """asks for a Title and comments for the video"""
-        print "Processing file %s" % self.fullPath
-        print "camera : %s" % self.camera
-        if self.data.has_key("INAM"):
-            print "Former title: %s" % self.data["INAM"]
-        title = raw_input("Title (INAM): ").decode(local)
+        print("Processing file %s" % self.fullPath)
+        print("camera : %s" % self.camera)
+        if "INAM" in self.data:
+            print("Former title: %s" % self.data["INAM"])
+        title = input("Title (INAM): ").decode(local)
         if len(title) > 0:
             self.data["INAM"] = title.strip()
-        if self.data.has_key("IKEY"):
-            print "Former keywords: " + "\t".join(self.data["IKEY"].split(";"))
-        keywords = raw_input("Keywords (IKEY): ").decode(local).split()
+        if "IKEY" in self.data:
+            print("Former keywords: " + "\t".join(self.data["IKEY"].split(";")))
+        keywords = input("Keywords (IKEY): ").decode(local).split()
         if len(keywords) > 0:
             self.data["IKEY"] = ";".join(keywords)
         f = open(self.CommentFile, "w")
@@ -363,7 +367,7 @@ class Video:
             __, rawaudio = tempfile.mkstemp(suffix=".raw")
             os.system(mplayer + " %s -dumpaudio   -dumpfile %s " % (self.fullPath, rawaudio))
             __, wavaudio = tempfile.mkstemp(suffix=".wav")
-            print "AudioSampleRate= %s" % self.audioSampleRate
+            print("AudioSampleRate= %s" % self.audioSampleRate)
 #            if self.audioSampleRate == 44100:
             os.system(sox + " -r %s -c %s -u -b 8 -t raw %s -r 44100 %s " % (self.audioSampleRate, self.audioChannel, rawaudio, wavaudio))
         __, tmpavi = tempfile.mkstemp(suffix=".avi")
@@ -382,7 +386,7 @@ class Video:
             if os.path.isfile("divx2pass.log.temp"):os.remove("divx2pass.log.temp")
         else:
             shutil.copy(self.fullPath, tmpavi)
-        print "%s -o %s -i %s -f %s" % (avimerge, self.destinationFile, tmpavi, self.CommentFile)
+        print("%s -o %s -i %s -f %s" % (avimerge, self.destinationFile, tmpavi, self.CommentFile))
         os.system("%s -o %s -i %s -f %s" % (avimerge, self.destinationFile, tmpavi, self.CommentFile))
 #        os.remove(tmpavi)
 
@@ -466,7 +470,7 @@ class Video:
         sub.wait()
         listThumb = [os.path.join(tempdir, i) for i in os.listdir(tempdir)]
         if len(listThumb) != 1:
-            print ("Unexpected result ... have a look at %s ther should only be one jpeg image" % tempdir)
+            print(("Unexpected result ... have a look at %s ther should only be one jpeg image" % tempdir))
         self.thumbName = OP.splitext(self.fullPath)[0] + "--Thumb.jpg"
         img = Image.open(listThumb[0])
         img.thumbnail((size, size))
@@ -593,13 +597,13 @@ if __name__ == "__main__":
         videos = {}
         for onefile in FindFile(RootDir):
             vi = Video(onefile)
-            if not videos.has_key(vi.timeStamp.date().isoformat()):
+            if vi.timeStamp.date().isoformat() not in videos:
                 videos[vi.timeStamp.date().isoformat()] = [vi]
             else:
                 videos[vi.timeStamp.date().isoformat()].append(vi)
-        date = videos.keys()
+        date = list(videos.keys())
         date.sort()
-        print date
+        print(date)
         html = Html("Videos", enc=webEncoding)
         html.element("a name='begin'")
 
@@ -610,7 +614,7 @@ if __name__ == "__main__":
                 onevideo.GenThumb()
                 html.start("tr")
                 html.start("td", {"width":200})
-                print RelativeName(onevideo.fullPath)
+                print(RelativeName(onevideo.fullPath))
                 html.start("a", {"href":RelativeName(onevideo.fullPath)})
                 thumb = RelativeName(onevideo.thumbName)
                 html.start("img", {"src":thumb, "alt":thumb})
@@ -635,11 +639,11 @@ if __name__ == "__main__":
         videos = {}
         for onefile in FindFile(RootDir):
             vi = Video(onefile)
-            if not videos.has_key(vi.timeStamp.date().isoformat()):
+            if vi.timeStamp.date().isoformat() not in videos:
                 videos[vi.timeStamp.date().isoformat()] = [vi]
             else:
                 videos[vi.timeStamp.date().isoformat()].append(vi)
-        date = videos.keys()
+        date = list(videos.keys())
         date.sort()
         logging.info("List of all dates:" + os.linesep.join(date))
         for onedate in date:
@@ -649,5 +653,5 @@ if __name__ == "__main__":
                 except:
                     logging.error(str("in processing %s " % onevideo.fullPath))
                     logging.error(str(onevideo.__repr__()))
-                print "#" * 50
+                print("#" * 50)
 

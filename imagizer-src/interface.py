@@ -22,12 +22,10 @@
 # *
 #*****************************************************************************/
 
-from __future__ import with_statement, division, print_function, absolute_import
-
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "16/04/2023"
+__date__ = "17/04/2023"
 __license__ = "GPL"
 
 import gc
@@ -1300,6 +1298,7 @@ class Interface(qt.QObject):
             self.treeview = tree.TreeWidget(tree_rep)
             self.treeview.callback = self.goto_image
         self.treeview.show()
+        self.treeview.expand_at(self.fn_current)
 
     def show_searchview(self, *arg):
         if self.searchview is None:

@@ -7201,7 +7201,7 @@ static PyObject *__pyx_f_5_tree_8TreeRoot_rename_day(struct __pyx_obj_5_tree_Tre
  *         if element:
  *             kday = element.parent             # <<<<<<<<<<<<<<
  *             kday.label = ymd[-1]
- * 
+ *             return kday
  */
     __pyx_t_3 = ((PyObject *)__pyx_v_element->parent);
     __Pyx_INCREF(__pyx_t_3);
@@ -7212,8 +7212,8 @@ static PyObject *__pyx_f_5_tree_8TreeRoot_rename_day(struct __pyx_obj_5_tree_Tre
  *         if element:
  *             kday = element.parent
  *             kday.label = ymd[-1]             # <<<<<<<<<<<<<<
+ *             return kday
  * 
- *     cpdef int index(self, str name):
  */
     __pyx_t_3 = __Pyx_GetItemInt(__pyx_v_ymd, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 204, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
@@ -7223,6 +7223,18 @@ static PyObject *__pyx_f_5_tree_8TreeRoot_rename_day(struct __pyx_obj_5_tree_Tre
     __Pyx_DECREF(__pyx_v_kday->label);
     __pyx_v_kday->label = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
+
+    /* "_tree.pyx":205
+ *             kday = element.parent
+ *             kday.label = ymd[-1]
+ *             return kday             # <<<<<<<<<<<<<<
+ * 
+ *     cpdef int index(self, str name):
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __Pyx_INCREF(((PyObject *)__pyx_v_kday));
+    __pyx_r = ((PyObject *)__pyx_v_kday);
+    goto __pyx_L0;
 
     /* "_tree.pyx":202
  *         day, hour = os.path.split(new)
@@ -7359,8 +7371,8 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_6rename_day(struct __pyx_obj_5_tree_T
   return __pyx_r;
 }
 
-/* "_tree.pyx":206
- *             kday.label = ymd[-1]
+/* "_tree.pyx":207
+ *             return kday
  * 
  *     cpdef int index(self, str name):             # <<<<<<<<<<<<<<
  *         "Calculate the index of an item as if it was a list"
@@ -7393,7 +7405,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
     if (unlikely(!__Pyx_object_dict_version_matches(((PyObject *)__pyx_v_self), __pyx_tp_dict_version, __pyx_obj_dict_version))) {
       PY_UINT64_T __pyx_type_dict_guard = __Pyx_get_tp_dict_version(((PyObject *)__pyx_v_self));
       #endif
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_index); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 206, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_index); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)(void*)__pyx_pw_5_tree_8TreeRoot_9index)) {
         __Pyx_INCREF(__pyx_t_1);
@@ -7409,10 +7421,10 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
         }
         __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_v_name) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_name);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 206, __pyx_L1_error)
+        if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 207, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 206, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 207, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         __pyx_r = __pyx_t_5;
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -7431,7 +7443,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
     #endif
   }
 
-  /* "_tree.pyx":209
+  /* "_tree.pyx":210
  *         "Calculate the index of an item as if it was a list"
  *         cdef:
  *             int idx=0             # <<<<<<<<<<<<<<
@@ -7440,19 +7452,19 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
  */
   __pyx_v_idx = 0;
 
-  /* "_tree.pyx":211
+  /* "_tree.pyx":212
  *             int idx=0
  *             TreeItem element
  *         element = self.find_leaf(name)             # <<<<<<<<<<<<<<
  *         if element is None:
  *             return -1
  */
-  __pyx_t_1 = ((PyObject *)((struct __pyx_vtabstruct_5_tree_TreeRoot *)__pyx_v_self->__pyx_base.__pyx_vtab)->find_leaf(__pyx_v_self, __pyx_v_name, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)((struct __pyx_vtabstruct_5_tree_TreeRoot *)__pyx_v_self->__pyx_base.__pyx_vtab)->find_leaf(__pyx_v_self, __pyx_v_name, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_element = ((struct __pyx_obj_5_tree_TreeItem *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "_tree.pyx":212
+  /* "_tree.pyx":213
  *             TreeItem element
  *         element = self.find_leaf(name)
  *         if element is None:             # <<<<<<<<<<<<<<
@@ -7463,7 +7475,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
   __pyx_t_7 = (__pyx_t_6 != 0);
   if (__pyx_t_7) {
 
-    /* "_tree.pyx":213
+    /* "_tree.pyx":214
  *         element = self.find_leaf(name)
  *         if element is None:
  *             return -1             # <<<<<<<<<<<<<<
@@ -7473,7 +7485,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
     __pyx_r = -1;
     goto __pyx_L0;
 
-    /* "_tree.pyx":212
+    /* "_tree.pyx":213
  *             TreeItem element
  *         element = self.find_leaf(name)
  *         if element is None:             # <<<<<<<<<<<<<<
@@ -7482,7 +7494,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
  */
   }
 
-  /* "_tree.pyx":214
+  /* "_tree.pyx":215
  *         if element is None:
  *             return -1
  *         while element:             # <<<<<<<<<<<<<<
@@ -7490,10 +7502,10 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
  *             element = element.parent
  */
   while (1) {
-    __pyx_t_7 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_element)); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 214, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_element)); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 215, __pyx_L1_error)
     if (!__pyx_t_7) break;
 
-    /* "_tree.pyx":215
+    /* "_tree.pyx":216
  *             return -1
  *         while element:
  *             idx += element.sub_index()             # <<<<<<<<<<<<<<
@@ -7502,7 +7514,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
  */
     __pyx_v_idx = (__pyx_v_idx + ((struct __pyx_vtabstruct_5_tree_TreeItem *)__pyx_v_element->__pyx_vtab)->sub_index(__pyx_v_element, 0));
 
-    /* "_tree.pyx":216
+    /* "_tree.pyx":217
  *         while element:
  *             idx += element.sub_index()
  *             element = element.parent             # <<<<<<<<<<<<<<
@@ -7515,7 +7527,7 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
     __pyx_t_1 = 0;
   }
 
-  /* "_tree.pyx":217
+  /* "_tree.pyx":218
  *             idx += element.sub_index()
  *             element = element.parent
  *         return idx             # <<<<<<<<<<<<<<
@@ -7525,8 +7537,8 @@ static int __pyx_f_5_tree_8TreeRoot_index(struct __pyx_obj_5_tree_TreeRoot *__py
   __pyx_r = __pyx_v_idx;
   goto __pyx_L0;
 
-  /* "_tree.pyx":206
- *             kday.label = ymd[-1]
+  /* "_tree.pyx":207
+ *             return kday
  * 
  *     cpdef int index(self, str name):             # <<<<<<<<<<<<<<
  *         "Calculate the index of an item as if it was a list"
@@ -7557,7 +7569,7 @@ static PyObject *__pyx_pw_5_tree_8TreeRoot_9index(PyObject *__pyx_v_self, PyObje
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("index (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyUnicode_Type), 1, "name", 1))) __PYX_ERR(0, 206, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyUnicode_Type), 1, "name", 1))) __PYX_ERR(0, 207, __pyx_L1_error)
   __pyx_r = __pyx_pf_5_tree_8TreeRoot_8index(((struct __pyx_obj_5_tree_TreeRoot *)__pyx_v_self), ((PyObject*)__pyx_v_name));
 
   /* function exit code */
@@ -7578,7 +7590,7 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_8index(struct __pyx_obj_5_tree_TreeRo
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("index", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_f_5_tree_8TreeRoot_index(__pyx_v_self, __pyx_v_name, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 206, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_f_5_tree_8TreeRoot_index(__pyx_v_self, __pyx_v_name, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7595,7 +7607,7 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_8index(struct __pyx_obj_5_tree_TreeRo
   return __pyx_r;
 }
 
-/* "_tree.pyx":219
+/* "_tree.pyx":220
  *         return idx
  * 
  *     def  __getitem__(self, idx):             # <<<<<<<<<<<<<<
@@ -7634,7 +7646,7 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_10__getitem__(struct __pyx_obj_5_tree
   __Pyx_RefNannySetupContext("__getitem__", 0);
   __Pyx_INCREF(__pyx_v_idx);
 
-  /* "_tree.pyx":223
+  /* "_tree.pyx":224
  *         cdef:
  *             int size
  *         size = self._size()             # <<<<<<<<<<<<<<
@@ -7643,34 +7655,34 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_10__getitem__(struct __pyx_obj_5_tree
  */
   __pyx_v_size = ((struct __pyx_vtabstruct_5_tree_TreeRoot *)__pyx_v_self->__pyx_base.__pyx_vtab)->__pyx_base._size(((struct __pyx_obj_5_tree_TreeItem *)__pyx_v_self));
 
-  /* "_tree.pyx":224
+  /* "_tree.pyx":225
  *             int size
  *         size = self._size()
  *         if idx<0:             # <<<<<<<<<<<<<<
  *             idx = size + idx
  *         if idx>=size:
  */
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_idx, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 224, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 224, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_idx, __pyx_int_0, Py_LT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 225, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 225, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_2) {
 
-    /* "_tree.pyx":225
+    /* "_tree.pyx":226
  *         size = self._size()
  *         if idx<0:
  *             idx = size + idx             # <<<<<<<<<<<<<<
  *         if idx>=size:
  *             raise IndexError("list index out of range")
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 225, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 226, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyNumber_Add(__pyx_t_1, __pyx_v_idx); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 225, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Add(__pyx_t_1, __pyx_v_idx); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF_SET(__pyx_v_idx, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "_tree.pyx":224
+    /* "_tree.pyx":225
  *             int size
  *         size = self._size()
  *         if idx<0:             # <<<<<<<<<<<<<<
@@ -7679,35 +7691,35 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_10__getitem__(struct __pyx_obj_5_tree
  */
   }
 
-  /* "_tree.pyx":226
+  /* "_tree.pyx":227
  *         if idx<0:
  *             idx = size + idx
  *         if idx>=size:             # <<<<<<<<<<<<<<
  *             raise IndexError("list index out of range")
  *         return self._getitem(idx).name
  */
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_size); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_size); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_idx, __pyx_t_3, Py_GE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_idx, __pyx_t_3, Py_GE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 226, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 227, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (unlikely(__pyx_t_2)) {
 
-    /* "_tree.pyx":227
+    /* "_tree.pyx":228
  *             idx = size + idx
  *         if idx>=size:
  *             raise IndexError("list index out of range")             # <<<<<<<<<<<<<<
  *         return self._getitem(idx).name
  * 
  */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_IndexError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_IndexError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 227, __pyx_L1_error)
+    __PYX_ERR(0, 228, __pyx_L1_error)
 
-    /* "_tree.pyx":226
+    /* "_tree.pyx":227
  *         if idx<0:
  *             idx = size + idx
  *         if idx>=size:             # <<<<<<<<<<<<<<
@@ -7716,24 +7728,24 @@ static PyObject *__pyx_pf_5_tree_8TreeRoot_10__getitem__(struct __pyx_obj_5_tree
  */
   }
 
-  /* "_tree.pyx":228
+  /* "_tree.pyx":229
  *         if idx>=size:
  *             raise IndexError("list index out of range")
  *         return self._getitem(idx).name             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_idx); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 228, __pyx_L1_error)
-  __pyx_t_1 = ((PyObject *)((struct __pyx_vtabstruct_5_tree_TreeRoot *)__pyx_v_self->__pyx_base.__pyx_vtab)->__pyx_base._getitem(((struct __pyx_obj_5_tree_TreeItem *)__pyx_v_self), __pyx_t_4, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_idx); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 229, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)((struct __pyx_vtabstruct_5_tree_TreeRoot *)__pyx_v_self->__pyx_base.__pyx_vtab)->__pyx_base._getitem(((struct __pyx_obj_5_tree_TreeItem *)__pyx_v_self), __pyx_t_4, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_name); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_name); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "_tree.pyx":219
+  /* "_tree.pyx":220
  *         return idx
  * 
  *     def  __getitem__(self, idx):             # <<<<<<<<<<<<<<
@@ -9513,14 +9525,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "_tree.pyx":227
+  /* "_tree.pyx":228
  *             idx = size + idx
  *         if idx>=size:
  *             raise IndexError("list index out of range")             # <<<<<<<<<<<<<<
  *         return self._getitem(idx).name
  * 
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_u_list_index_out_of_range); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 227, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_u_list_index_out_of_range); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 

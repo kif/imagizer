@@ -202,6 +202,7 @@ cdef class TreeRoot(TreeItem):
         if element:
             kday = element.parent
             kday.label = ymd[-1]
+            return kday
 
     cpdef int index(self, str name):
         "Calculate the index of an item as if it was a list"

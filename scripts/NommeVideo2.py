@@ -22,6 +22,8 @@
 #* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
 #*****************************************************************************/
+from __future__ import absolute_import
+from __future__ import print_function
 __author__ = "Jérôme Kieffer"
 __date__ = "31 March 2012"
 __copyright__ = "Jérôme Kieffer"
@@ -88,7 +90,7 @@ class VideoControler(object):
 
 def intro(ob):
     import collections
-    print "Introspection of %s" % ob
+    print("Introspection of %s" % ob)
     for i in dir(ob):
         if isinstance(eval("ob.%s" % (i)), collections.Callable):
             logger.debug("%s\t\tMethod" % i)
@@ -123,7 +125,7 @@ class VideoInterface(object):
         hbox1.pack2(self.mplayer)
 #        hbox1.pack_end(self.mplayer)
         hbox1.show_all()
-        self.videoWid = long(self.mplayer.get_id())
+        self.videoWid = int(self.mplayer.get_id())
         self.mplayer.setwid(self.videoWid)
         self.xml.get_widget("videoWindow").resize(800, 400)
         self.mplayer.set_size_request(640, 480)
@@ -192,7 +194,7 @@ class VideoInterface(object):
         """
         logger.debug("NextVideo")
         self.pairVideo.saveMetadata()
-        self.pairVideo = self.allVideo.next()
+        self.pairVideo = next(self.allVideo)
         if self.pairVideo.encVideo is not None:
             self.filename = self.pairVideo.encFile
             self.video = self.pairVideo.encVideo
@@ -234,7 +236,7 @@ class VideoInterface(object):
                 self.mplayer.videoFilter = "rotate=2"
             else:
                 self.mplayer.videoFilter = None
-            self.videoWid = long(self.mplayer.get_id())
+            self.videoWid = int(self.mplayer.get_id())
             self.pairVideo.saveMetadata()
             logger.debug("Mplayer Wid is now  %s" % self.videoWid)
             self.mplayer.setwid(self.videoWid)

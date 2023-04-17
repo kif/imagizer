@@ -30,7 +30,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "16/04/2023"
+__date__ = "17/04/2023"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -208,6 +208,7 @@ except:
             if element:
                 kday = element.parent
                 kday.label = ymd[-1]
+                return kday
 
         def index(self, name):
             "Calculate the index of an item as if it was a list"
@@ -297,9 +298,26 @@ class TreeModel(qt.QAbstractItemModel):
 
     def del_leaf(self, filename):
         self._root_item.del_leaf(filename)
+        self.layoutChanged.emit()
 
     def rename_day(self, old, new):
-        self._root_item.rename_day(old, new)
+        day_item = self._root_item.rename_day(old, new)
+        if day_item:
+            row_idx = day_item.parent.children.index(day_item)
+            index = self.createIndex(row_idx, 0, day_item)
+            self.dataChanged.emit(index, index)
+
+    def indexes_from_filename(self, filename):
+        "return a list of idexes with all parents"
+        leaf = self._root_item.find_leaf(filename)
+        res = []
+        if leaf is None:
+            return res
+        while leaf != self._root_item:
+            row_idx = leaf.parent.children.index(leaf)
+            res.append(self.createIndex(row_idx, 0, leaf))
+            leaf = leaf.parent
+        return res[-1::-1]
 
 class TreeWidget(qt.QWidget):
 
@@ -328,7 +346,7 @@ class TreeWidget(qt.QWidget):
             value = leaf.name
         else:
             value = leaf.first().name
-        print(value)
+        logger.info(f"Clicked on {value}")
         if self.callback:
             self.callback(value)
 
@@ -337,19 +355,29 @@ class TreeWidget(qt.QWidget):
         Remove a filename from the tree
         """
         logger.info(f"remove_file {filename} from tree")
-        self.view.collapseAll()
         self.model.del_leaf(filename)
-
+        
     def rename_directory(self, old, new):
         """
         rename a directory
         """
-        print(f"rename_directory {old} -> {new} update tree")
-        self.view.collapseAll()
+        logger.info(f"rename_directory {old} -> {new} update tree")
         self.model.rename_day(old, new)
+
+    def expand_at(self, filename):
+        """
+        Expand the tree for the given image & select the current image
+        """
+        indexes = self.model.indexes_from_filename(filename)
+        selectionModel = self.view.selectionModel()
+        #selectionModel.reset()
+        previous = selectionModel.currentIndex()
+        for idx in indexes:
+            self.view.setExpanded(idx, True)
+        self.view.scrollTo(idx, True)
+        selectionModel.setCurrentIndex(idx, qt.QItemSelectionModel.Select)
+        current = selectionModel.currentIndex()
         
-
-
 class ColumnWidget(qt.QWidget):
 
     def __init__(self, root, parent=None):
