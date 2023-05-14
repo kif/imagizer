@@ -25,7 +25,7 @@
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "17/04/2023"
+__date__ = "14/05/2023"
 __license__ = "GPL"
 
 import gc
@@ -41,16 +41,17 @@ if sys.version_info[0] > 2:
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copy_selected, process_selected, to_jpeg
 from . import qt
-from .qt import buildUI, flush, icon_on, ExtendedQLabel, Signal
+from .qt import buildUI, flush, icon_on, ExtendedQLabel, Signal, QFileDialog
 from .selection import Selected
-from .photo import Photo
+from .photo import Photo, RawImage
 from .utils import get_pixmap_file
 from .config import config, listConfigurationFiles
 from .imagecache import image_cache, title_cache
 from . import tree, __version__
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
 from .search import SearchTitle
-from .fileutils import smartSize, recursive_delete
+from .fileutils import smartSize, recursive_delete, findFiles
+from .imagizer import rename_file
 
 
 class Interface(qt.QObject):
@@ -1042,52 +1043,40 @@ class Interface(qt.QObject):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         logger.debug("Interface.importImages called")
         self.update_title()
-        # TODO
-        self.guiFiler = buildUI("filer")
-#        self.guiFiler.filer").set_current_folder(config.DefaultRepository)
-#        self.guiFiler.connect_signals({self.gui.Open, 'clicked()', self.filerSelect,
-#                                       self.gui.Cancel, 'clicked()', self.filerDestroy})
+        if self.treeview is not None:
+            self.treeview.close()
+            self.treeview = None
 
-    def filerSelect(self, *args):
-        """Close the filer GUI and update the data"""
-        logger.debug("dirchooser.filerSelect called")
-#        self.importImageCallBack(self.guiFiler.filer").get_current_folder())
-        self.guiFiler.filer.close()
+        path = QFileDialog.getExistingDirectory(self.gui, "Import images from ...")
 
-    def filerDestroy(self, *args):
-        """Close the filer GUI"""
-        logger.debug("dirchooser.filerDestroy called")
-        self.guiFiler.filer.close()
+        logger.warning("Interface.importImageCallBack with dirname= %s", path)
+        if path and os.path.isdir(path):
+            listNew = []
+            allJpegsFullPath = []
+            for afile in self.AllJpegs[:]:
+                if os.path.exists(os.path.join(config.DefaultRepository, afile)):
+                    allJpegsFullPath.append(os.path.join(config.DefaultRepository, afile))
+                else:
+                    logger.info("Removing non existing image file: %s" % afile)
+                    self.AllJpegs.remove(afile)
 
-    def importImageCallBack(self, path):
-        """This is the call back method for launching the import of new images"""
-        logger.debug("Interface.importImageCallBack with dirname= %s" % path)
-        self.update_title()
-        listNew = []
-        allJpegsFullPath = []
-        for afile in self.AllJpegs[:]:
-            if os.path.exists(os.path.join(config.DefaultRepository, afile)):
-                allJpegsFullPath.append(os.path.join(config.DefaultRepository, afile))
-            else:
-                logger.info("Removing non existing image file: %s" % afile)
-                self.AllJpegs.remove(afile)
-
-        # TODO Use MVC here ...
-        for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
-            if oneRaw in allJpegsFullPath:
-                logger.info("file already in repository: %s" % oneRaw)
-            else:
-                logger.debug("Importing: %s" % oneRaw)
-                raw = RawImage(oneRaw)
-                raw.extractJPEG()
-                listNew.append(raw.getJpegPath())
-        if len(listNew) > 0:
-            listNew.sort(key=lambda x:x[:-4])
-            first = listNew[0]
-            self.AllJpegs += listNew
-            self.AllJpegs.sort(key=lambda x:x[:-4])
-            self.idx_current = self.AllJpegs.index(first)
-            self.show_image()
+            # TODO Use MVC here ...
+            for fname in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
+                if fname in allJpegsFullPath:
+                    logger.info("file already in repository: %s", fname)
+                else:
+                    logger.debug("Importing: %s", fname)
+                    new_fname = rename_file(fname)
+                    if new_fname is not None:
+                        listNew.append(new_fname)
+            # print(listNew)
+            if len(listNew) > 0:
+                listNew.sort(key=lambda x:x[:-4])
+                first = listNew[0]
+                self.AllJpegs += listNew
+                self.AllJpegs.sort(key=lambda x:x[:-4])
+                self.idx_current = self.AllJpegs.index(first)
+                self.show_image()
 
     def defineMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""

@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "12/07/2020"
+__date__ = "14/05/2023"
 __license__ = "GPL"
 
 import os
@@ -51,11 +51,13 @@ if PY3:
     unicode = str
     to_unicode = str
 else:
+
     def to_unicode(text):
         if isinstance(text, str):
             return text.decode(config.Coding)
         else:
             return unicode(text)
+
 
 def message_box(parent=None, title="title", text="blabla"):
     """
@@ -65,6 +67,7 @@ def message_box(parent=None, title="title", text="blabla"):
     @return: True if accepted
     """
     qt.QMessageBox.about(parent, to_unicode(title), to_unicode(text))
+
 
 def quit_dialog(parent=None):
     """
@@ -83,6 +86,7 @@ def quit_dialog(parent=None):
     buttonBox.rejected.connect(dialog.reject)
     result = dialog.exec_()
     return result == qt.QDialog.Accepted
+
 
 def ask_media_size():
     """
@@ -205,7 +209,7 @@ def synchronize_dialog(current, AllPhotos, selected):
     gui.SyncCommand.setText(config.SynchronizeRep)
     param = {"newer":gui.SyncNewer,
              "older":gui.SyncOlder,
-             "all":  gui.SyncAll,
+             "all": gui.SyncAll,
              "selected": gui.SyncSelected}
     what = config.SynchronizeType.lower()
     for key, widget in param.items():
