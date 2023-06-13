@@ -30,7 +30,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "17/04/2023"
+__date__ = "13/06/2023"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -319,6 +319,7 @@ class TreeModel(qt.QAbstractItemModel):
             leaf = leaf.parent
         return res[-1::-1]
 
+
 class TreeWidget(qt.QWidget):
 
     def __init__(self, root, parent=None):
@@ -356,7 +357,7 @@ class TreeWidget(qt.QWidget):
         """
         logger.info(f"remove_file {filename} from tree")
         self.model.del_leaf(filename)
-        
+
     def rename_directory(self, old, new):
         """
         rename a directory
@@ -370,14 +371,15 @@ class TreeWidget(qt.QWidget):
         """
         indexes = self.model.indexes_from_filename(filename)
         selectionModel = self.view.selectionModel()
-        #selectionModel.reset()
+        # selectionModel.reset()
         previous = selectionModel.currentIndex()
         for idx in indexes:
             self.view.setExpanded(idx, True)
         self.view.scrollTo(idx, True)
         selectionModel.setCurrentIndex(idx, qt.QItemSelectionModel.Select)
         current = selectionModel.currentIndex()
-        
+
+
 class ColumnWidget(qt.QWidget):
 
     def __init__(self, root, parent=None):
@@ -415,7 +417,7 @@ def main():
     mainw = qt.QMainWindow()
     mainw.setCentralWidget(TreeWidget(tree, mainw))
     mainw.show()
-    app.exec_()
+    app.exec()
 
 
 if __name__ == "__main__":

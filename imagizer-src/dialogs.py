@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "14/05/2023"
+__date__ = "13/06/2023"
 __license__ = "GPL"
 
 import os
@@ -84,7 +84,7 @@ def quit_dialog(parent=None):
     lay.addWidget(buttonBox)
     buttonBox.accepted.connect(dialog.accept)
     buttonBox.rejected.connect(dialog.reject)
-    result = dialog.exec_()
+    result = dialog.exec()
     return result == qt.QDialog.Accepted
 
 
@@ -94,7 +94,7 @@ def ask_media_size():
     """
     gui = qt.buildUI("dialog_tailleCD")
     gui.TailleMo.setText(str(config.MediaSize))
-    result = gui.exec_()
+    result = gui.exec()
     if result == qt.QDialog.Accepted:
         txt = str(gui.TailleMo.text()).strip()
         try:
@@ -153,7 +153,7 @@ def rename_day(filename, all_photos, selected):
     gui.Commentaire.setText(comment["title"])
     gui.Description.setPlainText(comment["comment"].strip().replace("<BR>", "\n",))
 
-    result = gui.exec_()
+    result = gui.exec()
     if result == qt.QDialog.Accepted:
         newname = to_unicode(gui.Commentaire.text()).strip()
         comment["title"] = newname
@@ -215,7 +215,7 @@ def synchronize_dialog(current, AllPhotos, selected):
     for key, widget in param.items():
         widget.setChecked(key == what)
 
-    res = gui.exec_()
+    res = gui.exec()
     logger.debug(res)
     if res in (qt.QDialog.Accepted, PERFORM_SYNCRO):
         config.SynchronizeRep = to_unicode(gui.SyncCommand.text()).strip()
@@ -285,7 +285,7 @@ def slideshow_dialog():
     gui.delai.setValue(float(config.SlideShowDelay))
     gui.rating.setValue(float(config.SlideShowMinRating))
 
-    res = gui.exec_()
+    res = gui.exec()
     logger.debug(res)
 
     if res in (qt.QDialog.Accepted, START_DIAPO):
