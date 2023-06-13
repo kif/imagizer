@@ -23,18 +23,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import with_statement, division, print_function, absolute_import
-
 """Imagizer specific stuff from Qt"""
 
 __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "26/02/2018"
+__date__ = "13/06/2023"
 __status__ = "production"
 
-from ._qt import * # noqa
+import PyQt6.QtCore  # Pre-load PyQt6
+from ._qt import *  # noqa
 # from ._utils import * # noqa
 
 import logging
@@ -54,13 +53,11 @@ def supportedImageFormats():
     return set([convert(data) for data in formats])
 
 
-
 def flush():
     """
     Enforce the flush of the graphical application
     """
-    if QCoreApplication.hasPendingEvents():
-        QCoreApplication.flush()
+    QCoreApplication.processEvents()
 
 
 def update_fig(fig=None):
@@ -76,6 +73,7 @@ def update_fig(fig=None):
                                  QResizeEvent(fig.canvas.size(),
                                                     fig.canvas.size()))
             flush()
+
 
 def buildUI(ui_file):
     """
@@ -126,6 +124,7 @@ class ExtendedQLabel(QLabel):
     zoom = Signal(QWheelEvent, name="zoom")
     pan = Signal(QMoveEvent, name="pan")
     DELTA2 = 100
+
     def __init__(self, parent):
         QLabel.__init__(self, parent)
         self.old_pos = None
