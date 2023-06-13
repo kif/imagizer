@@ -25,7 +25,7 @@
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "14/05/2023"
+__date__ = "13/06/2023"
 __license__ = "GPL"
 
 import gc
@@ -1230,16 +1230,13 @@ class Interface(qt.QObject):
         @param ev: QWheelEvent. See qt.ExtendedLabel
         """
         logger.debug("Interface.image_zoom ")
-        try:
-            zoom = ev.angleDelta().y()
-        except AttributeError:  # Qt4
-            zoom = ev.delta()
+        zoom = ev.angleDelta().y()
         w_width = self.gui.photo.width()
         w_height = self.gui.photo.height()
         p_width = self.gui.photo.pixmap().width()
         p_height = self.gui.photo.pixmap().height()
-        x = ev.x()
-        y = ev.y()
+        x = ev.position().x()
+        y = ev.position().y()
         if zoom > 0 and not self.is_zoomed:
             nx = (x - (w_width - p_width) / 2.0) / p_width
             ny = (y - (w_height - p_height) / 2.0) / p_height

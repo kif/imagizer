@@ -152,12 +152,8 @@ class ExtendedQLabel(QLabel):
         self.old_pos = (ev.x(), ev.y())
 
     def wheelEvent(self, ev):
-        try:
-            _logger.debug("Scroll %s at %s,%s %s",
-                          ev, ev.x(), ev.y(), ev.angleDelta())
-        except AttributeError:  # Qt4
-            _logger.debug("Scroll %s at %s,%s %s",
-                          ev, ev.x(), ev.y(), ev.delta())
+        _logger.debug("Scroll %s at %s,%s %s",
+                          ev, ev.position().x(), ev.position().y(), ev.angleDelta().y())
         self.zoom.emit(ev)
 
 
