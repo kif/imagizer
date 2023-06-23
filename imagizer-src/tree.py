@@ -31,7 +31,7 @@ from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "28/07/2019"
+__date__ = "15/08/2021"
 __license__ = "GPL"
 
 MONTH = {"01": u"Janvier",
@@ -56,7 +56,7 @@ from .photo import Photo
 try:
     from ._tree import TreeItem, TreeRoot
 except:
-# if True:
+    logger.info("Using Python TreeItem and TreeRoot")
     class TreeItem(object):
         """
         Node of a tree ...

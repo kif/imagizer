@@ -30,7 +30,7 @@ from __future__ import print_function, absolute_import, division
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "23/12/2020"
+__date__ = "15/08/2021"
 __license__ = "GPL"
 
 from math import ceil
@@ -142,7 +142,10 @@ class Photo(object):
                 self._pil = Image.open(self.fn)
             else:
                 largest =self.exif.get_largest_preview()
-                self._pil = Image.open(BytesIO(largest.get_data()), mode="r")
+                try:
+                    self._pil = Image.open(BytesIO(largest.get_data()), mode="r")
+                except Exception as e:
+                    logger.error("Unable to extract PIL frame from RAW %s", self.fn)
         return self._pil
 
     @pil.setter
