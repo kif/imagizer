@@ -29,12 +29,15 @@ __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "25/06/2023"
+__date__ = "28/06/2023"
 __status__ = "production"
 
 import PyQt6.QtCore, PyQt6.QtGui  # Pre-load PyQt6
-PyQt6.QtGui.QImageReader.setAllocationLimit(0)
-"""Remove the limit in size for images"""
+try:
+    """Remove the limit in size for images"""
+    PyQt6.QtGui.QImageReader.setAllocationLimit(0)
+except:
+    pass
 from ._qt import *  # noqa
 # from ._utils import * # noqa
 
