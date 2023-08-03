@@ -138,23 +138,24 @@ class ExtendedQLabel(QLabel):
         _logger.debug("Released %s %s", ev, ev)
         if self.old_pos is not None:
             lastx, lasty = self.old_pos
-            x = ev.x()
-            y = ev.y()
+            position = ev.position()
+            x = position.x()
+            y = position.y()
             dx = x - lastx
             dy = y - lasty
             delta2 = dx * dx + dy * dy
             if delta2 > self.DELTA2:
-                move_ev = QMoveEvent(ev.pos(),
-                                           QPoint(*self.old_pos))
-#                 _logger.info("move image %s", move_ev)
+                point = QPoint(*self.old_pos)
+                move_ev = QMoveEvent(ev.pos(), point)
                 self.pan.emit(move_ev)
             self.old_pos = None
         else:
             print("last ev is None !!!")
 
     def mousePressEvent(self, ev):
-        _logger.debug("Pressed %s %s %s ", ev, ev.x(), ev.y())
-        self.old_pos = (ev.x(), ev.y())
+        position = ev.position()
+        _logger.debug("Pressed %s %s %s ", ev, position.x(), position.y())
+        self.old_pos = (int(position.x()), int(position.y()))
 
     def wheelEvent(self, ev):
         _logger.debug("Scroll %s at %s,%s %s",
