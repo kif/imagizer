@@ -25,9 +25,6 @@
 Buils a tree view on the list of files
 """
 
-from __future__ import with_statement, division, print_function, absolute_import
-
-
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
@@ -371,7 +368,7 @@ class TreeWidget(qt.QWidget):
         previous = selectionModel.currentIndex()
         for idx in indexes:
             self.view.setExpanded(idx, True)
-        self.view.scrollTo(idx, True)
+        self.view.scrollTo(idx, qt.QAbstractItemView.ScrollHint(3))
         selectionModel.setCurrentIndex(idx, qt.QItemSelectionModel.Select)
         current = selectionModel.currentIndex()
 
