@@ -2,7 +2,7 @@
 # coding: utf-8
 # ******************************************************************************\
 # *
-# * Copyright (C) 2006 - 2011,  Jérôme Kieffer <imagizer@terre-adelie.org>
+# * Copyright (C) 2006 - 2023,  Jérôme Kieffer <imagizer@terre-adelie.org>
 # * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 # * Licence GPL v2
 # *
@@ -25,12 +25,9 @@
 Module containing most classes for handling images
 """
 
-from __future__ import print_function, absolute_import, division
-
-
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "19/08/2022"
+__date__ = "05/08/2023"
 __license__ = "GPL"
 
 from math import ceil
@@ -301,32 +298,37 @@ class Photo(object):
                     extract = True
                 except (OSError, IOError, RuntimeError):
                     extract = False
-
-                if extract and op.isfile(strThumbFile):
-                    thumbImag = Photo(strThumbFile, dontCache=True)
-                    if self.larg() * thumbImag.larg() < 0:  # Check if the thumbnail is correctly oriented
-                        logger.warning("Thumbnail was not with the same orientation as original: %s" % self.filename)
-                        os.remove(strThumbFile)
-                        extract = False
+                if extract:
+                    if op.isfile(strThumbFile):
+                        thumbImag = Photo(strThumbFile, dontCache=True)
+                        if thumbImag.pixelsY>Size or thumbImag.pixelsX>Size:
+                            logger.warning("Thumbnail is too large in comparison to requested (%s): %s", Size, self.filename)
+                            os.remove(strThumbFile)
+                            extract = False
+                        elif self.larg() * thumbImag.larg() < 0:  # Check if the thumbnail is correctly oriented
+                            logger.warning("Thumbnail was not with the same orientation as original: %s", self.filename)
+                            os.remove(strThumbFile)
+                            extract = False
+                        else:
+                            # crop thumbnail to remove black borders
+                            orig_ratio = float(self.pixelsY) / self.pixelsX
+                            box = None
+                            if self.larg() > 0:  # image in lanscape, maybe crop horizontal bands
+                                new_height = thumbImag.pixelsX * orig_ratio
+                                if abs(new_height - thumbImag.pixelsY) > 2:  # Not the good format
+                                    offset = int(ceil((thumbImag.pixelsY - new_height) / 2.0))
+                                    box = (0, offset,
+                                           thumbImag.pixelsX, thumbImag.pixelsY - offset)
+                            else:  # image in portrait, maybe crop verical bands
+                                new_width = thumbImag.pixelsY / orig_ratio
+                                if abs(new_width - thumbImag.pixelsX) > 2:  # Not the good format
+                                    offset = int(ceil((thumbImag.pixelsX - new_width) / 2.0))
+                                    box = (offset, 0,
+                                           thumbImag.pixelsX - offset, thumbImag.pixelsY)
+                            if box is not None:
+                                thumbImag.pil.crop(box).save(strThumbFile)
                     else:
-                        # crop thumbnail to remove black borders
-                        orig_ratio = float(self.pixelsY) / self.pixelsX
-                        box = None
-                        if self.larg() > 0:  # image in lanscape, maybe crop horizontal bands
-                            new_height = thumbImag.pixelsX * orig_ratio
-                            if abs(new_height - thumbImag.pixelsY) > 2:  # Not the good format
-                                offset = int(ceil((thumbImag.pixelsY - new_height) / 2.0))
-                                box = (0, offset,
-                                       thumbImag.pixelsX, thumbImag.pixelsY - offset)
-                        else:  # image in portrait, maybe crop verical bands
-                            new_width = thumbImag.pixelsY / orig_ratio
-                            if abs(new_width - thumbImag.pixelsX) > 2:  # Not the good format
-                                offset = int(ceil((thumbImag.pixelsX - new_width) / 2.0))
-                                box = (offset, 0,
-                                       thumbImag.pixelsX - offset, thumbImag.pixelsY)
-                        if box is not None:
-                            thumbImag.pil.crop(box).save(strThumbFile)
-
+                        extract = False
             if not extract:
                 if Interpolation < 4:
                     copyOfImage = self.pil.copy()
