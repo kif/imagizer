@@ -1311,7 +1311,7 @@ class Interface(qt.QObject):
 
     def toggle_fullscreen(self, *arg):
         if self.is_fullscreen:
-            self.gui.setWindowState(qt.Qt.WindowNoState | qt.Qt.WindowActive)
+            self.gui.setWindowState(qt.Qt.WindowState.WindowNoState | qt.Qt.WindowState.WindowActive)
             self.gui.menubar.setVisible(True)
             self.menubar_isvisible = True
             self.is_fullscreen = False
