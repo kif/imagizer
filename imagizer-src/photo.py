@@ -27,7 +27,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "05/08/2023"
+__date__ = "18/08/2023"
 __license__ = "GPL"
 
 from math import ceil
@@ -84,7 +84,6 @@ class Photo(object):
                  'Exif.Photo.ISOSpeedRatings':'iso'
                 }
 
-
     def __init__(self, filename, dontCache=False):
         """
         @param filename: Name of the image file, starting from the repository root
@@ -138,7 +137,7 @@ class Photo(object):
             if not self.is_raw:
                 self._pil = Image.open(self.fn)
             else:
-                largest =self.exif.get_largest_preview()
+                largest = self.exif.get_largest_preview()
                 try:
                     data = largest.get_data()
                 except:
@@ -192,10 +191,14 @@ class Photo(object):
             try:
                 self._exif = Exif(self.fn)
             except Exception as e:
-                print(f"Unable to parse metadata for {self.fn}")
+                logger.error(f"Unable to parse metadata for {self.fn}")
                 self._exif = None
-                self._pixelsY = max(1, self.pil.size[1])
-                self._pixelsX = max(1, self.pil.size[0])
+                if self.is_raw:
+                    # for raw images, pil calls exif ... infinite loop of recursion.
+                    self._pixelsX = self._pixelsY = 1
+                else:
+                    self._pixelsY = max(1, self.pil.size[1])
+                    self._pixelsX = max(1, self.pil.size[0])
                 raise e
             else:
                 self._pixelsX, self._pixelsY = self._exif.dimensions
@@ -221,11 +224,9 @@ class Photo(object):
 
     orientation = property(get_orientation, set_orientation)
 
-
     def larg(self):
         """width-height of a jpeg file"""
         return self.pixelsX - self.pixelsY
-
 
     def taille(self):
         """Deprecated method to taille data"""
@@ -272,7 +273,6 @@ class Photo(object):
             rescaled.set_title(title, rate, reset_orientation=True)
             return rescaled
 
-
     def saveThumb(self, strThumbFile, Size=160, Interpolation=1, Quality=75, Progressive=False,
                   Optimize=False, ExifExtraction=False):
         """save a thumbnail of the given name, with the given size and the interpolation methode (quality)
@@ -301,7 +301,7 @@ class Photo(object):
                 if extract:
                     if op.isfile(strThumbFile):
                         thumbImag = Photo(strThumbFile, dontCache=True)
-                        if thumbImag.pixelsY>Size or thumbImag.pixelsX>Size:
+                        if thumbImag.pixelsY > Size or thumbImag.pixelsX > Size:
                             logger.warning("Thumbnail is too large in comparison to requested (%s): %s", Size, self.filename)
                             os.remove(strThumbFile)
                             extract = False
@@ -421,7 +421,6 @@ class Photo(object):
         logger.debug("sent %s to trash" % self.filename)
         self.removeFromCache()
 
-
     def read_exif(self):
         """
         @return: metadata dict (exif data + title from the photo)
@@ -474,7 +473,6 @@ class Photo(object):
             pixbuf = qt.QPixmap(self.fn)
         return pixbuf
 
-
     def get_pixbuf(self, Xsize=600, Ysize=600, Xcenter=None, Ycenter=None):
         """
         Generate a pixbuffer from size and center
@@ -488,7 +486,7 @@ class Photo(object):
         from . import qt
 
         scaled_buf = None
-        if Xsize > config.ImageWidth :
+        if Xsize > config.ImageWidth:
             config.ImageWidth = Xsize
         if Ysize > config.ImageHeight:
             config.ImageHeight = Ysize
@@ -521,7 +519,7 @@ class Photo(object):
 
                 self.scaledPixbuffer = pixbuf.scaled(nxBig, nyBig, aspectRatioMode=qt.Qt.KeepAspectRatio,
                                                      transformMode=qt.transformations[config.Interpolation])
-            else :
+            else:
                 self.scaledPixbuffer = pixbuf
             logger.debug("To Cached  %s, size (%i,%i)" % (self.filename, nxBig, nyBig))
         if Xcenter and Ycenter:
@@ -602,7 +600,6 @@ class Photo(object):
             logger.warning("Got IO exception %s: file has probably changed:\n photo.name=%s\n exif.name=%s\n pil.name=%s" %
                            (error, self.filename, self.exif.filename, self.pil.filename))
 
-
     def renameFile(self, newname):
         """
         rename the current instance of photo:
@@ -619,7 +616,6 @@ class Photo(object):
         self._exif = None
         if (image_cache is not None) and (oldname in image_cache):
             image_cache.rename(oldname, newname)
-
 
     def store_original_name(self, originalName):
         """
@@ -663,7 +659,6 @@ class Photo(object):
                     self.metadata["resolution"] = "%s x %s " % (self.pixelsX, self.pixelsY)
             self.orientation = 1
 
-
     def contrastMask(self, outfile):
         """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste,
         il permet de rattrapper une photo trop contrasté, un contre jour, ...
@@ -688,7 +683,7 @@ class Photo(object):
         ImageFile.MAXBLOCK = dimX * dimY
         img_array = numpy.frombuffer(self.pil.tobytes(), dtype="uint8").astype("float32")
         img_array.shape = (dimY, dimX, 3)
-        red, green, blue = img_array[:, :, 0], img_array[:, :, 1], img_array[:, :, 2]
+        red, green, blue = img_array[:,:, 0], img_array[:,:, 1], img_array[:,:, 2]
         # nota: this is faster than desat2=(ar.max(axis=2)+ar.min(axis=2))/2
         desat_array = (numpy.minimum(numpy.minimum(red, green), blue) + numpy.maximum(numpy.maximum(red, green), blue)) / 2.0
         inv_desat = 255. - desat_array
@@ -715,7 +710,6 @@ class Photo(object):
         res = Photo(outfile)
         res.autorotate()
         return res
-
 
     def autoWB(self, outfile):
         """
@@ -763,12 +757,13 @@ class Photo(object):
         res.autorotate()
         return res
 
-
 # #######################################################
 # # # # # # fin de la classe photo # # # # # # # # # # #
 # #######################################################
 
+
 class Signature(object):
+
     def __init__(self, filename):
         """
         this filter allows add a signature to an image
@@ -797,7 +792,7 @@ class Signature(object):
             return
         self.orientation = orientation
         self.bigsig = Image.new("RGB", (self.x, self.y), (0, 0, 0))
-        if self.x < self.xs or self.y < self.ys :
+        if self.x < self.xs or self.y < self.ys:
             # the signature is larger than the image
             return
         if self.orientation == 0:
@@ -835,6 +830,7 @@ class RawImage:
     - extract thumbnails
     - copy them in the repository
     """
+
     def __init__(self, strRawFile):
         """
         Contructor of the class
