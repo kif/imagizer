@@ -27,7 +27,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "18/08/2023"
+__date__ = "22/08/2023"
 __license__ = "GPL"
 
 from math import ceil
@@ -120,8 +120,8 @@ class Photo(object):
                 self.metadata = fromCache.metadata
                 self._pixelsX = fromCache.pixelsX
                 self._pixelsY = fromCache.pixelsY
-                self._pil = fromCache.pil
-                self._exif = fromCache.exif
+                self._pil = fromCache._pil
+                self._exif = fromCache._exif
                 self.scaledPixbuffer = fromCache.scaledPixbuffer
                 self._orientation = fromCache.orientation
             elif not dontCache:
