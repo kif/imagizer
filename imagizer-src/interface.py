@@ -25,7 +25,7 @@
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "13/06/2023"
+__date__ = "22/08/2024"
 __license__ = "GPL"
 
 import gc
@@ -1117,9 +1117,9 @@ class Interface(qt.QObject):
         self.show_image()
         # start timer
         self.timer = qt.QTimer(self.gui)
-        self.timer.setInterval(1000.0 * config.SlideShowDelay)
+        self.timer.setInterval(int(1000 * config.SlideShowDelay))
         self.timer.timeout.connect(self.new_slide)
-        self.timer.start(1000.0 * config.SlideShowDelay)
+        self.timer.start(int(1000 * config.SlideShowDelay))
 
     def stop_slideshow(self, *args):
         """quit slideshow mode"""
