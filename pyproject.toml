@@ -1,0 +1,66 @@
+[project]
+name = 'imagizer'
+dynamic = ['version',]
+license = {file = 'copyright'}
+requires-python = '>=3.7'
+readme = 'README.txt'
+description = ''
+#keyword = ['image', 'detector']
+authors = [
+  { name = 'Jérôme Kieffer', email = 'jerome.kieffer@terre-adelie.org'},
+]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Console',
+    'Intended Audience :: End Users/Desktop',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    "License :: OSI Approved :: MIT License",
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Programming Language :: C',
+    'Programming Language :: Cython',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Topic :: Scientific/Engineering :: Chemistry',
+    'Topic :: Scientific/Engineering :: Bio-Informatics',
+    'Topic :: Scientific/Engineering :: Physics',
+    'Topic :: Scientific/Engineering :: Visualization',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
+
+dependencies = [
+   'numpy',
+   'pillow'
+]
+
+[build-system]
+build-backend = 'mesonpy'
+requires = [
+    'meson-python>=0.11',
+    "meson>=0.64; platform_system=='Windows'",
+    "meson; platform_system!='Windows'",
+    'ninja',
+    'wheel',
+    'Cython>=0.29',
+    'pyproject-metadata>=0.5.0',
+    'tomli>=1.0.0'
+]
+
+[project.urls]
+homepage = 'http://github.com/kif/imagizer'
+#documentation = 'http://www.silx.org/doc/fabio/latest/'
+source = 'https://github.com/kif/imagizer'
+download = 'https://github.com/kif/imagizer/releases'
+tracker = 'https://github.com/kif/imagizer/issues'
+
+[project.scripts]
+densify_Bragg = 'fabio.app.densify:main'
+eiger2cbf = 'fabio.app.eiger2cbf:main'
+eiger2crysalis = 'fabio.app.eiger2crysalis:main'
+fabio-convert = 'fabio.app.convert:main'
+
+[project.gui-scripts]
+fabio_viewer = 'fabio.app.viewer:main'
