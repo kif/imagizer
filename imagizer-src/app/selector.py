@@ -97,12 +97,12 @@ class Interfaces(object):
 
 
     def create_selected(self):
-        if not os.path.isfile(selected_fn):
+        if not os.path.isfile(self.selected_fn):
             try:
-                f = open(selected_fn, "w")
+                f = open(self.selected_fn, "w")
                 f.close()
             except Exception as error:
-                logger.info("Unable to create selected file %s: %s" % (selected_fn, error))
+                logger.info("Unable to create selected file %s: %s", self.selected_fn, error)
 
     def load_list(self):
         logger.debug("load_list")
@@ -115,7 +115,8 @@ class Interfaces(object):
         self.interface = Interface()  # self.all_files, self.current, self.selected)
         range_tout(config.DefaultRepository, fast=self.fast, updated=self.interface.signal_status, finished=self.interface.signal_newfiles)
 
-if __name__ == '__main__':
+
+def main():
     printWarning = True
 
     parser = ArgumentParser(prog="selector",
@@ -157,4 +158,5 @@ if __name__ == '__main__':
     sys.exit(0)
 
 
-
+if __name__ == '__main__':
+    main()

@@ -31,3 +31,7 @@ subdir('imagizer-src')
 subdir('src')
 subdir('py3exiv2/src')
 subdir('pyexiftran')
+subdir('gui')
+subdir('pixmaps')
+
+
