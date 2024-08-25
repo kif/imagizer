@@ -212,7 +212,7 @@ def gaussian_filter(img, sigma):
 @cython.cdivision(True)
 cdef inline void _point_horizontal(int x, int y, uint8_t[:,:,::1] img, 
                                    uint8_t[:,:,::1] output, float factor, float order, 
-                                   float[:] data) nogil:
+                                   float[:] data) noexcept nogil:
     cdef:
         float[4] sum
         int c = 0
@@ -262,7 +262,7 @@ cdef inline void _point_horizontal(int x, int y, uint8_t[:,:,::1] img,
 @cython.wraparound(False)
 @cython.cdivision(True)
 cdef inline void _point_vertical(int x, int y, uint8_t[:,:,::1] img, uint8_t[:,:,::1] output, 
-                                 float factor, float order, float[:] data) nogil:
+                                 float factor, float order, float[:] data) noexcept nogil:
     cdef:
         float[4] sum
         int c = 0
