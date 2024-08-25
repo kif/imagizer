@@ -926,7 +926,8 @@ def imageSizeNoCache(filename):
 #-------------------------------------------------------------------------------
 #
 
-szre = re.compile('(\d+)x(\d+)')
+
+szre = re.compile(r'(\d+)x(\d+)')
 
 imageSizeCache = {}
 
@@ -1424,7 +1425,7 @@ def main():
                       representations which is an image file.  This option adds
                       step (3).""")
 
-    parser.add_option('--repn-affinity', action='store', help="""Specifies
+    parser.add_option('--repn-affinity', action='store', help=r"""Specifies
                       a comma separated list of regular expressions to match for
                       alt.repn files and file extensions to prefer when
                       searching for a main image file to generate a page for

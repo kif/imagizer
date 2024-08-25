@@ -722,7 +722,7 @@ class Templates(object):
         :return: list of PieceOfCode (3-tuple with text, compiled code and the source)
         """
         output = []
-        mre1 = re.compile("<!--tag(?P<code>code)?:\s*")
+        mre1 = re.compile(r"<!--tag(?P<code>code)?:\s*")
         mre2 = re.compile("-->")
         pos = 0
         errors = 0

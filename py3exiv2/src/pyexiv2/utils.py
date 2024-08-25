@@ -332,7 +332,7 @@ class GPSCoordinate(object):
     properties.
     """
     _format_re = re.compile(r'(?P<degrees>-?\d+),'
-                    '(?P<minutes>\d+)(,(?P<seconds>\d+)|\.(?P<fraction>\d+))'
+                    r'(?P<minutes>\d+)(,(?P<seconds>\d+)|\.(?P<fraction>\d+))'
                     '(?P<direction>[NSEW])')
 
     def __init__(self, degrees, minutes, seconds, direction):
