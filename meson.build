@@ -1,5 +1,5 @@
 project('imagizer',
-  'c', 'cython',
+  'c', 'cython', 'cpp',
   license: 'MIT',
   meson_version: '>= 0.60',
   version: '8.0.0'
@@ -12,6 +12,7 @@ if meson.backend() != 'ninja'
 endif
 
 cc = meson.get_compiler('c')
+cpp = meson.get_compiler('cpp')
 cy = meson.get_compiler('cython')
 m_dep = cc.find_library('m', required : false)
 if m_dep.found()
@@ -22,5 +23,7 @@ endif
 py_mod = import('python')
 py = py_mod.find_installation()
 py_dep = py.dependency()
-
+boost_dep = dependency('boost')
+exiv2_dep = dependency('exiv2')
 subdir('imagizer-src')
+subdir('py3exiv2/src')
