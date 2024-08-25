@@ -103,8 +103,8 @@ class AttrFile(object):
         Parse attributes file lines into a map.
         """
         logger.debug("AttrFile.parse")
-        mre1 = re.compile(b"^([^:\n]+)\s*:", re.M)
-        mre2 = re.compile(b"^\s*$", re.M)
+        mre1 = re.compile(br"^([^:\n]+)\s*:", re.M)
+        mre2 = re.compile(br"^\s*$", re.M)
         bytes_dict = OrderedDict()
         pos = 0
         while True:
@@ -180,7 +180,7 @@ class AttrFile(object):
         value = value.strip()
 
         # remove blank lines from the field value
-        mre2 = re.compile("^\s*$", re.M)
+        mre2 = re.compile(r"^\s*$", re.M)
         while 1:
             mo = mre2.search(value)
             if mo and mo.end() != len(value):
