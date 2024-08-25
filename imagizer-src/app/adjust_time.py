@@ -12,12 +12,12 @@ def gettime(filename):
 		try:
 			timetuple=time.strptime("2006-10-02_"+filename[:8],"%Y-%m-%d_%Hh%Mm%S")
 		except:
-			print "the file does not have look like a time"
+			print("the file does not have look like a time")
 			return
 	else:
-		print "the filename is far too short"
+		print("the filename is far too short")
 		return
-#	print timetuple
+#	print(timetuple)
 	return time.mktime(timetuple)
 
 
@@ -43,6 +43,6 @@ for f in fn:
 			suffix=f[8:]
 			newtime=time.strftime("%Hh%Mm%S",time.localtime(oldtime+shift))
 			dest=os.path.join(ATdir,newtime+suffix)
-#			print f[:8],oldtime,newtime
-			print "%s\t==>\t%s"%(f,dest)
+#			print(f[:8],oldtime,newtime
+			print("%s\t==>\t%s"%(f,dest))
 			os.rename(f,dest)
