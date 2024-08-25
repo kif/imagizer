@@ -5,10 +5,10 @@
 
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "20201222"
+__date__ = "25/08/2024"
 __license__ = "GPL"
 
-import pyexiv2
+from . import pyexiv2
 
 
 class Exif(pyexiv2.ImageMetadata):
