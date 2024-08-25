@@ -31,23 +31,22 @@ Selector is the graphical (GUI) interface part of the Imagizer project.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "25/08/2024"
 __license__ = "GPL"
 
 import os
 import locale
+from argparse import ArgumentParser
 import logging
 import sys
 logger = logging.getLogger("imagizer.selector")
 
-import imagizer
-from imagizer            import qt
-from imagizer.config        import config
-from imagizer.dirchooser    import WarningSc
-from imagizer.selection     import Selected
-from imagizer.argparse      import ArgumentParser
-from imagizer.imagizer      import range_tout
-from imagizer.interface     import Interface
+from ..import qt
+from ..config        import config
+from ..dirchooser    import WarningSc
+from ..selection     import Selected
+from ..imagizer      import range_tout
+from ..interface     import Interface
 
 try:
     from rfoo.utils import rconsole
