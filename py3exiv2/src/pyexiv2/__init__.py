@@ -57,7 +57,7 @@ A typical use of this binding would be:
 >>> metadata.write()
 """
 
-import libexiv2python
+from . import libexiv2python
 
 from pyexiv2.metadata import ImageMetadata
 from pyexiv2.exif import ExifValueError, ExifTag, ExifThumbnail
