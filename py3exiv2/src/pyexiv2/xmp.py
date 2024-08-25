@@ -28,9 +28,9 @@
 XMP specific code.
 """
 
-import libexiv2python
+from . import libexiv2python
 
-from pyexiv2.utils import (FixedOffset, is_fraction, make_fraction,
+from .utils import (FixedOffset, is_fraction, make_fraction,
                           GPSCoordinate, DateTimeFormatter)
 
 import datetime

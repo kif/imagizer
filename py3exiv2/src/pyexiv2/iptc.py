@@ -28,9 +28,9 @@
 IPTC specific code.
 """
 
-import libexiv2python
+from . import libexiv2python
 
-from pyexiv2.utils import ListenerInterface, NotifyingList, \
+from .utils import ListenerInterface, NotifyingList, \
                           FixedOffset, DateTimeFormatter
 
 import time

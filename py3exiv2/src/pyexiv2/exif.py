@@ -28,9 +28,9 @@
 EXIF specific code.
 """
 
-import libexiv2python
+from . import libexiv2python
 
-from pyexiv2.utils import (is_fraction, make_fraction, fraction_to_string,
+from .utils import (is_fraction, make_fraction, fraction_to_string,
                           NotifyingList, ListenerInterface,
                           undefined_to_string, string_to_undefined,
                           DateTimeFormatter)

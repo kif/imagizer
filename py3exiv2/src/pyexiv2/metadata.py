@@ -40,12 +40,12 @@ if sys.version_info < (3, 3):
 else:
     from collections.abc import MutableMapping
 
-import libexiv2python
+from . import libexiv2python
 
-from pyexiv2.exif import ExifTag, ExifThumbnail
-from pyexiv2.iptc import IptcTag
-from pyexiv2.xmp import XmpTag
-from pyexiv2.preview import Preview
+from .exif import ExifTag, ExifThumbnail
+from .iptc import IptcTag
+from .xmp import XmpTag
+from .preview import Preview
 
 
 class ImageMetadata(MutableMapping):
