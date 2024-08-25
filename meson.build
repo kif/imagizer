@@ -23,7 +23,7 @@ endif
 py_mod = import('python')
 py = py_mod.find_installation()
 py_dep = py.dependency()
-boost_dep = dependency('boost')
+boost_dep = dependency('boost', modules : ['python3'])
 exiv2_dep = dependency('exiv2')
 exif_dep = dependency('libexif')
 jpeg_dep = dependency('libjpeg')

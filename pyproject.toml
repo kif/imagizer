@@ -3,7 +3,7 @@ name = 'imagizer'
 dynamic = ['version',]
 license = {file = 'copyright'}
 requires-python = '>=3.7'
-readme = 'README.txt'
+readme = 'README.rst'
 description = 'Tools to manage a repostory of pictures'
 #keyword = ['image', 'detector']
 authors = [
