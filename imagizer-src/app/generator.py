@@ -232,12 +232,15 @@ else:
 
 try:
     import Image as PilImage
+    import ImageFile
 except ImportError as e:
     try:
         from PIL import Image as PilImage
+        from PIL import ImageFile
     except ImportError as e:
         PilImage = None
-
+ImageFile.MAXBLOCK = 1<<30
+PilImage.MAX_IMAGE_PIXELS = None
 
 from imagizer.config    import Config
 config = Config()
@@ -1340,7 +1343,11 @@ def exif(filename):
             ]
     data = {}
     image_exif = Exif(filename)
-    comment = image_exif.comment
+    try:
+        comment = image_exif.comment
+    except Exception as err:
+        logger.warning("%s: Unable to read comment from %s", type(err).__name__, filename)
+        comment = ""
 
     for i in clef:
         try:
