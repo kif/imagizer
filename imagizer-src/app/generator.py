@@ -1324,29 +1324,30 @@ def sous_titre(image):
 
 def exif(filename):
     """return exif data + title from the photo"""
-    clef = ['Exif.Image.Make',
- 'Exif.Image.Model',
- 'Exif.Image.DateTime',
- 'Exif.Photo.ExposureTime',
- 'Exif.Photo.FNumber',
- 'Exif.Photo.DateTimeOriginal',
- 'Exif.Photo.DateTimeDigitized',
- 'Exif.Photo.ShutterSpeedValue',
- 'Exif.Photo.ApertureValue',
- 'Exif.Photo.ExposureBiasValue',
- 'Exif.Photo.Flash',
- 'Exif.Photo.FocalLength',
- 'Exif.Photo.ISOSpeedRatings'
-]
+    clef = [ 'Exif.Image.Make',
+             'Exif.Image.Model',
+             'Exif.Image.DateTime',
+             'Exif.Photo.ExposureTime',
+             'Exif.Photo.FNumber',
+             'Exif.Photo.DateTimeOriginal',
+             'Exif.Photo.DateTimeDigitized',
+             'Exif.Photo.ShutterSpeedValue',
+             'Exif.Photo.ApertureValue',
+             'Exif.Photo.ExposureBiasValue',
+             'Exif.Photo.Flash',
+             'Exif.Photo.FocalLength',
+             'Exif.Photo.ISOSpeedRatings'
+            ]
     data = {}
     image_exif = Exif(filename)
     comment = image_exif.comment
 
     for i in clef:
         try:
-            data[i] = image_exif[i]
-        except:
+            data[i] = image_exif.interpretedExifValue(i)
+        except Exception as err:
             data[i] = ""
+            logger.warning("%s Unable to read key %s from %s", type(err).__name__, i, filename)
     return data, comment
 
 ################################################################################
@@ -1404,6 +1405,8 @@ def prepend_dir_visitor(directory, root):
 #===============================================================================
 
 def main():
+    logging.basicConfig()
+
     import optparse
     parser = optparse.OptionParser(__doc__.strip(), version=__version_pr__)
     parser.add_option('--help-script', action='store_true',

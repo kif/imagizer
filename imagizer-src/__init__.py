@@ -2,7 +2,7 @@
 # coding: utf8
 #
 #******************************************************************************\
-# * Copyright (C) 2006 - 2014,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Copyright (C) 2006 - 2024,  Jérôme Kieffer <kieffer@terre-adelie.org>
 # * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 # * Licence GPL v2
 # *
@@ -32,7 +32,7 @@ It handles images, progress bars and configuration file.
 __author__ = "Jérôme Kieffer"
 __version__ = "7.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "13/06/2023"
+__date__ = "23/12/2024"
 __license__ = "GPL"
 
 import os, logging, sys

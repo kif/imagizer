@@ -2,7 +2,7 @@
 # -*- coding: UTF8 -*-
 
 __author__ = "Jérôme Kieffer"
-__date__ = "2019-07-21"
+__date__ = "2024-12-23"
 __license__ = "GPL"
 
 import sys
@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from collections import namedtuple
 PieceOfCode = namedtuple("PieceOfCode", "preamble compiled source")
 logger = logging.getLogger(__name__)
-from .config    import Config
+from .config import Config
 config = Config()
 
 #===============================================================================
@@ -27,10 +27,10 @@ config = Config()
 # new common code in template-rc.py and use it from your templates.
 
 html_preamble = \
-"""<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">
+f"""<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">
 <html>
 <head>
-   <meta http-equiv=\"Content-Type\" content=\"text/html\"; charset=\"""" + config.Coding + """\" >
+   <meta http-equiv=\"Content-Type\" content=\"text/html\"; charset=\"{config.Coding}\" >
    <link rel=stylesheet type=\"text/css\" href=\"<!--tag:rel(css_fn, cd)-->\">
    <title>%s</title>
 </head>
@@ -133,14 +133,14 @@ default_templates[ 'template-image' ] = \
 <!--tagcode:
 pi = prev(image, allimages)
 if pi:
-    print('<a class="arrow" href="%s">&lt;&lt;&lt;</a>'%rel(pi._pagefn, cd))
+    print(f'<a class="arrow" href="{rel(pi._pagefn, cd)}">&lt;&lt;&lt;</a>')
 -->
 
 </td><td width="50%" align="right">
 <!--tagcode:
 ni = next(image, allimages)
 if ni:
-    print('<a class="arrow" href="%s">&gt;&gt;&gt;</a>'%rel(ni._pagefn, cd))
+    print(f'<a class="arrow" href="{rel(ni._pagefn, cd)}">&gt;&gt;&gt;</a>')
 -->
 </td></tr></table>
 
@@ -161,16 +161,15 @@ if image._pagefn:
         e = w
         pi = prev(image, allimages)
         if pi:
-            print( '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %                   (0, 0, w4, h, rel(pi._pagefn, cd)))
+            print(f'<area shape=rect coords="0,0,{w4},{h}" href="{rel(pi._pagefn, cd)}">')
             s = w4
 
         ni = next(image, allimages)
         if ni:
-            print( '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %                   (3*w4, 0, w, h, rel(ni._pagefn, cd)))
+            print(f'<area shape=rect coords="{3*w4},0,{w},{h}" href="{rel(ni._pagefn, cd)}">')
             e = 3*w4
 
-        print( '<area shape=rect coords="%d,%d,%d,%d" href="%s">' %               (s, 0, e, ht, rel(image._dir._pagefn, cd)))
-
+        print(f'<area shape=rect coords="{s},0,{e},{ht}" href="{rel(image._dir._pagefn, cd)}">')
         print( '</map>')
 
     else:
@@ -207,7 +206,7 @@ if image._attr:
 if image._attr:
     location = image._attr.get('location')
     if location:
-        print('<span class="location">%s</span><br>' % location)
+        print(f'<span class="location">{location}</span><br>')
 -->
 <p>
 
@@ -243,8 +242,8 @@ if image._exif:
     print('<span class="settingstitle">PARAMETRES PHOTO:</span></td></tr>')
     for s in exif_tag:
         if exif_key[s] in image._exif:
-            print('<tr><td class="settings">%s:</td> \
-            <td class="settings"> %s </td></tr>' % (s,image._exif[exif_key[s]]))
+            print(f'<tr><td class="settings">{s}:</td> \
+            <td class="settings"> {image._exif[exif_key[s]]} </td></tr>')
 -->
 
 </table>
@@ -267,7 +266,7 @@ if pi and pi._thumbsize:
 else:
     pw = opts.thumb_size
 
-print('<td width="%d">' % pw)
+print(f'<td width="{pw}">')
 if pi:
     print(thumbImage(cd, pi, 'align="left"'))
 -->
@@ -288,7 +287,7 @@ if pi:
 if len(image._altrepns) > 0:
     print("Alternative representations:")
     for rep in image._altrepns.keys():
-        print('<a href="%s">%s</a>&nbsp;'%(urlquote(rel(join(image._dir._path,image._altrepns[ rep ]), cd)), rep))
+        print(f'<a href="{urlquote(rel(join(image._dir._path,image._altrepns[ rep ]), cd))}">{rep}</a>&nbsp;')
     print('<p>')
 -->
 
@@ -314,7 +313,7 @@ if ni and ni._thumbsize:
 else:
     nw = opts.thumb_size
 
-print('<td width="%d">' % nw)
+print(f'<td width="{nw}">')
 if ni:
     print(thumbImage(cd, ni, 'align="right"'))
 -->
@@ -356,12 +355,12 @@ if dir._parent:
     if icur > 0:
        iprev = icur - 1
        dprev = sname[iprev]
-       print('<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename ))
-    print('<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd))
+       print(f'<a href="{rel(dprev._pagefn,cd)}">{dprev._basename}</a>|')
+    print(f'<a href="{rel(rootdir._pagefn, cd)}">Haut</a>')
     if icur < len(sname)-1:
        inext = icur + 1
        dnext = sname[inext]
-       print('|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename ))
+       print(f'|<a href="{rel(dnext._pagefn,cd)}">{dnext._basename}</a>')
 -->
 </div>
 
@@ -392,19 +391,19 @@ if len( dir._subdirs ) > 0:
                 else:
                     width=config.Thumbnails["Size"]
                     height=3*width/4
-                print('<td><center><a href="%s"><img CLASS="thumb" src="%s" alt="%s" height=%i width=%i></a></center></td>'%(rel(d._pagefn,cd),rel(filename,op.split(cd)[1]),op.split(filename)[1],height,width))
+                print(f'<td><center><a href="{rel(d._pagefn,cd)}"><img CLASS="thumb" src="{rel(filename,op.split(cd)[1])}" alt="{op.split(filename)[1]}" height={height} width={width}></a></center></td>')
             else:
                 print("<td> </td>")
             if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
-                print('<td><center><a href="%s">%s<br>%s</a></center></td>'%(rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"])))
+                print(f'<td><center><a href="{rel(d._pagefn,cd)}">{unicode2html(d._attrfile["date"])}<br>{unicode2html(d._attrfile["title"])}</a></center></td>')
             else:
                 if len(d._basename)>11:
                     if d._basename[10] in [" ","_","-"]:
-                        print('<td><a href="%s">%s<br>%s</a></td>'%(rel(d._pagefn,cd),d._basename[:10],d._basename[11:]))
+                        print(f'<td><a href="{rel(d._pagefn,cd)}">{d._basename[:10]}<br>{d._basename[11:]}</a></td>')
                     else:
-                        print('<td><a href="%s">%s</a></td>'%(rel(d._pagefn,cd),d._basename))
+                        print(f'<td><a href="{rel(d._pagefn,cd)}">{d._basename}</a></td>')
             if d._attrfile.has_key("comment"):
-                print("<td>%s</td>"%(unicode2html(d._attrfile["comment"].replace("<BR>","\\n")).replace("\\n","<BR>")))
+                print(f"<td>{unicode2html(d._attrfile['comment'].replace('<BR>',os.linesep)).replace(os.linesep,'<BR>')}</td>")
             else:
                 print("<td> </td>")
             print("</tr>")
@@ -426,11 +425,11 @@ if len( dir._subdirs ) > 0:
                         comment=unicode2html(d._attrfile["comment"].replace("<BR>"," "))
                 if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
                     if len(d._attrfile["date"])>0:
-                        print('<li><a href="%s">%s : %s.</a> <i>%s</i></li>' %( rel(d._pagefn,cd),unicode2html(d._attrfile["date"]),unicode2html(d._attrfile["title"]), comment))
+                        print(f'<li><a href="{rel(d._pagefn,cd)}">{unicode2html(d._attrfile["date"])} : {unicode2html(d._attrfile["title"])}.</a> <i>{comment}</i></li>')
                     else:
-                        print('<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment))
+                        print(f'<li><a href="{rel(d._pagefn,cd)}">{d._basename}.</a>  <i>{comment}</i></li>')
                 else:
-                    print('<li><a href="%s">%s.</a>  <i>%s</i></li>' %( rel(d._pagefn,cd), d._basename,comment))
+                    print(f'<li><a href="{rel(d._pagefn,cd)}">{d._basename}.</a>  <i>{comment}</i></li>')
         print('</ul><p>')
 -->
 
@@ -455,12 +454,12 @@ if dir._parent:
     if icur > 0:
        iprev = icur - 1
        dprev = sname[iprev]
-       print('<a href="%s">%s</a>|' % ( rel(dprev._pagefn,cd), dprev._basename ))
-    print('<a href="%s">Haut</a>' % rel(rootdir._pagefn, cd))
+       print(f'<a href="{rel(dprev._pagefn,cd)}">{dprev._basename}</a>|')
+    print(f'<a href="{rel(rootdir._pagefn, cd)}">Haut</a>')
     if icur < len(sname)-1:
        inext = icur + 1
        dnext = sname[inext]
-       print('|<a href="%s">%s</a>' % ( rel(dnext._pagefn,cd), dnext._basename ))
+       print('|<a href="{rel(dnext._pagefn,cd)}">{dnext._basename}</a>')
 -->
 </div>
 
@@ -517,8 +516,7 @@ if len(alldirs) > 0:
             pname = d._path
         else:
             pname = '(root)'
-        print('<li><a href=\"%s\">%s</a></li>' % \
-            ( rel(d._pagefn, cd), pname ))
+        print(f'<li><a href=\"{rel(d._pagefn, cd)}\">{pname}</a></li>')
     print('</ul><p>')
 -->
 
@@ -527,7 +525,7 @@ if len(tracks) > 0:
     print('<h3>Tracks:</h3>')
     print('<ul>')
     for t in tracks:
-        print('<li><a href=\"%s\">%s</a></li>' % (trackindex_fns[t], t))
+        print(f'<li><a href=\"{trackindex_fns[t]}\">{t}</a></li>')
     print('</ul>')
 -->
 
@@ -565,7 +563,7 @@ if len(allimages) > 0:
     for i in ilist:
         print('<p>')
         print(thumbImage( cd, i, 'align=\"middle\"' ))
-        print('<a href=\"%s\">%s</a>' %( rel(i._pagefn, cd), i._base ))
+        print(f'<a href=\"{rel(i._pagefn, cd)}\">{i._base}</a>')
         print()
 -->
 """ + html_postamble
@@ -606,7 +604,7 @@ class Templates(object):
         # Compile HTML templates.
 
         for tt in [ 'image', 'dirindex', 'allindex', 'trackindex', 'sortindex' ]:
-            fn = 'template-%s' % tt + self.opts.htmlext
+            fn = f'template-{tt}' + self.opts.htmlext
             templatetxt = self.read_one(fn)
             self.templates[ tt ] = self.compile_template(templatetxt, fn)
 
@@ -739,7 +737,7 @@ class Templates(object):
             pretext = templatetxt[ pos: mo1.start() ]
             code = templatetxt[ mo1.end(): mo2.start() ]
             if not mo1.group('code'):
-                code = "sys.stdout.write(%s)" % code
+                code = f"sys.stdout.write({code})"
             output.append(self.compile_code(pretext, code, filename))
             pos = mo2.end()
 
