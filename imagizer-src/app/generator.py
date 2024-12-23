@@ -1344,10 +1344,10 @@ def exif(filename):
 
     for i in clef:
         try:
-            data[i] = image_exif.interpretedExifValue(i)
+            data[i] = str(image_exif.interpretedExifValue(i)).capitalize()
         except Exception as err:
             data[i] = ""
-            logger.warning("%s Unable to read key %s from %s", type(err).__name__, i, filename)
+            logger.warning("%s: Unable to read key %s from %s", type(err).__name__, i, filename)
     return data, comment
 
 ################################################################################
