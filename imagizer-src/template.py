@@ -2,7 +2,7 @@
 # -*- coding: UTF8 -*-
 
 __author__ = "Jérôme Kieffer"
-__date__ = "2024-12-23"
+__date__ = "2025-01-05"
 __license__ = "GPL"
 
 import sys
@@ -459,7 +459,7 @@ if dir._parent:
     if icur < len(sname)-1:
        inext = icur + 1
        dnext = sname[inext]
-       print('|<a href="{rel(dnext._pagefn,cd)}">{dnext._basename}</a>')
+       print(f'|<a href="{rel(dnext._pagefn,cd)}">{dnext._basename}</a>')
 -->
 </div>
 
