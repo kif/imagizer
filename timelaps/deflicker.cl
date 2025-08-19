@@ -91,8 +91,8 @@ static float3 XYZ2Lab(float3 XYZ)
            xyz = XYZ/D65,
            fxyz = (float3)(comp_L(xyz.x), comp_L(xyz.y), comp_L(xyz.z));
     Lab = (float3)(116.0f * fxyz.y - 16.0f,
-                   500*(fxyz.x - fxyz.y),
-                   200*(fxyz.y - fxyz.z));
+                   500 * (fxyz.x - fxyz.y),
+                   200 * (fxyz.y - fxyz.z));
     return Lab;
 }
 
@@ -262,7 +262,7 @@ static float3 bilinear3(float2 target,
         }
         else 
         { //no interpolation TODO: round index !
-                interp = load3(image, (int)(target.y + 0.5) * size.x + (int)(target.x + 0.5));
+                interp = load3(image, (int)(target.y + 0.5f) * size.x + (int)(target.x + 0.5f));
         }
     }
     
@@ -315,7 +315,7 @@ static float3 lanczos(float2 target,
             coef_x = _lanczos_n(((float)x-target.x)/scale.x, fmode);
             idx = y * size.x + x;
             coef = coef_x * coef_y;
-            if (fabs(coef)>1e-30)
+            if (fabs(coef)>1.0e-30f)
             {
                 sum4 += (float4)(load3(image, idx) * coef, coef);
             }
@@ -339,7 +339,7 @@ kernel void rotate_image(global float *inp, global float *out, int width, int he
         float3 out3= bilinear3(target, 
                                inp,
                                (int2)(width, height),
-                               (float3) (0.0f,0.0f,0.0f),
+                               (float3) (0.0f, 0.0f, 0.0f),
                                1);
         out[3*i] = out3.x;
         out[3*i+1] = out3.y;

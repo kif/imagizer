@@ -1,5 +1,11 @@
+# cython: profile=False
+# cython: language_level=3
+
+import logging
+logger = logging.getLogger(__name__)
 import cython
 import os
+
 
 cdef class TreeItem(object):
     """
@@ -19,7 +25,7 @@ cdef class TreeItem(object):
     cdef public int order
     cdef public object extra
 
-    def __init__(self, label=None, parent=None):
+    def __init__(self, str label=None, TreeItem parent=None, object extra=None):
         self.children = []
         self.parent = parent
         self.label = label
@@ -28,7 +34,7 @@ cdef class TreeItem(object):
             self.order = parent.order + 1
         else:
             self.order = 0
-        self.extra = None
+        self.extra = extra
 
     cpdef add_child(self, TreeItem child):
         self.children.append(child)
@@ -53,7 +59,8 @@ cdef class TreeItem(object):
         self.children.sort(key=lambda x:x.label)
 
     cpdef TreeItem next(self):
-        cdef int idx
+        cdef:
+            int idx
         if self.parent is None:
             raise IndexError("Next does not exist")
         idx = self.parent.children.index(self)
@@ -63,7 +70,8 @@ cdef class TreeItem(object):
             return self.parent.next().children[0]
 
     cpdef TreeItem previous(self):
-        cdef int idx
+        cdef:
+            int idx
         if self.parent is None:
             raise IndexError("Previous does not exist")
         idx = self.parent.children.index(self)
@@ -84,16 +92,21 @@ cdef class TreeItem(object):
         else:
             return self
 
+    cdef int _size(self):
+        "Cython way of calculating size"
+        cdef:
+            int s = 0
+            TreeItem child
+        if self.children:
+            for child in self.children:
+                s += child._size()
+            return s
+        else:
+            return 1
+
     property size:
         def __get__(self):
-            cdef int s = 0
-            cdef TreeItem child
-            if self.children:
-                for child in self.children:
-                    s += child.size()
-                return s
-            else:
-                return 1
+            return self._size()
 
     property name:
         def __get__(self):
@@ -103,4 +116,115 @@ cdef class TreeItem(object):
                 return self.parent.name + os.sep + self.label
             else:
                 return self.parent.name + "-" + self.label
+
+    cpdef int sub_index(self):
+        cdef:
+            int s, in_list
+            TreeItem brother
+
+        if self.parent is None:
+            return 0
+        else:
+            in_list = self.parent.children.index(self)
+            s = 0
+            for brother in self.parent.children[:in_list]:
+                s+=brother._size()
+            return s
+
+    cpdef TreeItem _getitem(self, int idx):
+        "List emulation mode, retrieve index, return self when no children"
+        cdef:
+            int size, sum_,
+            TreeItem child, element
+        if self.children:
+            sum_ = 0
+            for child in self.children:
+                child_size = child._size()
+                if sum_ + child_size <= idx:
+                    sum_ += child_size
+                else:
+                    return child._getitem(idx - sum_)
+        else:
+            return self
+
+
+cdef class TreeRoot(TreeItem):
+    "TreeRoot has some additional methods"
+    cpdef TreeItem find_leaf(self, str name):
+        "Find an element in the tree, return None if not present"
+        cdef TreeItem element, child
+        day, hour = os.path.split(name)
+        ymd = day.split("-", 2)
+        ymd.append(hour)
+        element = self
+        for item in ymd:
+            child = element.get(item)
+            if child is None:
+                logger.error("Node %s from %s does not exist, cannot remove", item, name)
+            element = child
+        return element
+
+    cpdef add_leaf(self, str name, object extra=None):
+        "Add a new leaf to the tree, only available from root"
+        day, hour = os.path.split(name)
+        ymd = day.split("-", 2)
+        ymd.append(hour)
+        element = self
+        for level, item in enumerate(ymd):
+            child = element.get(item)
+            if child is None:
+                if level == 3:
+                    child = TreeItem(item, element, extra)
+                else:
+                    child = TreeItem(item, element)
+            element = child
+
+    cpdef del_leaf(self, str name):
+        "Remove a leaf from the tree, only available from root"
+        cdef:
+            TreeItem element, child
+        element = self.find_leaf(name)
+        if element:
+            # Now start deleting:
+            while element.parent is not None:
+                element.parent.children.remove(element)
+                if not element.parent.children:
+                    element = element.parent
+                else:
+                    return
+                
+    cpdef rename_day(self, str old, str new):
+        cdef:
+            TreeItem element, child
+        element = self.find_leaf(old)
+        day, hour = os.path.split(new)
+        ymd = day.split("-", 2)
+        if element:
+            kday = element.parent
+            kday.label = ymd[-1]
+            return kday
+
+    cpdef int index(self, str name):
+        "Calculate the index of an item as if it was a list"
+        cdef:
+            int idx=0
+            TreeItem element
+        element = self.find_leaf(name)
+        if element is None:
+            return -1
+        while element:
+            idx += element.sub_index()
+            element = element.parent
+        return idx
+
+    def  __getitem__(self, idx):
+        "x.__getitem__(y) <==> x[y]"
+        cdef:
+            int size
+        size = self._size()
+        if idx<0:
+            idx = size + idx
+        if idx>=size:
+            raise IndexError("list index out of range")
+        return self._getitem(idx).name
 

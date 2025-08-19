@@ -22,17 +22,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import with_statement, division, print_function, absolute_import
-
 """Imagizer specific stuff from Qt"""
 
 __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "01/01/2016"
+__date__ = "13/06/2023"
 __status__ = "production"
-
 
 import os
 import sys
@@ -65,6 +62,7 @@ def update_fig(fig=None):
                                  QtGui.QResizeEvent(fig.canvas.size(),
                                                     fig.canvas.size()))
             flush()
+
 
 def buildUI(ui_file):
     """
@@ -114,6 +112,7 @@ class ExtendedQLabel(QtGui.QLabel):
     zoom = Signal(QtGui.QWheelEvent, name="zoom")
     pan = Signal(QtGui.QMoveEvent, name="pan")
     DELTA2 = 100
+
     def __init__(self, parent):
         QtGui.QLabel.__init__(self, parent)
         self.old_pos = None

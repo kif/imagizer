@@ -2,34 +2,34 @@
 # coding: utf-8
 #
 #******************************************************************************\
-#* $Source$
-#* $Id$
-#*
-#* Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# * $Source$
+# * $Id$
+# *
+# * Copyright (C) 2006 - 2010,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 """
 Utility function to convert string to ASCII
 """
 from __future__ import with_statement, division, print_function, absolute_import
 __author__ = "Jérôme Kieffer"
-__date__ = "14/12/2014"
+__date__ = "28/07/2019"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPLv3+"
 __contact__ = "Jerome.Kieffer@terre-adelie.org"
@@ -47,33 +47,144 @@ else:
 
 
 
-LATIN_TO_ASCII = {0xc0:'A', 0xc1:'A', 0xc2:'A', 0xc3:'A', 0xc4:'A', 0xc5:'A',
-                 0xc6:'Ae', 0xc7:'C',
-                 0xc8:'E', 0xc9:'E', 0xca:'E', 0xcb:'E',
-                 0xcc:'I', 0xcd:'I', 0xce:'I', 0xcf:'I',
-                 0xd0:'Th', 0xd1:'N',
-                 0xd2:'O', 0xd3:'O', 0xd4:'O', 0xd5:'O', 0xd6:'O', 0xd8:'O',
-                 0xd9:'U', 0xda:'U', 0xdb:'U', 0xdc:'U',
-                 0xdd:'Y', 0xde:'th', 0xdf:'ss',
-                 0xe0:'a', 0xe1:'a', 0xe2:'a', 0xe3:'a', 0xe4:'a', 0xe5:'a',
-                 0xe6:'ae', 0xe7:'c',
-                 0xe8:'e', 0xe9:'e', 0xea:'e', 0xeb:'e',
-                 0xec:'i', 0xed:'i', 0xee:'i', 0xef:'i',
-                 0xf0:'th', 0xf1:'n',
-                 0xf2:'o', 0xf3:'o', 0xf4:'o', 0xf5:'o', 0xf6:'o', 0xf8:'o',
-                 0xf9:'u', 0xfa:'u', 0xfb:'u', 0xfc:'u',
-                 0xfd:'y', 0xfe:'th', 0xff:'y',
-                 0xa1:'!', 0xa2:'{cent}', 0xa3:'{pound}', 0xa4:'{currency}',
-                 0xa5:'{yen}', 0xa6:'|', 0xa7:'{section}', 0xa8:'{umlaut}',
-                 0xa9:'{C}', 0xaa:'{^a}', 0xab:'<<', 0xac:'{not}',
-                 0xad:'-', 0xae:'{R}', 0xaf:'_', 0xb0:'{degrees}',
-                 0xb1:'{+/-}', 0xb2:'{^2}', 0xb3:'{^3}', 0xb4:"'",
-                 0xb5:'{micro}', 0xb6:'{paragraph}', 0xb7:'*', 0xb8:'{cedilla}',
-                 0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>',
-                 0xbc:'{1/4}', 0xbd:'{1/2}', 0xbe:'{3/4}', 0xbf:'?',
-                 0xd7:'*', 0xf7:'/'
+LATIN_TO_ASCII = {0x99: 'oe',
+                  0xc0:'A',
+                  0xc1:'A',
+                  0xc2:'A',
+                  0xc3:'A',
+                  0xc4:'A',
+                  0xc5:'A',
+                  0xc6:'AE',  # Æ
+                  0xe6:'ae',  # æ
+                  0xc7:'C',
+                  0xc8:'E', 0xc9:'E', 0xca:'E', 0xcb:'E',
+                  0xcc:'I', 0xcd:'I', 0xce:'I', 0xcf:'I',
+                  0xd0:'Th',  # Ð
+                  0xf0:'th',  # ð
+                  0xde:'Th',  # Þ
+                  0xfe:'th',  # þ
+                  0xd1:'N',
+                  0xd2:'O', 0xd3:'O', 0xd4:'O', 0xd5:'O', 0xd6:'O', 0xd8:'O',
+                  0xd9:'U', 0xda:'U', 0xdb:'U', 0xdc:'U',
+                  0xdd:'Y', 0xdf:'ss',
+                  0xe0:'a', 0xe1:'a', 0xe2:'a', 0xe3:'a', 0xe4:'a', 0xe5:'a',
+                  0xe7:'c',
+                  0xe8:'e', 0xe9:'e', 0xea:'e', 0xeb:'e',
+                  0xec:'i', 0xed:'i', 0xee:'i', 0xef:'i',
+                  0xf1:'n',
+                  0xf2:'o', 0xf3:'o', 0xf4:'o', 0xf5:'o', 0xf6:'o', 0xf8:'o',
+                  0xf9:'u', 0xfa:'u', 0xfb:'u', 0xfc:'u',
+                  0xfd:'y', 0xff:'y',
+                  0xa1:'!', 0xa2:'{cent}', 0xa3:'{pound}', 0xa4:'{currency}',
+                  0xa5:'{yen}', 0xa6:'|', 0xa7:'{section}', 0xa8:'{umlaut}',
+                  0xa9:'{C}', 0xaa:'{^a}', 0xab:'<<', 0xac:'{not}',
+                  0xad:'-', 0xae:'{R}', 0xaf:'_', 0xb0:'{degrees}',
+                  0xb1:'{+/-}', 0xb2:'{^2}', 0xb3:'{^3}', 0xb4:"'",
+                  0xb5:'{micro}', 0xb6:'{paragraph}', 0xb7:'*', 0xb8:'{cedilla}',
+                  0xb9:'{^1}', 0xba:'{^o}', 0xbb:'>>',
+                  0xbc:'{1/4}', 0xbd:'{1/2}', 0xbe:'{3/4}', 0xbf:'?',
+                  0xd7:'*', 0xf7:'/',
+                  0xe2:"'",
                  }
-
+UNICODE_TO_ASCII = { u'\x99': 'oe',
+                     u'\xa1': '!',
+                     u'\xa2': '{cent}',
+                     u'\xa3': '{pound}',
+                     u'\xa4': '{currency}',
+                     u'\xa5': '{yen}',
+                     u'\xa6': '|',
+                     u'\xa7': '{section}',
+                     u'\xa8': '{umlaut}',
+                     u'\xa9': '{C}',
+                     u'\xaa': '{^a}',
+                     u'\xab': '<<',
+                     u'\xac': '{not}',
+                     u'\xad': '-',
+                     u'\xae': '{R}',
+                     u'\xaf': '_',
+                     u'\xb0': '{degrees}',
+                     u'\xb1': '{+/-}',
+                     u'\xb2': '{^2}',
+                     u'\xb3': '{^3}',
+                     u'\xb4': "'",
+                     u'\xb5': '{micro}',
+                     u'\xb6': '{paragraph}',
+                     u'\xb7': '*',
+                     u'\xb8': '{cedilla}',
+                     u'\xb9': '{^1}',
+                     u'\xba': '{^o}',
+                     u'\xbb': '>>',
+                     u'\xbc': '{1/4}',
+                     u'\xbd': '{1/2}',
+                     u'\xbe': '{3/4}',
+                     u'\xbf': '?',
+                     u'\xc0': 'A',
+                     u'\xc1': 'A',
+                     u'\xc2': 'A',
+                     u'\xc3': 'A',
+                     u'\xc4': 'A',
+                     u'\xc5': 'A',
+                     u'\xc6': 'AE',
+                     u'\xc7': 'C',
+                     u'\xc8': 'E',
+                     u'\xc9': 'E',
+                     u'\xca': 'E',
+                     u'\xcb': 'E',
+                     u'\xcc': 'I',
+                     u'\xcd': 'I',
+                     u'\xce': 'I',
+                     u'\xcf': 'I',
+                     u'\xd0': 'Th',
+                     u'\xd1': 'N',
+                     u'\xd2': 'O',
+                     u'\xd3': 'O',
+                     u'\xd4': 'O',
+                     u'\xd5': 'O',
+                     u'\xd6': 'O',
+                     u'\xd7': '*',
+                     u'\xd8': 'O',
+                     u'\xd9': 'U',
+                     u'\xda': 'U',
+                     u'\xdb': 'U',
+                     u'\xdc': 'U',
+                     u'\xdd': 'Y',
+                     u'\xde': 'Th',
+                     u'\xdf': 'ss',
+                     u'\xe0': 'a',
+                     u'\xe1': 'a',
+                     u'\xe2': "'",
+                     u'\xe3': 'a',
+                     u'\xe4': 'a',
+                     u'\xe5': 'a',
+                     u'\xe6': 'ae',
+                     u'\xe7': 'c',
+                     u'\xe8': 'e',
+                     u'\xe9': 'e',
+                     u'\xea': 'e',
+                     u'\xeb': 'e',
+                     u'\xec': 'i',
+                     u'\xed': 'i',
+                     u'\xee': 'i',
+                     u'\xef': 'i',
+                     u'\xf0': 'th',
+                     u'\xf1': 'n',
+                     u'\xf2': 'o',
+                     u'\xf3': 'o',
+                     u'\xf4': 'o',
+                     u'\xf5': 'o',
+                     u'\xf6': 'o',
+                     u'\xf7': '/',
+                     u'\xf8': 'o',
+                     u'\xf9': 'u',
+                     u'\xfa': 'u',
+                     u'\xfb': 'u',
+                     u'\xfc': 'u',
+                     u'\xfd': 'y',
+                     u'\xfe': 'th',
+                     u'\xff': 'y',
+                     u'\x99': 'oe',
+                     u'\u2019': "'",
+                     }
 
 UNICODE_TO_HTML = { u('\u0022'): '&quot;',
                     u('\u0026'): '&amp;',
@@ -327,7 +438,7 @@ UNICODE_TO_HTML = { u('\u0022'): '&quot;',
                     u('\u2660'): '&spades;',
                     u('\u2663'): '&clubs;',
                     u('\u2665'): '&hearts;',
-                    u('\u2666'): '&diams;'
+                    u('\u2666'): '&diams;',
                     }
 
 def unicode2ascii(unicrap):
@@ -355,37 +466,35 @@ def unicode2ascii(unicrap):
             else:
                 str_out += chr(i)
 
-    else: #Python2
+    else:  # Python2
         if isinstance(unicrap, unicode):
-            byte_crap = unicrap.encode("latin-1")
+            str_out = "".join(UNICODE_TO_ASCII.get(i, "")  if ord(i) > 128 else i for i in unicrap)
         else:
             byte_crap = unicrap
-        for i in byte_crap:
-            ordi = ord(i)
-            if ordi in LATIN_TO_ASCII:
-                str_out += LATIN_TO_ASCII[ordi]
-            elif ordi >= 0x80:
-                pass
-            else:
-                str_out += str(i)
+            for i in byte_crap:
+                ordi = ord(i)
+                if ordi in LATIN_TO_ASCII:
+                    str_out += LATIN_TO_ASCII[ordi]
+                elif ordi >= 0x80:
+                    pass
+                else:
+                    str_out += str(i)
     return str_out
 
 
-def unicode2html(_unicrap):
+def unicode2html(unicrap):
     """
     Converts an unicode input into a "html" like string
 
-    @param _unicrap: input unicode
+    @param unicrap: input unicode
     @return: html string
     """
-    str_out = ""
-    if _unicrap is not None:
-        for i in _unicrap:
-            if i in UNICODE_TO_HTML:
-                str_out += UNICODE_TO_HTML[i]
-            else:
-                str_out += str(i)
-    return str_out
+    strout = ""
+    if unicrap is not None:
+        if not isinstance(unicrap, unicode):
+            unicrap = unicrap.decode("utf-8")
+        strout = "".join(UNICODE_TO_HTML[i] if i in UNICODE_TO_HTML else str(i) for i in unicrap)
+    return strout
 
 def test():
     if PY3:

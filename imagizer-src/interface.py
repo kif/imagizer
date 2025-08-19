@@ -22,12 +22,10 @@
 # *
 #*****************************************************************************/
 
-from __future__ import with_statement, division, print_function, absolute_import
-
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "13/01/2019"
+__date__ = "22/08/2024"
 __license__ = "GPL"
 
 import gc
@@ -37,18 +35,23 @@ import logging
 import random
 import subprocess
 import threading
+import sys
+if sys.version_info[0] > 2:
+    unicode = str
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copy_selected, process_selected, to_jpeg
 from . import qt
-from .qt import buildUI, flush, icon_on, ExtendedQLabel, Signal
+from .qt import buildUI, flush, icon_on, ExtendedQLabel, Signal, QFileDialog
 from .selection import Selected
-from .photo import Photo
+from .photo import Photo, RawImage
 from .utils import get_pixmap_file
 from .config import config, listConfigurationFiles
-from .imagecache import imageCache
+from .imagecache import image_cache, title_cache
 from . import tree, __version__
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
-from .fileutils import smartSize, recursive_delete
+from .search import SearchTitle
+from .fileutils import smartSize, recursive_delete, findFiles
+from .imagizer import rename_file
 
 
 class Interface(qt.QObject):
@@ -58,6 +61,7 @@ class Interface(qt.QObject):
     signal_status = Signal(str, int, int)
     signal_newfiles = Signal(list, int)
     signal_processed = Signal(list)
+
     def __init__(self, AllJpegs=None, first=0, selected=None, mode="Default", callback=None):
         qt.QObject.__init__(self)
         self.callback = callback
@@ -73,6 +77,7 @@ class Interface(qt.QObject):
         self.is_fullscreen = False
         self.in_slideshow = False
         self.treeview = None
+        self.searchview = None
         self.rnd_lst = []
         logger.info("Initialization of the windowed graphical interface ...")
         self.gui = buildUI("principale")
@@ -271,7 +276,6 @@ class Interface(qt.QObject):
             self.gui.actionHide_toolbar: "toggle_toolbar",
             #    <string>Ctrl+T</string>
 
-
             # Menu Preference
             self.gui.actionMedia_size: "defineMediaSize",
             self.gui.actionAutorotate: "setAutoRotate",
@@ -291,7 +295,6 @@ class Interface(qt.QObject):
             self.gui.actionCD_DVD_suivant: "selectMedia",
             self.gui.actionCD_DVD_precedent:"selectMedia",
 
-
 #        self.gui.indexJ_activate': self.indexJ,
 #        self.gui.searchJ_activate': self.searchJ,
 
@@ -308,7 +311,7 @@ class Interface(qt.QObject):
             self.gui.actionNearest:"set_interpolation",
             self.gui.actionLinear: "set_interpolation",
             self.gui.actionLanczos:"set_interpolation",
-            self.gui.action9:  "set_images_per_page",
+            self.gui.action9: "set_images_per_page",
             self.gui.action12: "set_images_per_page",
             self.gui.action16: "set_images_per_page",
             self.gui.action20: "set_images_per_page",
@@ -355,6 +358,7 @@ class Interface(qt.QObject):
             self.gui.actionNav_untitle_last: "navigate",
 
             self.gui.actionNav_tree: "show_treeview",
+            self.gui.actionRechercher: "show_searchview",
 
             }
         # assign as data the name of the method to be called as callback
@@ -367,9 +371,14 @@ class Interface(qt.QObject):
         logger.debug("Interface.update_title")
         new_title = unicode(self.gui.title.text())
         new_rate = int(self.gui.rate.value())
-        metadata = self.image.metadata or {}
+        try:
+            metadata = self.image.metadata
+        except:
+            metadata = {}
+        else:
+            metadata = metadata or {}
         if (new_title != metadata.get("title", "")) or (new_rate != metadata.get("rate", 0)):
-            self.image.name(new_title, new_rate)
+            self.image.set_title(new_title, new_rate)
 
     def create_statusbar(self):
         self.status_bar = self.gui.statusBar()
@@ -414,7 +423,7 @@ class Interface(qt.QObject):
         self.gui.photo.setPixmap(pixbuf)
         del pixbuf
         gc.collect()
-        metadata = self.image.readExif()
+        metadata = self.image.read_exif()
         if "rate" in metadata:
             self.gui.rate.setValue(int(float(metadata["rate"])))
             metadata.pop("rate")
@@ -429,7 +438,6 @@ class Interface(qt.QObject):
 
         self.gui.setWindowTitle("Selector : %s" % self.fn_current)
         self.gui.selection.setChecked(self.fn_current in self.selected)
-
 
     def calc_index(self, what="next", menu="image"):
         """
@@ -447,7 +455,7 @@ class Interface(qt.QObject):
                 else:
                     for fn in self.AllJpegs[current_idx + 1:]:
                         image = Photo(fn)
-                        data = image.readExif()
+                        data = image.read_exif()
                         if "rate" in data:
                             rate = int(float(data["rate"]))
                             if rate >= self.min_mark:
@@ -463,7 +471,7 @@ class Interface(qt.QObject):
                 else:
                     for fn in self.AllJpegs[current_idx - 1::-1]:
                         image = Photo(fn)
-                        data = image.readExif()
+                        data = image.read_exif()
                         if "rate" in data:
                             rate = int(float(data["rate"]))
                             if rate >= self.min_mark:
@@ -504,7 +512,7 @@ class Interface(qt.QObject):
             elif what == "last":
                 lastday = os.path.dirname(self.AllJpegs[-1])
                 last = lastday
-                for img in self.AllJpegs[-1 ::-1]:
+                for img in self.AllJpegs[-1::-1]:
                     jc = os.path.dirname(img)
                     if (last == lastday) and (jc < last):
                         return self.AllJpegs.index(img) + 1
@@ -550,43 +558,43 @@ class Interface(qt.QObject):
             if what == "first":
                 for i in self.AllJpegs:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return  self.AllJpegs.index(i)
             elif what == "previous":
                 for i in self.AllJpegs[current_idx - 1::-1]:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "next":
                 for i in self.AllJpegs[current_idx + 1:]:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "last":
                 for i in self.AllJpegs[-1::-1]:
                     myPhoto = Photo(i)
-                    if myPhoto.has_title():
+                    if myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
         elif menu == "untitle":
             if what == "first":
                 for i in self.AllJpegs:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return  self.AllJpegs.index(i)
             elif what == "previous":
                 for i in self.AllJpegs[current_idx - 1::-1]:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "next":
                 for i in self.AllJpegs[current_idx + 1:]:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
             elif what == "last":
                 for i in self.AllJpegs[-1::-1]:
                     myPhoto = Photo(i)
-                    if not myPhoto.has_title():
+                    if not myPhoto.is_entitled():
                         return self.AllJpegs.index(i)
         elif menu == "random":
             if what == "last":
@@ -600,7 +608,7 @@ class Interface(qt.QObject):
                         random.shuffle(self.rnd_lst)
                     new_idx = self.rnd_lst.pop()
                     image = Photo(self.AllJpegs[new_idx])
-                    data = image.readExif()
+                    data = image.read_exif()
                     if "rate" in data:
                         rate = int(float(data["rate"]))
                         if rate >= self.min_mark:
@@ -649,6 +657,8 @@ class Interface(qt.QObject):
         self.update_title()
         if self.fn_current in  self.selected:
             self.selected.remove(self.fn_current)
+        if self.treeview is not None:
+            self.treeview.remove_file(self.fn_current)
         self.AllJpegs.remove(self.fn_current)
         self.image.trash()
         self.show_image(min(self.idx_current, len(self.AllJpegs) - 1))
@@ -692,7 +702,7 @@ class Interface(qt.QObject):
         newnamefull = os.path.join(config.DefaultRepository, newname)
         self.image.as_jpeg(newnamefull)
         os.chmod(newnamefull, config.DefaultFileMode)
-        p = subprocess.Popen([config.Rawtherapee, "-R", filenamefull])
+        p = subprocess.Popen([config.Rawtherapee, filenamefull])
         with self.job_sem:
             self.processes.append(p)
         self.show_image()
@@ -714,8 +724,8 @@ class Interface(qt.QObject):
         logger.debug("Interface.reload")
         self.update_title()
         filename = self.fn_current
-        if (imageCache is not None) and (filename in imageCache):
-            imageCache.pop(filename)
+        if (image_cache is not None) and (filename in image_cache):
+            image_cache.pop(filename)
         self.image = Photo(filename)
         self.show_image()
 
@@ -791,7 +801,6 @@ class Interface(qt.QObject):
             self.selected.save()
             self.destroy()
 
-
     def copy_resize(self, *args):
         """lauch the copy of all selected files then scale them to generate web pages"""
         logger.debug("Interface.copy_resize")
@@ -812,20 +821,38 @@ class Interface(qt.QObject):
         SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
         out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
         if out != 0:
-            logger.error("Error n° : %i" % out)
+            logger.error("Error n° : %i", out)
         logger.info("Interface.to_web: Done")
 
     def empty_selected(self, *args):
         """remove all the files in the "Selected" folder"""
 
-        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
-        for dirs in os.listdir(SelectedDir):
-            curfile = os.path.join(SelectedDir, dirs)
+        sel_dirname = os.path.join(config.DefaultRepository, config.SelectedDirectory)
+        if not os.path.isdir(sel_dirname):
+            os.mkdir(sel_dirname)
+            return
+        errors = []
+        for dirs in os.listdir(sel_dirname):
+            curfile = os.path.join(sel_dirname, dirs)
             if os.path.isdir(curfile):
-                recursive_delete(curfile)
+                errors += recursive_delete(curfile)
             else:
-                os.remove(curfile)
-        logger.info("Done")
+                try:
+                    os.remove(curfile)
+                except:
+                    errors.append(curfile)
+        if errors:
+            if len(errors) > 10:
+                errors = errors[:10]
+                errors.append("...")
+            errors.insert(0, 'Unable to delete those files/folders:')
+            msg = os.linesep.join(errors)
+            emsg = qt.QErrorMessage(self.gui)
+            emsg.setWindowModality(qt.Qt.WindowModal)
+            emsg.showMessage(msg)
+            logger.error(msg)
+        else:
+            logger.info("Done")
 
     def copy(self, *args):
         """lauch the copy of all selected files"""
@@ -856,13 +883,11 @@ class Interface(qt.QObject):
             logger.error("Error n° : %i" % out)
         logger.info("Interface.burn: Done")
 
-
     def save_selection(self, *args):
         """Saves all the selection of photos """
         logger.debug("Interface.save_selection")
         self.update_title()
         self.selected.save()
-
 
     def load_selection(self, *args):
         """Load a previously saved  selection of photos """
@@ -932,7 +957,6 @@ class Interface(qt.QObject):
         """Set the Signature/Filigrane flag"""
         logger.debug("Interface.setFiligrane clicked")
 
-
     def set_interpolation(self, act=None, value=None):
         """
         @param act: Qaction
@@ -952,14 +976,13 @@ class Interface(qt.QObject):
         for name in options:
             name.setChecked(name == act)
 
-
     def set_images_per_page(self, act=None, value=None):
         """
         @param act: Qaction
         @param value: numerical value
         """
         logger.debug("Interface.set_images_per_page")
-        options = {9:  self.gui.action9,
+        options = {9: self.gui.action9,
                    12: self.gui.action12,
                    16: self.gui.action16,
                    20: self.gui.action20,
@@ -1004,10 +1027,11 @@ class Interface(qt.QObject):
         """Launch a new window and ask for anew name for the current directory"""
         logger.debug("Interface.rename_day clicked")
         self.update_title()
+        old_name = self.fn_current
         res = rename_day(self.fn_current, self.AllJpegs, self.selected)
         if res is not None:
             if self.treeview is not None:
-                self.treeview.close()
+                self.treeview.rename_directory(old_name, res)
             self.image.filename = res
             self.image.fn = os.path.join(config.DefaultRepository, res)
             self.image._exif = None
@@ -1019,53 +1043,40 @@ class Interface(qt.QObject):
         """Launch a filer window to select a directory from witch import all JPEG/RAW images"""
         logger.debug("Interface.importImages called")
         self.update_title()
-        # TODO
-        self.guiFiler = buildUI("filer")
-#        self.guiFiler.filer").set_current_folder(config.DefaultRepository)
-#        self.guiFiler.connect_signals({self.gui.Open, 'clicked()', self.filerSelect,
-#                                       self.gui.Cancel, 'clicked()', self.filerDestroy})
+        if self.treeview is not None:
+            self.treeview.close()
+            self.treeview = None
 
-    def filerSelect(self, *args):
-        """Close the filer GUI and update the data"""
-        logger.debug("dirchooser.filerSelect called")
-#        self.importImageCallBack(self.guiFiler.filer").get_current_folder())
-        self.guiFiler.filer.close()
+        path = QFileDialog.getExistingDirectory(self.gui, "Import images from ...")
 
-    def filerDestroy(self, *args):
-        """Close the filer GUI"""
-        logger.debug("dirchooser.filerDestroy called")
-        self.guiFiler.filer.close()
+        logger.warning("Interface.importImageCallBack with dirname= %s", path)
+        if path and os.path.isdir(path):
+            listNew = []
+            allJpegsFullPath = []
+            for afile in self.AllJpegs[:]:
+                if os.path.exists(os.path.join(config.DefaultRepository, afile)):
+                    allJpegsFullPath.append(os.path.join(config.DefaultRepository, afile))
+                else:
+                    logger.info("Removing non existing image file: %s" % afile)
+                    self.AllJpegs.remove(afile)
 
-    def importImageCallBack(self, path):
-        """This is the call back method for launching the import of new images"""
-        logger.debug("Interface.importImageCallBack with dirname= %s" % path)
-        self.update_title()
-        listNew = []
-        allJpegsFullPath = []
-        for afile in self.AllJpegs[:]:
-            if os.path.exists(os.path.join(config.DefaultRepository, afile)):
-                allJpegsFullPath.append(os.path.join(config.DefaultRepository, afile))
-            else:
-                logger.info("Removing non existing image file: %s" % afile)
-                self.AllJpegs.remove(afile)
-
-        # TODO Use MVC here ...
-        for oneRaw in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
-            if oneRaw in allJpegsFullPath:
-                logger.info("file already in repository: %s" % oneRaw)
-            else:
-                logger.debug("Importing: %s" % oneRaw)
-                raw = RawImage(oneRaw)
-                raw.extractJPEG()
-                listNew.append(raw.getJpegPath())
-        if len(listNew) > 0:
-            listNew.sort(key=lambda x:x[:-4])
-            first = listNew[0]
-            self.AllJpegs += listNew
-            self.AllJpegs.sort(key=lambda x:x[:-4])
-            self.idx_current = self.AllJpegs.index(first)
-            self.show_image()
-
+            # TODO Use MVC here ...
+            for fname in findFiles(path, lstExtentions=config.RawExtensions + config.Extensions, bFromRoot=True):
+                if fname in allJpegsFullPath:
+                    logger.info("file already in repository: %s", fname)
+                else:
+                    logger.debug("Importing: %s", fname)
+                    new_fname = rename_file(fname)
+                    if new_fname is not None:
+                        listNew.append(new_fname)
+            # print(listNew)
+            if len(listNew) > 0:
+                listNew.sort(key=lambda x:x[:-4])
+                first = listNew[0]
+                self.AllJpegs += listNew
+                self.AllJpegs.sort(key=lambda x:x[:-4])
+                self.idx_current = self.AllJpegs.index(first)
+                self.show_image()
 
     def defineMediaSize(self, *args):
         """lauch a new window and ask for the size of the backup media"""
@@ -1106,9 +1117,9 @@ class Interface(qt.QObject):
         self.show_image()
         # start timer
         self.timer = qt.QTimer(self.gui)
-        self.timer.setInterval(1000.0 * config.SlideShowDelay)
+        self.timer.setInterval(int(1000 * config.SlideShowDelay))
         self.timer.timeout.connect(self.new_slide)
-        self.timer.start(1000.0 * config.SlideShowDelay)
+        self.timer.start(int(1000 * config.SlideShowDelay))
 
     def stop_slideshow(self, *args):
         """quit slideshow mode"""
@@ -1219,16 +1230,13 @@ class Interface(qt.QObject):
         @param ev: QWheelEvent. See qt.ExtendedLabel
         """
         logger.debug("Interface.image_zoom ")
-        try:
-            zoom = ev.angleDelta().y()
-        except AttributeError: #Qt4
-            zoom = ev.delta()
+        zoom = ev.angleDelta().y()
         w_width = self.gui.photo.width()
         w_height = self.gui.photo.height()
         p_width = self.gui.photo.pixmap().width()
         p_height = self.gui.photo.pixmap().height()
-        x = ev.x()
-        y = ev.y()
+        x = ev.position().x()
+        y = ev.position().y()
         if zoom > 0 and not self.is_zoomed:
             nx = (x - (w_width - p_width) / 2.0) / p_width
             ny = (y - (w_height - p_height) / 2.0) / p_height
@@ -1276,6 +1284,12 @@ class Interface(qt.QObject):
             self.treeview = tree.TreeWidget(tree_rep)
             self.treeview.callback = self.goto_image
         self.treeview.show()
+        self.treeview.expand_at(self.fn_current)
+
+    def show_searchview(self, *arg):
+        if self.searchview is None:
+            self.searchview = SearchTitle(self.goto_image)
+        self.searchview.show()
 
     def goto_image(self, name=None):
         """
@@ -1288,7 +1302,6 @@ class Interface(qt.QObject):
         else:
             self.show_image(idx)
 
-
     def toggle_toolbar(self, *arg):
         """
         Set toolbar visible/not
@@ -1298,7 +1311,7 @@ class Interface(qt.QObject):
 
     def toggle_fullscreen(self, *arg):
         if self.is_fullscreen:
-            self.gui.setWindowState(qt.Qt.WindowNoState | qt.Qt.WindowActive)
+            self.gui.setWindowState(qt.Qt.WindowState.WindowNoState | qt.Qt.WindowState.WindowActive)
             self.gui.menubar.setVisible(True)
             self.menubar_isvisible = True
             self.is_fullscreen = False
@@ -1332,10 +1345,8 @@ class Interface(qt.QObject):
 ################################################################################
 
 
-
-
-
 class SelectDay(object):
+
     def __init__(self, upperIface):
         self.upperIface = upperIface
         self.gui = buildUI("ChangeDir")

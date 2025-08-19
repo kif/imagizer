@@ -263,7 +263,7 @@ def test():
     from imagizer import rangeTout
     listConfigurationFiles = ["/etc/imagizer.conf", os.path.join(os.getenv("HOME"), ".imagizer")]
     config.load(listConfigurationFiles)
-    print config.DefaultRepository
+    print(config.DefaultRepository)
     t0 = time.time()
     files, idx = rangeTout(config.DefaultRepository)
     print("startup took: %.3f;\tlen of files %s, %s" % (time.time() - t0, len(files), files[0]))
@@ -272,9 +272,9 @@ def test():
         a = Day(i)
 #        print a
     print("Analysis took: %.3f" % (time.time() - t0))
-    print a
-    print a.__dict__
-    print len(a.cache)
+    print(a)
+    print(a.__dict__)
+    print(len(a.cache))
     gui = SearchDay(files)
     gtk.main()
 

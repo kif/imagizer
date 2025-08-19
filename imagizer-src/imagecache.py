@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 #******************************************************************************\
-#*
-#* Copyright (C) 2006-2014,  Jérome Kieffer <kieffer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# *
+# * Copyright (C) 2006-2014,  Jérome Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 
 from __future__ import with_statement, division, print_function, absolute_import
@@ -33,10 +33,16 @@ __contact__ = "imagizer@terre-adelie.org"
 __date__ = "20141204"
 __license__ = "GPL"
 
-import logging, os
+import os
+import json
+import logging
 logger = logging.getLogger("imagizer.imagecache")
 from .config import config
-
+try:
+    from .sqlitedict import SqliteDict
+except ImportError as error:
+    logger.error("Unable to import sqlitedict: %s", error)
+    SqliteDict = None
 
 ################################################################################################
 ###############  Class ImageCache for storing the bitmaps in a Borg ############################
@@ -162,7 +168,12 @@ class ImageCache(dict):
         self.imageDict[newKey] = myData
 
 if config.ImageCache > 1:
-    imageCache = ImageCache(maxSize=config.ImageCache)
+    image_cache = ImageCache(maxSize=config.ImageCache)
+    title_cache = SqliteDict(os.path.join(config.DefaultRepository, config.Database_file),
+                             encode=json.dumps,
+                             decode=json.loads,
+                             autocommit=True,
+                             tablename='title')
 else:
-    imageCache = None
-
+    image_cache = None
+    title_cache = None

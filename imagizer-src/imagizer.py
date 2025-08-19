@@ -27,7 +27,7 @@ It handles images, progress bars and configuration file.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "27/08/2016"
+__date__ = "14/05/2023"
 __license__ = "GPL"
 import os
 import shutil
@@ -39,12 +39,13 @@ import threading
 logger = logging.getLogger("imagizer.imagizer")
 
 try:
-    import Image  # IGNORE:F0401
-except ImportError as error:
-    logger.error("""Selector needs PIL: Python Imaging Library
-    PIL is available from http://www.pythonware.com/products/pil/""")
-    raise err
-
+    from PIL import Image
+except ImportError:
+    try:
+        import Image
+    except ImportError:
+        logger.error("""Selector needs PIL: Python Imaging Library or pillow""")
+        raise error
 
 from .encoding import unicode2ascii
 from .config import config
@@ -53,8 +54,73 @@ from .photo import Photo, Signature
 
 
 class DummySignal(object):
+
     def emit(self, *arg, **kwarg):
         pass
+
+
+def rename_file(fname, rootdir=None):
+    """Move a initial image to the proper position in the selector tree
+    @param fname: initial filename
+    @return: destination filename
+    """
+    if rootdir is None:
+        rootdir = config.DefaultRepository
+
+    photo = Photo(fname, dontCache=True)
+    data = photo.read_exif()
+    try:
+        datei, heurei = data["time"].split()
+        date = re.sub(":", "-", unicode2ascii(datei))
+        heurej = re.sub(":", "h", heurei, 1)
+        model = data["model"].split(",")[-1]
+        heure = unicode2ascii("%s-%s" % (re.sub(":", "m", heurej, 1),
+                                         re.sub("/", "", re.sub(" ", "_", model))))
+    except ValueError:
+        date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(rootdir, fname))))
+        heure = unicode2ascii("%s-%s" % (time.strftime("%Hh%Mm%S",
+                                                        time.gmtime(os.path.getctime(os.path.join(rootdir, fname)))),
+                                         re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
+    if not (os.path.isdir(os.path.join(rootdir, date))):
+        fileutils.mkdir(os.path.join(rootdir, date))
+    heure_we = heure + photo.ext  # Hours with extension
+
+    bSkipFile = False
+    for existingfn in fileutils.list_files_in_named_dir(rootdir, date, heure_we) + \
+                      fileutils.list_files_in_named_dir(config.TrashDirectory, date, heure_we):
+        logger.debug("%s <-?-> %s", fname, existingfn)
+        existing = Photo(existingfn, dontCache=True)
+        original_name = existing.retrieve_original_name()
+        if original_name and (os.path.basename(original_name) == os.path.basename(fname)):
+            logger.debug("File already in repository, leaving as it is")
+            bSkipFile = existingfn
+            break
+    if bSkipFile:
+        logger.warning("%s -x-> %s", fname, bSkipFile)
+        return
+    full_path = os.path.join(rootdir, date, heure_we)
+    if os.path.isfile(full_path):
+        s = 0
+        for j in os.listdir(os.path.join(rootdir, date)):
+            if j.find(heure) == 0:
+                s += 1
+        heure += "-%s" % s
+        heure_we = heure + photo.ext  # Hours with extension
+    new_fname = os.path.join(date, heure_we)
+    full_path = os.path.join(rootdir, new_fname)
+    shutil.move(os.path.join(rootdir, fname), full_path)
+    try:
+        os.chown(full_path, os.getuid(), os.getgid())
+        os.chmod(full_path, config.DefaultFileMode)
+    except OSError:
+        logger.warning("in ModelRangeTout: unable to chown or chmod  %s", full_path)
+    photo = Photo(full_path)
+    # Save the old image name in exif tag
+    photo.store_original_name(fname)
+
+    if config.AutoRotate:
+        photo.autorotate()
+    return new_fname
 
 
 class ThreadedProcessing(threading.Thread):
@@ -63,6 +129,7 @@ class ThreadedProcessing(threading.Thread):
     moves all the JPEG files to a directory named from
     their day and with the name according to the time"""
     sem = threading.Semaphore()
+
     def __init__(self, updated_signal=None, finished_signal=None):
         """
         Constructor
@@ -102,8 +169,6 @@ class RangeTout(ThreadedProcessing):
         files_to_process = []
         processed_files = []
         new_files = []
-        uid = os.getuid()
-        gid = os.getgid()
         for i in all_files:
             if i.find(config.TrashDirectory) == 0: continue
             if i.find(config.SelectedDirectory) == 0: continue
@@ -122,63 +187,13 @@ class RangeTout(ThreadedProcessing):
         files_to_process.sort()
         number_of_files = len(files_to_process)
         self.updated_signal.emit("range tout", 0, number_of_files)
+
         for idx, fname in enumerate(files_to_process):
             self.updated_signal.emit(fname, idx, number_of_files)
-            photo = Photo(fname, dontCache=True)
-            data = photo.readExif()
-            try:
-                datei, heurei = data["time"].split()
-                date = re.sub(":", "-", unicode2ascii(datei))
-                heurej = re.sub(":", "h", heurei, 1)
-                model = data["model"].split(",")[-1]
-                heure = unicode2ascii("%s-%s" % (re.sub(":", "m", heurej, 1),
-                                                 re.sub("/", "", re.sub(" ", "_", model))))
-            except ValueError:
-                date = time.strftime("%Y-%m-%d", time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname))))
-                heure = unicode2ascii("%s-%s" % (time.strftime("%Hh%Mm%S",
-                                                                time.gmtime(os.path.getctime(os.path.join(self.rootdir, fname)))),
-                                                 re.sub("/", "-", re.sub(" ", "_", os.path.splitext(fname)[0]))))
-            if not (os.path.isdir(os.path.join(self.rootdir, date))):
-                fileutils.mkdir(os.path.join(self.rootdir, date))
-            heure_we = heure + photo.ext  # Hours with extension
-
-            bSkipFile = False
-            for existingfn in fileutils.list_files_in_named_dir(self.rootdir, date, heure_we) + \
-                              fileutils.list_files_in_named_dir(trashDir, date, heure_we):
-                logger.debug("%s <-?-> %s", fname, existingfn)
-                existing = Photo(existingfn, dontCache=True)
-                original_name = existing.retrieve_original_name()
-                if original_name and (os.path.basename(original_name) == os.path.basename(fname)):
-                    logger.debug("File already in repository, leaving as it is")
-                    bSkipFile = existingfn
-                    break
-            if bSkipFile:
-                logger.warning("%s -x-> %s", fname, bSkipFile)
-                continue
-            full_path = os.path.join(self.rootdir, date, heure_we)
-            if os.path.isfile(full_path):
-                s = 0
-                for j in os.listdir(os.path.join(self.rootdir, date)):
-                    if j.find(heure) == 0:
-                        s += 1
-                heure += "-%s" % s
-                heure_we = heure + photo.ext  # Hours with extension
-            new_fname = os.path.join(date, heure_we)
-            full_path = os.path.join(self.rootdir, new_fname)
-            shutil.move(os.path.join(self.rootdir, fname), full_path)
-            try:
-                os.chown(full_path, uid, gid)
-                os.chmod(full_path, config.DefaultFileMode)
-            except OSError:
-                logger.warning("in ModelRangeTout: unable to chown or chmod  %s", full_path)
-            photo = Photo(full_path)
-#            Save the old image name in exif tag
-            photo.storeOriginalName(fname)
-
-            if config.AutoRotate:
-                photo.autorotate()
-            processed_files.append(new_fname)
-            new_files.append(new_fname)
+            new_fname = rename_file(fname, self.rootdir)
+            if new_fname is not None:
+                processed_files.append(new_fname)
+                new_files.append(new_fname)
         processed_files.sort(key=lambda x: x[:-4])
         self.updated_signal.emit("", 0, 0)
 
@@ -189,7 +204,6 @@ class RangeTout(ThreadedProcessing):
         self.finished_signal.emit(processed_files, first)
         self.result = processed_files, first
         return self.result
-
 
     @classmethod
     def range_tout(cls, repository=None, bUseX=True, fast=False, updated=None, finished=None):
@@ -237,6 +251,7 @@ range_tout = RangeTout.range_tout
 
 class ToJpeg(ThreadedProcessing):
     """Copies of all selected photos "selected" subdirectory in JPEG format"""
+
     def __init__(self, lst=None, updated=None, finished=None):
         """Constructor"""
         ThreadedProcessing.__init__(self, updated, finished)
@@ -274,12 +289,15 @@ class ToJpeg(ThreadedProcessing):
             else:
                 rt.start()
 
+
 to_jpeg = ToJpeg.to_jpeg
+
 
 class CopySelected(ThreadedProcessing):
     """
     CopySelected threaded implementation
     """
+
     def __init__(self, lst=None, updated=None, finished=None):
         """Constructor"""
         ThreadedProcessing.__init__(self, updated, finished)
@@ -375,11 +393,14 @@ class CopySelected(ThreadedProcessing):
             else:
                 rt.start()
 
+
 copy_selected = CopySelected.copy_selected
+
 
 class ProcessSelected(ThreadedProcessing):
     """
     """
+
     def __init__(self, lst, updated=None, finished=None):
         """Constructor
 
@@ -581,8 +602,8 @@ class ProcessSelected(ThreadedProcessing):
             else:
                 rt.start()
 
-process_selected = ProcessSelected.process_selected
 
+process_selected = ProcessSelected.process_selected
 
 
 #######################################################################################

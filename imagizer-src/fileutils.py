@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 #******************************************************************************\
-#*
-#* Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
-#* Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
-#* Licence GPL v2
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# *
+# * Copyright (C) 2006 - 2014,  Jérôme Kieffer <imagizer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
 from __future__ import with_statement, division, print_function, absolute_import
 
@@ -28,16 +28,16 @@ Module containing most classes for handling files
 """
 
 __author__ = "Jérôme Kieffer"
-__date__ = "21/11/2015"
+__date__ = "21/08/2022"
 __licence__ = "GPLv2"
 __contact__ = "imagizer@terre-adelie.org"
-
 
 import os, logging
 import os.path as op
 installdir = op.dirname(__file__)
 logger = logging.getLogger("imagizer.fileutils")
 from .config import config
+
 
 def makedir(filen):
     """creates the tree structure for the file"""
@@ -119,13 +119,28 @@ def recursive_delete(strDirname):
     could delete all your disk files.
     @param strDirname: top directory to delete
     @type strDirname: string
+    @return: list of errored filenames
     """
+    errors = []
     for root, dirs, files in os.walk(strDirname, topdown=False):
         for name in files:
-            os.remove(os.path.join(root, name))
+            one = os.path.join(root, name)
+            try:
+                os.remove(one)
+            except:
+                errors.append(one)
         for name in dirs:
-            os.rmdir(os.path.join(root, name))
-    os.rmdir(strDirname)
+            one = os.path.join(root, name)
+            try:
+                os.rmdir(one)
+            except:
+                errors.append(one)
+    if not errors:
+        try:
+            os.rmdir(strDirname)
+        except:
+            errors.append(strDirname)
+    return errors
 
 
 def list_files_in_named_dir(root, dirname, filename):

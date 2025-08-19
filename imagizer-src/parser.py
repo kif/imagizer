@@ -1,28 +1,28 @@
 #!/usr/bin/env python
 # coding: utf8
 #******************************************************************************\
-#*
-#* Copyright (C) 2001, Martin Blais <blais@furius.ca>
-#* Copyright (C) 2012, Jerome Kieffer <imagizer@terre-adelie.org>
-#*
-#* This program is free software; you can redistribute it and/or modify
-#* it under the terms of the GNU General Public License as published by
-#* the Free Software Foundation; either version 2 of the License, or
-#* (at your option) any later version.
-#*
-#* This program is distributed in the hope that it will be useful,
-#* but WITHOUT ANY WARRANTY; without even the implied warranty of
-#* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#* GNU General Public License for more details.
-#*
-#* You should have received a copy of the GNU General Public License
-#* along with this program; if not, write to the Free Software
-#* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#*
+# *
+# * Copyright (C) 2001, Martin Blais <blais@furius.ca>
+# * Copyright (C) 2012, Jerome Kieffer <imagizer@terre-adelie.org>
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
 #*****************************************************************************/
-from __future__ import with_statement, division, print_function, absolute_import
 
 """CLASS AttrFile Attributes file representation and trivial parser."""
+from __future__ import with_statement, division, print_function, absolute_import
 
 __authors__ = ["Martin Blais", "Jérôme Kieffer"]
 __contact = "imagizer@terre-adelie.org"
@@ -30,8 +30,11 @@ __date__ = "20120415"
 __license__ = "GPL"
 
 import re, os, sys, logging
+from collections import OrderedDict
 logger = logging.getLogger("imagizer.parser")
 from .config import config
+
+PY2 = sys.version_info[0] == 2
 
 class AttrFile(object):
     """Attributes file representation and trivial parser."""
@@ -40,7 +43,7 @@ class AttrFile(object):
     def __init__(self, path):
         """Constructor."""
         self._path = path
-        self._attrmap = {}
+        self._attrmap = OrderedDict()
         self._dirty = False
         self._attrmap["coding"] = config.Coding
 
@@ -53,7 +56,7 @@ class AttrFile(object):
                 self._lines = f.read()
         except IOError as error:
             logger.error("Cannot open attributes file %s: %s", self._path, error)
-            self._lines = ''
+            self._lines = b''
 
         self.parse(self._lines)
         self._dirty = False
@@ -83,30 +86,28 @@ class AttrFile(object):
 
             with open(self._path, "wb") as f:
                 for k in self._attrmap.keys():
-                    f.write(k)
-                    f.write(": ")
+                    f.write(k.encode(coding))
+                    f.write(b": ")
                     f.write(self._attrmap[k].encode(coding))
-                    f.write("\n\n")
+                    f.write(b"\n\n")
         except IOError as e:
-            sys.stderr.write("Error: cannot open attributes file %s: %s%s"\
-                             % (self._path, e, os.linesep))
-            self._lines = ''
+            logger.error("Cannot open attributes file %s: %s", self._path, e)
+            self._lines = b''
         try:
             os.chmod(self._path, config.DefaultFileMode)
-        except:
-            logger.warning("Unable to chmod %s" % self._path)
-
+        except Exception as e:
+            logger.warning("Unable to chmod %s: %s", self._path, e)
 
     def parse(self, lines):
         """
         Parse attributes file lines into a map.
         """
         logger.debug("AttrFile.parse")
-        mre1 = re.compile("^([^:\n]+)\s*:", re.M)
-        mre2 = re.compile("^\s*$", re.M)
-
+        mre1 = re.compile(br"^([^:\n]+)\s*:", re.M)
+        mre2 = re.compile(br"^\s*$", re.M)
+        bytes_dict = OrderedDict()
         pos = 0
-        while 1:
+        while True:
             mo1 = mre1.search(lines, pos)
 
             if not mo1:
@@ -117,26 +118,35 @@ class AttrFile(object):
             if mo2:
                 txt = lines[ mo1.end() : mo2.start() ].strip()
             else:
-                txt = lines[ mo1.end() : ] .strip()
+                txt = lines[ mo1.end() : ].strip()
 
-            self._attrmap[ mo1.group(1) ] = txt
+            bytes_dict[ mo1.group(1) ] = txt
 
             if mo2:
                 pos = mo2.end()
             else:
                 break
-        try:
-            coding = self._attrmap["coding"]
-        except:
-            coding = config.Coding
-
-        for key in self._attrmap.keys():
-            txt = self._attrmap[ key ]
+        if b"coding" in bytes_dict:
             try:
-                self._attrmap[key] = txt.decode(coding)
-            except:
-                self._attrmap[key] = txt
+                coding = bytes_dict[b"coding"].decode()
+            except Exception as err:
+                logger.error("Unable to decode '%s' %s: %s", bytes_dict[b"coding"], type(err), err)
+                coding = None
+            if coding is None:
+                coding = config.Coding
 
+        for key, txt in bytes_dict.items():
+            try:
+                ukey = key.decode(coding)
+            except Exception as err:
+                logger.error("Unable to decode key '%s' %s: %s", key, type(err), err)
+                continue
+            try:
+                utxt = txt.decode(coding)
+            except Exception as err:
+                logger.error("Unable to decode value '%s' %s: %s", txt, type(err), err)
+                utxt = txt
+            self._attrmap[ukey] = utxt
 
     def get(self, field, default=None):
         """
@@ -170,7 +180,7 @@ class AttrFile(object):
         value = value.strip()
 
         # remove blank lines from the field value
-        mre2 = re.compile("^\s*$", re.M)
+        mre2 = re.compile(r"^\s*$", re.M)
         while 1:
             mo = mre2.search(value)
             if mo and mo.end() != len(value):
@@ -229,5 +239,8 @@ class AttrFile(object):
         Returns contents to a string for debugging purposes.
         """
         lsttxt = ["AttrFile for %s" % self._path]
-        lsttxt += ["%s: %s" % (a, b) for a, b in self._attrmap.items()]
+        if PY2:
+            lsttxt += ["%s: %s" % (a, b.encode(config.Coding)) for a, b in self._attrmap.items()]
+        else:
+            lsttxt += ["%s: %s" % (a, b) for a, b in self._attrmap.items()]
         return os.linesep.join(lsttxt)

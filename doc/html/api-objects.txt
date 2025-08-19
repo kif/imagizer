@@ -155,7 +155,7 @@ imagizer.imagizer.photo.larg	imagizer.imagizer.photo-class.html#larg
 imagizer.imagizer.photo.LoadPIL	imagizer.imagizer.photo-class.html#LoadPIL
 imagizer.imagizer.photo.storeOriginalName	imagizer.imagizer.photo-class.html#storeOriginalName
 imagizer.imagizer.photo.Rotate	imagizer.imagizer.photo-class.html#Rotate
-imagizer.imagizer.photo.readExif	imagizer.imagizer.photo-class.html#readExif
+imagizer.imagizer.photo.read_exif	imagizer.imagizer.photo-class.html#read_exif
 imagizer.imagizer.photo.SaveThumb	imagizer.imagizer.photo-class.html#SaveThumb
 imagizer.imagizer.photo.name	imagizer.imagizer.photo-class.html#name
 imagizer.imagizer.photo.has_title	imagizer.imagizer.photo-class.html#has_title

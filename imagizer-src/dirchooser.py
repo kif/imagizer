@@ -29,7 +29,7 @@ Library used by selector and the installer to select the working directories.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "29/10/2016"
+__date__ = "13/06/2023"
 __license__ = "GPL"
 
 import os, sys, logging
@@ -38,10 +38,12 @@ logger = logging.getLogger("imagizer.dirchooser")
 from . import qt
 from .config import config
 
+
 class WarningSc(object):
     """
     Print a warning before starting the program and allows to change the working directory
     """
+
     def __init__(self, directory, window="dialog_warning", callBack=None):
         """
         Print a small dialog screen
@@ -100,6 +102,7 @@ class WarningSc(object):
         """
         logger.debug("WarningSc.set_directory")
         self.gui.dirname.setText(value)
+
     directory = property(get_directory, set_directory)
 
     def show(self):
@@ -107,15 +110,17 @@ class WarningSc(object):
 
 
 def test():
+
     def callback(dirname):
         print("Got dirname %s" % dirname)
 
     app = qt.QApplication([])
     w = WarningSc("/home", callBack=callback)
     w.show()
-    res = app.exec_()
+    res = app.exec()
     print(res)
     sys.exit(res)
+
 
 if __name__ == "__main__":
     test()

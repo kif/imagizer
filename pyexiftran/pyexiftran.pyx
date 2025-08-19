@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# cython: language_level=3
 # -*- coding: UTF8 -*-
 #******************************************************************************\
 #*
@@ -31,7 +31,7 @@ Needs libexif-dev, libjepg-dev and python-dev to be installed on the system.
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "20130527"
+__date__ = "24/12/2019"
 __license__ = "GPL"
 
 import logging
@@ -41,64 +41,85 @@ cdef extern from "exiftran.h":
 
 logger = logging.getLogger("pyexiftran")
 
+cdef inline bytes _encode(filename, encoding):
+    cdef bytes bytestring
+    if isinstance(filename, bytes):
+        bytestring = filename
+    else:
+        try:
+            bytestring = filename.encode(encoding)
+        except:
+            bytestring = bytes(filename)
+    return bytestring
 
-def rotate90(filename):
+
+def rotate90(filename, encoding=None):
     """
     Rotate the given image file by 90 degrees clockwise
 
-    @param filename: name of the JPEG file to rotate
-    @type filename: python string
+    :param str  filename: name of the JPEG file to rotate
+    :param encoding: type of encoding of the filename (used if unicode)
     """
-    cdef int rc
-    cdef char* cfname = filename
-    logger.debug("rotate90 %s" % (filename))
-    #with nogil:
-    rc = pylib(9, cfname)
+    cdef:
+        int rc
+        bytes bytestring = _encode(filename, encoding)
+        char* cfname = bytestring 
+    logger.debug("rotate90 %s", filename)
+    with nogil:
+        rc = pylib(9, cfname)
     if rc:
-        logger.warning("rotate90 returned code %s on %s"%(rc,filename))
+        logger.warning("rotate90 returned code %s on %s", rc, filename)
 
 
-def rotate180(filename):
+def rotate180(filename, encoding=None):
     """
     Rotate the given image file by 180 degrees
 
-    @param filename: name of the JPEG file to rotate
-    @type filename: python string
+    :param str  filename: name of the JPEG file to rotate
+    :param encoding: type of encoding of the filename (used if unicode)
     """
-    cdef int rc
-    cdef char* cfname = filename
-    logger.debug("rotate180 %s" % (cfname))
-    #with nogil:
-    rc = pylib(1, filename)
+    cdef:
+        int rc
+        bytes bytestring = _encode(filename, encoding)
+        char* cfname = bytestring 
+    logger.debug("rotate180 %s", filename)
+    with nogil:
+        rc = pylib(1, cfname)
     if rc:
-        logger.warning("rotate180 returned code %s on %s"%(rc,filename))
+        logger.warning("rotate180 returned code %s on %s", rc, filename)
 
-def rotate270(filename):
+
+def rotate270(filename, encoding=None):
     """
     Rotate the given file by 90 degrees counter-clockwise (270deg clockwise)
 
-    @param filename: name of the JPEG file to rotate
-    @type filename: python string
+    :param str  filename: name of the JPEG file to rotate
+    :param encoding: type of encoding of the filename (used if unicode)
     """
-    cdef int rc
-    cdef char* cfname = filename
-    logger.debug("rotate270 %s" % (filename))
-    #with nogil:
-    rc = pylib(2, cfname)
+    cdef:
+        int rc
+        bytes bytestring = _encode(filename, encoding)
+        char* cfname = bytestring 
+    logger.debug("rotate270 %s", filename)
+    with nogil:
+        rc = pylib(2, cfname)
     if rc:
-        logger.warning("rotate270 returned code %s on %s"%(rc,filename))
+        logger.warning("rotate270 returned code %s on %s", rc, filename)
 
-def autorotate(filename):
+
+def autorotate(filename, encoding=None):
     """
     Auto rotate the given image file
 
-    @param filename: name of the JPEG file to rotate
-    @type filename: python string
+    :param str filename: name of the JPEG file to rotate
+    :param encoding: type of encoding of the filename (used if unicode)
     """
-    cdef int rc
-    cdef char* cfname = filename
-    logger.debug("autorotate %s" % (filename))
-#    with nogil:
-    rc = pylib(0, cfname)
+    cdef:
+        int rc
+        bytes bytestring = _encode(filename, encoding)
+        char* cfname = bytestring 
+    logger.debug("autorotate %s", filename)
+    with nogil:
+        rc = pylib(0, cfname)
     if rc:
-        logger.warning("autorotate returned code %s on %s"%(rc,filename))
+        logger.warning("autorotate returned code %s on %s", rc, filename)

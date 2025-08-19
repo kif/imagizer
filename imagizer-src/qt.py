@@ -23,17 +23,21 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import with_statement, division, print_function, absolute_import
-
 """Imagizer specific stuff from Qt"""
 
 __author__ = "Jerome Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
 __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
-__date__ = "26/02/2018"
+__date__ = "28/06/2023"
 __status__ = "production"
 
+import PyQt6.QtCore, PyQt6.QtGui  # Pre-load PyQt6
+try:
+    """Remove the limit in size for images"""
+    PyQt6.QtGui.QImageReader.setAllocationLimit(0)
+except:
+    pass
 from ._qt import *  # noqa
 # from ._utils import * # noqa
 
@@ -54,13 +58,11 @@ def supportedImageFormats():
     return set([convert(data) for data in formats])
 
 
-
 def flush():
     """
     Enforce the flush of the graphical application
     """
-    if QCoreApplication.hasPendingEvents():
-        QCoreApplication.flush()
+    QCoreApplication.processEvents()
 
 
 def update_fig(fig=None):
@@ -76,6 +78,7 @@ def update_fig(fig=None):
                                  QResizeEvent(fig.canvas.size(),
                                                     fig.canvas.size()))
             flush()
+
 
 def buildUI(ui_file):
     """
@@ -126,6 +129,7 @@ class ExtendedQLabel(QLabel):
     zoom = Signal(QWheelEvent, name="zoom")
     pan = Signal(QMoveEvent, name="pan")
     DELTA2 = 100
+
     def __init__(self, parent):
         QLabel.__init__(self, parent)
         self.old_pos = None
@@ -134,31 +138,28 @@ class ExtendedQLabel(QLabel):
         _logger.debug("Released %s %s", ev, ev)
         if self.old_pos is not None:
             lastx, lasty = self.old_pos
-            x = ev.x()
-            y = ev.y()
+            position = ev.position()
+            x = position.x()
+            y = position.y()
             dx = x - lastx
             dy = y - lasty
             delta2 = dx * dx + dy * dy
             if delta2 > self.DELTA2:
-                move_ev = QMoveEvent(ev.pos(),
-                                           QPoint(*self.old_pos))
-#                 _logger.info("move image %s", move_ev)
+                point = QPoint(*self.old_pos)
+                move_ev = QMoveEvent(ev.pos(), point)
                 self.pan.emit(move_ev)
             self.old_pos = None
         else:
             print("last ev is None !!!")
 
     def mousePressEvent(self, ev):
-        _logger.debug("Pressed %s %s %s ", ev, ev.x(), ev.y())
-        self.old_pos = (ev.x(), ev.y())
+        position = ev.position()
+        _logger.debug("Pressed %s %s %s ", ev, position.x(), position.y())
+        self.old_pos = (int(position.x()), int(position.y()))
 
     def wheelEvent(self, ev):
-        try:
-            _logger.debug("Scroll %s at %s,%s %s",
-                          ev, ev.x(), ev.y(), ev.angleDelta())
-        except AttributeError:  # Qt4
-            _logger.debug("Scroll %s at %s,%s %s",
-                          ev, ev.x(), ev.y(), ev.delta())
+        _logger.debug("Scroll %s at %s,%s %s",
+                          ev, ev.position().x(), ev.position().y(), ev.angleDelta().y())
         self.zoom.emit(ev)
 
 

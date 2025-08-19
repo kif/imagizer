@@ -1,3 +1,5 @@
+# cython: profile=False
+# cython: language_level=3
 # -*- coding: utf-8 -*-
 #
 #    Project: Image downsampler
@@ -25,16 +27,18 @@
 """Implementation of a separable 2D convolution"""
 __authors__ = ["Jerome Kieffer"]
 __contact__ = "Jerome.kieffer@terre-adelie.org"
-__date__ = "06/12/2014"
+__date__ = "25/08/2024"
 __status__ = "stable"
 __license__ = "GPLv3+"
 import cython
 import numpy
-cimport numpy
+#cimport numpy
 from cython.parallel import prange
 from cython cimport view
 from libc.math cimport round, fabs, floor
 import time
+
+ctypedef unsigned char uint8_t
 
 def timeit(func):
     def wrapper(*arg, **kw):
@@ -70,7 +74,8 @@ def horizontal_convolution(float[:, :] img, float[:] filter):
         int IMAGE_H, IMAGE_W
         int x, y, pos, fIndex, newpos, c
         float sum, err, val, tmp
-        numpy.ndarray[numpy.float32_t, ndim = 2] output
+        float[:,::1] output
+        # numpy.ndarray[numpy.float32_t, ndim = 2] output
 
     FILTER_SIZE = filter.shape[0]
     if FILTER_SIZE % 2 == 1:
@@ -98,7 +103,7 @@ def horizontal_convolution(float[:, :] img, float[:] filter):
                 err = (tmp - sum) - val
                 sum = tmp
             output[y, x] += sum
-    return output
+    return numpy.asarray(output)
 
 
 @cython.cdivision(True)
@@ -118,7 +123,8 @@ def vertical_convolution(float[:, :] img, float[:] filter):
         int IMAGE_H, IMAGE_W
         int x, y, pos, fIndex, newpos, c
         float sum, err, val, tmp
-        numpy.ndarray[numpy.float32_t, ndim=2] output
+        float[:, ::1] output
+        # numpy.ndarray[numpy.float32_t, ndim=2] output
 
     FILTER_SIZE = filter.shape[0]
     if FILTER_SIZE % 2 == 1:
@@ -146,7 +152,7 @@ def vertical_convolution(float[:, :] img, float[:] filter):
                 err = (tmp - sum) - val
                 sum = tmp
             output[y, x] += sum
-    return output
+    return numpy.asarray(output)
 
 
 def gaussian(sigma, width=None, half=True):
@@ -204,7 +210,9 @@ def gaussian_filter(img, sigma):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef inline void _point_horizontal(int x, int y, numpy.uint8_t[:,:,:] img, numpy.uint8_t[:,:,:] output, float factor, float order, float[:] data) nogil:
+cdef inline void _point_horizontal(int x, int y, uint8_t[:,:,::1] img, 
+                                   uint8_t[:,:,::1] output, float factor, float order, 
+                                   float[:] data) noexcept nogil:
     cdef:
         float[4] sum
         int c = 0
@@ -248,12 +256,13 @@ cdef inline void _point_horizontal(int x, int y, numpy.uint8_t[:,:,:] img, numpy
         if coef >= 255.0:
             output[y, x, c] = 255
         else:
-            output[y, x, c] = <numpy.uint8_t> coef
+            output[y, x, c] = <uint8_t> coef
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef inline void _point_vertical(int x, int y, numpy.uint8_t[:,:,:] img, numpy.uint8_t[:,:,:] output, float factor, float order, float[:] data) nogil:
+cdef inline void _point_vertical(int x, int y, uint8_t[:,:,::1] img, uint8_t[:,:,::1] output, 
+                                 float factor, float order, float[:] data) noexcept nogil:
     cdef:
         float[4] sum
         int c = 0
@@ -298,7 +307,7 @@ cdef inline void _point_vertical(int x, int y, numpy.uint8_t[:,:,:] img, numpy.u
         if coef >= 255.0:
             output[y, x, c] = 255
         else:
-            output[y, x, c] = <numpy.uint8_t> coef
+            output[y, x, c] = <uint8_t> coef
 
 
 class DownScaler(object):
@@ -339,7 +348,7 @@ class DownScaler(object):
     @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
-    def _horizontal_scale(self, numpy.uint8_t[:,:,:] img, numpy.uint8_t[:,:,:] output, float factor):
+    def _horizontal_scale(self, uint8_t[:,:,::1] img, uint8_t[:,:,::1] output, float factor):
         """
         scale an image dim0, dim1 -> dim0, dim1/factor
         note dim2 is the color channel
@@ -387,7 +396,7 @@ class DownScaler(object):
     @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
-    def _vertical_scale(self, numpy.uint8_t[:,:,:] img, numpy.uint8_t[:,:,:] output, float factor):
+    def _vertical_scale(self, uint8_t[:,:,::1] img, uint8_t[:,:,::1] output, float factor):
         """
         scale an image dim0, dim1 -> dim0/factor
         note dim2 is the color channel

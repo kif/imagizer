@@ -1,0 +1,162 @@
+#!/usr/bin/env python
+# coding: utf-8
+#
+#******************************************************************************\
+# *
+# * Copyright (C) 2006-2014,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
+# * Licence GPL v2
+# *
+# * This program is free software; you can redistribute it and/or modify
+# * it under the terms of the GNU General Public License as published by
+# * the Free Software Foundation; either version 2 of the License, or
+# * (at your option) any later version.
+# *
+# * This program is distributed in the hope that it will be useful,
+# * but WITHOUT ANY WARRANTY; without even the implied warranty of
+# * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# * GNU General Public License for more details.
+# *
+# * You should have received a copy of the GNU General Public License
+# * along with this program; if not, write to the Free Software
+# * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# *
+#*****************************************************************************/
+#
+#
+from __future__ import with_statement, division, print_function, absolute_import
+
+"""
+Selector is the graphical (GUI) interface part of the Imagizer project.
+"""
+__author__ = "Jérôme Kieffer"
+__contact__ = "imagizer@terre-adelie.org"
+__date__ = "25/08/2024"
+__license__ = "GPL"
+
+import os
+import locale
+from argparse import ArgumentParser
+import logging
+import sys
+logger = logging.getLogger("imagizer.selector")
+
+from ..import qt
+from ..config        import config
+from ..dirchooser    import WarningSc
+from ..selection     import Selected
+from ..imagizer      import range_tout
+from ..interface     import Interface
+
+try:
+    from rfoo.utils import rconsole
+    rconsole.spawn_server()
+except ImportError:
+    logger.debug("No socket opened for debugging -> please install rfoo")
+# for debugging using rfoo
+ifc = object()
+
+if os.getenv("LANGUAGE"):
+    try:
+        locale.setlocale(locale.LC_ALL, os.getenv("LANGUAGE"))
+    except:
+        locale.setlocale(locale.LC_ALL, config.Locale)
+else:
+    locale.setlocale(locale.LC_ALL, config.Locale)
+
+
+################################################################################
+# Main program of selector
+################################################################################
+
+class Interfaces(object):
+    """
+    Manages the switch between interfaces...
+    """
+    def __init__(self, all_files=[], current=0, warning=True, fast=False):
+        self.interface = None
+        self.all_files = all_files
+        self.current = current
+        self.warning = warning
+        self.selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
+        self.fast = fast
+        self.selected = None
+
+    def print_warning(self):
+        if (self.warning) and (not os.path.isfile(self.selected_fn)):
+            self.interface = WarningSc(config.DefaultRepository, callBack=self.set_root)
+            self.interface.show()
+        else:
+            self.create_selected()
+
+    def set_root(self, path):
+            config.DefaultRepository = path
+            self.selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
+            self.interface.close()
+            self.create_selected()
+
+
+    def create_selected(self):
+        if not os.path.isfile(self.selected_fn):
+            try:
+                f = open(self.selected_fn, "w")
+                f.close()
+            except Exception as error:
+                logger.info("Unable to create selected file %s: %s", self.selected_fn, error)
+
+    def load_list(self):
+        logger.debug("load_list")
+        self.all_files, self.current = range_tout(config.DefaultRepository, fast=self.fast)
+        logger.debug("list loaded")
+
+    def start_interface(self):
+        if self.selected is None:
+            self.selected = Selected.load()
+        self.interface = Interface()  # self.all_files, self.current, self.selected)
+        range_tout(config.DefaultRepository, fast=self.fast, updated=self.interface.signal_status, finished=self.interface.signal_newfiles)
+
+
+def main():
+    printWarning = True
+
+    parser = ArgumentParser(prog="selector",
+                            description="Selector classe toutes les photos du répertoire donné",
+                            epilog="Attention selector renomme tous les fichiers")
+    parser.add_argument("-d", "--debug", help="mode debug tres verbeux", action="store_true", default=False)
+    parser.add_argument("--nowarning", help="desactive l'avertissement", action="store_true", default=False)
+    parser.add_argument("--noautorotate", help="ne pas tourner automatiquement les images", action="store_true", default=False)
+    parser.add_argument("-f", "--fast", help="Démarrage rapide", action="store_true", default=False)
+    parser.add_argument("path", help="repertoire a traiter", nargs='?')
+    args = parser.parse_args()
+    if args.debug:
+        logging.root.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
+        logger.debug("We are in debug mode ...First Debug message")
+    else:
+        logging.root.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
+    if args.noautorotate:
+        config.AutoRotate = False
+        logger.debug("Autorotate is disabled")
+    if args.nowarning:
+        logger.debug("Initial warning about file renaming is disabled")
+        printWarning = False
+    if args.path and  os.path.isdir(args.path):
+        logger.debug("Working on directory %s" % args.path)
+        config.DefaultRepository = os.path.abspath(args.path)
+
+    config.printConfig()
+    selected_fn = os.path.join(config.DefaultRepository, config.Selected_save)
+
+    app = qt.QApplication([])
+    ifc = Interfaces(warning=printWarning, fast=args.fast)
+    ifc.print_warning()
+    ifc.create_selected()
+    # ifc.load_list()
+    ifc.start_interface()
+    res = app.exec()
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
