@@ -568,8 +568,11 @@ class Image(object):
                     sys.stderr.write("Error: "+msg)
 		
         filename = join(opts.root, self._filename)
-        print(filename)
-        self._exif, self._comment = exif(filename)
+        try:
+            self._exif, self._comment = exif(filename)
+        except Exception as err:
+            logger.error(f"Could not parse Exif in file `{filename}`")
+            raise err
         # no title, so use something unique to the image, it's path
         if not self._title:
             self._title = join(self._dir._path, self._base)
