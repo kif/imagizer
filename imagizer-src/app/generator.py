@@ -563,9 +563,13 @@ class Image(object):
                 try:
                     self.handleDescription(a)
                 except:
-                    sys.stderr.write("Error: in attributes file %s\n", a._path)
-
-        self._exif, self._comment = exif(join(opts.root, self._filename))
+                    msg = f"in attributes file {a._path}"
+                    logger.error(msg)
+                    sys.stderr.write("Error: "+msg)
+		
+        filename = join(opts.root, self._filename)
+        print(filename)
+        self._exif, self._comment = exif(filename)
         # no title, so use something unique to the image, it's path
         if not self._title:
             self._title = join(self._dir._path, self._base)
