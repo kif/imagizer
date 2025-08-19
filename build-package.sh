@@ -1,5 +1,5 @@
 #!/bin/sh
-rm -rf deb_dist/imagizer-*
+#m -rf deb_dist/imagizer-*
 export DEB_BUILD_OPTIONS=nocheck
 
 if [ -d /usr/lib/ccache ];
@@ -7,10 +7,12 @@ then
    export PATH=/usr/lib/ccache:$PATH
 fi
 
-python3 setup.py --command-packages=stdeb.command bdist_deb
-sudo dpkg -i deb_dist/python3-imagizer_*.deb
-#scp deb_dist/python-imagizer_3.*.deb jerome@islay:/home/httpd/html/devel
-#scp deb_dist/imagizer_4.*-1.dsc jerome@islay:/home/httpd/html/devel
-#scp deb_dist/imagizer_4.*.orig.tar.gz jerome@islay:/home/httpd/html/devel
-#scp deb_dist/imagizer_4.*-1.diff.gz jerome@islay:/home/httpd/html/devel
-#scp deb_dist/imagizer_4.*-1_amd64.changes jerome@islay:/home/httpd/html/devel
+python3 -m build -w
+rm -rf packaging/python3-imagizer_8.0.0-1~w2d0_amd64/src/*
+unzip dist/imagizer-*linux_x86_64.whl -d packaging/python3-imagizer_8.0.0-1~w2d0_amd64/src
+cd packaging
+cd python3-imagizer*_amd64
+dpkg-buildpackage -uc -us
+cd ..
+sudo dpkg -i python3-imagizer_*.deb
+cd ..
