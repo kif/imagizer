@@ -334,7 +334,7 @@ static void do_exif(struct jpeg_decompress_struct *src,
 	}
 	if (ed->data)
 	    free(ed->data);
-	ed->data = thumbnail;
+	ed->data = (unsigned char*) thumbnail;
 	ed->size = tsize;
     }
     if (NULL == ed)
@@ -398,7 +398,7 @@ static void do_comment(struct jpeg_decompress_struct *src,
     }
 
     /* update comment marker */
-    size = strlen(comment) +1;
+    size = strlen((char*) comment) + 1;
     mark->data = src->mem->alloc_large((j_common_ptr)src,JPOOL_IMAGE,size);
     mark->original_length = size;
     mark->data_length = size;

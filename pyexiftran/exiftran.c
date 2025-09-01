@@ -116,10 +116,8 @@ int pylib(int action, char *name)
 {
     JXFORM_CODE transform = JXFORM_NONE;
     unsigned char *comment = NULL;
-    unsigned char *outfile = NULL;
     unsigned char *thumbnail = NULL;
     int tsize = 0;
-    int inplace = 1;
     unsigned int flags =
 	JFLAG_TRANSFORM_IMAGE     |
 	JFLAG_TRANSFORM_THUMBNAIL |
@@ -129,6 +127,7 @@ int pylib(int action, char *name)
 //    int i, c, rc;
     int rc=0;
     char *actionName;
+    actionName = "Undefined";
 //    printf("in pylib action=%i name=%s\n",action,name);
 	switch (action) {
 	case 9:
@@ -159,17 +158,18 @@ int pylib(int action, char *name)
     }
 
     /* do actual update work */
+    fprintf(stderr,"processing %s on %s\n",actionName,name);
 
-	fprintf(stderr,"processing %s on %s\n",actionName,name);
     if (flags & JFLAG_UPDATE_THUMBNAIL) {
 	thumbnail = malloc(THUMB_MAX);
 	tsize = create_thumbnail(name,thumbnail,THUMB_MAX);
     }
     if (0 != jpeg_transform_inplace(name, transform, comment,
-				thumbnail, tsize, flags))	rc = 1;
-	return rc;
+                                    (char*) thumbnail, tsize, flags)){ 
+        rc = 1; 
+    }
 
-
+    return rc;
 }
 
 
@@ -241,13 +241,13 @@ int main(int argc, char *argv[])
 
 	case 'c':
 	    flags |= JFLAG_UPDATE_COMMENT;
-	    comment = optarg;
+	    comment = (unsigned char*) optarg;
 	    break;
 	case 'g':
 	    flags |= JFLAG_UPDATE_THUMBNAIL;
 	    break;
 	case 'o':
-	    outfile = optarg;
+	    outfile = (unsigned char*) optarg;
 	    break;
 	case 'd':
 	    dump = 1;
@@ -317,8 +317,8 @@ int main(int argc, char *argv[])
 	    thumbnail = malloc(THUMB_MAX);
 	    tsize = create_thumbnail(argv[optind],thumbnail,THUMB_MAX);
 	}
-	return jpeg_transform_files(argv[optind], outfile, transform,
-				    comment, thumbnail, tsize, flags);
+	return jpeg_transform_files(argv[optind], (char*) outfile, transform,
+				    comment, (char*) thumbnail, tsize, flags);
     } else {
 	rc = 0;
 	for (i = optind; i < argc; i++) {
@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
 		tsize = create_thumbnail(argv[i],thumbnail,THUMB_MAX);
 	    }
 	    if (0 != jpeg_transform_inplace(argv[i], transform, comment,
-					    thumbnail, tsize, flags))
+					    (char*) thumbnail, tsize, flags))
 		rc = 1;
 	}
 	return rc;
