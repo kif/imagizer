@@ -1,0 +1,3 @@
+src/imagizer-8.0.0.dist-info /usr/lib/python3/dist-packages/
+entrypoints/* /usr/bin/
+src/imagizer /usr/lib/python3/dist-packages/
