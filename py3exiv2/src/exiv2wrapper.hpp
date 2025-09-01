@@ -1,7 +1,7 @@
 // *****************************************************************************
 /*
  * Copyright (C) 2006-2010 Olivier Tilloy <olivier@tilloy.net>
- * Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+ * Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
  *
  * This file is part of the py3exiv2 distribution.
  *
@@ -26,6 +26,7 @@
 
 #ifndef __exiv2wrapper__
 #define __exiv2wrapper__
+#endif
 
 #include <string>
 
@@ -264,7 +265,12 @@ private:
     std::string _filename;
     Exiv2::byte* _data;
     long _size;
-    Exiv2::Image::AutoPtr _image;
+
+#if EXIV2_MAJOR_VERSION >= 1 || (EXIV2_MAJOR_VERSION == 0 && EXIV2_MINOR_VERSION >= 28)
+        Exiv2::Image::UniquePtr _image;
+#else
+        Exiv2::Image::AutoPtr _image;
+#endif
     Exiv2::ExifData* _exifData;
     Exiv2::IptcData* _iptcData;
     Exiv2::XmpData* _xmpData;
@@ -292,5 +298,4 @@ void unregisterAllXmpNs();
 
 } // End of namespace exiv2wrapper
 
-#endif
 

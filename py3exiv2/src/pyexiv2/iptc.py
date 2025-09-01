@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -28,9 +28,9 @@
 IPTC specific code.
 """
 
-from . import libexiv2python
+import libexiv2python
 
-from .utils import ListenerInterface, NotifyingList, \
+from pyexiv2.utils import ListenerInterface, NotifyingList, \
                           FixedOffset, DateTimeFormatter
 
 import time

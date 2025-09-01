@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -40,12 +40,12 @@ if sys.version_info < (3, 3):
 else:
     from collections.abc import MutableMapping
 
-from . import libexiv2python
+import libexiv2python
 
-from .exif import ExifTag, ExifThumbnail
-from .iptc import IptcTag
-from .xmp import XmpTag
-from .preview import Preview
+from pyexiv2.exif import ExifTag, ExifThumbnail
+from pyexiv2.iptc import IptcTag
+from pyexiv2.xmp import XmpTag
+from pyexiv2.preview import Preview
 
 
 class ImageMetadata(MutableMapping):

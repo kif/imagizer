@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -57,15 +57,15 @@ A typical use of this binding would be:
 >>> metadata.write()
 """
 
-from . import libexiv2python
+import libexiv2python
 
-from .metadata import ImageMetadata
-from .exif import ExifValueError, ExifTag, ExifThumbnail
-from .iptc import IptcValueError, IptcTag
-from .xmp import (XmpValueError, XmpTag, register_namespace,
+from pyexiv2.metadata import ImageMetadata
+from pyexiv2.exif import ExifValueError, ExifTag, ExifThumbnail
+from pyexiv2.iptc import IptcValueError, IptcTag
+from pyexiv2.xmp import (XmpValueError, XmpTag, register_namespace,
                          unregister_namespace, unregister_namespaces)
-from .preview import Preview
-from .utils import (FixedOffset, NotifyingList,
+from pyexiv2.preview import Preview
+from pyexiv2.utils import (FixedOffset, NotifyingList,
                            undefined_to_string, string_to_undefined,
                            GPSCoordinate)
 
@@ -75,7 +75,7 @@ def _make_version(version_info):
 
 
 #: A tuple containing the three components of the version number: major, minor, micro.
-version_info = (0, 9, 3)
+version_info = (0, 12, 0)
 
 #: The version of the module as a string (major.minor.micro).
 __version__ = _make_version(version_info)
