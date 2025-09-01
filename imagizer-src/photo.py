@@ -27,7 +27,7 @@ Module containing most classes for handling images
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/08/2023"
+__date__ = "19/03/2025"
 __license__ = "GPL"
 
 from math import ceil
@@ -638,7 +638,7 @@ class Photo(object):
             original_name = exif["Exif.Image.DocumentName"].human_value
         except (KeyError, IndexError) as err:
             original_name = None
-            logger.error("in retrieve_original_name: reading Exif for %s. %s", self.fn, err)
+            logger.error("in retrieve_original_name: reading Exif for %s. %s:%s", self.fn, type(err), err)
         return original_name
 
     def autorotate(self, check=True):
