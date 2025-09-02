@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -177,7 +177,7 @@ class XmpTag(object):
 
     def _set_raw_value(self, value):
         type_ = self._tag._getExiv2Type()
-        
+
         if type_ == 'XmpText':
             if not isinstance(value, str):
                 raise ValueError("Type XmpText need string value, not %s" % type(value))
@@ -209,7 +209,7 @@ class XmpTag(object):
             if type_.lower().startswith('closed choice of'):
                 type_ = type[17:]
 
-            self._value = [self._convert_to_python(v, type_) 
+            self._value = [self._convert_to_python(v, type_)
                            for v in self._raw_value]
 
         elif self.type == 'Lang Alt':
@@ -221,7 +221,7 @@ class XmpTag(object):
                     raise XmpValueError(self._raw_value, self.type)
 
         elif self.type.lower().startswith('closed choice of'):
-            self._value = self._convert_to_python(self._raw_value, 
+            self._value = self._convert_to_python(self._raw_value,
                                                   self.type[17:])
 
         elif self.type == '':
@@ -253,7 +253,7 @@ class XmpTag(object):
             else:
                 stype = "Text"
                 if isinstance(value, (list, tuple)):
-                    self.raw_value = [self._convert_to_string(v, stype) 
+                    self.raw_value = [self._convert_to_string(v, stype)
                                         for v in value]
 
                 else:
@@ -537,8 +537,8 @@ class XmpTag(object):
                 except UnicodeEncodeError:
                     raise XmpValueError(value, type_)
 
-            elif isinstance(value, bytes): 
-                return value 
+            elif isinstance(value, bytes):
+                return value
 
             raise XmpValueError(value, type_)
 
@@ -587,16 +587,16 @@ class XmpTag(object):
 def initialiseXmpParser():
     """Initialise the xmp parser.
 
-    Calling this method is usually not needed, as encode() and decode() will 
+    Calling this method is usually not needed, as encode() and decode() will
     initialize the XMP Toolkit if necessary.
 
-    The function takes optional pointers to a callback function xmpLockFct and 
-    related data pLockData that the parser uses when XMP namespaces are 
+    The function takes optional pointers to a callback function xmpLockFct and
+    related data pLockData that the parser uses when XMP namespaces are
     subsequently registered.
 
-    This function itself still is not thread-safe and needs to be 
-    called in a thread-safe manner (e.g., on program startup), but if used with 
-    suitable additional locking parameters, any subsequent registration of 
+    This function itself still is not thread-safe and needs to be
+    called in a thread-safe manner (e.g., on program startup), but if used with
+    suitable additional locking parameters, any subsequent registration of
     namespaces will be thread-safe.
     """
     libexiv2python._initialiseXmpParser()
@@ -606,8 +606,8 @@ def closeXmpParser():
 
     Terminate the XMP Toolkit and unregister custom namespaces.
 
-    Call this method when the XmpParser is no longer needed to allow the XMP 
-    Toolkit to cleanly shutdown. 
+    Call this method when the XmpParser is no longer needed to allow the XMP
+    Toolkit to cleanly shutdown.
     """
     libexiv2python._closeXmpParser()
 

@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -69,7 +69,7 @@ class ExifTag(ListenerInterface):
     - Long, SLong: [list of] int
     - Short, SShort: [list of] int
     - Rational, SRational: [list of] :class:`fractions.Fraction` if available
-      (Python ≥ 2.6) or :class:`pyexiv2.utils.Rational`      
+      (Python ≥ 2.6) or :class:`pyexiv2.utils.Rational`
     - Undefined: string
     """
     # According to the EXIF specification, the only accepted format for an Ascii
@@ -183,7 +183,7 @@ class ExifTag(ListenerInterface):
         """Lazy computation of the value from the raw value.
 
         """
-        if self.type in ('Short', 'SShort', 'Long', 'SLong', 
+        if self.type in ('Short', 'SShort', 'Long', 'SLong',
                          'Rational', 'SRational'):
             # May contain multiple values
             values = self._raw_value.split()
@@ -220,7 +220,7 @@ class ExifTag(ListenerInterface):
             self._value.register_listener(self)
 
         elif isinstance(value, (list, tuple)):
-            # Make the values a notifying list 
+            # Make the values a notifying list
             self._value = NotifyingList(value)
             self._value.register_listener(self)
 
@@ -252,7 +252,7 @@ class ExifTag(ListenerInterface):
         # http://www.exiv2.org/doc/classExiv2_1_1CommentValue.html
         # enum  	CharsetId {
         #           ascii, jis, unicode, undefined,
-        #           invalidCharsetId, lastCharsetId } 
+        #           invalidCharsetId, lastCharsetId }
         encoding = sys.getdefaultencoding()
         if charset in ('Ascii', 'ascii'):
             encoding = 'ascii'
@@ -311,7 +311,7 @@ class ExifTag(ListenerInterface):
                     return val
                 return value
 
-            if value.startswith(b'charset='):          
+            if value.startswith(b'charset='):
                 charset = charset.split('=')[1].strip('"')
                 encoding = self._match_encoding(charset)
                 return val.decode(encoding, 'replace')

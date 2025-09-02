@@ -2,7 +2,8 @@ project('imagizer',
   'c', 'cython', 'cpp',
   license: 'MIT',
   meson_version: '>= 0.60',
-  version: '8.0.0'
+  version: '8.1.0',
+  default_options : 'cpp_std=c++11'
 )
 
 

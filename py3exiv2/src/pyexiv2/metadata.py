@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -322,7 +322,7 @@ class ImageMetadata(MutableMapping):
                         tag or a value
                         Type: pyexiv2.exif.ExifTag instance or
                               pyexiv2.iptc.IptcTag instance or
-                              pyexiv2.xmp.XmpTag instance or 
+                              pyexiv2.xmp.XmpTag instance or
                               any valid value type
         """
         family = key.split('.')[0].lower()
@@ -456,7 +456,7 @@ class ImageMetadata(MutableMapping):
         exif -- whether to copy the EXIF metadata, default True
         iptc -- whether to copy the IPTC metadata, default True
         xmp -- whether to copy the XMP metadata, default True
-        comment -- whether to copy the image comment, default True 
+        comment -- whether to copy the image comment, default True
         """
         self._image._copyMetadata(other._image, exif, iptc, xmp)
         # Empty the cache where needed
@@ -525,7 +525,7 @@ class ImageMetadata(MutableMapping):
         except KeyError:
             pass
 
-    iptc_charset = property(fget=_get_iptc_charset, 
+    iptc_charset = property(fget=_get_iptc_charset,
                             fset=_set_iptc_charset,
                             fdel=_del_iptc_charset,
                             doc='An optional character set the IPTC data'\
@@ -545,11 +545,11 @@ class ImageMetadata(MutableMapping):
         """Returns the exposure time as rational or float.
 
         Args:
-        float_ -- if False, default, the value is returned as rational 
+        float_ -- if False, default, the value is returned as rational
                   otherwise as float
         """
         try:
-            speed = self['Exif.Photo.ExposureTime'].value 
+            speed = self['Exif.Photo.ExposureTime'].value
         except KeyError:
             return
 
@@ -612,7 +612,7 @@ class ImageMetadata(MutableMapping):
         When a tag is not set, the value will be None
 
         Args:
-        float_ -- if False, default, the value of the exposure time is returned 
+        float_ -- if False, default, the value of the exposure time is returned
                   as rational otherwise as float
         """
         data = {"iso": self.get_iso(),
@@ -636,11 +636,11 @@ class ImageMetadata(MutableMapping):
 
         When a tag is not set, the value will be None
         """
-        tags = [('creator', 'Xmp.dc.creator'), 
+        tags = [('creator', 'Xmp.dc.creator'),
                 ('artist', 'Exif.Image.Artist'),
-                ('rights', 'Xmp.dc.rights'), 
+                ('rights', 'Xmp.dc.rights'),
                 ('copyright', 'Exif.Image.Copyright'),
-                ('marked', 'Xmp.xmpRights.Marked'), 
+                ('marked', 'Xmp.xmpRights.Marked'),
                 ('usage', 'Xmp.xmpRights.UsageTerms')]
         rights = {}
         for tag in tags:

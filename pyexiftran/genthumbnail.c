@@ -131,7 +131,7 @@ compress_thumbnail(struct ida_image *img, char *dest, int max)
     thc.dst.err = jpeg_std_error(&thc.err);
     jpeg_create_compress(&thc.dst);
     thc.dst.dest = &thumbnail_dst;
-    thc.out = dest;
+    thc.out = (unsigned char*) dest;
     thc.osize = max;
 
     thc.dst.image_width  = img->i.width;
@@ -174,7 +174,7 @@ int create_thumbnail(char *filename, unsigned char *dest, int max)
     }
 
     //fprintf(stderr,"compress ");
-    size = compress_thumbnail(thumb,dest,max);
+    size = compress_thumbnail(thumb, (char*) dest, max);
 
     /* cleanup */
     free(img->data);

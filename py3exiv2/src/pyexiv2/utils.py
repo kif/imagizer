@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2012 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -332,7 +332,7 @@ class GPSCoordinate(object):
     properties.
     """
     _format_re = re.compile(r'(?P<degrees>-?\d+),'
-                    r'(?P<minutes>\d+)(,(?P<seconds>\d+)|\.(?P<fraction>\d+))'
+                    '(?P<minutes>\d+)(,(?P<seconds>\d+)|\.(?P<fraction>\d+))'
                     '(?P<direction>[NSEW])')
 
     def __init__(self, degrees, minutes, seconds, direction):

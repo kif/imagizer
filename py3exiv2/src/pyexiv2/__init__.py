@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -75,7 +75,7 @@ def _make_version(version_info):
 
 
 #: A tuple containing the three components of the version number: major, minor, micro.
-version_info = (0, 9, 3)
+version_info = (0, 12, 0)
 
 #: The version of the module as a string (major.minor.micro).
 __version__ = _make_version(version_info)

@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+#WHEEL2DEB#
+
+
+
+
+
+if which py3compile >/dev/null 2>&1; then
+    py3compile -p python3-imagizer
+fi
+
+#DEBHELPER#

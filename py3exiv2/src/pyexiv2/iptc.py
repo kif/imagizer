@@ -3,7 +3,7 @@
 # ******************************************************************************
 #
 # Copyright (C) 2006-2011 Olivier Tilloy <olivier@tilloy.net>
-# Copyright (C) 2015-2021 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
+# Copyright (C) 2015-2023 Vincent Vande Vyvre <vincent.vandevyvre@oqapy.eu>
 #
 # This file is part of the py3exiv2 distribution.
 #
@@ -193,7 +193,7 @@ class IptcTag(ListenerInterface):
 
     def _compute_values(self):
         # Lazy computation of the values from the raw values
-        self._values = NotifyingList([self._convert_to_python(v) 
+        self._values = NotifyingList([self._convert_to_python(v)
                                         for v in self._raw_values])
         self._values.register_listener(self)
         self._values_cookie = False
@@ -218,7 +218,7 @@ class IptcTag(ListenerInterface):
             self._values = values
 
         else:
-            # Make the values a notifying list 
+            # Make the values a notifying list
             self._values = NotifyingList(values)
 
         self._values.register_listener(self)
