@@ -1,4 +1,3 @@
 numpy
-py3exiv2
 pillow
 pyqt6

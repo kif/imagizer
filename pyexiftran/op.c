@@ -15,7 +15,7 @@ static void
 op_flip_vert(struct ida_image *src, struct ida_rect *rect,
 	     unsigned char *dst, int line, void *data)
 {
-    char *scanline;
+    unsigned char *scanline;
 
     scanline = src->data + (src->i.height - line - 1) * src->i.width * 3;
     memcpy(dst,scanline,src->i.width*3);
@@ -25,7 +25,7 @@ static void
 op_flip_horz(struct ida_image *src, struct ida_rect *rect,
 	     unsigned char *dst, int line, void *data)
 {
-    char *scanline;
+    unsigned char *scanline;
     unsigned int i;
 
     scanline = src->data + (line+1) * src->i.width * 3;
@@ -53,7 +53,7 @@ static void
 op_rotate_cw(struct ida_image *src, struct ida_rect *rect,
 	     unsigned char *dst, int line, void *data)
 {
-    char *pix;
+    unsigned char *pix;
     unsigned int i;
 
     pix = src->data + src->i.width * src->i.height * 3 + line * 3;
@@ -70,7 +70,7 @@ static void
 op_rotate_ccw(struct ida_image *src, struct ida_rect *rect,
 	      unsigned char *dst, int line, void *data)
 {
-    char *pix;
+    unsigned char *pix;
     unsigned int i;
 
     pix = src->data + (src->i.width-line-1) * 3;
@@ -149,7 +149,7 @@ op_autocrop_init(struct ida_image *src, struct ida_rect *unused,
     int x,y,limit;
     unsigned char *line;
     void *data;
-    
+
     /* detect edges */
     rect.x1 = 0;
     rect.x2 = src->i.width;
@@ -221,7 +221,7 @@ op_autocrop_init(struct ida_image *src, struct ida_rect *unused,
 
     if (0 == rect.x2 - rect.x1  ||  0 == rect.y2 - rect.y1)
 	return NULL;
-    
+
     *unused = rect;
     *i = src->i;
     i->width  = rect.x2 - rect.x1;
