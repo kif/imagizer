@@ -33,7 +33,8 @@ classifiers = [
 
 dependencies = [
    'numpy',
-   'pillow'
+   'pillow',
+
 ]
 
 [build-system]
@@ -58,6 +59,7 @@ tracker = 'https://github.com/kif/imagizer/issues'
 
 [project.scripts]
 generator = 'imagizer.app.generator:main'
+Gen_HTML = 'imagizer.app.video_page:main'
 
 [project.gui-scripts]
 selector = 'imagizer.app.selector:main'

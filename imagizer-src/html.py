@@ -22,7 +22,7 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "23 Feb 2011"
+__date__ = "14/09/2025"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPL"
 __contact__ = "imagizer@terre-adelie.org"
@@ -60,7 +60,7 @@ class Html(object):
 
     def write(self, filename):
         self.footer()
-        f = open(filename, "w")
+        f = open(filename, "wb")
         f.write(os.linesep.join(self.lsttxt).encode(self.enc))
         f.close()
 

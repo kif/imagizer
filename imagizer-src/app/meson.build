@@ -8,7 +8,7 @@ py.install_sources([
 'mkdb_sift.py',
 'nomme_video.py',
 'nomme_video2.py',
-
+'video_page.py'
 ],
   pure: false,    # Will be installed next to binaries
   subdir: 'imagizer/app'  # Folder relative to site-packages to install to
