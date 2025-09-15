@@ -22,7 +22,7 @@
 #*
 #*****************************************************************************/
 __author__ = "Jérôme Kieffer"
-__date__ = "14/09/2025"
+__date__ = "15/09/2025"
 __copyright__ = "Jerome Kieffer"
 __license__ = "GPL"
 __contact__ = "imagizer@terre-adelie.org"
@@ -46,35 +46,35 @@ class Html(object):
     def header(self, title, enc, favicon):
         self.lsttxt = ['<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">', '<html>', '<head>']
         if favicon:
-             self.lsttxt.append(u'<link rel="icon" type="image/%s" href="%s" />' % (OP.splitext(favicon)[1][1:], favicon))
+             self.lsttxt.append(f'<link rel="icon" type="image/{OP.splitext(favicon)[1][1:]}" href="{favicon}" />'
         if enc:
-             self.lsttxt.append(u'<content="text/html; charset=%s">' % enc)
-        self.lsttxt.append(u"<title>%s</title>" % title)
-        self.lsttxt.append(u"</head>")
-        self.lsttxt.append(u"<body>")
+             self.lsttxt.append(f'<content="text/html; charset={enc}">')
+        self.lsttxt.append(f"<title>{title}</title>")
+        self.lsttxt.append("</head>")
+        self.lsttxt.append("<body>")
 
     def footer(self):
-        self.lsttxt.append(u"</body>")
-        self.lsttxt.append(u"</html>")
+        self.lsttxt.append("</body>")
+        self.lsttxt.append("</html>")
 
 
     def write(self, filename):
         self.footer()
-        f = open(filename, "wb")
-        f.write(os.linesep.join(self.lsttxt).encode(self.enc))
+        f = open(filename, "wb", encoding=self.enc)
+        f.write(os.linesep.join(self.lsttxt))
         f.close()
 
 
     def start(self, tag, dico=None):
-        txt = u"<%s" % tag
+        txt = f"<{tag}"
         if isinstance(dico, dict):
             for i in dico:
-                 txt += u' %s="%s" ' % (i, dico[i])
-        self.lsttxt.append(txt + u" >")
+                 txt += f' {i}="{dico[i]}" '
+        self.lsttxt.append(txt + " >")
 
 
     def stop(self, tag):
-         self.lsttxt.append(u"</%s>" % tag)
+         self.lsttxt.append(f"</{tag}>")
 
 
     def data(self, donnee, encoding=None):

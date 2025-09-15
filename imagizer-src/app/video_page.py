@@ -3,7 +3,7 @@ video_page is the tool to generate a web page with all videos
 """
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "14/09/2025"
+__date__ = "15/09/2025"
 __license__ = "GPL"
 
 import time
@@ -75,10 +75,9 @@ class Video:
                     dirname = dirname[1:]
                 try:
                     dirdate = datetime.datetime.fromtimestamp(time.mktime(time.strptime(dirname[:10], "%Y-%m-%d")))
-                except:
-                    print("unable to parse dirdate:", dirname)
+                except Exception as err:
+                    logger.error(f"{type(err)}: {err}. Unable to parse dirdate `{dirname}`.")
                 else:
-                    print(dirdate.date(), timestamp.date(), dirdate.date() < timestamp.date())
                     if dirdate.date() < timestamp.date():
                         timestamp = datetime.datetime.combine(dirdate.date(), timestamp.time())
             self._timestamp = timestamp
@@ -110,7 +109,7 @@ class AllVideo:
         all.sort()
         return all
     
-    def build_html(self):
+    def build_html(self, output="index.html"):
         per_date = {}
         for video in self.filenames.values():
             date = video.date
@@ -129,7 +128,6 @@ class AllVideo:
                 thumb_name = onevideo.save_frame()
                 html.start("tr")
                 html.start("td", {"width":200})
-                # print(RelativeName(onevideo.abs_filename))
                 html.start("a", {"href": onevideo.filename})
                 thumb = os.path.relpath(thumb_name, self.root)
                 html.start("img", {"src":thumb, "alt":thumb})
@@ -139,14 +137,14 @@ class AllVideo:
                 html.start("td")
                 html.data(onevideo.timestamp.time().strftime("%Hh%Mm%Ss"))
                 html.start("br")
-                html.data(f"Dur\xe9e {onevideo.duration:.1f}s")
+                html.data(f"Durée {onevideo.duration:.1f}s")
                 html.stop("td")
                 html.element("td", onevideo.title)
                 html.stop("tr")
             html.stop("table")
             html.start("hr/")
         html.element("a name='end'")
-        html.write(os.path.join(self.root, "index.html"))
+        html.write(os.path.join(self.root, output))
 
 
 def parse():
@@ -155,7 +153,7 @@ def parse():
                             description="Cree une page web avec les videos",
                             epilog="")
     parser.add_argument("-d", "--debug", help="mode debug tres verbeux", action="store_true", default=False)
-    parser.add_argument("path", help="repertoires a traiter", default=(os.getcwd(),), nargs='*')
+    parser.add_argument("paths", help="repertoires a traiter", default=(os.getcwd(),), nargs='*')
     args = parser.parse_args()
     if args.debug:
         logging.root.setLevel(logging.DEBUG)
@@ -169,6 +167,10 @@ def parse():
 
 def main(args=sys.argv):
     args = parse()
+    for root in args.paths:
+        av = AllVideo(root)
+        logger.info(f"Processing directory `{root}` with {len(av.filenames)} videos.")
+        av.
     print(args.path)
 
 
