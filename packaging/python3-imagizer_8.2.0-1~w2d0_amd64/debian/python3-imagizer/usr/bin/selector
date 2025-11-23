@@ -1,0 +1,3 @@
+#!/usr/bin/python3
+from imagizer.app.selector import main
+main()
