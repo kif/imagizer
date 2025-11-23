@@ -5,7 +5,7 @@
 
 __author__ = "Jérôme Kieffer"
 __contact = "imagizer@terre-adelie.org"
-__date__ = "25/08/2024"
+__date__ = "23/11/2025"
 __license__ = "GPL"
 
 from . import pyexiv2
@@ -30,10 +30,6 @@ class Exif(pyexiv2.ImageMetadata):
     def _get_comment(self):
         if "Exif.Photo.UserComment" in self:
             e = self["Exif.Photo.UserComment"]
-#             print("raw_value", type(e.raw_value), e.raw_value, "\n",
-#                   "value", e.value, e._value, "\n",
-#                   "human", e.human_value, "\n",
-#                    str(e))
             if e.raw_value in ("charset=Ascii binary comment", 'binary comment'):
                 ecomment = ""
             else:
@@ -48,14 +44,14 @@ class Exif(pyexiv2.ImageMetadata):
         if comment:
             try:
                 pyexiv2.ImageMetadata._set_comment(self, comment)
-            except ValueError:
+            except (ValueError, OSError):
                 pass
             pyexiv2.ImageMetadata.__setitem__(self, "Exif.Photo.UserComment",
-                                              "charset=Unicode " + comment)
+                                              f"charset=Unicode {comment}")
         else:
             try:
                 self._del_comment()
-            except ValueError:
+            except (ValueError, OSError):
                 pass
             pyexiv2.ImageMetadata.__setitem__(self, "Exif.Photo.UserComment", "charset=Ascii  ")
 
