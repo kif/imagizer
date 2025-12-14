@@ -428,7 +428,11 @@ class Photo(object):
         exif = self.exif
         if self.metadata.get("size") is None:
             self.metadata["size"] = "%.2f %s" % smartSize(op.getsize(self.fn))
-            title = exif.comment or u""
+            try:
+                title = exif.comment or u""
+            except UnicodeError as err:
+                print(f"Unicode Error on {self.filename}: {err}")
+                title = ""
             title = title.strip()
             self.metadata["title"] = title
             if title_cache:
