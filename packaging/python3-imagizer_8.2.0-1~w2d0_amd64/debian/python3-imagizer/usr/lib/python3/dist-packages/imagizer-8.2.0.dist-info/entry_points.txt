@@ -1,7 +1,0 @@
-[console_scripts]
-generator = imagizer.app.generator:main
-Gen_HTML = imagizer.app.video_page:main
-
-[gui_scripts]
-selector = imagizer.app.selector:main
-

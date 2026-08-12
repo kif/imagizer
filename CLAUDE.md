@@ -67,5 +67,5 @@ A directory is treated as an imagizer repository only if it contains a **`.selec
 - The tree carries legacy Python-2 compatibility shims (`from __future__ import ...`, `try/except` around `configparser`/PIL imports). New code targets Python 3 (`requires-python >=3.7`), but keep additions tolerant of the existing style.
 - `*.orig` files (e.g. `photo.py.orig`, `interface.py.orig`) are stale merge artifacts — ignore them; edit the non-`.orig` file.
 - Generated artifacts checked into the tree (`*.c`/`*.html` next to `.pyx`, `build/`, `dist/`, `deb_dist/`, many `*.tar.gz`/`*.deb`/`*.whl`) are not source — edit the `.pyx`/`.py` originals.
-- The version is set in `meson.build` (`version:`) and `imagizer-src/__init__.py` (`__version__`); keep them in sync when bumping.
+- The version has a single source of truth: `version:` in `meson.build`. At build time meson generates `imagizer/_version.py` from `imagizer-src/_version.py.in`, and `imagizer-src/__init__.py` imports `__version__` from it. Bump the version in `meson.build` only.
 - License is mixed: `pyproject.toml` declares MIT, but most imagizer source files carry a GPL header.

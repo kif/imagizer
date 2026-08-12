@@ -1,5 +1,17 @@
 subdir('app')
 
+# Generate _version.py from the project version (single source of truth:
+# the `version:` field of the top-level meson.build).
+version_py = configure_file(
+  input: '_version.py.in',
+  output: '_version.py',
+  configuration: {'VERSION': meson.project_version()},
+)
+py.install_sources(version_py,
+  pure: false,
+  subdir: 'imagizer',
+)
+
 py.install_sources([
 'blur.py',
 'config.py',
