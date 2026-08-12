@@ -1,14 +1,15 @@
 7bccaaaf31259d484330126266ebd1b8  usr/bin/generator
 4c509c6e6d142a612577e2dc5980932d  usr/bin/selector
 61cda9b485822b4d7088dbcc705e6be9  usr/lib/python3/dist-packages/imagizer-8.3.0.dist-info/METADATA
-fdc05573262c887d1de4f7f60c9af9a2  usr/lib/python3/dist-packages/imagizer-8.3.0.dist-info/RECORD
+13a74fef9cba8cd13fc0a12cae1e1b1d  usr/lib/python3/dist-packages/imagizer-8.3.0.dist-info/RECORD
 2b12ef62bf68d9cbd4af650fd635f74e  usr/lib/python3/dist-packages/imagizer-8.3.0.dist-info/WHEEL
 b234ee4d69f5fce4486a80fdaf4a4263  usr/lib/python3/dist-packages/imagizer-8.3.0.dist-info/copyright
 d7d16f41e8f7641cd8358110405209cd  usr/lib/python3/dist-packages/imagizer-8.3.0.dist-info/entry_points.txt
-ad48c37c51ae5f82d5190f0d48d1bb56  usr/lib/python3/dist-packages/imagizer/__init__.py
+4ec22954b2c02f308ad44c9a1dead5fa  usr/lib/python3/dist-packages/imagizer/__init__.py
 b63d68e0b2b477b518483c7b805bb1da  usr/lib/python3/dist-packages/imagizer/_pyqt6.py
 0bad94a722e793043e196b95775dd2e4  usr/lib/python3/dist-packages/imagizer/_qt.py
 3f94191652f680439b6ac1b978581346  usr/lib/python3/dist-packages/imagizer/_tree.cpython-313-x86_64-linux-gnu.so
+f76e20b8e3d3f1597c5157169d13b473  usr/lib/python3/dist-packages/imagizer/_version.py
 8a29910ed8b67083e18e6c9b8ad2387b  usr/lib/python3/dist-packages/imagizer/app/adjust_time.py
 47614bf58e28e9b3f43c916c5eb81b0d  usr/lib/python3/dist-packages/imagizer/app/extract_image_labels.py
 8569cab3066e7886dce30cb223d43c94  usr/lib/python3/dist-packages/imagizer/app/generator.py

@@ -174,7 +174,7 @@ def _start_qt_worker(target):
 
 
 class RangeTout(ThreadedProcessing):
-    """Implemantation de range_tout
+    """Implementation of range_tout
 
     moves all the JPEG files to a directory named from
     their day and with the name according to the time"""
@@ -185,7 +185,7 @@ class RangeTout(ThreadedProcessing):
         self.rootdir = rootdir
 
     def run(self):
-        """ Lance les calculs (utilisable dans un thread a part...
+        """ Run the computation (usable in a separate thread...
 
         @return: 2tuple containing the list of all images and the start-index
         @rtype: (list,integer)
@@ -334,7 +334,7 @@ class CopySelected(ThreadedProcessing):
 
     def run(self):
         """
-        Lance les calculs
+        Run the computation
 
         @param self.input: list of files to process
         """

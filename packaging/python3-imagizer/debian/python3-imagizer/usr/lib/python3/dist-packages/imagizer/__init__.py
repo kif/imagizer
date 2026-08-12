@@ -30,10 +30,20 @@ It handles images, progress bars and configuration file.
 """
 
 __author__ = "Jérôme Kieffer"
-__version__ = "8.2.0"
 __contact__ = "imagizer@terre-adelie.org"
 __date__ = "15/09/2025"
 __license__ = "GPL"
+
+# The version is defined once, in meson.build. At build time meson generates
+# _version.py from _version.py.in; fall back to the installed package metadata.
+try:
+    from ._version import __version__
+except ImportError:
+    try:
+        from importlib.metadata import version as _pkg_version
+        __version__ = _pkg_version("imagizer")
+    except Exception:
+        __version__ = "unknown"
 
 import os, logging, sys
 logging.basicConfig()
