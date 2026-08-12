@@ -1,11 +1,19 @@
 subdir('app')
 
 # Generate _version.py from the project version (single source of truth:
-# the `version:` field of the top-level meson.build).
+# the `version:` field of the top-level meson.build). __date__ reflects the
+# last modification date of meson.build (git commit date, with a filesystem
+# mtime fallback), computed at configure time; meson re-runs this whenever
+# meson.build changes.
+version_date = run_command(py,
+  files('_get_date.py'),
+  meson.project_source_root() / 'meson.build',
+  check: true).stdout().strip()
+
 version_py = configure_file(
   input: '_version.py.in',
   output: '_version.py',
-  configuration: {'VERSION': meson.project_version()},
+  configuration: {'VERSION': meson.project_version(), 'DATE': version_date},
 )
 py.install_sources(version_py,
   pure: false,
