@@ -31,14 +31,15 @@ It handles images, progress bars and configuration file.
 
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "15/09/2025"
 __license__ = "GPL"
 
-# The version is defined once, in meson.build. At build time meson generates
-# _version.py from _version.py.in; fall back to the installed package metadata.
+# __version__ and __date__ are defined once, from meson.build (the project
+# version and the modification date of meson.build). At build time meson
+# generates _version.py from _version.py.in; fall back to package metadata.
 try:
-    from ._version import __version__
+    from ._version import __version__, __date__
 except ImportError:
+    __date__ = "unknown"
     try:
         from importlib.metadata import version as _pkg_version
         __version__ = _pkg_version("imagizer")

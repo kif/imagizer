@@ -93,7 +93,7 @@ class Config(object):
             self.CommentFile = "index.desc"
             self.Interpolation = 1
             self.DefaultFileMode = int(self.DefaultMode, 8)
-            self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 en octal ... 3145 +s mode octal
+            self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 in octal ... 3145 +s octal mode
             self.Filigrane = False
             self.FiligraneSource = os.path.join(installdir, "signature.png")
             self.FiligranePosition = 5
@@ -195,7 +195,7 @@ class Config(object):
             elif key == "WebDirIndexStyle".lower(): self.WebDirIndexStyle = value
             elif key == "DefaultFileMode".lower():
                 self.DefaultFileMode = int(value, 8)
-                self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 en octal ... 3145 +s mode octal
+                self.DefaultDirMode = self.DefaultFileMode + 3145  # 73 = +111 in octal ... 3145 +s octal mode
             elif key == "RawExtensions".lower():      self.RawExtensions = value.split()
             elif key == "Extensions".lower():         self.Extensions = value.split()
             elif key == "DefaultRepository".lower():  self.DefaultRepository = value

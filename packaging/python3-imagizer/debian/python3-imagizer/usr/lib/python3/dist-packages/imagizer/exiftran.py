@@ -23,14 +23,14 @@
 #*****************************************************************************/
 
 #
-# Liste des dépendances : python, PIL, Glade-2
-# Exiftran existe en version windows maintenant ... nous utilisons une verison modifiée ...!!!!
+# List of dependencies: python, PIL, Glade-2
+# Exiftran now exists in a windows version ... we use a modified version ...!!!!
 #
-#todo liste des fonctions a implemanter ....
-# - se passer de exiftran
-# - la version windows et la version mac
-# - faire une doc décente.
-# - proposer d'exporter toutes les photos dans un seul répertoire (pas de jour)
+#todo list of functions to implement ....
+# - get rid of exiftran
+# - the windows version and the mac version
+# - write decent documentation.
+# - offer to export all photos into a single directory (no per-day folders)
 
 
 """

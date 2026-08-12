@@ -67,7 +67,7 @@ from .           import blur
 
 
 # #########################################################
-# # # # # # Début de la classe photo # # # # # # # # # # #
+# # # # # # Start of the photo class # # # # # # # # # # #
 # #########################################################
 class Photo(object):
     """class photo that does all the operations available on photos"""
@@ -664,11 +664,11 @@ class Photo(object):
             self.orientation = 1
 
     def contrastMask(self, outfile):
-        """Ceci est un filtre de debouchage de photographies, aussi appelé masque de contraste,
-        il permet de rattrapper une photo trop contrasté, un contre jour, ...
-        Écrit par Jérôme Kieffer, avec l'aide de la liste python@aful,
-        en particulier A. Fayolles et F. Mantegazza avril 2006
-        necessite numpy et PIL.
+        """This is a shadow-recovery filter for photographs, also called a contrast mask,
+        it makes it possible to rescue an overly contrasted photo, a backlit shot, ...
+        Written by Jérôme Kieffer, with the help of the python@aful mailing list,
+        in particular A. Fayolles and F. Mantegazza, April 2006
+        requires numpy and PIL.
 
         @param: the name of the output file (JPEG)
         @return: filtered Photo instance
@@ -762,7 +762,7 @@ class Photo(object):
         return res
 
 # #######################################################
-# # # # # # fin de la classe photo # # # # # # # # # # #
+# # # # # # end of the photo class # # # # # # # # # # #
 # #######################################################
 
 

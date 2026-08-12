@@ -25,7 +25,7 @@
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "22/08/2024"
+__date__ = "12/08/2026"
 __license__ = "GPL"
 
 import gc
@@ -47,7 +47,7 @@ from .photo import Photo, RawImage
 from .utils import get_pixmap_file
 from .config import config, listConfigurationFiles
 from .imagecache import image_cache, title_cache
-from . import tree, __version__
+from . import tree, __version__, __date__ as date
 from .dialogs import rename_day, quit_dialog, ask_media_size, synchronize_dialog, message_box, slideshow_dialog
 from .search import SearchTitle
 from .fileutils import smartSize, recursive_delete, findFiles
@@ -927,8 +927,12 @@ class Interface(qt.QObject):
         """display a copyright message"""
         logger.debug("Interface.about clicked")
         self.update_title()
-        msg = "Selector vous permet de mélanger, de sélectionner et de tourner \ndes photos provenant de plusieurs sources.\nÉcrit par %s <%s>\nVersion %s (%s)" % (__author__, __contact__, __version__, __date__)
-        message_box(self.gui, "À Propos", msg)
+        msg = ["Selector vous permet de mélanger, de sélectionner et de tourner",
+                "des photos provenant de plusieurs sources.",
+                '',
+                f"Écrit par {__author__} <{__contact__}>",
+                f"Version {__version__} ({date})"]
+        message_box(self.gui, "À Propos", " \n".join(msg))
 
     def searchJ(self, *args):
         """start the searching widget"""

@@ -64,26 +64,26 @@ class VideoControler(object):
         self.__model = model
         self.__view = view
 
-        # Connection des signaux
+        # Connect the signals
         model.startSignal.connect(self.__startCallback)
         model.refreshSignal.connect(self.__refreshCallback)
         model.finishSignal.connect(self.__stopCallback)
         model.NbrJobsSignal.connect(self.__NBJCallback)
 
     def __startCallback(self, label, nbVal):
-        """ Callback pour le signal de début de progressbar."""
+        """ Callback for the progress bar start signal."""
         self.__view.creatProgressBar(label, nbVal)
 
     def __refreshCallback(self, i, filename):
-        """ Mise à jour de la progressbar."""
+        """ Update the progress bar."""
         self.__view.updateProgressBar(i, filename)
 
     def __stopCallback(self):
-        """ Callback pour le signal de fin de splashscreen."""
+        """ Callback for the splash screen finish signal."""
         self.__view.finish()
 
     def __NBJCallback(self, NbrJobs):
-        """ Callback pour redefinir le nombre de job totaux."""
+        """ Callback to redefine the total number of jobs."""
         self.__view.ProgressBarMax(NbrJobs)
 
 
