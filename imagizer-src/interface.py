@@ -244,7 +244,7 @@ class Interface(qt.QObject):
         Set the data in every action containing the name of the callback method
         """
         action_dict = {
-            # Menu Fichier
+            # File menu
             self.gui.actionName_day: "rename_day",
             #    <string>Ctrl+N</string>
             self.gui.actionDiaporama: "toggle_slideshow",
@@ -265,7 +265,7 @@ class Interface(qt.QObject):
             self.gui.actionQuitter: "die",
             #    <string>Ctrl+Q</string>
 
-            # Menu Affichage
+            # View menu
 #                    self.gui.actionNote_minimale: self.start_image_mark_window,
             self.gui.actionReload: "reload_img",
             #    <string>Ctrl+R</string>
@@ -276,14 +276,14 @@ class Interface(qt.QObject):
             self.gui.actionHide_toolbar: "toggle_toolbar",
             #    <string>Ctrl+T</string>
 
-            # Menu Preference
+            # Preferences menu
             self.gui.actionMedia_size: "defineMediaSize",
             self.gui.actionAutorotate: "setAutoRotate",
             self.gui.actionSignature_filigrane_web:"setFiligrane",
             self.gui.actionSave_pref: "save_pref",
             self.gui.actionConfigurer_le_diaporama:"config_slideshow",
 
-            # Menu Selection
+            # Selection menu
             self.gui.selectionner: "select_shortcut",
             #    <string>Ctrl+S</string>
             self.gui.actionCharger: "load_selection",
@@ -298,16 +298,16 @@ class Interface(qt.QObject):
 #        self.gui.indexJ_activate': self.indexJ,
 #        self.gui.searchJ_activate': self.searchJ,
 
-            # Menu Filtres
+            # Filters menu
             self.gui.actionAuto_whitebalance: "filter_AutoWB",
             self.gui.actionContrast_mask: "filter_ContrastMask",
             self.gui.actionGimp: "gimp",
             self.gui.actionRawTherapee: "rawtherapee",
 
-            # Menu Aide
+            # Help menu
             self.gui.actionA_propos: "about",
 
-            # Menu Preference
+            # Preferences menu
             self.gui.actionNearest:"set_interpolation",
             self.gui.actionLinear: "set_interpolation",
             self.gui.actionLanczos:"set_interpolation",
@@ -323,7 +323,7 @@ class Interface(qt.QObject):
             self.gui.action3: "set_min_rate",
             self.gui.action4: "set_min_rate",
             self.gui.action5: "set_min_rate",
-            # Menu navigation
+            # Navigation menu
             # #Image
             self.gui.actionNav_img_first: "navigate",
             self.gui.actionNav_img_previous10: "navigate",
@@ -1341,7 +1341,7 @@ class Interface(qt.QObject):
             self.processes = still
 
 ################################################################################
-# # # # # # # fin de la classe interface graphique # # # # # #
+# # # # # # # end of the graphical interface class # # # # # #
 ################################################################################
 
 

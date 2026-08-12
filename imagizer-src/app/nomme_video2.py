@@ -64,7 +64,7 @@ class VideoControler(object):
         self.__model = model
         self.__view = view
 
-        # Connection des signaux
+        # Connect the signals
         model.startSignal.connect(self.__startCallback)
         model.refreshSignal.connect(self.__refreshCallback)
         model.finishSignal.connect(self.__stopCallback)

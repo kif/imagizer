@@ -67,7 +67,7 @@ from .           import blur
 
 
 # #########################################################
-# # # # # # Début de la classe photo # # # # # # # # # # #
+# # # # # # Start of the photo class # # # # # # # # # # #
 # #########################################################
 class Photo(object):
     """class photo that does all the operations available on photos"""
@@ -762,7 +762,7 @@ class Photo(object):
         return res
 
 # #######################################################
-# # # # # # fin de la classe photo # # # # # # # # # # #
+# # # # # # end of the photo class # # # # # # # # # # #
 # #######################################################
 
 

@@ -344,7 +344,7 @@ class Directory(object):
                     self._attrfile["title"] = longtitle
             if "image" not in self._attrfile:
                 self._attrfile["image"] = ""
-        ####reste un probleme avec les images noms d'image.... il sera resolu 100 lignes plus loin
+        ####still a problem with the image names.... it will be resolved 100 lines further down
         imgmap = {}
         for f in files:
             af = join(path, f)
