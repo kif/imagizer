@@ -144,6 +144,35 @@ class ThreadedProcessing(threading.Thread):
         raise NotImplementedError("Abstract method to be overwritten")
 
 
+# References to running Qt worker threads, keeping them alive until they finish.
+_qt_workers = []
+
+
+def _start_qt_worker(target):
+    """Run ``target.run()`` inside a Qt-managed thread and return that thread.
+
+    The background jobs emit Qt signals (progress/finished) that drive GUI
+    widgets. Emitting those from a plain ``threading.Thread`` makes Qt adopt a
+    foreign thread whose timer teardown raises:
+        QObject::killTimer: Timers cannot be stopped from another thread
+    Running the work in a ``QThread`` instead lets Qt deliver the signals to the
+    GUI thread through proper queued connections. A reference to the thread is
+    kept in ``_qt_workers`` until it finishes so it is not garbage-collected
+    (and destroyed) while still running.
+    """
+    from . import qt
+
+    class _Worker(qt.QThread):
+        def run(self):
+            target.run()
+
+    worker = _Worker()
+    _qt_workers.append(worker)
+    worker.finished.connect(lambda: worker in _qt_workers and _qt_workers.remove(worker))
+    worker.start()
+    return worker
+
+
 class RangeTout(ThreadedProcessing):
     """Implemantation de range_tout
 
@@ -243,7 +272,7 @@ class RangeTout(ThreadedProcessing):
                 if finished is None:
                     return rt.run()
                 else:
-                    rt.start()
+                    _start_qt_worker(rt)
 
 
 range_tout = RangeTout.range_tout
@@ -287,7 +316,7 @@ class ToJpeg(ThreadedProcessing):
             if finished is None:
                 return rt.run()
             else:
-                rt.start()
+                _start_qt_worker(rt)
 
 
 to_jpeg = ToJpeg.to_jpeg
@@ -391,7 +420,7 @@ class CopySelected(ThreadedProcessing):
             if finished is None:
                 return rt.run()
             else:
-                rt.start()
+                _start_qt_worker(rt)
 
 
 copy_selected = CopySelected.copy_selected
@@ -600,7 +629,7 @@ class ProcessSelected(ThreadedProcessing):
             if finished is None:
                 return rt.run()
             else:
-                rt.start()
+                _start_qt_worker(rt)
 
 
 process_selected = ProcessSelected.process_selected
