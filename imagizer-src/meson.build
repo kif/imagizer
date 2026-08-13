@@ -1,4 +1,5 @@
 subdir('app')
+subdir('test')
 
 # Generate _version.py from the project version (single source of truth:
 # the `version:` field of the top-level meson.build). __date__ reflects the
@@ -21,6 +22,7 @@ py.install_sources(version_py,
 )
 
 py.install_sources([
+'_get_date.py',
 'blur.py',
 'config.py',
 'curator.py',

@@ -34,7 +34,14 @@ python3 -m build -w      # wheel only
 
 ## Tests
 
-There is **no test suite for the imagizer package itself**. The only tests live in the vendored `py3exiv2/` subproject:
+Unit tests for the imagizer package live in the `imagizer/test/` submodule (source: `imagizer-src/test/`). They are self-contained — each loads the module under test by file path with minimal stubs, so they need neither a configured `~/.imagizer` nor a Qt/graphical environment, and run straight from a source checkout:
+
+```sh
+python3 -m unittest discover -s imagizer-src/test -p 'test_*.py'   # from source
+python3 -m imagizer.test                                           # once installed
+```
+
+The vendored `py3exiv2/` subproject has its own separate tests:
 
 ```sh
 cd py3exiv2 && python test/TestsRunner.py
