@@ -619,7 +619,12 @@ class Photo(object):
         self.fn = newfn
         self._exif = None
         if (image_cache is not None) and (oldname in image_cache):
-            image_cache.rename(oldname, newname)
+            # Replace the cached entry with this up-to-date instance. Renaming
+            # only the key would keep the previously cached Photo, whose _exif
+            # (a pyexiv2 object) and paths still point at the old location and
+            # would fail when its previews are lazily reopened after the move.
+            image_cache.pop(oldname)
+            image_cache[newname] = self
 
     def store_original_name(self, originalName):
         """
