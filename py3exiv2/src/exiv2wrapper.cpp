@@ -619,7 +619,7 @@ const std::string Image::getExifThumbnailExtension()
 
 void Image::writeExifThumbnailToFile(const std::string& path)
 {
-    _getExifThumbnail()->writeFile(path);
+    (void) _getExifThumbnail()->writeFile(path);
 }
 
 boost::python::list Image::getExifThumbnailData()
@@ -2046,7 +2046,7 @@ void unregisterXmpNs(const std::string& name)
         Exiv2::XmpProperties::unregisterNs(name);
         try
         {
-            const Exiv2::XmpNsInfo* info = Exiv2::XmpProperties::nsInfo(prefix);
+            (void) Exiv2::XmpProperties::nsInfo(prefix);
         }
         catch (Exiv2::Error& error)
         {
