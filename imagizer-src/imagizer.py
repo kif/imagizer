@@ -540,29 +540,41 @@ class ProcessSelected(ThreadedProcessing):
                                 nbfiles += 1
 
 #######then copy the selected files to their folders###########################
+        failed = []
         for afile in self.input:
-            ph = Photo(afile)
-            if ph.is_raw:
-                dest = os.path.join(SelectedDir, os.path.splitext(afile)[0] + ".jpg")
-            else:
-                dest = os.path.join(SelectedDir, afile)
-            src = os.path.join(config.DefaultRepository, afile)
-            destdir = os.path.dirname(dest)
-            if not os.path.isdir(destdir):
-                fileutils.makedir(destdir)
-            if not os.path.exists(dest):
-                logger.info("copie de %s " % afile)
+            try:
+                ph = Photo(afile)
                 if ph.is_raw:
-                    ph.as_jpeg(dest)
+                    dest = os.path.join(SelectedDir, os.path.splitext(afile)[0] + ".jpg")
                 else:
-                    shutil.copy(src, dest)
-                try:
-                    os.chmod(dest, config.DefaultFileMode)
-                except OSError:
-                    logger.warning("Unable to chmod %s" % dest)
-                nbfiles += 1
-            else:
-                logger.warning("%s existe déja" % dest)
+                    dest = os.path.join(SelectedDir, afile)
+                src = os.path.join(config.DefaultRepository, afile)
+                destdir = os.path.dirname(dest)
+                if not os.path.isdir(destdir):
+                    fileutils.makedir(destdir)
+                if not os.path.exists(dest):
+                    logger.info("copie de %s " % afile)
+                    if ph.is_raw:
+                        ph.as_jpeg(dest)
+                    else:
+                        shutil.copy(src, dest)
+                    try:
+                        os.chmod(dest, config.DefaultFileMode)
+                    except OSError:
+                        logger.warning("Unable to chmod %s" % dest)
+                    nbfiles += 1
+                else:
+                    logger.warning("%s existe déja" % dest)
+            except Exception as error:
+                # Skip a file that cannot be processed (moved or removed by hand,
+                # unreadable, ...) instead of aborting the whole batch: an
+                # uncaught exception here escapes the Qt slot and PyQt aborts the
+                # process (SIGABRT), losing every remaining file.
+                failed.append(afile)
+                logger.error("Skipping %s: %s: %s", afile, type(error).__name__, error)
+        if failed:
+            logger.error("%d file(s) could not be processed and were skipped: %s",
+                         len(failed), ", ".join(failed))
 ######copy the comments of the directory to the Selected directory
         already_done = []
         for afile in self.input:
