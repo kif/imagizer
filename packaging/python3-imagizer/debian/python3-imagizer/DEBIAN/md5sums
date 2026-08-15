@@ -1,16 +1,16 @@
 7bccaaaf31259d484330126266ebd1b8  usr/bin/generator
 4c509c6e6d142a612577e2dc5980932d  usr/bin/selector
-6921fc8c0c604e3627cb438540e1670d  usr/lib/python3/dist-packages/imagizer-8.5.0.dist-info/METADATA
-45acec93ca74c171899e01bf01af9682  usr/lib/python3/dist-packages/imagizer-8.5.0.dist-info/RECORD
-2b12ef62bf68d9cbd4af650fd635f74e  usr/lib/python3/dist-packages/imagizer-8.5.0.dist-info/WHEEL
-b234ee4d69f5fce4486a80fdaf4a4263  usr/lib/python3/dist-packages/imagizer-8.5.0.dist-info/copyright
-d7d16f41e8f7641cd8358110405209cd  usr/lib/python3/dist-packages/imagizer-8.5.0.dist-info/entry_points.txt
+4b7c2bfef4c95128c7d2bd31b3f564d4  usr/lib/python3/dist-packages/imagizer-8.6.0.dist-info/METADATA
+3abbc4c364bf91e11bb57d477c199208  usr/lib/python3/dist-packages/imagizer-8.6.0.dist-info/RECORD
+2b12ef62bf68d9cbd4af650fd635f74e  usr/lib/python3/dist-packages/imagizer-8.6.0.dist-info/WHEEL
+b234ee4d69f5fce4486a80fdaf4a4263  usr/lib/python3/dist-packages/imagizer-8.6.0.dist-info/copyright
+d7d16f41e8f7641cd8358110405209cd  usr/lib/python3/dist-packages/imagizer-8.6.0.dist-info/entry_points.txt
 f4b7f752d38b80fe78ab013951df7864  usr/lib/python3/dist-packages/imagizer/__init__.py
 92ff669289b3d1b897aee6e91f03b700  usr/lib/python3/dist-packages/imagizer/_get_date.py
 b63d68e0b2b477b518483c7b805bb1da  usr/lib/python3/dist-packages/imagizer/_pyqt6.py
 0bad94a722e793043e196b95775dd2e4  usr/lib/python3/dist-packages/imagizer/_qt.py
 3f94191652f680439b6ac1b978581346  usr/lib/python3/dist-packages/imagizer/_tree.cpython-313-x86_64-linux-gnu.so
-bdef812865d32e7d2f29a7226b9219bc  usr/lib/python3/dist-packages/imagizer/_version.py
+34f7111294cb3116495efdcf0877a56a  usr/lib/python3/dist-packages/imagizer/_version.py
 8a29910ed8b67083e18e6c9b8ad2387b  usr/lib/python3/dist-packages/imagizer/app/adjust_time.py
 47614bf58e28e9b3f43c916c5eb81b0d  usr/lib/python3/dist-packages/imagizer/app/extract_image_labels.py
 e741446757abec73257971612c036b9d  usr/lib/python3/dist-packages/imagizer/app/generator.py
@@ -49,7 +49,7 @@ aad91744699a2b376c67204c90378bae  usr/lib/python3/dist-packages/imagizer/html.py
 a77d19de0e4806b7af907e856fe1116a  usr/lib/python3/dist-packages/imagizer/imagecache.py
 1041ed2a943d792fb96ce550575ccc4e  usr/lib/python3/dist-packages/imagizer/imagemagick.py
 171a9369e81c4bc5cf487bc5a4fe8545  usr/lib/python3/dist-packages/imagizer/imagizer.py
-26ed327bfce95835e9c7ed18d91a73e0  usr/lib/python3/dist-packages/imagizer/interface.py
+d47bbcb73bc090e1a01715812c093980  usr/lib/python3/dist-packages/imagizer/interface.py
 4e7f40ffb02a275aa2f4404de7f31fda  usr/lib/python3/dist-packages/imagizer/myqt.py
 27d7c814698042436850f4de0ffa6ebb  usr/lib/python3/dist-packages/imagizer/parser.py
 6777c3cfafaf1a85982aa3f951d2a8ba  usr/lib/python3/dist-packages/imagizer/photo.py
@@ -85,7 +85,7 @@ f291ef27e768090a5517f14b85d54965  usr/lib/python3/dist-packages/imagizer/pyexiv2
 9502be76c50a9207475a704c5dfba468  usr/lib/python3/dist-packages/imagizer/pyexiv2/xmp.py
 e224cf1965d83f907effa9662aa876df  usr/lib/python3/dist-packages/imagizer/pygtkmplayer.py
 a352dfa4be65a5801ba62873958d7a7f  usr/lib/python3/dist-packages/imagizer/pyside_dynamic.py
-a039fd8094c47911a02d6df60f918240  usr/lib/python3/dist-packages/imagizer/qt.py
+fab012633f5bbf6815020e7628f76d4d  usr/lib/python3/dist-packages/imagizer/qt.py
 9e8395071e2e703bd72815607814c787  usr/lib/python3/dist-packages/imagizer/search.py
 1403ccfd159b670f89a008e46277e8f4  usr/lib/python3/dist-packages/imagizer/search_day.py
 349ced274880b3fc290ec804a8834758  usr/lib/python3/dist-packages/imagizer/selection.py
@@ -100,4 +100,4 @@ ccee63883ff21a50afdca1f31501cc6b  usr/lib/python3/dist-packages/imagizer/utils.p
 b8d127935d15ad8925bf61ff8dc773e9  usr/lib/python3/dist-packages/imagizer/video.py
 146de9fd85e772708c6f1cf5a0b06da5  usr/lib/python3/dist-packages/imagizer/video_gui.py
 03eab6b0e9337a5fbf130760fc00f21c  usr/lib/python3/dist-packages/imagizer/winpath.py
-53816bcb6718add3b17a67e92cbb4a4d  usr/share/doc/python3-imagizer/changelog.Debian.gz
+db76f9c8a3a46eaee7297beecf3ad98e  usr/share/doc/python3-imagizer/changelog.Debian.gz

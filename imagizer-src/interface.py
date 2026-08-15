@@ -41,7 +41,7 @@ if sys.version_info[0] > 2:
 logger = logging.getLogger("imagizer.interface")
 from .imagizer import copy_selected, process_selected, to_jpeg
 from . import qt
-from .qt import buildUI, flush, icon_on, ExtendedQLabel, Signal, QFileDialog
+from .qt import buildUI, flush, ExtendedQLabel, Signal, QFileDialog
 from .selection import Selected
 from .photo import Photo, RawImage
 from .utils import get_pixmap_file
@@ -92,10 +92,15 @@ class Interface(qt.QObject):
                          "gimp": self.gui.edit,
                          "trash": self.gui.trash
                          })
-        icon_on("left", self.gui.previous)
-        icon_on("left", self.gui.left)
-        icon_on("right", self.gui.next)
-        icon_on("right", self.gui.right)
+        # Navigation & rotation buttons: native QPushButton icon + text (icons
+        # set by _set_icons above, labels from the .ui). Replaces icon_on()'s
+        # QLabel-in-a-QPushButton hack, which dropped the icon or the text
+        # depending on the theme. RightToLeft places the icon on the trailing
+        # side (previous/left: icon on the left; next/right: icon on the right).
+        for button in (self.gui.previous, self.gui.left, self.gui.next, self.gui.right):
+            button.setIconSize(qt.QSize(22, 22))
+        for button in (self.gui.next, self.gui.right):
+            button.setLayoutDirection(qt.Qt.LayoutDirection.RightToLeft)
 
         # Let Ctrl+Left / Ctrl+Right rotate even while the editable title field
         # has focus: a QLineEdit otherwise swallows them as word-cursor moves

@@ -88,41 +88,6 @@ def buildUI(ui_file):
     return loadUi(get_ui_file(ui_file))
 
 
-def icon_on(target="right", button=None, icon_name=None,):
-    """Put the icon of the button on the right side of the text
-    @param target: "right" or "left"
-    @param button: QPushButton Instance
-    @param icon_name: path to the filename ... optional
-    """
-    if not button:
-        return
-    text = button.text()
-    if icon_name is None:
-        pixmap = button.icon().pixmap(QSize(22, 22))
-    else:
-        pixmap = QPixmap(icon_name)
-    button.setText("")
-    button.setIcon(QIcon())
-    layout1 = QHBoxLayout(button)
-    layout1.setContentsMargins(0, 0, 0, 0)
-    layout1.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-    button.setLayout(layout1)
-    widget = QWidget(button)
-    button.layout().addWidget(widget)
-    layout2 = QFormLayout(widget)
-    layout2.setContentsMargins(0, 0, 0, 0)
-    layout2.setSpacing(2)
-    widget.setLayout(layout2)
-    lab_txt = QLabel(text, widget)
-    lab_txt.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-    lab_ico = QLabel(widget)
-    lab_ico.setPixmap(pixmap)
-    if target == "right":
-        widget.layout().addRow(lab_txt, lab_ico)
-    else:
-        widget.layout().addRow(lab_ico, lab_txt)
-
-
 class ExtendedQLabel(QLabel):
     """Extenstion for Qlabel with pan and zoom function used to display images
     """
