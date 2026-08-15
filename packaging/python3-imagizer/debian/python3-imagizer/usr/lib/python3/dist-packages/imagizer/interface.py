@@ -166,11 +166,34 @@ class Interface(qt.QObject):
             logger.debug(callback.__name__)
             signal.connect(callback)
 
+        # Widgets operating on the current image / navigation: they must not be
+        # used until the repository has finished loading in the background
+        # (range_tout runs in a thread), otherwise navigating an empty image set
+        # crashes the interface.
+        widget_names = ("next", "previous", "left", "right", "reload", "filter",
+                        "edit", "trash", "selection", "title", "rate", "entry",
+                        "annuler", "selectionner",
+                        # rotation actions (menu + shortcuts)
+                        "actionRotation_left", "actionRotation_right",
+                        # export / publication actions (menu)
+                        "actionSynchroniser", "actionCopier_seulement",
+                        "actionVers_Jpeg", "actionCopier_et_graver",
+                        "actionCopier_et_redimensionner", "actionVers_page_web",
+                        # filter actions (menu) operating on the current image
+                        "actionAuto_whitebalance", "actionContrast_mask")
+        self._loading_widgets = [w for w in (getattr(self.gui, n, None) for n in widget_names)
+                                 if w is not None]
+        self._loading_widgets += list(self.navigation_dict.keys())
+
         self.gui.show()
         flush()
         width = sum(self.gui.splitter.sizes())
         self.gui.splitter.setSizes([self.left_tab_width, width - self.left_tab_width])
         self.set_data(AllJpegs, first, selected)
+        if not self.AllJpegs:
+            # Repository still being scanned in the background (range_tout):
+            # disable image controls until set_data() runs again with the list.
+            self.disable_widgets()
 
     def set_data(self, AllJpegs=None, first=0, selected=None):
         self.AllJpegs = AllJpegs or []
@@ -180,6 +203,19 @@ class Interface(qt.QObject):
         self.idx_current = first
         if self.AllJpegs:
             self.show_image(first)
+            self.enable_widgets()
+
+    def disable_widgets(self):
+        """Disable the widgets that cannot be used while the repository is still
+        loading (range_tout runs in a background thread): clicking the
+        navigation buttons on an empty image set would crash the interface."""
+        for widget in getattr(self, "_loading_widgets", []):
+            widget.setEnabled(False)
+
+    def enable_widgets(self):
+        """Re-enable the widgets disabled by disable_widgets, once images are loaded."""
+        for widget in getattr(self, "_loading_widgets", []):
+            widget.setEnabled(True)
 
     def _set_icons(self, kwarg):
         """
