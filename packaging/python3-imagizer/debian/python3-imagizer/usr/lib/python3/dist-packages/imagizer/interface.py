@@ -97,6 +97,11 @@ class Interface(qt.QObject):
         icon_on("right", self.gui.next)
         icon_on("right", self.gui.right)
 
+        # Let Ctrl+Left / Ctrl+Right rotate even while the editable title field
+        # has focus: a QLineEdit otherwise swallows them as word-cursor moves
+        # (see eventFilter).
+        self.gui.title.installEventFilter(self)
+
         self.timer = None
         self.progress_bar = None
         self.status_bar = None
@@ -216,6 +221,21 @@ class Interface(qt.QObject):
         """Re-enable the widgets disabled by disable_widgets, once images are loaded."""
         for widget in getattr(self, "_loading_widgets", []):
             widget.setEnabled(True)
+
+    def eventFilter(self, obj, event):
+        """Decline the Ctrl+Left / Ctrl+Right ShortcutOverride on the title field.
+
+        An editable QLineEdit accepts these as word-cursor moves, which swallows
+        them before Qt can fire the rotation shortcuts. Refusing the override
+        lets the keys reach actionRotation_left/right; plain Left/Right (and
+        every other key) still edit the title normally.
+        """
+        if event.type() == qt.QEvent.Type.ShortcutOverride:
+            if (event.modifiers() & qt.Qt.KeyboardModifier.ControlModifier) and \
+               event.key() in (qt.Qt.Key.Key_Left, qt.Qt.Key.Key_Right):
+                event.ignore()
+                return True
+        return super().eventFilter(obj, event)
 
     def _set_icons(self, kwarg):
         """
