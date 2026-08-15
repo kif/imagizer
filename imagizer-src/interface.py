@@ -65,7 +65,7 @@ class Interface(qt.QObject):
     def __init__(self, AllJpegs=None, first=0, selected=None, mode="Default", callback=None):
         qt.QObject.__init__(self)
         self.callback = callback
-        self.left_tab_width = 350
+        self.left_tab_width = 370  # matches left_tab's minimum width in the .ui
         self.image = None
         self.processes = []
         self.job_sem = threading.Semaphore()
@@ -97,10 +97,31 @@ class Interface(qt.QObject):
         # QLabel-in-a-QPushButton hack, which dropped the icon or the text
         # depending on the theme. RightToLeft places the icon on the trailing
         # side (previous/left: icon on the left; next/right: icon on the right).
-        for button in (self.gui.previous, self.gui.left, self.gui.next, self.gui.right):
+        nav_buttons = (self.gui.previous, self.gui.left, self.gui.next, self.gui.right)
+        for button in nav_buttons:
             button.setIconSize(qt.QSize(22, 22))
         for button in (self.gui.next, self.gui.right):
             button.setLayoutDirection(qt.Qt.LayoutDirection.RightToLeft)
+        # Give the four buttons an identical width: the largest of their size
+        # hints, never below the .ui minimum, so differing label lengths
+        # ("Rotation à gauche" vs "Suivant") stay even. Fixing the width also
+        # stops the QFormLayout field column (next / rotate-right) from stretching
+        # wider than the label column (previous / rotate-left).
+        btn_width = max(max(b.minimumWidth(), b.sizeHint().width()) for b in nav_buttons)
+        for button in nav_buttons:
+            button.setFixedWidth(btn_width)
+        # Collapse width of the info pane, derived from the two side-by-side
+        # buttons of formLayout_2: 2 * button width + the form's column spacing
+        # and margins + the pane layout margins. (left_tab.minimumSizeHint() is
+        # not usable here: the QFormLayout lets its label column shrink, so it
+        # under-reports the width and the left-column buttons still get squeezed.)
+        form = self.gui.formLayout_2
+        fm_left, _, fm_right, _ = form.getContentsMargins()
+        pane_layout = self.gui.left_tab.layout()
+        pm_left, _, pm_right, _ = pane_layout.getContentsMargins()
+        pane_min = (2 * btn_width + form.horizontalSpacing()
+                    + fm_left + fm_right + pm_left + pm_right)
+        self.gui.left_tab.setMinimumWidth(max(self.gui.left_tab.minimumWidth(), pane_min))
 
         # Let Ctrl+Left / Ctrl+Right rotate even while the editable title field
         # has focus: a QLineEdit otherwise swallows them as word-cursor moves
