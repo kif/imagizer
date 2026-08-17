@@ -2,7 +2,7 @@
 # coding: utf8
 #
 #******************************************************************************\
-# * Copyright (C) 2006 - 2014,  Jérôme Kieffer <kieffer@terre-adelie.org>
+# * Copyright (C) 2006 - 2026,  Jérôme Kieffer <kieffer@terre-adelie.org>
 # * Conception : Jérôme KIEFFER, Mickael Profeta & Isabelle Letard
 # * Licence GPL v2
 # *
@@ -30,7 +30,7 @@ Dialog Graphical interfaces for selector.
 __author__ = "Jérôme Kieffer"
 __version__ = "2.0.0"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "13/06/2023"
+__date__ = "17/08/2026"
 __license__ = "GPL"
 
 import os
@@ -257,11 +257,11 @@ def synchronize_dialog(current, AllPhotos, selected):
                              bufsize=4096, stdout=stdout, stderr=stderr)
 #        os.system("rsync -v --files-from=%s %s/ %s" % (synchrofile, config.DefaultRepository, config.SynchronizeRep))
         if logger.getEffectiveLevel() <= logging.INFO:
-            line = p.stdout.readline().strip()
+            line = p.stdout.readline().decode().strip()
             while (p.returncode is None) or line:
                 if line:
                     logger.info(line)
-                    line = p.stdout.readline().strip()
+                    line = p.stdout.readline().decode().strip()
                 else:
                     p.wait()
         logger.info("Rsync finished with returncode %s" % (p.wait()))
@@ -302,4 +302,3 @@ def test():
     all = imagizer.imagizer.rangeTout("/tmp", fast=True)[0]
     selected = all[:5]
     imagizer.dialogs.rename_day('2012-02-23/07h58m53-_WB510__VLUU_WB500__SAMSUNG_HZ10W-AutoWB.jpg', all, selected)
-
