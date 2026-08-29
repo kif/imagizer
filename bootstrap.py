@@ -181,10 +181,12 @@ def find_executable(target):
     if os.path.isfile(target):
         return ("path", os.path.abspath(target))
 
-    # search the executable in pyproject.toml
+    # search the executable in pyproject.toml (PEP 621: [project.scripts] and
+    # [project.gui-scripts], nested under the "project" table).
     with open(os.path.join(PROJECT_DIR, "pyproject.toml")) as f:
         pyproject = tomli.loads(f.read())
-    for script, entry_point in list(pyproject.get("console_scripts", {}).items()) + list(pyproject.get("gui_scripts", {}).items()):
+    project = pyproject.get("project", {})
+    for script, entry_point in list(project.get("scripts", {}).items()) + list(project.get("gui-scripts", {}).items()):
         if script == target:
             print(script, entry_point)
             return ("entry_point", target, entry_point)
