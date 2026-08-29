@@ -27,15 +27,15 @@ config = Config()
 # new common code in template-rc.py and use it from your templates.
 
 html_preamble = \
-f"""<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">
-<html>
+"""<!doctype html>
+<html lang="fr">
 <head>
-   <meta http-equiv=\"Content-Type\" content=\"text/html\"; charset=\"{config.Coding}\" >
-   <link rel=stylesheet type=\"text/css\" href=\"<!--tag:rel(css_fn, cd)-->\">
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="<!--tag:rel(css_fn, cd)-->">
    <title>%s</title>
 </head>
 <body>
-<a name='begin'>
 """
 
 html_postamble = """
@@ -50,421 +50,494 @@ if 'footer' in globals():
 
 default_templates = {}
 
-default_templates[ 'template-css' ] = """
+default_templates[ 'template-css' ] = r'''
+/* ===========================================================================
+   Imagizer — feuille de style web (increment 2 : balisage moderne)
+   Responsive (mobile d'abord), sombre par défaut + variante claire.
+   100 % statique, aucune dépendance externe (police système, pas de CDN).
+   =========================================================================== */
 
-
-BODY {
-    background-color: #444444;
-    font-family: Arial,Geneva,sans-serif;
-    color: lightgray;
+:root {
+    --bg:#17171a; --surface:#212127; --surface-2:#2b2b32;
+    --text:#e8e8ea; --muted:#9a9aa4; --line:#383840;
+    --accent:#6db3f2; --accent-2:#a9d3f8;
+    --radius:12px; --gap:clamp(.6rem,2vw,1.2rem); --maxw:1200px;
+    --shadow:0 6px 24px rgba(0,0,0,.45);
+}
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg:#f4f4f6; --surface:#fff; --surface-2:#ececf0;
+        --text:#1c1c20; --muted:#5c5c66; --line:#d8d8e0;
+        --accent:#1769c0; --accent-2:#0f4e93; --shadow:0 6px 24px rgba(0,0,0,.12);
+    }
 }
 
-A:link { text-decoration: none;
-         color: #FFFFFF;
-     }
-A:visited { text-decoration: none;
-    color: #FFFFFF;
+*,*::before,*::after { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body {
+    margin:0 auto; max-width:var(--maxw);
+    padding:clamp(.7rem,3vw,1.5rem);
+    background:var(--bg); color:var(--text);
+    font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
+a { color:var(--accent); text-decoration:none; }
+a:hover,a:focus { color:var(--accent-2); text-decoration:underline; }
+img { max-width:100%; height:auto; }
 
-.arrownav { width: 100%; border: none; margin: 0; padding: 0; }
-.arrow { font-weight: bold; text-decoration: none; }
+/* --- En-tête de page / fil d'Ariane --------------------------------------- */
+.pagehead { margin:0 0 var(--gap); }
+.pagehead h1 { margin:.2rem 0; font-size:clamp(1.3rem,5vw,2rem); }
+.crumbs { color:var(--muted); font-size:.9rem; margin-bottom:.3rem; }
+.subtitle { margin:.1rem 0 .5rem; }
+.daycomment { color:var(--muted); margin:.2rem 0 .8rem; max-width:70ch; }
+.muted { color:var(--muted); }
 
-.image { border: solid 7px black; }
-
-.thumb {
-       border-width: 3px;
-       border-style: ridge;
-       border-color: #AAAAAA;
+.btn {
+    display:inline-block; padding:.55rem 1.1rem;
+    background:var(--surface-2); color:var(--accent);
+    border:1px solid var(--line); border-radius:var(--radius);
+    font-weight:600; cursor:pointer;
 }
+.btn:hover,.btn:focus { border-color:var(--accent); color:var(--accent-2); text-decoration:none; }
 
-
-.desctable { width: 100%; border: none; margin: 0; padding: 0; }
-
-.titlecell { vertical-align: top; }
-.title { font-size: 24px; }
-
-.location { font-weight: bold; }
-
-.description { font-family: Arial,Geneva,sans-serif;
-    text-align: center;
- }
-
-HR.sephr { background-color: black; height: 1px; width: 90%; }
-
-.navtable { width: 100%; border: none }
-
-.settingscell {
-    width: 1%;
-    vertical-align: top;
-    text-align: right;
-    white-space: nowrap;
+/* --- Grilles (jours & miniatures) ----------------------------------------- */
+.grid {
+    list-style:none; margin:0; padding:0; display:grid; gap:var(--gap);
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
 }
-.settingstitle {
-    font-size: x-small;
-    font-weight: bold;
+.days { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); align-items:start; }
+
+.tile {
+    display:flex; flex-direction:column; overflow:hidden;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    color:inherit; text-decoration:none; transition:transform .15s, box-shadow .15s;
 }
-.settings {
-    font-size: x-small;
+.tile:hover,.tile:focus { transform:translateY(-2px); box-shadow:var(--shadow); text-decoration:none; }
+/* Cadre de proportion fixe (technique du padding %, universelle) : l'image le
+   remplit en object-fit:cover. Robuste sur tous navigateurs, mobile inclus. */
+.tile-img { position:relative; display:block; padding-top:100%; height:0;
+            overflow:hidden; background:var(--surface-2); }
+.days .tile-img { padding-top:75%; }   /* 4:3 pour les couvertures de jour */
+.tile-img img { position:absolute; top:0; left:0; width:100%; height:100%;
+                object-fit:cover; display:block; }
+.tile-cap { padding:.5rem .6rem; font-size:.9rem; color:var(--muted); text-align:center; }
+.days .tile-cap { color:var(--text); }
+.cardnote { display:block; margin-top:.3rem; font-size:.82rem; color:var(--muted); text-align:left; }
+
+/* --- Page image ----------------------------------------------------------- */
+.photo { max-width:1000px; margin-inline:auto; }
+.stage { position:relative; margin:var(--gap) 0; }
+.viewer { display:block; }
+.image { display:block; max-width:100%; height:auto; margin:0 auto;
+         border-radius:var(--radius); box-shadow:var(--shadow); }
+
+.navbtn {
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    width:48px; height:48px; display:flex; align-items:center; justify-content:center;
+    font-size:2rem; line-height:1; color:var(--text);
+    background:color-mix(in srgb, var(--surface) 78%, transparent);
+    border:1px solid var(--line); border-radius:50%; text-decoration:none;
 }
+.navbtn:hover,.navbtn:focus { background:var(--surface-2); text-decoration:none; }
+.navbtn.prev { left:.4rem; }
+.navbtn.next { right:.4rem; }
 
-.tracksind { font-weight: bold; }
+.title { font-size:clamp(1.2rem,4vw,1.5rem); text-align:center; margin:var(--gap) 0 .2rem; }
+.description { text-align:center; color:var(--muted); margin:.2rem 0; }
+.backlink { text-align:center; margin:var(--gap) 0; }
 
-.toptable { width: 100%; background-color: black; }
+.exif {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:.3rem .9rem;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:.8rem 1rem; margin:var(--gap) 0; font-size:.85rem;
+}
+.exif div { display:flex; gap:.4rem; }
+.exif dt { color:var(--muted); margin:0; }
+.exif dd { margin:0; font-weight:600; }
 
-.dirtop { background-color: black; }
-.globaltop { background-color: black; }
-.tracktop { background-color: black; }
-.sortedtop { background-color: black; }
+/* --- Diaporama (lightbox, construit en JS) -------------------------------- */
+.lightbox {
+    position:fixed; inset:0; z-index:1000; display:none;
+    align-items:center; justify-content:center; background:rgba(0,0,0,.93);
+}
+.lightbox.open { display:flex; }
+.lightbox img { max-width:96vw; max-height:82vh; object-fit:contain; border-radius:6px; }
+.lb-caption {
+    position:absolute; left:0; right:0; bottom:3.4rem; text-align:center;
+    color:#f0f0f0; padding:0 1rem; font-size:1rem; text-shadow:0 1px 3px #000;
+    white-space:pre-line;   /* respecte les retours à la ligne des légendes */
+}
+.lb-exif {
+    position:absolute; top:.6rem; left:.6rem; max-width:min(80vw, 340px);
+    background:rgba(0,0,0,.62); color:#eee; padding:.6rem .8rem; border-radius:8px;
+    font-size:.85rem; line-height:1.45; white-space:pre-line; text-shadow:0 1px 2px #000;
+}
+.lb-exif[hidden] { display:none; }
+.lb-bar { position:absolute; left:0; right:0; bottom:.7rem; display:flex; gap:.6rem; justify-content:center; }
+.lb-btn {
+    width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; color:#fff; background:rgba(255,255,255,.14);
+    border:0; border-radius:50%; cursor:pointer;
+}
+.lb-btn:hover,.lb-btn:focus { background:rgba(255,255,255,.28); }
+.lb-prev { position:absolute; left:.6rem; top:50%; transform:translateY(-50%); }
+.lb-next { position:absolute; right:.6rem; top:50%; transform:translateY(-50%); }
+.lb-close { position:absolute; top:.6rem; right:.6rem; }
+'''
 
-.toptitle { font-size: x-large; }
-.topsubtitle { font-weight: bold; }
+# Ressources JavaScript (diaporama + téléchargement ZIP), écrites telles quelles.
+GALLERY_JS = r'''
+/* Imagizer — diaporama (lightbox) en JavaScript « vanilla ».
+   Amélioration progressive : sans JS, les vignettes restent de simples liens
+   vers les pages image. Aucune dépendance externe. */
+(function () {
+    "use strict";
+    var gallery = document.getElementById("gallery");
+    if (!gallery) return;
+    var links = Array.prototype.slice.call(gallery.querySelectorAll("a[data-full]"));
+    if (!links.length) return;
 
-.mininav { text-align: right; font-size: smaller; }
+    var items = links.map(function (a) {
+        return { full: a.getAttribute("data-full"),
+                 caption: a.getAttribute("data-caption") || "",
+                 exif: a.getAttribute("data-exif") || "" };
+    });
 
-"""
+    var DELAY = 4000;          // ms entre deux photos en lecture auto
+    var idx = 0, timer = null;
+
+    var lb = document.createElement("div");
+    lb.className = "lightbox";
+    lb.setAttribute("role", "dialog");
+    lb.setAttribute("aria-label", "Diaporama");
+    lb.innerHTML =
+        '<button class="lb-btn lb-close" aria-label="Fermer" type="button">✕</button>' +
+        '<button class="lb-btn lb-prev" aria-label="Précédente" type="button">‹</button>' +
+        '<img alt="">' +
+        '<button class="lb-btn lb-next" aria-label="Suivante" type="button">›</button>' +
+        '<div class="lb-exif" hidden></div>' +
+        '<div class="lb-caption"></div>' +
+        '<div class="lb-bar">' +
+        '<button class="lb-btn lb-play" aria-label="Lecture / Pause" type="button">▶</button>' +
+        '<button class="lb-btn lb-info" aria-label="Informations EXIF" type="button">ⓘ</button>' +
+        '</div>';
+    document.body.appendChild(lb);
+
+    var img = lb.querySelector("img");
+    var cap = lb.querySelector(".lb-caption");
+    var playBtn = lb.querySelector(".lb-play");
+    var infoBtn = lb.querySelector(".lb-info");
+    var exifBox = lb.querySelector(".lb-exif");
+
+    function show(i) {
+        idx = (i + items.length) % items.length;
+        img.src = items[idx].full;
+        img.alt = items[idx].caption;
+        cap.textContent = items[idx].caption;
+        exifBox.textContent = items[idx].exif ? items[idx].exif.split(" • ").join("\n") : "";
+        infoBtn.style.display = items[idx].exif ? "" : "none";
+    }
+    function open(i) { show(i); lb.classList.add("open"); document.body.style.overflow = "hidden"; }
+    function close() { stop(); lb.classList.remove("open"); document.body.style.overflow = ""; img.removeAttribute("src"); exifBox.hidden = true; }
+    function next() { show(idx + 1); }
+    function prev() { show(idx - 1); }
+    function play() { if (timer) return; timer = setInterval(next, DELAY); playBtn.textContent = "⏸"; }
+    function stop() { if (!timer) return; clearInterval(timer); timer = null; playBtn.textContent = "▶"; }
+    function toggle() { if (timer) { stop(); } else { play(); } }
+
+    // Un clic sur une vignette suit son lien vers la PAGE image (EXIF, lien
+    // pleine résolution, préc/suiv) — on n'intercepte donc pas. Le diaporama
+    // (lightbox) est réservé au bouton ci-dessous.
+
+    // Bouton « Diaporama » -> ouvre la lightbox et démarre la lecture auto.
+    var starter = document.getElementById("slideshow");
+    if (starter) starter.addEventListener("click", function (e) {
+        e.preventDefault();
+        open(0);
+        if (!window.matchMedia || !matchMedia("(prefers-reduced-motion: reduce)").matches) play();
+    });
+
+    lb.querySelector(".lb-prev").addEventListener("click", function () { stop(); prev(); });
+    lb.querySelector(".lb-next").addEventListener("click", function () { stop(); next(); });
+    lb.querySelector(".lb-close").addEventListener("click", close);
+    playBtn.addEventListener("click", toggle);
+    infoBtn.addEventListener("click", function () { exifBox.hidden = !exifBox.hidden; });
+    lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+
+    document.addEventListener("keydown", function (e) {
+        if (!lb.classList.contains("open")) return;
+        if (e.key === "Escape") close();
+        else if (e.key === "ArrowRight") { stop(); next(); }
+        else if (e.key === "ArrowLeft") { stop(); prev(); }
+        else if (e.key === " ") { e.preventDefault(); toggle(); }
+    });
+
+    // Glissement tactile gauche/droite.
+    var x0 = null;
+    lb.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener("touchend", function (e) {
+        if (x0 === null) return;
+        var dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) > 40) { stop(); if (dx < 0) { next(); } else { prev(); } }
+    });
+})();
+'''
+
+ZIP_JS = r'''
+/* Imagizer — téléchargement d'une journée en ZIP mode « store » (sans recompression).
+   Les JPEG sont déjà compressés : on se contente de les concaténer avec les en-têtes
+   ZIP. Vanilla JS, sans dépendance. Amélioration progressive : le bouton n'est ajouté
+   que si JavaScript est actif (sinon rien, les photos restent accessibles une à une).
+   Mémoire maîtrisée : on ne garde en RAM qu'une image à la fois (pour son CRC) ; les
+   données sont ensuite référencées comme Blob (adossé au disque par le navigateur). */
+(function () {
+    "use strict";
+    var gallery = document.getElementById("gallery");
+    if (!gallery) return;
+    var tiles = Array.prototype.slice.call(gallery.querySelectorAll("a[data-download]"));
+    if (!tiles.length) return;
+
+    var entries = tiles.map(function (a) {
+        var url = a.getAttribute("data-download");
+        return { url: url, name: decodeURIComponent(url.split("/").pop()) };
+    });
+    var zipname = gallery.getAttribute("data-zipname") || "photos";
+
+    // --- CRC32 ---
+    var TABLE = (function () {
+        var t = new Uint32Array(256), c, n, k;
+        for (n = 0; n < 256; n++) {
+            c = n;
+            for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+            t[n] = c >>> 0;
+        }
+        return t;
+    })();
+    function crc32(u8) {
+        var c = 0xFFFFFFFF;
+        for (var i = 0; i < u8.length; i++) c = TABLE[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+        return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    // --- helpers octets (little-endian) ---
+    function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+    function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+    function utf8(s) {
+        var e = unescape(encodeURIComponent(s)), a = [];
+        for (var i = 0; i < e.length; i++) a.push(e.charCodeAt(i));
+        return a;
+    }
+    var SIG_LOCAL = 0x04034b50, SIG_CENTRAL = 0x02014b50, SIG_EOCD = 0x06054b50;
+    var FLAG_UTF8 = 0x0800, DOSDATE = 0x0021;   // 1980-01-01, méthode 0 = store
+
+    function localHeader(name, crc, size) {
+        return Uint8Array.from([].concat(
+            u32(SIG_LOCAL), u16(20), u16(FLAG_UTF8), u16(0), u16(0), u16(DOSDATE),
+            u32(crc), u32(size), u32(size), u16(name.length), u16(0), name));
+    }
+    function centralHeader(name, crc, size, offset) {
+        return Uint8Array.from([].concat(
+            u32(SIG_CENTRAL), u16(20), u16(20), u16(FLAG_UTF8), u16(0), u16(0), u16(DOSDATE),
+            u32(crc), u32(size), u32(size), u16(name.length),
+            u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), name));
+    }
+    function eocd(count, size, offset) {
+        return Uint8Array.from([].concat(
+            u32(SIG_EOCD), u16(0), u16(0), u16(count), u16(count), u32(size), u32(offset), u16(0)));
+    }
+
+    async function buildZip(setProgress) {
+        var parts = [], central = [], offset = 0;
+        for (var i = 0; i < entries.length; i++) {
+            setProgress(i + 1, entries.length);
+            var resp = await fetch(entries[i].url);
+            if (!resp.ok) throw new Error("HTTP " + resp.status + " sur " + entries[i].url);
+            var buf = await resp.arrayBuffer();
+            var u8 = new Uint8Array(buf);
+            var crc = crc32(u8), size = u8.length, name = utf8(entries[i].name);
+            var lh = localHeader(name, crc, size);
+            parts.push(lh, new Blob([buf]));                 // en-tête + donnée (Blob)
+            central.push(centralHeader(name, crc, size, offset));
+            offset += lh.length + size;
+            buf = u8 = null;                                 // libère la RAM
+        }
+        var cdStart = offset, cdSize = 0;
+        for (var j = 0; j < central.length; j++) { parts.push(central[j]); cdSize += central[j].length; }
+        parts.push(eocd(entries.length, cdSize, cdStart));
+        return new Blob(parts, { type: "application/zip" });
+    }
+
+    function triggerDownload(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = zipname + ".zip";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+    }
+
+    // --- bouton (injecté seulement si JS) ---
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "btn"; btn.id = "download-day";
+    var label = "⬇ Télécharger la journée (" + entries.length + " photos)";
+    btn.textContent = label;
+    var slideshow = document.getElementById("slideshow");
+    if (slideshow && slideshow.parentNode) slideshow.parentNode.insertBefore(btn, slideshow.nextSibling);
+    else gallery.parentNode.insertBefore(btn, gallery);
+
+    btn.addEventListener("click", async function () {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+            var blob = await buildZip(function (i, n) { btn.textContent = "Préparation… " + i + "/" + n; });
+            triggerDownload(blob);
+            btn.textContent = "✓ Téléchargement lancé";
+        } catch (e) {
+            btn.textContent = "Échec — réessayer";
+            if (window.console) console.error(e);
+        } finally {
+            setTimeout(function () { btn.disabled = false; btn.textContent = label; }, 4000);
+        }
+    });
+})();
+'''
+
 
 default_templates[ 'template-image' ] = \
-(html_preamble % 'Image: <!--tag:unicode2html(image._title)-->') + \
+(html_preamble % 'Image: <!--tag:unicode2html(image._base)-->') + \
 """
-
-<!-- quick navigator at the top -->
-<table class="arrownav">
-<tr><td width=50% align="left">
+<main class="photo">
 <!--tagcode:
-pi = prev(image, allimages)
-if pi:
-    print(f'<a class="arrow" href="{rel(pi._pagefn, cd)}">&lt;&lt;&lt;</a>')
+import html as _h
+_desc = image._comment or (image._attr and image._attr.get('description')) or ''
+_lines = _desc.replace('<BR>', chr(10)).split(chr(10))
+_title = (_lines[0].strip() or image._base) if _desc else image._base
+_rest = chr(10).join(_lines[1:]).strip()
+_pi = prev(image, allimages)
+_ni = next(image, allimages)
+_scaled = image._scaledfn or image._filename
 -->
-
-</td><td width="50%" align="right">
+  <nav class="crumbs"><!--tag:dirnav(cd, image._dir)--></nav>
+  <div class="stage">
 <!--tagcode:
-ni = next(image, allimages)
-if ni:
-    print(f'<a class="arrow" href="{rel(ni._pagefn, cd)}">&gt;&gt;&gt;</a>')
+if _pi:
+    print('<a class="navbtn prev" href="' + urlquote(rel(_pi._pagefn, cd)) + '" rel="prev" aria-label="Photo precedente">&lsaquo;</a>')
+_sz = ''
+if image._scaledsize:
+    _sz = ' width="' + str(image._scaledsize[0]) + '" height="' + str(image._scaledsize[1]) + '"'
+print('<a class="viewer" href="' + urlquote(rel(image._filename, cd)) + '" title="Voir en pleine resolution">'
+      '<img class="image" src="' + urlquote(rel(_scaled, cd)) + '" alt="' + _h.escape(_title, quote=True) + '"' + _sz + '></a>')
+if _ni:
+    print('<a class="navbtn next" href="' + urlquote(rel(_ni._pagefn, cd)) + '" rel="next" aria-label="Photo suivante">&rsaquo;</a>')
 -->
-</td></tr></table>
-
-<center>
+  </div>
+  <h1 class="title"><!--tag:_h.escape(_title)--></h1>
 <!--tagcode:
-
-if image._pagefn:
-
-    if image._size:
-        (w,h)=image._size
-        use_map = 1
-        # smart image map
-        w4 = w / 4
-        ht = h / 10
-
-        print('<map name="navmap">')
-        s = 0
-        e = w
-        pi = prev(image, allimages)
-        if pi:
-            print(f'<area shape=rect coords="0,0,{w4},{h}" href="{rel(pi._pagefn, cd)}">')
-            s = w4
-
-        ni = next(image, allimages)
-        if ni:
-            print(f'<area shape=rect coords="{3*w4},0,{w},{h}" href="{rel(ni._pagefn, cd)}">')
-            e = 3*w4
-
-        print(f'<area shape=rect coords="{s},0,{e},{ht}" href="{rel(image._dir._pagefn, cd)}">')
-        print( '</map>')
-
-    else:
-        use_map = 0
-    use_map = 0
-    xtra = 'class="image"'
-    if use_map:
-        xtra += '  usemap="#%s"' % 'navmap'
-    print(scaledImage(cd, image, xtra))
--->
-</center>
-
-<p>
-
-<!--description and camera settings, in a table-->
-<!--tagcode:
-if image._attr:
-    description = image._attr.get('description')
-    settings = image._attr.get('settings')
-    if not settings:
-        settings = image._attr.get('info')
-
-    print('<table class="desctable">')
-    print('<tr>')
-    print('<td class="titlecell">')
-
--->
-
-<!--title and location in big, if available, to the left-->
-<div class="title">
-<!--tag:image._base--><br>
-</div>
-<!--tagcode:
-if image._attr:
-    location = image._attr.get('location')
-    if location:
-        print(f'<span class="location">{location}</span><br>')
--->
-<p>
-
-<!--tagcode:
-
-description = None
-if image._attr:
-    description = image._attr.get('description')
-elif image._comment:
-    description = image._comment
-
-if description:
-    print('<p class="description">')
-    print(unicode2html(description))
-    print('</p>')
-
--->
-
-<center>
-<table>
-<!--tagcode:
-
-exif_tag=['Marque','Modele','Date','Focale','Ouverture','Vitesse',\
-          'Iso', 'Flash']
-exif_key={'Marque' : 'Exif.Image.Make' , 'Modele' : 'Exif.Image.Model' , \
-          'Date' : 'Exif.Photo.DateTimeOriginal' , 'Focale' : 'Exif.Photo.FocalLength' ,\
-          'Vitesse' :  'Exif.Photo.ExposureTime' , 'Ouverture' : 'Exif.Photo.FNumber' ,\
-          'Iso' : 'Exif.Photo.ISOSpeedRatings' , 'Flash' : 'Exif.Photo.Flash' }
-
+if _rest:
+    print('<p class="description">' + _h.escape(_rest).replace(chr(10), '<br>') + '</p>')
+_etags = ['Marque','Modele','Date','Focale','Ouverture','Vitesse','Iso','Flash']
+_ekeys = {'Marque':'Exif.Image.Make', 'Modele':'Exif.Image.Model', 'Date':'Exif.Photo.DateTimeOriginal',
+          'Focale':'Exif.Photo.FocalLength', 'Vitesse':'Exif.Photo.ExposureTime', 'Ouverture':'Exif.Photo.FNumber',
+          'Iso':'Exif.Photo.ISOSpeedRatings', 'Flash':'Exif.Photo.Flash'}
 if image._exif:
-    print('<tr>')
-    print('<td class="settingscell" >')
-    print('<span class="settingstitle">PARAMETRES PHOTO:</span></td></tr>')
-    for s in exif_tag:
-        if exif_key[s] in image._exif:
-            print(f'<tr><td class="settings">{s}:</td> \
-            <td class="settings"> {image._exif[exif_key[s]]} </td></tr>')
+    _rows = [(_t, image._exif[_ekeys[_t]]) for _t in _etags if _ekeys[_t] in image._exif]
+    if _rows:
+        print('<dl class="exif">')
+        for _lab, _val in _rows:
+            print('  <div><dt>' + _h.escape(_lab) + '</dt><dd>' + _h.escape(str(_val)) + '</dd></div>')
+        print('</dl>')
 -->
-
-</table>
-</center>
-
-
-
-<!--previous and next thumbnails, with text in between-->
-<br>
-<center>
-<hr class="sephr">
-<table class="navtable">
-<tr>
-
-<!--tagcode:
-pi = prev(image, allimages)
-
-if pi and pi._thumbsize:
-    pw = pi._thumbsize[0]
-else:
-    pw = opts.thumb_size
-
-print(f'<td width="{pw}">')
-if pi:
-    print(thumbImage(cd, pi, 'align="left"'))
--->
-
-</td><td align="center" CELLPADDING="5">
-
-<!--dirnav, alternative representations and navigation,
-    between the floating thumbs-->
-
-<b>
-<!--tag:dirnav(cd, image._dir)-->
-<!--tag:dirnavsep-->
-<a href="<!--tag:rel(image._filename, cd)-->">
-<!--tag:basename(image._filename)--></a>
-</b><br>
-
-<!--tagcode:
-if len(image._altrepns) > 0:
-    print("Alternative representations:")
-    for rep in image._altrepns.keys():
-        print(f'<a href="{urlquote(rel(join(image._dir._path,image._altrepns[ rep ]), cd))}">{rep}</a>&nbsp;')
-    print('<p>')
--->
-
-<br>
-<!--tagcode:
-print(textnav(cd, image, image._dir._images,
-              "dir", rel(image._dir._pagefn, cd) ))
-if len(image._tracks) > 0:
-    print('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',)
-    print('<span class="tracksind">tracks:</span>')
-    for t in image._tracks:
-        print('&nbsp;&nbsp;&nbsp;&nbsp;')
-        print(textnav(cd, image, trackmap[t], t, rel(trackindex_fns[t], cd)))
---><p>
-
-</td>
-
-<!--tagcode:
-ni = next(image, allimages)
-
-if ni and ni._thumbsize:
-    nw = ni._thumbsize[0]
-else:
-    nw = opts.thumb_size
-
-print(f'<td width="{nw}">')
-if ni:
-    print(thumbImage(cd, ni, 'align="right"'))
--->
-
-</td></tr></table>
-</center>
-
-
+  <p class="backlink"><a href="<!--tag:urlquote(rel(image._dir._pagefn, cd))-->">&#8617; Retour a la galerie</a></p>
+</main>
 """ + html_postamble
 
 default_templates[ 'template-dirindex' ] = \
-(html_preamble % 'Directory Index: <!--tag:dir._path-->') + \
+(html_preamble % 'Galerie : <!--tag:unicode2html((dir._attrfile or {}).get("title") or dir._basename or "photo")-->') + \
 """
-<table class="toptable dirtop"><tr><td>
-<p class="toptitle"><!--tag:dirnav(cd, dir)--></p>
+<main>
 <!--tagcode:
-desc_page = dir._attrfile
-if desc_page:
-    if 'title' in desc_page:
-        print("<p><center><h3>")
-        print(unicode2html(desc_page['title']))
-        print("</h3></center></p>")
-    if 'date' in desc_page:
-        print("<p><h4>")
-        print(unicode2html(desc_page['date']))
-        print("</h4></p>")
-    if desc_page.has_key('comment'):
-        print("<p>")
-        print(unicode2html(desc_page['comment'].replace(u"<BR>",u"\\n")).replace("\\n","<BR>"))
-        print("</p>")
+import html as _h
+_af = dir._attrfile or {}
+_title = _af.get('title') or dir._basename or 'Galerie'
+_date = _af.get('date') or ''
+_comment = _af.get('comment') or ''
+_imgs = dir._images
+_subs = dir._subdirs
 -->
-</td></tr></table>
-
-<div class="mininav">
+  <header class="pagehead">
+    <nav class="crumbs"><!--tag:dirnav(cd, dir)--></nav>
+    <h1><!--tag:_h.escape(_title)--></h1>
 <!--tagcode:
-if dir._parent:
-    sname = list((dir._parent)._subdirs)
-    icur = sname.index(dir)
-    if icur > 0:
-       iprev = icur - 1
-       dprev = sname[iprev]
-       print(f'<a href="{rel(dprev._pagefn,cd)}">{dprev._basename}</a>|')
-    print(f'<a href="{rel(rootdir._pagefn, cd)}">Haut</a>')
-    if icur < len(sname)-1:
-       inext = icur + 1
-       dnext = sname[inext]
-       print(f'|<a href="{rel(dnext._pagefn,cd)}">{dnext._basename}</a>')
+if _date:
+    print('<p class="subtitle muted">' + _h.escape(_date) + '</p>')
+if _comment:
+    print('<p class="daycomment">' + _h.escape(_comment.replace('<BR>', chr(10))).replace(chr(10), '<br>') + '</p>')
+if len(_imgs) > 0:
+    print('<a class="btn" id="slideshow" href="' + urlquote(rel(_imgs[0]._pagefn, cd)) + '">&#9654; Diaporama (' + str(len(_imgs)) + ' photos)</a>')
 -->
-</div>
-
-
+  </header>
 <!--tagcode:
-import sys
-import os.path as op
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-if len( dir._subdirs ) > 0:
-    print('<h3>Sous-repertoires:</h3>')
-    # sort subdirs by time
-    subdirs = list(dir._subdirs)
-    if config.WebDirIndexStyle=="table":
-        print("<table>")
-        for d in subdirs:
-            print("<tr>")
-            if d._attrfile.has_key("image"):
-                temp=op.splitext(d._attrfile["image"])[0]+opts.separator+config.Thumbnails["Suffix"]+config.Extensions[0]
-                temp1,temp2=op.split(temp)
-                filename=op.join(op.split(d._curdir)[1],temp1,config.Thumbnails["Suffix"],temp2)
-                longfilename=op.join(opts.root,op.split(cd)[0],filename)
-                if op.isfile(longfilename):
-                    im = Image.open(longfilename)
-                    width,height = im.size
-                else:
-                    width=config.Thumbnails["Size"]
-                    height=3*width/4
-                print(f'<td><center><a href="{rel(d._pagefn,cd)}"><img CLASS="thumb" src="{rel(filename,op.split(cd)[1])}" alt="{op.split(filename)[1]}" height={height} width={width}></a></center></td>')
-            else:
-                print("<td> </td>")
-            if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
-                print(f'<td><center><a href="{rel(d._pagefn,cd)}">{unicode2html(d._attrfile["date"])}<br>{unicode2html(d._attrfile["title"])}</a></center></td>')
-            else:
-                if len(d._basename)>11:
-                    if d._basename[10] in [" ","_","-"]:
-                        print(f'<td><a href="{rel(d._pagefn,cd)}">{d._basename[:10]}<br>{d._basename[11:]}</a></td>')
-                    else:
-                        print(f'<td><a href="{rel(d._pagefn,cd)}">{d._basename}</a></td>')
-            if d._attrfile.has_key("comment"):
-                print(f"<td>{unicode2html(d._attrfile['comment'].replace('<BR>',os.linesep)).replace(os.linesep,'<BR>')}</td>")
-            else:
-                print("<td> </td>")
-            print("</tr>")
-        print("</table>")
-
-    else: # WebDirStyle is old fashion list
-        print('<ul>')
-        for d in subdirs:
-                comment=""
-                if  d._attrfile.has_key("comment"):
-                    if len(d._attrfile["comment"])>50:
-                        words=unicode2html(d._attrfile["comment"].replace("<BR>"," ")).split()
-                        for w in words:
-                            comment+=w+" "
-                            if len(comment)>47:
-                                comment+="..."
-                                break
-                    else:
-                        comment=unicode2html(d._attrfile["comment"].replace("<BR>"," "))
-                if d._attrfile.has_key("date") and d._attrfile.has_key("title"):
-                    if len(d._attrfile["date"])>0:
-                        print(f'<li><a href="{rel(d._pagefn,cd)}">{unicode2html(d._attrfile["date"])} : {unicode2html(d._attrfile["title"])}.</a> <i>{comment}</i></li>')
-                    else:
-                        print(f'<li><a href="{rel(d._pagefn,cd)}">{d._basename}.</a>  <i>{comment}</i></li>')
-                else:
-                    print(f'<li><a href="{rel(d._pagefn,cd)}">{d._basename}.</a>  <i>{comment}</i></li>')
-        print('</ul><p>')
+if len(_subs) > 0:
+    import os.path as _op
+    print('<ul class="grid days">')
+    for _d in _subs:
+        _daf = _d._attrfile or {}
+        _all = _d.get_all_images()
+        _cover = None
+        if _daf.get('image'):
+            _cb = _op.splitext(_op.basename(_daf['image']))[0]
+            for _im in _all:
+                if _im._base == _cb:
+                    _cover = _im
+                    break
+        if _cover is None and _all:
+            _cover = _all[0]
+        _dt = _daf.get('title') or _d._basename
+        _dd = _daf.get('date') or ''
+        _dc = _daf.get('comment') or ''
+        print('<li><a class="tile" href="' + urlquote(rel(_d._pagefn, cd)) + '">')
+        if _cover is not None and _cover._thumbfn:
+            print('  <span class="tile-img"><img src="' + urlquote(rel(_cover._thumbfn, cd)) + '" alt="" loading="lazy" decoding="async"></span>')
+        _cap = '<strong>' + _h.escape(_dt) + '</strong>'
+        if _dd:
+            _cap = _cap + '<br><span class="muted">' + _h.escape(_dd) + '</span>'
+        if _dc:
+            _cap = _cap + '<br><span class="cardnote">' + _h.escape(_dc.replace('<BR>', chr(10))).replace(chr(10), '<br>') + '</span>'
+        print('  <span class="tile-cap">' + _cap + '</span>')
+        print('</a></li>')
+    print('</ul>')
 -->
-
 <!--tagcode:
-if desc_page:
-  if desc_page.get('description'):
-    print('<p><div class="description">')
-    print(unicode2html(desc_page.get('description')))
-    print('</div></p>')
-
-if len( dir._images ) > 0:
-    print('<h3>Images:</h3>')
-    print(table( cd, dir._images, sous_titre ))
-
+if len(_imgs) > 0:
+    _etags = ['Marque','Modele','Date','Focale','Ouverture','Vitesse','Iso','Flash']
+    _ekeys = {'Marque':'Exif.Image.Make', 'Modele':'Exif.Image.Model', 'Date':'Exif.Photo.DateTimeOriginal',
+              'Focale':'Exif.Photo.FocalLength', 'Vitesse':'Exif.Photo.ExposureTime', 'Ouverture':'Exif.Photo.FNumber',
+              'Iso':'Exif.Photo.ISOSpeedRatings', 'Flash':'Exif.Photo.Flash'}
+    _sep = ' ' + chr(0x2022) + ' '
+    print('<ul class="grid gallery" id="gallery" data-zipname="' + _h.escape(dir._basename or 'photos', quote=True) + '">')
+    for _i in _imgs:
+        _cap = _i._comment or (_i._attr and _i._attr.get('description')) or ''
+        _cap1 = ' '.join(_cap.replace('<BR>', ' ').split())
+        _exif = ''
+        if _i._exif:
+            _exif = _sep.join(_t + ' : ' + str(_i._exif[_ekeys[_t]]) for _t in _etags if _ekeys[_t] in _i._exif)
+        print('<li><a class="tile" href="' + urlquote(rel(_i._pagefn, cd)) +
+              '" data-full="' + urlquote(rel(_i._scaledfn, cd)) +
+              '" data-download="' + urlquote(rel(_i._filename, cd)) +
+              '" data-caption="' + _h.escape(_cap1, quote=True) +
+              '" data-exif="' + _h.escape(_exif, quote=True) + '">')
+        print('  <span class="tile-img"><img src="' + urlquote(rel(_i._thumbfn, cd)) +
+              '" alt="' + _h.escape(_cap1, quote=True) + '" loading="lazy" decoding="async"></span>')
+        if _cap:
+            print('  <span class="tile-cap">' + _h.escape(_cap.replace('<BR>', chr(10))).replace(chr(10), '<br>') + '</span>')
+        print('</a></li>')
+    print('</ul>')
 -->
-
-<div class="mininav">
+</main>
 <!--tagcode:
-if dir._parent:
-    sname = list((dir._parent)._subdirs)
-    icur = sname.index(dir)
-    if icur > 0:
-       iprev = icur - 1
-       dprev = sname[iprev]
-       print(f'<a href="{rel(dprev._pagefn,cd)}">{dprev._basename}</a>|')
-    print(f'<a href="{rel(rootdir._pagefn, cd)}">Haut</a>')
-    if icur < len(sname)-1:
-       inext = icur + 1
-       dnext = sname[inext]
-       print(f'|<a href="{rel(dnext._pagefn,cd)}">{dnext._basename}</a>')
+if len(_imgs) > 0:
+    print('<script src="' + urlquote(rel(gallery_fn, cd)) + '" defer></script>')
+    print('<script src="' + urlquote(rel(zipjs_fn, cd)) + '" defer></script>')
 -->
-</div>
-
-
-
 """ + html_postamble
 
 default_templates[ 'template-trackindex' ] = \
