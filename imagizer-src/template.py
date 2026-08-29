@@ -57,19 +57,18 @@ default_templates[ 'template-css' ] = r'''
    100 % statique, aucune dépendance externe (police système, pas de CDN).
    =========================================================================== */
 
+/* Galerie sombre par defaut (comme les versions precedentes d'imagizer) :
+   fond #17171a quel que soit le reglage clair/sombre du systeme. Le palette
+   clair est conservee ci-dessous mais volontairement inactive (elle ne
+   s'active plus via prefers-color-scheme) ; la reactiver = restaurer le
+   bloc @media. color-scheme:dark aligne aussi les widgets natifs (scrollbars). */
 :root {
+    color-scheme:dark;
     --bg:#17171a; --surface:#212127; --surface-2:#2b2b32;
     --text:#e8e8ea; --muted:#9a9aa4; --line:#383840;
     --accent:#6db3f2; --accent-2:#a9d3f8;
     --radius:12px; --gap:clamp(.6rem,2vw,1.2rem); --maxw:1200px;
     --shadow:0 6px 24px rgba(0,0,0,.45);
-}
-@media (prefers-color-scheme: light) {
-    :root {
-        --bg:#f4f4f6; --surface:#fff; --surface-2:#ececf0;
-        --text:#1c1c20; --muted:#5c5c66; --line:#d8d8e0;
-        --accent:#1769c0; --accent-2:#0f4e93; --shadow:0 6px 24px rgba(0,0,0,.12);
-    }
 }
 
 *,*::before,*::after { box-sizing:border-box; }
@@ -131,16 +130,23 @@ img { max-width:100%; height:auto; }
 .image { display:block; max-width:100%; height:auto; margin:0 auto;
          border-radius:var(--radius); box-shadow:var(--shadow); }
 
+/* Grandes zones de navigation : colonnes cliquables sur toute la hauteur de
+   l'image, a gauche (precedente) et a droite (suivante). Transparentes au
+   repos (aucune teinte sur l'image) ; seul le chevron reste visible, lisible
+   grace a son ombre portee. Un fond leger n'apparait qu'au survol/focus. */
 .navbtn {
-    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
-    width:48px; height:48px; display:flex; align-items:center; justify-content:center;
-    font-size:2rem; line-height:1; color:var(--text);
-    background:color-mix(in srgb, var(--surface) 78%, transparent);
-    border:1px solid var(--line); border-radius:50%; text-decoration:none;
+    position:absolute; top:0; bottom:0; z-index:2;
+    width:clamp(56px, 15%, 130px);
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.4rem; line-height:1; color:#fff;
+    text-shadow:0 1px 4px rgba(0,0,0,.7);
+    background:transparent; border:0; text-decoration:none; transition:background .15s;
 }
-.navbtn:hover,.navbtn:focus { background:var(--surface-2); text-decoration:none; }
-.navbtn.prev { left:.4rem; }
-.navbtn.next { right:.4rem; }
+.navbtn:hover,.navbtn:focus {
+    background:color-mix(in srgb, var(--surface) 55%, transparent); text-decoration:none;
+}
+.navbtn.prev { left:0; border-radius:var(--radius) 0 0 var(--radius); }
+.navbtn.next { right:0; border-radius:0 var(--radius) var(--radius) 0; }
 
 .title { font-size:clamp(1.2rem,4vw,1.5rem); text-align:center; margin:var(--gap) 0 .2rem; }
 .description { text-align:center; color:var(--muted); margin:.2rem 0; }
@@ -203,7 +209,9 @@ GALLERY_JS = r'''
                  exif: a.getAttribute("data-exif") || "" };
     });
 
-    var DELAY = 4000;          // ms entre deux photos en lecture auto
+    // Delai entre deux photos en lecture auto (ms), issu de imagizer.conf
+    // (SlideShowDelay) via l'attribut data-delay ; repli sur 4000 ms.
+    var DELAY = parseInt(gallery.getAttribute("data-delay"), 10) || 4000;
     var idx = 0, timer = null;
 
     var lb = document.createElement("div");
@@ -402,6 +410,34 @@ ZIP_JS = r'''
 '''
 
 
+# Navigation clavier sur les pages image (asset statique partage). Amelioration
+# progressive : sans JS, les liens prec./suiv. restent cliquables.
+PHOTO_JS = r'''
+/* Imagizer -- navigation clavier sur les pages image.
+   Fleches gauche/droite ET pave numerique (4/6), quel que soit l'etat de
+   NumLock : NumLock eteint -> e.key ArrowLeft/ArrowRight ; NumLock allume ->
+   e.code Numpad4/Numpad6. On suit simplement le lien prec./suiv. de la page. */
+(function () {
+    "use strict";
+    function go(sel) {
+        var a = document.querySelector(sel);
+        if (a && a.getAttribute("href")) window.location.href = a.href;
+    }
+    document.addEventListener("keydown", function (e) {
+        if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+        var t = e.target;
+        if (t && (t.isContentEditable ||
+                  /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        if (e.key === "ArrowLeft" || e.code === "Numpad4") {
+            e.preventDefault(); go(".navbtn.prev");
+        } else if (e.key === "ArrowRight" || e.code === "Numpad6") {
+            e.preventDefault(); go(".navbtn.next");
+        }
+    });
+})();
+'''
+
+
 default_templates[ 'template-image' ] = \
 (html_preamble % 'Image: <!--tag:unicode2html(image._base)-->') + \
 """
@@ -448,6 +484,7 @@ if image._exif:
 -->
   <p class="backlink"><a href="<!--tag:urlquote(rel(image._dir._pagefn, cd))-->">&#8617; Retour a la galerie</a></p>
 </main>
+<script src="<!--tag:urlquote(rel(photojs_fn, cd))-->" defer></script>
 """ + html_postamble
 
 default_templates[ 'template-dirindex' ] = \
@@ -513,7 +550,7 @@ if len(_imgs) > 0:
               'Focale':'Exif.Photo.FocalLength', 'Vitesse':'Exif.Photo.ExposureTime', 'Ouverture':'Exif.Photo.FNumber',
               'Iso':'Exif.Photo.ISOSpeedRatings', 'Flash':'Exif.Photo.Flash'}
     _sep = ' ' + chr(0x2022) + ' '
-    print('<ul class="grid gallery" id="gallery" data-zipname="' + _h.escape(dir._basename or 'photos', quote=True) + '">')
+    print('<ul class="grid gallery" id="gallery" data-zipname="' + _h.escape(dir._basename or 'photos', quote=True) + '" data-delay="' + str(int(config.SlideShowDelay * 1000)) + '">')
     for _i in _imgs:
         _cap = _i._comment or (_i._attr and _i._attr.get('description')) or ''
         _cap1 = ' '.join(_cap.replace('<BR>', ' ').split())

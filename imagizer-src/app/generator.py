@@ -209,7 +209,6 @@ from os.path import isfile, islink, isdir, exists
 
 import re, string, time, random, locale
 
-import imghdr
 import distutils.sysconfig
 
 
@@ -254,7 +253,7 @@ else:
     locale.setlocale(locale.LC_ALL, config.Locale)
 from imagizer.exif      import Exif
 from imagizer.parser    import AttrFile
-from imagizer.template import Templates, GALLERY_JS, ZIP_JS
+from imagizer.template import Templates, GALLERY_JS, ZIP_JS, PHOTO_JS
 from imagizer.curator import  FCache, urlquote, split_filename, check_thumbnail_size, relative_path as rel
 from imagizer.imagemagick import ImageMagick
 templates = Templates()
@@ -280,8 +279,13 @@ def imgwhat(filename, fast=None):
             return None
     else:
         try:
-            return imghdr.what(filename)
-        except IOError:
+            # Pillow replaces the deprecated (3.11) / removed (3.13) imghdr:
+            # Image.open() only reads the header (no pixel decoding). Returns
+            # the format string ('JPEG', 'PNG', ...) or None for non-images.
+            # UnidentifiedImageError subclasses OSError, as does IOError.
+            with PilImage.open(filename) as im:
+                return im.format
+        except OSError:
             return None
 
 
@@ -1690,7 +1694,7 @@ def main():
     cidxext = ".cidx"
 
     global index_fn, dirindex_fn, dirattr_fn
-    global allindex_fn, allcidx_fn, trackindex_fn, sortindex_fn, css_fn, gallery_fn, zipjs_fn
+    global allindex_fn, allcidx_fn, trackindex_fn, sortindex_fn, css_fn, gallery_fn, zipjs_fn, photojs_fn
     index_fn = "index" + opts.htmlext
     dirindex_fn = "dirindex" + opts.htmlext
     dirattr_fn = config.CommentFile  # "dir" + opts.attrext
@@ -1701,6 +1705,7 @@ def main():
     css_fn = 'style.css'
     gallery_fn = 'gallery.js'
     zipjs_fn = 'zip.js'
+    photojs_fn = 'photo.js'
 
     opts.root = os.path.normpath(opts.root)
     if not os.path.exists(opts.root) or not os.path.isdir(opts.root):
@@ -1752,6 +1757,7 @@ def main():
         css_fn = prepend(css_fn, htmldir)
         gallery_fn = prepend(gallery_fn, htmldir)
         zipjs_fn = prepend(zipjs_fn, htmldir)
+        photojs_fn = prepend(photojs_fn, htmldir)
         for t in tracks:
             trackindex_fns[t] = prepend(trackindex_fns[t], htmldir)
 
@@ -1774,6 +1780,7 @@ def main():
         css_fn = os.path.join(singledir, css_fn)
         gallery_fn = os.path.join(singledir, gallery_fn)
         zipjs_fn = os.path.join(singledir, zipjs_fn)
+        photojs_fn = os.path.join(singledir, photojs_fn)
         for t in tracks:
             trackindex_fns[t] = os.path.join(singledir, trackindex_fns[t])
 
@@ -1863,7 +1870,7 @@ def main():
     generateSummary(allcidx_fn, allimages)
     logger.info("generating css file %s", css_fn)
     generatePage(css_fn, 'css', environ)
-    for _jsfn, _jscontent in ((gallery_fn, GALLERY_JS), (zipjs_fn, ZIP_JS)):
+    for _jsfn, _jscontent in ((gallery_fn, GALLERY_JS), (zipjs_fn, ZIP_JS), (photojs_fn, PHOTO_JS)):
         logger.info("generating js file %s", _jsfn)
         with open(join(opts.root, _jsfn), 'w') as _jsf:
             _jsf.write(_jscontent)
