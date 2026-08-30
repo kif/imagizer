@@ -2,7 +2,7 @@ project('imagizer',
   'c', 'cython', 'cpp',
   license: 'MIT',
   meson_version: '>= 0.60',
-  version: '8.6.0',
+  version: '8.7.0',
   default_options : 'cpp_std=c++11'
 )
 
@@ -34,5 +34,3 @@ subdir('py3exiv2/src')
 subdir('pyexiftran')
 subdir('gui')
 subdir('pixmaps')
-
-

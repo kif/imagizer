@@ -25,7 +25,7 @@
 __doc__ = """Graphical interface for selector."""
 __author__ = "Jérôme Kieffer"
 __contact__ = "imagizer@terre-adelie.org"
-__date__ = "12/08/2026"
+__date__ = "23/08/2026"
 __license__ = "GPL"
 
 import gc
@@ -900,10 +900,30 @@ class Interface(qt.QObject):
         process_selected(self.selected[:], self.signal_status)
         self.selected = Selected()
         self.gui.selection.setChecked((self.fn_current in self.selected))
-        SelectedDir = os.path.join(config.DefaultRepository, config.SelectedDirectory)
-        out = os.system(config.WebServer.replace("$WebRepository", config.WebRepository).replace("$Selected", SelectedDir))
-        if out != 0:
-            logger.error("Error n° : %i", out)
+        cmd = config.WebServer
+        for k, v  in {
+                      "$WebRepository": config.WebRepository,
+                      "$DefaultRepository": config.DefaultRepository,
+                      "$SelectedDirectory": config.SelectedDirectory,
+                      "$Selected": os.path.join(config.DefaultRepository, config.SelectedDirectory),
+                     }.items():
+            cmd = cmd.replace(k, v)
+        logger.info("Run: %s", cmd)
+        p = subprocess.Popen(cmd,
+                             shell=True,
+                             bufsize=4096,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+
+        line = p.stdout.readline().decode().strip()
+        while (p.returncode is None) or line:
+            if line:
+                logger.info(line)
+                line = p.stdout.readline().decode().strip()
+            else:
+                p.wait()
+        if p.returncode:
+            logger.error("Error while synchronizing: %s\n%s", cmd, p.stderr.read().decode())
         logger.info("Interface.to_web: Done")
 
     def empty_selected(self, *args):
