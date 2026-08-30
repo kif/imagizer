@@ -209,7 +209,6 @@ from os.path import isfile, islink, isdir, exists
 
 import re, string, time, random, locale
 
-import imghdr
 import distutils.sysconfig
 
 
@@ -254,7 +253,7 @@ else:
     locale.setlocale(locale.LC_ALL, config.Locale)
 from imagizer.exif      import Exif
 from imagizer.parser    import AttrFile
-from imagizer.template import Templates
+from imagizer.template import Templates, GALLERY_JS, ZIP_JS, PHOTO_JS
 from imagizer.curator import  FCache, urlquote, split_filename, check_thumbnail_size, relative_path as rel
 from imagizer.imagemagick import ImageMagick
 templates = Templates()
@@ -280,8 +279,13 @@ def imgwhat(filename, fast=None):
             return None
     else:
         try:
-            return imghdr.what(filename)
-        except IOError:
+            # Pillow replaces the deprecated (3.11) / removed (3.13) imghdr:
+            # Image.open() only reads the header (no pixel decoding). Returns
+            # the format string ('JPEG', 'PNG', ...) or None for non-images.
+            # UnidentifiedImageError subclasses OSError, as does IOError.
+            with PilImage.open(filename) as im:
+                return im.format
+        except OSError:
             return None
 
 
@@ -1390,21 +1394,28 @@ def walk_for_index(directory, environ):
             os.remove(lnfn)
         if not (opts.no_links or opts.out_onedir) and \
                not os.path.exists(lnfn) and not os.path.islink(lnfn):
+            # css_fn is relative to opts.root; make it relative to this
+            # redirect page (root -> "html/style.css", a day dir -> "../html/style.css").
+            css_rel = os.path.relpath(css_fn, directory._path or ".")
+            dirindex_rel = os.path.relpath(directory._pagefn, directory._path or ".")
             with open(lnfn, "w") as f:
-                f.write('''
-<HTML>
-<HEAD>
-<link rel=stylesheet type="text/css" href="style.css">
-<TITLE>Redirection</TITLE>
-<META HTTP-EQUIV="Refresh" CONTENT="0;URL=html/dirindex.html#''')
+                f.write('''<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="''' + css_rel + '''">
+<title>Redirection</title>
+<meta http-equiv="refresh" content="0;URL=''' + dirindex_rel + '#''')
                 f.write(config.WebPageAnchor)
                 f.write('''">
-</HEAD>
-<BODY>
-<H1>You should be reloacted to the correct URL in a second :</H1>
-<p> <a href="html/dirindex.html#end">html/dirindex.html</a></p>
-</BODY>
-</HTML>''')
+</head>
+<body>
+<p>Redirection vers <a href="''' + dirindex_rel + '#')
+                f.write(config.WebPageAnchor)
+                f.write('''">la galerie</a>&hellip;</p>
+</body>
+</html>''')
 
 
 def prepend(path, pfx):
@@ -1683,7 +1694,7 @@ def main():
     cidxext = ".cidx"
 
     global index_fn, dirindex_fn, dirattr_fn
-    global allindex_fn, allcidx_fn, trackindex_fn, sortindex_fn, css_fn
+    global allindex_fn, allcidx_fn, trackindex_fn, sortindex_fn, css_fn, gallery_fn, zipjs_fn, photojs_fn
     index_fn = "index" + opts.htmlext
     dirindex_fn = "dirindex" + opts.htmlext
     dirattr_fn = config.CommentFile  # "dir" + opts.attrext
@@ -1692,6 +1703,9 @@ def main():
     trackindex_fn = "trackindex-%s" + opts.htmlext
     sortindex_fn = "sortindex" + opts.htmlext
     css_fn = 'style.css'
+    gallery_fn = 'gallery.js'
+    zipjs_fn = 'zip.js'
+    photojs_fn = 'photo.js'
 
     opts.root = os.path.normpath(opts.root)
     if not os.path.exists(opts.root) or not os.path.isdir(opts.root):
@@ -1741,6 +1755,9 @@ def main():
         allcidx_fn = prepend(allcidx_fn, htmldir)
         sortindex_fn = prepend(sortindex_fn, htmldir)
         css_fn = prepend(css_fn, htmldir)
+        gallery_fn = prepend(gallery_fn, htmldir)
+        zipjs_fn = prepend(zipjs_fn, htmldir)
+        photojs_fn = prepend(photojs_fn, htmldir)
         for t in tracks:
             trackindex_fns[t] = prepend(trackindex_fns[t], htmldir)
 
@@ -1761,6 +1778,9 @@ def main():
         allcidx_fn = os.path.join(singledir, allcidx_fn)
         sortindex_fn = os.path.join(singledir, sortindex_fn)
         css_fn = os.path.join(singledir, css_fn)
+        gallery_fn = os.path.join(singledir, gallery_fn)
+        zipjs_fn = os.path.join(singledir, zipjs_fn)
+        photojs_fn = os.path.join(singledir, photojs_fn)
         for t in tracks:
             trackindex_fns[t] = os.path.join(singledir, trackindex_fns[t])
 
@@ -1850,6 +1870,10 @@ def main():
     generateSummary(allcidx_fn, allimages)
     logger.info("generating css file %s", css_fn)
     generatePage(css_fn, 'css', environ)
+    for _jsfn, _jscontent in ((gallery_fn, GALLERY_JS), (zipjs_fn, ZIP_JS), (photojs_fn, PHOTO_JS)):
+        logger.info("generating js file %s", _jsfn)
+        with open(join(opts.root, _jsfn), 'w') as _jsf:
+            _jsf.write(_jscontent)
 
     #
     # Output image HTML files
