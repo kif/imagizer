@@ -2,7 +2,7 @@
 #Size of the image on the Screen, by default
 ScreenSize: 500
 
-#Downsampling quality [0=nearest, 1=bilinear]
+#Downsampling quality [0=nearest, 1=tiles, 2=bilinear, 3=hyperbolic]
 Interpolation: 1
 
 #Page prefix (used when there are too many images per day to fit on one web page)
@@ -20,6 +20,9 @@ SelectedDirectory: Selected
 #File containing the list of selected but unprocessed images
 Selected_save: .selected-photos
 
+#File containing the database with all title of images
+Database_file: .imagizer.sqlite
+
 #Use Exif data for auto-rotation of the images (canon cameras mainly)
 AutoRotate: True
 
@@ -28,6 +31,9 @@ DefaultFileMode: 664
 
 #Default JPEG extensions
 Extensions: .jpg .jpeg .jpe .jfif
+
+#Default Raw images extensions
+RawExtensions: .cr2 .arw .mrw .dng .pef .nef
 
 #Default photo repository
 DefaultRepository: /home/jerome/Images
@@ -48,16 +54,16 @@ FiligranePosition: 5
 FiligraneQuality: 75
 
 #Optimize the filigraned image (2 pass JPEG encoding)
-FiligraneOptimize: False
+FiligraneOptimize: True
 
 #Progressive JPEG for saving filigraned images
-FiligraneProgressive: False
+FiligraneProgressive: True
 
 #File containing the description of the day in each directory
 CommentFile: index.desc
 
 #Style of the dirindex web pages, either <<list>> or <<table>>, the latest includes thumbnail photos
-WebDirIndexStyle: list
+WebDirIndexStyle: table
 
 #System command to use to burn a CD or a DVD
 # $Selected will be replaced by the directory where the files are
@@ -67,6 +73,8 @@ Burn: grave-rep $Selected/.
 # $Selected will be replaced by the directory where the files are
 # $WebRepository will be replaced by the directory of the root of generator
 WebServer: cp -r $Selected/* $WebRepository
+#WebServer:ssh -N -L 8730:127.0.0.1:873 server & tunnel=$!; trap 'kill "$tunnel" 2>/dev/null' EXIT; cd "$DefaultRepository/$SelectedDirectory"; until nc -z localhost 8730 2>/dev/null; do sleep 0.2; done; rsync -avxO . rsync://localhost:8730/imagizer; kill "$tunnel" 2>/dev/null
+
 
 #The location of the root of generator
 WebRepository: /var/www/imagizer
@@ -89,8 +97,11 @@ SlideShowDelay: 5.0
 #Type of slideshow : chronological, anti-chronological or random ?
 SlideShowType: chronological
 
+#Minimum rating of an image to appear in the slidesho [0-5]
+SlideShowMinRating: 1
+
 #Remote repository to synchronize with (rsync like)
-SynchronizeRep: jerome@patagonia:/home/photo
+SynchronizeRep: user@workstation:/home/photo
 
 #Synchronization type, acceptable values are Newer, Older, Selected and All
 SynchronizeType: Newer
@@ -107,9 +118,15 @@ ImageHeight:600
 #Gnu Image Manipulation Program (GIMP) path to executable
 Gimp: gimp
 
+#Digital Camera Raw (dcraw) extraction program and option (-w -c is  suggested)
+Dcraw: dcraw -w -c
+
+#Filter selected by default for image processing: ContrastMask, AutoWB, ...
+SelectedFilter: ContrastMask
+
 [ScaledImages]
 #ScaledImages size
-Size: 800
+Size: 1024
 
 #ScaledImages suffix
 Suffix: scaled
@@ -131,7 +148,7 @@ ExifExtraction: False
 
 [Thumbnails]
 #Thumbnails size
-Size: 160
+Size: 280
 
 #Thumbnails suffix
 Suffix: thumb
@@ -146,7 +163,7 @@ Progressive: True
 Optimize: True
 
 #Thumbnails quality (in percent)
-Quality: 50
+Quality: 75
 
 #Thumbnails image can be obtained by Exif extraction ?
 ExifExtraction: False
