@@ -99,6 +99,16 @@ img { max-width:100%; height:auto; }
 }
 .btn:hover,.btn:focus { border-color:var(--accent); color:var(--accent-2); text-decoration:none; }
 
+/* Barre d'actions : navigation laterale (jour/annee prec. et suiv.) de part et
+   d'autre des boutons Diaporama et Telechargement. Le lien "prec." est pousse a
+   gauche, "suiv." a droite ; les boutons du centre sont injectes entre les deux
+   (le bouton Telechargement est ajoute par zip.js apres #slideshow). */
+.pagenav { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:.6rem 0 0; }
+.pagenav .prev { margin-right:auto; }
+.pagenav .next { margin-left:auto; }
+.navday { min-width:0; max-width:16rem; overflow:hidden;
+          text-overflow:ellipsis; white-space:nowrap; }
+
 /* --- Grilles (jours & miniatures) ----------------------------------------- */
 .grid {
     list-style:none; margin:0; padding:0; display:grid; gap:var(--gap);
@@ -508,8 +518,37 @@ if _date:
     print('<p class="subtitle muted">' + _h.escape(_date) + '</p>')
 if _comment:
     print('<p class="daycomment">' + _h.escape(_comment.replace('<BR>', chr(10))).replace(chr(10), '<br>') + '</p>')
-if len(_imgs) > 0:
-    print('<a class="btn" id="slideshow" href="' + urlquote(rel(_imgs[0]._pagefn, cd)) + '">&#9654; Diaporama (' + str(len(_imgs)) + ' photos)</a>')
+# Navigation laterale : repertoires freres (jours, ou annees) dans le parent.
+# _subdirs est trie -> pour des dossiers YYYY-MM-DD-* l'ordre est chronologique.
+_prevd = _nextd = None
+_par = dir._parent
+if _par is not None:
+    _sibs = _par._subdirs
+    try:
+        _k = _sibs.index(dir)
+    except ValueError:
+        _k = -1
+    if _k > 0:
+        _prevd = _sibs[_k - 1]
+    if 0 <= _k < len(_sibs) - 1:
+        _nextd = _sibs[_k + 1]
+if _prevd or _nextd or len(_imgs) > 0:
+    print('<div class="pagenav">')
+    if _prevd:
+        _pa = _prevd._attrfile or {}
+        _plab = _pa.get('title') or _prevd._basename or ''
+        _ptip = ' '.join(_x for _x in (_pa.get('date') or '', _plab) if _x)
+        print('<a class="btn navday prev" href="' + urlquote(rel(_prevd._pagefn, cd)) +
+              '" title="' + _h.escape(_ptip, quote=True) + '">&lsaquo; ' + _h.escape(_plab) + '</a>')
+    if len(_imgs) > 0:
+        print('<a class="btn" id="slideshow" href="' + urlquote(rel(_imgs[0]._pagefn, cd)) + '">&#9654; Diaporama (' + str(len(_imgs)) + ' photos)</a>')
+    if _nextd:
+        _na = _nextd._attrfile or {}
+        _nlab = _na.get('title') or _nextd._basename or ''
+        _ntip = ' '.join(_x for _x in (_na.get('date') or '', _nlab) if _x)
+        print('<a class="btn navday next" href="' + urlquote(rel(_nextd._pagefn, cd)) +
+              '" title="' + _h.escape(_ntip, quote=True) + '">' + _h.escape(_nlab) + ' &rsaquo;</a>')
+    print('</div>')
 -->
   </header>
 <!--tagcode:
